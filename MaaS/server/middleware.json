@@ -42,9 +42,9 @@
     }
   },
   "files": {
-  },
-  "final": {
-    "loopback#urlNotFound": {}
+    "loopback#static": {
+      "params": "$!../client"
+    }
   },
   "final:after": {
     "loopback#errorHandler": {}
