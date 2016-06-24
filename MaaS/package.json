@@ -24,12 +24,16 @@
   "devDependencies": {
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.3.0",
+    "browser-sync": "^2.13.0",
     "browserify": "^13.0.1",
     "del": "^2.2.1",
     "eslint": "^2.5.3",
     "gulp": "^3.9.1",
+    "gulp-notify": "^2.2.0",
     "nsp": "^2.1.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.7.0"
   },
   "repository": {
     "type": "",
