@@ -1,4 +1,4 @@
-var React = require('react');
+/*var React = require('react');
 var Dispatcher = require('../../dispatcher/Dispatcher.js');
 var Constants = require('../../constants/Constants.js');
 var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
@@ -6,10 +6,6 @@ var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
 var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
 //var RouteActionCreators = require('../../actions/RouteActionCreator.react.jsx');
 
-ReactDOM.render(
-      <h1>Ciao</h1>,
-      document.getElementById('content')
-    );
 
 var provaView = React.createClass({
 
@@ -34,4 +30,39 @@ var provaView = React.createClass({
 
 });
 
-module.exports = provaView;
+module.exports = provaView;*/
+
+var React = require('react'),
+    ListItem = require('./home.react.jsx');
+
+var ListItems = React.createClass({
+  render: function() {
+
+    var words = [
+      {
+        "origin": "accogliere",
+        "translation": "to welcome"
+      },
+      {
+        "origin": "affrettarsi",
+        "translation": "to hurry"
+      },
+      {
+        "origin": "ammettere",
+        "translation": "to admit"
+      }
+    ];
+
+    var listItems = words.map(function(item){
+      return <ListItem item={item} />;
+    });
+
+    return (
+     <ul className="list-group">
+     {listItems}
+     </ul>
+    );
+  }
+});
+
+module.exports = ListItem;

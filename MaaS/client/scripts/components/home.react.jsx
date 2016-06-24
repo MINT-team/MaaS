@@ -1,7 +1,14 @@
-var ReactDOM = require("react-dom");
-//var ProvaView = require("provaView.react.jsx");
+var React = require('react');
 
-ReactDOM.render(
-  <h1>cia</h1>,
-  document.getElementById('content')
-);
+var ListItem = React.createClass({
+  render: function() {
+    return (
+    <li className="list-group-item">
+    <h4 className="list-group-item-heading">{{this.props.origin}}</h4>
+    <p className="list-group-item-text">{{this.props.translation}}</p>
+    </li>       
+  );
+  }
+});
+
+module.exports = ListItem;
