@@ -1,7 +1,7 @@
-//var ReactDOM = require("react");
-var ProvaView = require("provaView.react.jsx");
+var ReactDOM = require("react-dom");
+//var ProvaView = require("provaView.react.jsx");
 
 ReactDOM.render(
-  ProvaView,
+  <h1>cia</h1>,
   document.getElementById('content')
 );
