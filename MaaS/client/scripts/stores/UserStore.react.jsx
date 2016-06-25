@@ -41,7 +41,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
   switch(action.type) {
     
     case ActionTypes.GET_USER:
-        _users = action.email;
+        _users = action.email;  //???
         UserStore.emitChange();
         break;
         
