@@ -1,3 +1,7 @@
+html {
+    font-family: 'Montserrat', sans-serif;
+}
+
 body {
     background-color: lightgreen;
 }
@@ -12,6 +16,36 @@ body {
     padding: 2em;
     margin: 0 auto;
     width: 20em;
-    text-align: center;"
-    border-radius: 1em 1em;
+    text-align: center;
+    -webkit-border-radius: 2em;
+    -moz-border-radius: 2em;
+    border-radius: 2em;
+}
+
+input[type=text] {
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	height: 1em;
+	padding: 0.5em;
+}
+
+button {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    margin-left: 1em;
+    -webkit-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
+	-moz-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
+	box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
+	color:#333;
+	background-color lightgray;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border:none;
+	font-family:'Helvetica Neue',Arial,sans-serif;
+	font-size: 1em;
+	font-weight:700;
+	height: 2em;
+	text-shadow: #ccc 0 1px 0
 }

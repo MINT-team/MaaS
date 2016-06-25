@@ -3,7 +3,7 @@ var React = require('react');
 //var Constants = require('../../constants/Constants.js');
 //var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
 //var SessionStore = require('../../stores/SessionStore.react.jsx');
-var UserActionCreator = require('../actionCreators/UserActionCreator.react.jsx');
+var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
 //var RouteActionCreators = require('../../actions/RouteActionCreator.react.jsx');
 
 
@@ -15,16 +15,16 @@ var ProvaView = React.createClass({
 
   _onSubmit: function(e) {
     e.preventDefault();
-    var email = this.refs.email.getDOMNode().value;
+    var email = this.refs.email.getDOMNode().value; //non va un cazzo
     UserActionCreator.request_getUser(email);
   },
   
   render: function() {
     return (
         <form onSubmit={this._onSubmit}>
-            <p>Cerca un utente</p>
+            <p id="info">Cerca un utente</p>
             <input type="text" placeholder="email" name="email" ref="email" /> 
-            <button type="submit">Get</button>
+            <button type="submit">Cerca</button>
         </form>
      );
   }
