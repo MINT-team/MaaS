@@ -43,7 +43,7 @@ gulp.task('browserSync', function() {
 gulp.task('watchify', function() {
     var bundler = watchify(browserify(p.jsx, watchify.args));
     
-    function rebundler() {
+    function rebundle() {
         return bundler
             .bundle()
             .on('error', notify.onError())
@@ -54,11 +54,11 @@ gulp.task('watchify', function() {
     
     bundler.transform(babelify, {presets: ["react"]})
     .on('update', rebundle);
-    return rebundler();
+    return rebundle();
 });
 
 gulp.task('watch', ['clean'], function() {
-    gulp.start(['browserSync']);
+    gulp.start(['browserSync', 'watchify']);
 });
 
 gulp.task('build', ['clean'], function() {

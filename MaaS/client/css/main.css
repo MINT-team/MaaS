@@ -1,0 +1,17 @@
+body {
+    background-color: lightgreen;
+}
+
+#name {
+    text-align: center;
+}
+
+#content {
+    background-color: white;
+    display: block;
+    padding: 2em;
+    margin: 0 auto;
+    width: 20em;
+    text-align: center;"
+    border-radius: 1em 1em;
+}

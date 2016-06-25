@@ -1,13 +1,13 @@
-/*var React = require('react');
-var Dispatcher = require('../../dispatcher/Dispatcher.js');
-var Constants = require('../../constants/Constants.js');
-var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
+var React = require('react');
+//var Dispatcher = require('../../dispatcher/Dispatcher.js');
+//var Constants = require('../../constants/Constants.js');
+//var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
 //var SessionStore = require('../../stores/SessionStore.react.jsx');
-var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
+var UserActionCreator = require('../actionCreators/UserActionCreator.react.jsx');
 //var RouteActionCreators = require('../../actions/RouteActionCreator.react.jsx');
 
 
-var provaView = React.createClass({
+var ProvaView = React.createClass({
 
   componentDidMount: function() {
     
@@ -22,47 +22,13 @@ var provaView = React.createClass({
   render: function() {
     return (
         <form onSubmit={this._onSubmit}>
-            <input type="text" placeholder="Title" name="email" ref="email" /> 
-            <button type="submit">GET</button>
+            <p>Cerca un utente</p>
+            <input type="text" placeholder="email" name="email" ref="email" /> 
+            <button type="submit">Get</button>
         </form>
      );
   }
 
 });
 
-module.exports = provaView;*/
-
-var React = require('react'),
-    ListItem = require('./home.react.jsx');
-
-var ListItems = React.createClass({
-  render: function() {
-
-    var words = [
-      {
-        "origin": "accogliere",
-        "translation": "to welcome"
-      },
-      {
-        "origin": "affrettarsi",
-        "translation": "to hurry"
-      },
-      {
-        "origin": "ammettere",
-        "translation": "to admit"
-      }
-    ];
-
-    var listItems = words.map(function(item){
-      return <ListItem item={item} />;
-    });
-
-    return (
-     <ul className="list-group">
-     {listItems}
-     </ul>
-    );
-  }
-});
-
-module.exports = ListItem;
+module.exports = ProvaView;
