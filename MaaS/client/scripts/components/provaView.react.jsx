@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactDOM = require("react-dom");
 //var Dispatcher = require('../../dispatcher/Dispatcher.js');
 //var Constants = require('../../constants/Constants.js');
 //var WebAPIUtils = require('../../webAPIUtils/WebAPIUtils.js');
@@ -15,8 +16,9 @@ var ProvaView = React.createClass({
 
   _onSubmit: function(e) {
     e.preventDefault();
-    var email = this.refs.email.getDOMNode().value; //non va un cazzo
+    var email = this.refs.email.value; 
     UserActionCreator.request_getUser(email);
+    ReactDOM.render(<p>Action creata</p>, document.getElementById("info"));
   },
   
   render: function() {

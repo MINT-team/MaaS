@@ -2,55 +2,119 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 window.React = React;
-var routes = require('./routes.jsx');
+var Routes = require('./routes.jsx');
 
-ReactDOM.render(React.createElement(
-  Router,
-  null,
-  routes
-), document.getElementById('content'));
-
-//var ProvaView = require('./components/provaView.react.jsx');
-
-//ReactDOM.render(<ProvaView />, document.getElementById('content'));
-
-/*ReactDOM.render(
-  <h1>Hello, world!</h1>,
-  document.getElementById('content')
-);*/
+ReactDOM.render(React.createElement(Routes, null), document.getElementById('content'));
 
 },{"./routes.jsx":5,"react":234,"react-dom":7}],2:[function(require,module,exports){
 var React = require('react');
+
+var LoginPage = React.createClass({
+  displayName: "LoginPage",
+
+  render() {
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "div",
+        { className: "row" },
+        React.createElement(
+          "div",
+          { className: "card card--login small-10 medium-6 large-4 columns small-centered" },
+          React.createElement(
+            "form",
+            null,
+            React.createElement(
+              "div",
+              { className: "card--login__field" },
+              React.createElement(
+                "label",
+                { name: "email" },
+                "Email"
+              ),
+              React.createElement("input", { type: "text", name: "email", ref: "email" })
+            ),
+            React.createElement(
+              "div",
+              { className: "card--login__field" },
+              React.createElement(
+                "label",
+                { name: "password" },
+                "Password"
+              ),
+              React.createElement("input", { type: "password", name: "password", ref: "password" })
+            ),
+            React.createElement(
+              "button",
+              { type: "submit", className: "card--login__submit" },
+              "Login"
+            )
+          )
+        )
+      )
+    );
+  }
+});
+
+module.exports = LoginPage;
 
 },{"react":234}],3:[function(require,module,exports){
 var React = require('react');
 
 },{"react":234}],4:[function(require,module,exports){
 var ReactDOM = require('react-dom');
+var React = require('react');
+//var ProvaView = require('./provaView.react.jsx');
 
-ReactDOM.render(React.createElement(
-    'h1',
-    null,
-    'Ciao'
-), document.getElementById('content'));
+//ReactDOM.render(<ProvaView />, document.getElementById('content'));
+/*ReactDOM.render(
+    <h1>Ciao</h1>,
+    document.getElementById('content')
+);*/
 
-},{"react-dom":7}],5:[function(require,module,exports){
+var Home = React.createClass({
+    displayName: 'Home',
+
+    render() {
+        return React.createElement(
+            'h1',
+            null,
+            'Hello'
+        );
+    }
+});
+
+module.exports = Home;
+
+},{"react":234,"react-dom":7}],5:[function(require,module,exports){
 var React = require('react');
 var ReactRouter = require('react-router');
-var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
-var DefaultRoute = ReactRouter.DefaultRoute;
+var IndexRoute = ReactRouter.IndexRoute;
 
 var MaaSApp = require('./components/MaaSApp.react.jsx');
-var home = require('./components/home.react.jsx');
+var Home = require('./components/home.react.jsx');
 var LoginPage = require('./components/LoginPage.react.jsx');
 
-module.exports = React.createElement(
-  Route,
-  { path: 'app', path: '/', handler: MaaSApp },
-  React.createElement(DefaultRoute, { handler: home }),
-  React.createElement(Route, { path: 'login', path: '/login', handler: LoginPage })
-);
+var Routes = React.createClass({
+  displayName: 'Routes',
+
+  render() {
+    return React.createElement(
+      Router,
+      null,
+      React.createElement(
+        Route,
+        { path: '/', handler: MaaSApp },
+        React.createElement(IndexRoute, { component: Home }),
+        React.createElement(Route, { path: '/login', component: LoginPage })
+      )
+    );
+  }
+});
+
+module.exports = Routes;
 
 },{"./components/LoginPage.react.jsx":2,"./components/MaaSApp.react.jsx":3,"./components/home.react.jsx":4,"react":234,"react-router":37}],6:[function(require,module,exports){
 // shim for using process in browser
