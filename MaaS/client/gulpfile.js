@@ -130,7 +130,7 @@ gulp.task('watchify', function() {
             .pipe(reload({stream: true}));
     }
     
-    bundler.transform(babelify, {presets: ["react"]})
+    bundler.transform(babelify, {presets: ["es2015", "react"]})
     .on('update', rebundle);
     return rebundle();
 });
@@ -139,17 +139,17 @@ gulp.task('watch', ['clean'], function() {
     gulp.start(['browserSync', 'watchify']);
 });
 
-gulp.task('buildApp', function() {
+/*gulp.task('buildApp', function() {
     gulp.start(['browserifyApp']);
 });
 
 gulp.task('buildVendor', function() {
     gulp.start(['browserifyVendor']);
 });
-
+*/
 gulp.task('build', ['clean'], function() {
     process.env.NODE_ENV = 'production';
-    gulp.start(['buildApp','buildVendor']);
+    gulp.start(['browserify']);
 });
 
 gulp.task('default', function() {
