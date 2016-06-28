@@ -6,11 +6,11 @@ var ActionTypes = Constants.ActionTypes;
 
 module.exports = {
     //REQUESTS
-    request_getUser : function(email) {
-        Dispatcher.handleViewAction({
+    getUser : function(email) {
+        /*Dispatcher.handleViewAction({
             type: ActionTypes.GET_USER,
             email: email
-        });
+        });*/
     WebAPIUtils.loadUser(email);
     },
     
@@ -18,4 +18,4 @@ module.exports = {
     response_getUser : function(response) {
         
     }
-}
+};

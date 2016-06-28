@@ -1,16 +1,73 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 html {
     font-family: 'Montserrat', sans-serif;
 }
 
 body {
-    background-color: lightgreen;
+    background-color: #eef;
 }
 
-#name {
-    text-align: center;
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+#header {
+    width: 100%;
+    margin: auto;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    color: white;
+    background-color: #333;
+    box-shadow: lightgreen 0 0.2em;
 }
 
-#content {
+#header #title {
+    font-size: 2.2em;
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+#header a {
+    margin-left: 1em;
+    margin-right: 1em;
+    color: white;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+#header a:hover {
+    color: lightgreen;
+    
+}
+
+#header #preferences {
+    float: right;
+    margin-right: 2em;
+}
+
+#header #preferences i {
+  vertical-align: middle;
+}
+
+/*#content {
     background-color: white;
     display: block;
     padding: 2em;
@@ -20,9 +77,9 @@ body {
     -webkit-border-radius: 2em;
     -moz-border-radius: 2em;
     border-radius: 2em;
-}
+}*/
 
-input[type=text] {
+input {
 	border-radius:5px;
 	-moz-border-radius:5px;
 	-webkit-border-radius:5px;
@@ -38,7 +95,7 @@ button {
 	-moz-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
 	box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
 	color:#333;
-	background-color lightgray;
+	background-color: lightgray;
 	border-radius:5px;
 	-moz-border-radius:5px;
 	-webkit-border-radius:5px;
