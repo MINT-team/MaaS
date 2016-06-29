@@ -34,6 +34,7 @@ body {
     margin: auto;
     padding-top: 1em;
     padding-bottom: 1em;
+    margin-bottom: 2em;
     color: white;
     background-color: #333;
     box-shadow: lightgreen 0 0.2em;
@@ -53,31 +54,73 @@ body {
     vertical-align: middle;
 }
 
-#header a:hover {
+#header a:hover, a:focus {
     color: lightgreen;
     
 }
 
-#header #preferences {
+#header #header-panel {
     float: right;
+    margin-right: 4em;
+    min-width: 15em;
+    text-align: right;
+}
+
+#header #header-panel ul {
+    list-style-type: none;
+}
+
+#header #header-panel i {
+    vertical-align: middle;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    margin-top: 0.5em;
+    margin-left: 4em;
     margin-right: 2em;
-}
-
-#header #preferences i {
-  vertical-align: middle;
-}
-
-/*#content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-align: left;
     background-color: white;
+    overflow: auto;
+    box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.2);
+    -webkit-border-radius: 0.4em;
+    -moz-border-radius: 0.4em;
+    border-radius: 0.4em;
+}
+
+.dropdown-content ul li {
+    width: 80%;
+    color: black;
+    display: inline-block;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.dropdown-content ul li:hover {
+    color: lightgrey;
+}
+
+.dropdown-show {
     display: block;
-    padding: 2em;
-    margin: 0 auto;
-    width: 20em;
+}
+
+#page-content {
+    width: 70%;
+    margin: auto;
+    background-color: white;
+    padding: 4em;
+    min-height: 20em;
     text-align: center;
-    -webkit-border-radius: 2em;
-    -moz-border-radius: 2em;
-    border-radius: 2em;
-}*/
+    -webkit-border-radius: 0.4em;
+    -moz-border-radius: 0.4em;
+    border-radius: 0.4em;
+    box-shadow: lightgray 4px 4px;
+}
 
 input {
 	border-radius:5px;
