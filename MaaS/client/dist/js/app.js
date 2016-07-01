@@ -6,7 +6,12 @@ var ReactDOM = require('react-dom');
 window.React = React;
 var Routes = require('./routes.jsx');
 
+var Header = require('./components/Header.react.jsx');
+
+//ReactDOM.render(<Header />, document.getElementById('content'));
+
 ReactDOM.render(React.createElement(Routes, null), document.getElementById('content'));
+
 /*
 var LoginPage = React.createClass({
     render() {
@@ -35,14 +40,20 @@ var LoginPage = React.createClass({
 ReactDOM.render(<LoginPage />, document.getElementById('content'));
 */
 
-},{"./routes.jsx":6,"react":235,"react-dom":8}],2:[function(require,module,exports){
-"use strict";
+},{"./components/Header.react.jsx":2,"./routes.jsx":6,"react":235,"react-dom":8}],2:[function(require,module,exports){
+'use strict';
 
 var React = require('react');
+var Link = require('react-router').Link;
 
 var Header = React.createClass({
-	displayName: "Header",
+	displayName: 'Header',
 
+	getInitialState: function getInitialState() {
+		return {
+			isLogged: false
+		};
+	},
 
 	handleClick: function handleClick(event) {
 		if (!event.target.className.match("dropdown-button")) {
@@ -72,107 +83,111 @@ var Header = React.createClass({
 	},
 
 	render: function render() {
-		return React.createElement(
-			"div",
-			{ id: "header" },
-			React.createElement(
-				"a",
-				{ id: "title", href: "" },
-				"MaaS"
-			),
-			React.createElement(
-				"a",
-				{ href: "" },
-				"Dashboard"
-			),
-			React.createElement(
-				"a",
-				{ href: "" },
-				"link2"
-			),
-			React.createElement(
-				"a",
-				{ href: "" },
-				"link3"
-			),
-			React.createElement(
-				"a",
-				{ href: "" },
-				"link4"
-			),
-			React.createElement(
-				"div",
-				{ id: "header-panel" },
+		var headerPanel;
+		if (this.state.isLogged) {
+			headerPanel = React.createElement(
+				'div',
+				{ id: 'header-panel' },
 				React.createElement(
-					"a",
-					{ href: "" },
+					'a',
+					{ href: '' },
 					React.createElement(
-						"i",
-						{ className: "material-icons md-36" },
-						""
+						'i',
+						{ className: 'material-icons md-36' },
+						''
 					)
 				),
 				React.createElement(
-					"a",
-					{ href: "", id: "settings-button", onClick: this.toggleDropdown },
+					'a',
+					{ href: '', id: 'settings-button', onClick: this.toggleDropdown },
 					React.createElement(
-						"i",
-						{ className: "material-icons md-36 dropdown-button" },
-						""
+						'i',
+						{ className: 'material-icons md-36 dropdown-button' },
+						''
 					)
 				),
 				React.createElement(
-					"div",
-					{ className: "dropdown-content", ref: "dropdownMenu" },
+					'div',
+					{ className: 'dropdown-content', ref: 'dropdownMenu' },
 					React.createElement(
-						"ul",
+						'ul',
 						null,
 						React.createElement(
-							"a",
-							{ href: "" },
+							'a',
+							{ href: '' },
 							React.createElement(
-								"li",
+								'li',
 								null,
-								"Dashboard attiva"
+								'Dashboard attiva'
 							)
 						),
 						React.createElement(
-							"a",
-							{ href: "" },
+							'a',
+							{ href: '' },
 							React.createElement(
-								"li",
+								'li',
 								null,
-								"link5"
+								'link5'
 							)
 						),
 						React.createElement(
-							"a",
-							{ href: "" },
+							'a',
+							{ href: '' },
 							React.createElement(
-								"li",
+								'li',
 								null,
-								"link6"
+								'link6'
 							)
 						),
 						React.createElement(
-							"a",
-							{ href: "" },
+							'a',
+							{ href: '' },
 							React.createElement(
-								"li",
+								'li',
 								null,
-								"link7"
+								'link7'
 							)
 						)
 					)
 				)
-			)
+			);
+		} else {}
+		return React.createElement(
+			'div',
+			{ id: 'header' },
+			React.createElement(
+				'a',
+				{ id: 'title', href: '' },
+				'MaaS'
+			),
+			React.createElement(
+				'a',
+				{ href: '' },
+				'Dashboard'
+			),
+			React.createElement(
+				'a',
+				{ href: '' },
+				'link2'
+			),
+			React.createElement(
+				'a',
+				{ href: '' },
+				'link3'
+			),
+			React.createElement(
+				'a',
+				{ href: '' },
+				'link4'
+			),
+			headerPanel
 		);
 	}
 });
 
 module.exports = Header;
 
-},{"react":235}],3:[function(require,module,exports){
+},{"react":235,"react-router":38}],3:[function(require,module,exports){
 'use strict';
 
 var ReactDOM = require('react-dom');
@@ -209,38 +224,34 @@ var LoginPage = React.createClass({
       null,
       React.createElement(
         "div",
-        { className: "row" },
+        null,
         React.createElement(
-          "div",
-          { className: "card card--login small-10 medium-6 large-4 columns small-centered" },
+          "form",
+          null,
           React.createElement(
-            "form",
-            null,
+            "div",
+            { className: "login-field" },
             React.createElement(
-              "div",
-              { className: "card--login__field" },
-              React.createElement(
-                "label",
-                { name: "email" },
-                "Email"
-              ),
-              React.createElement("input", { type: "text", name: "email", ref: "email" })
+              "label",
+              { name: "email" },
+              "Email"
             ),
+            React.createElement("input", { type: "text", name: "email", ref: "email" })
+          ),
+          React.createElement(
+            "div",
+            { className: "login-field" },
             React.createElement(
-              "div",
-              { className: "card--login__field" },
-              React.createElement(
-                "label",
-                { name: "password" },
-                "Password"
-              ),
-              React.createElement("input", { type: "password", name: "password", ref: "password" })
+              "label",
+              { name: "password" },
+              "Password"
             ),
-            React.createElement(
-              "button",
-              { type: "submit", className: "card--login__submit" },
-              "Login"
-            )
+            React.createElement("input", { type: "password", name: "password", ref: "password" })
+          ),
+          React.createElement(
+            "button",
+            { type: "submit", className: "login-submit" },
+            "Login"
           )
         )
       )
@@ -287,6 +298,18 @@ var MaaSApp = require('./components/MaaSApp.react.jsx');
 var Home = require('./components/Home.react.jsx');
 var LoginPage = require('./components/LoginPage.react.jsx');
 
+/*var Routes = React.createClass({
+  render() {
+    return (
+      <Router history={browserHistory}>
+        <Route path="/" component={MaaSApp}>
+          <Route path="login" component={LoginPage} />
+        </Route>
+      </Router>
+      );
+  }
+});*/
+
 var Routes = React.createClass({
   displayName: 'Routes',
   render: function render() {
@@ -294,16 +317,11 @@ var Routes = React.createClass({
       Router,
       { history: browserHistory },
       React.createElement(Route, { path: '/', component: MaaSApp }),
-      React.createElement(
-        Route,
-        { path: 'asd/', component: LoginPage },
-        React.createElement(Route, { path: 'lol', component: MaaSApp })
-      )
+      React.createElement(Route, { path: '/login', component: LoginPage })
     );
   }
 });
-// <IndexRoute component={Home} />
-//<Route path="/login" component={LoginPage} />
+
 module.exports = Routes;
 
 /*

@@ -1,6 +1,6 @@
 var React = require('react');
 
-var LoginPage = React.createClass({
+var RegisterPage = React.createClass({
     render() {
         return (
         <div>

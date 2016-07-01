@@ -3,11 +3,13 @@ module.exports = function(app, callback) {
     //var app = express();
     //var port = process.env.PORT || 8080;
     var path = require('path');
-    app.get('/asd',function (req, res){
+    app.get('/login',function (req, res){
         //res.SendFile(path.resolve('$!../client','index.html'));
         res.sendFile(path.resolve('client/index.html'));
     });
-    app.get('/asd/lol',function (req, res){
+    
+    //configurazione pagina register
+    app.get('/register',function (req, res){
         //res.SendFile(path.resolve('$!../client','index.html'));
         res.sendFile(path.resolve('client/index.html'));
     });

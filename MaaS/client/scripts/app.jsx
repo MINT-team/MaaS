@@ -3,8 +3,12 @@ var ReactDOM = require('react-dom');
 window.React = React;
 var Routes = require('./routes.jsx');
 
+var Header = require('./components/Header.react.jsx');
+
+//ReactDOM.render(<Header />, document.getElementById('content'));
 
 ReactDOM.render(<Routes />, document.getElementById('content'));
+
 /*
 var LoginPage = React.createClass({
     render() {
