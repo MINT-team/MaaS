@@ -4,10 +4,10 @@ var Home = require('./Home.react.jsx');
 
 var MaaSApp = React.createClass({
     render() {
-        return (    //questo div serve altrimenti da errore
-            <div id="app">   
+        return (
+            <div id="app">
                 <Header />
-                <Home />
+                {this.props.children}
             </div>
 	    );
     }

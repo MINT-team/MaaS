@@ -7,7 +7,7 @@ var Header = React.createClass({
 			isLogged: false
 		};
 	},
-	
+
 	handleClick: function(event) {
 	    if(!event.target.className.match("dropdown-button")) {
 		    var dropdowns = document.getElementsByClassName("dropdown-content");
@@ -18,8 +18,9 @@ var Header = React.createClass({
 		        	openDropdown.classList.remove("dropdown-show");
 		    	}
 			}
+		} else {
+			event.target.focus();
 		}
-		document.getElementsByClassName("dropdown-button");
 	},
 
 	componentDidMount: function() {
@@ -29,43 +30,61 @@ var Header = React.createClass({
 	componentWillUnmount: function() {
     	window.removeEventListener('click', this.handleClick);
 	},
-	
+
 	toggleDropdown: function(event) {
 		event.preventDefault();
 		this.refs.dropdownMenu.classList.toggle("dropdown-show");
 	},
-	
+
     render: function() {
+    	var title;
+    	var headerMenu;
     	var headerPanel;
-    	if (this.state.isLogged)
-    	{
-	    	headerPanel=(<div id="header-panel">
-				<a href="" ><i className="material-icons md-36">&#xE7FD;</i></a>
-				<a href="" id="settings-button" onClick={this.toggleDropdown}>
-					<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
-				</a>
-				<div className="dropdown-content" ref="dropdownMenu">
-					<ul>
-						<a href=""><li>Dashboard attiva</li></a>
-						<a href=""><li>link5</li></a>
-						<a href=""><li>link6</li></a>
-						<a href=""><li>link7</li></a>
-					</ul>
+    	if (!this.state.isLogged) {
+    		title = (
+    			<Link to="/" id="title">NomeAzienda</Link>
+    		)
+			headerMenu = (
+				<div id="header-menu">
+					<Link to="">Dashboard</Link>
+					<Link to="">Altro</Link>
 				</div>
-			</div>
+    		);
+	    	headerPanel = (
+		    	<div id="header-panel">
+					<Link to="/profile" ><i className="material-icons md-36">&#xE7FD;</i></Link>
+					<Link to="" id="settings-button" onClick={this.toggleDropdown}>
+						<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+					</Link>
+					<div className="dropdown-content" ref="dropdownMenu">
+						<ul>
+							<Link to=""><li>Dashboard attiva</li></Link>
+							<Link to=""><li>Editor di testo</li></Link>
+							<Link to="/logout"><li>Esci</li></Link>
+						</ul>
+					</div>
+				</div>
 			);
-    	}
-    	else
-    	{
-    		
+    	} else {
+    		title = (
+    			<Link to="/" id="title">MaaS</Link>
+    		)
+			headerMenu = (
+				<div id="header-menu">
+					<p id="header-description">MongoDB as an Admin Service</p>
+				</div>
+    		);
+    		headerPanel = (
+    			<div id="header-panel">
+			    	<Link to="/login">Login</Link>
+			    	<Link to="/register">Sign Up</Link>
+				</div>
+    		);
     	}
         return (
             <div id="header">
-			    <a id="title" href="" >MaaS</a>
-			    <a href="">Dashboard</a>
-			    <a href="">link2</a>
-			    <a href="">link3</a>
-			    <a href="">link4</a>
+			    {title}
+			    {headerMenu}
 			    {headerPanel}
 		    </div>
 	    );

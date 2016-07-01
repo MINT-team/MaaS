@@ -28,99 +28,22 @@ var production = (process.env.NODE_ENV === 'production');*/
 gulp.task('clean',function(cb) {
     return del(['dist'], cb);
 });
-/*
-
-gulp.task('browserifyVendor', function() {
-    return browserify()
-    .require(dependencies)
-    .bundle()
-    .pipe(source(p.bundleVendor))
-    .pipe(buffer())
-    .pipe(gulp.dest(p.distJs));
-});
-
-gulp.task('browserifyApp', function() {
-    return browserify(p.jsx)
-    .external(dependencies)
-    .transform(babelify, {presets: ["react"]})
-    .bundle()
-    .pipe(source(p.bundleApp))
-    .pipe(buffer())
-    .pipe(gulp.dest(p.distJs));
-});
-
-
-function getNPMPackageIds() {
-  // read package.json and get dependencies' package ids
-  var packageManifest = {};
-  try {
-    packageManifest = require('./package.json');
-  } catch (e) {
-    // does not have a package.json manifest
-  }
-  return _.keys(packageManifest.dependencies) || [];
-
-}
-
-
-gulp.task('browserifyVendor', function() {
-    var b = browserify({
-        // generate source maps in non-production environment
-        debug: !production
-    });
-    
-    getNPMPackageIds().forEach(function (id) {
-        b.require(nodeResolve.sync(id), { expose: id });
-    });
-
-    var stream = b
-    .bundle()
-    .on('error', function(err){
-      // print the error (can replace with gulp-util)
-      console.log(err.message);
-      // end this stream
-      this.emit('end');
-    })
-    .pipe(source(p.bundleVendor))
-    stream.pipe(gulp.dest(p.distJs));
-    return stream;
-});
-
-
-
-
-gulp.task('browserifyApp', function() {
-    var b = browserify(p.jsx, {
-        debug: !production
-    })
-    
-   
-    getNPMPackageIds().forEach(function (id) {
-        b.external(id);
-    });
-
-    var stream = b
-    .transform(babelify, {presets: ["react"]})
-    .bundle()
-    .pipe(source(p.bundleApp))
-    stream.pipe(gulp.dest(p.distJs));
-    return stream;
-});
-*/
-
 
 gulp.task('browserSync', function() {
-    browserSync({
+    browserSync.init(null, {
+        proxy: "http://localhost:8080",
+        files: ["client/**/*.*"],
         notify: false,
-        server: {
+        /*server: {
             baseDir: './'
-        }
-    })
+        }*/
+        port: 8080
+    });
 });
 
 gulp.task('watchify', function() {
     var bundler = watchify(browserify(p.jsx, watchify.args));
-    
+
     function rebundle() {
         return bundler
             .bundle()
@@ -129,7 +52,7 @@ gulp.task('watchify', function() {
             .pipe(gulp.dest(p.distJs))
             .pipe(reload({stream: true}));
     }
-    
+
     bundler.transform(babelify, {presets: ["es2015", "react"]})
     .on('update', rebundle);
     return rebundle();
