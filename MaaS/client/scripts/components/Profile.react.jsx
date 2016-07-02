@@ -7,22 +7,30 @@ var Profile = React.createClass({
             <p className="container-title">Profilo</p>
             <form className="form-container">
               <div className="form-field">
-                <label name="nomeAzienda">Nome Azienda</label>
-                <input type="text" name="nomeAzienda" ref="nomeAzienda" />
+                <label htmlFor="nome">Nome</label>
+                <input type="text" id="nome" ref="nome" />
               </div>
               <div className="form-field">
-                <label name="email">Email</label>
-                <input type="text" name="email" ref="email" />
+                <label htmlFor="cognome">Cognome</label>
+                <input type="text" id="cognome" ref="nome" />
               </div>
               <div className="form-field">
-                <label name="password">Password</label>
-                <input type="password" name="password" ref="password" />
+                <label htmlFor="azienda">Azienda</label>
+                <input type="text" id="azienda" ref="nomeAzienda" disabled="disabled"/>
               </div>
               <div className="form-field">
-                <label name="confermaPassword">Conferma Password</label>
-                <input type="confermaPassword" name="confermaPassword" ref="confermaPassword" />
+                <label htmlFor="email">Email</label>
+                <input type="text" id="email" ref="email" />
               </div>
-              <button type="submit" className="form-submit">Registra la tua azienda</button>
+              <div className="form-field">
+                <label htmlFor="password">Nuova Password</label>
+                <input type="password" id="password" ref="password" />
+              </div>
+              <div className="form-field">
+                <label htmlFor="confermaPassword">Conferma Password</label>
+                <input type="confermaPassword" id="confermaPassword" ref="confermaPassword" />
+              </div>
+              <button type="submit" className="form-submit">Salva i cambiamenti</button>
             </form>
           </div>
     );
