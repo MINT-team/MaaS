@@ -13,7 +13,6 @@ var factor = require('factor-bundle');
 var reload = browserSync.reload;
 var p = {
     jsx: './scripts/app.jsx',
-    bundleVendor: 'vendor.js',
     bundleApp: 'app.js',
     distJs: 'dist/js',
     distCss: 'dist/css',
@@ -30,14 +29,10 @@ gulp.task('clean',function(cb) {
 });
 
 gulp.task('browserSync', function() {
-    browserSync.init(null, {
-        proxy: "http://localhost:8080",
-        files: ["client/**/*.*"],
-        notify: false,
-        /*server: {
+    browserSync({
+        server: {
             baseDir: './'
-        }*/
-        port: 8080
+        }
     });
 });
 
