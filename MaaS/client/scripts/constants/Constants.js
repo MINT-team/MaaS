@@ -23,7 +23,9 @@ module.exports = {
     // Routes
     REDIRECT: null,
 
-    GET_USER: null
+    GET_USER: null,
+    CREATE_USER: null,
+    DESTROY_USER: null
   })
 
 };

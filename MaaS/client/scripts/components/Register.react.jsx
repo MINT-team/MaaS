@@ -21,7 +21,7 @@ var Register = React.createClass({
               </div>
               <div className="form-field">
                 <label htmlFor="confermaPassword">Conferma Password</label>
-                <input type="confermaPassword" id="confermaPassword" ref="confermaPassword" />
+                <input type="password" id="confermaPassword" ref="confermaPassword" />
               </div>
               <button type="submit" className="form-submit">Registra la tua azienda</button>
             </form>

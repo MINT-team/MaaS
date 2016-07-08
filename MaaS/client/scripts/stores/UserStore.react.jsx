@@ -2,16 +2,33 @@ var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-var WebAPIUtils = require('../utils/UserWebAPIUtils.js');
+//var WebAPIUtils = require('../utils/UserWebAPIUtils.js');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _users = [];
+var _users = [];//{ id: "a", email: "aaa" }, { id: "b", email: "bbb" }];
 //var _errors = [];
-var _user = { email: "" };
+var _user = { id: "", email: "" };
+
+function create(email) {
+
+  var id = _users.length; //Date.now() Using the current timestamp in place of a real id.
+  _users[id] = {
+    id: id,
+    email: email
+  };
+}
+
+function destroy(id) {
+  delete _users[id];
+}
 
 var UserStore = assign({}, EventEmitter.prototype, {
+
+  getAll: function() {
+    return _users;
+  },
 
   emitChange: function() {
     this.emit(CHANGE_EVENT);
@@ -27,27 +44,32 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getUser: function() {
     return _user;
-  }/*,
+  },
 
-  getErrors: function() {
+  /*getErrors: function() {
     return _errors;
   }*/
 
-});
+  dispatcherIndex: Dispatcher.register(function(payload) {
+    var action = payload.action;
 
-UserStore.dispatchToken = Dispatcher.register(function(payload) {
-  var action = payload.action;
+    switch(action.type) {
 
-  switch(action.type) {
-    
-    case ActionTypes.GET_USER:
-        _users = action.email;  //???
+      case ActionTypes.CREATE_USER:
+        create(action.email);
         UserStore.emitChange();
         break;
-        
-  }
 
-  return true;
+      case ActionTypes.DESTROY_USER:
+        destroy(action.id);
+        UserStore.emitChange();
+        break;
+
+    }
+
+    return true;  //Niente errori, richiesto dal Promise nel Dispatcher (? ..mah ok)
+  })
+
 });
 
 module.exports = UserStore;

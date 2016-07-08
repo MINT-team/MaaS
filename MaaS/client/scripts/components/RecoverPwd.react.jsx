@@ -3,21 +3,22 @@ var React = require('react');
 var RecoverPwd = React.createClass({
     render() {
         return (
-          <div>
-            <form>
-              <div className="recover-field">
-
-                <label name="userName">UserName</label>
-                <input type="text" name="userName" ref="userName" />
-
-                <label name="password">Password</label>
-                <input type="password" name="password" ref="password" />
-
-                <label name="confermaPassword">Confirm Password</label>
-                <input type="confermaPassword" name="confermaPassword" ref="confermaPassword" />
-
+          <div className="container">
+            <p className="container-title">Choose a new Password</p>
+            <form className="form-container">
+              <div className="form-field">
+                <label htmlFor="userName">Email</label>
+                <input type="text" id="userName" ref="email" />
               </div>
-              <button type="submit" className="recover-submit">Send</button>
+              <div className="form-field">
+                <label htmlFor="password">Password</label>
+                <input type="password" id="password" ref="password" />
+              </div>
+              <div className="form-field">
+                <label htmlFor="confermaPassword">Confirm Password</label>
+                <input type="password" id="confermaPassword" ref="confermaPassword" />
+              </div>
+              <button type="submit" className="form-submit">Send</button>
             </form>
           </div>
     );

@@ -40,9 +40,9 @@ var Header = React.createClass({
     	var title;
     	var headerMenu;
     	var headerPanel;
-    	if (!this.state.isLogged) {
+    	if (this.state.isLogged) {
     		title = (
-    			<Link to="/" id="title">NomeAzienda</Link>
+    			<Link to="/" id="header-title">NomeAzienda</Link>
     		)
 			headerMenu = (
 				<div id="header-menu">
@@ -67,7 +67,7 @@ var Header = React.createClass({
 			);
     	} else {
     		title = (
-    			<Link to="/" id="title">MaaS</Link>
+    			<Link to="/" id="header-title">MaaS</Link>
     		)
 			headerMenu = (
 				<div id="header-menu">

@@ -7,7 +7,7 @@ var Footer = React.createClass({
             <div id="footer">
                 <div className="footer-block">
                     <ul>
-                        <li><Link to="/" id="title">MaaS</Link></li>
+                        <li><Link to="/" id="footer-title">MaaS</Link></li>
                         <li></li>
                     </ul>
                 </div>

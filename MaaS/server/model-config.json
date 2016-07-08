@@ -31,5 +31,9 @@
   "Role": {
     "dataSource": "db",
     "public": false
+  },
+  "DSL": {
+    "dataSource": "db",
+    "public": true
   }
 }
