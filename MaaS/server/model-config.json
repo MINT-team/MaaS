@@ -14,7 +14,8 @@
     ]
   },
   "User": {
-    "dataSource": "db"
+    "dataSource": "db",
+    "public": false
   },
   "AccessToken": {
     "dataSource": "db",
@@ -32,8 +33,14 @@
     "dataSource": "db",
     "public": false
   },
-  "DSL": {
-    "dataSource": "db",
-    "public": true
+  "Email": {
+    "dataSource": "gmail"
+  },
+  "user": {
+    "dataSource": "maas",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": true
+    }
   }
 }

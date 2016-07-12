@@ -1,12 +1,32 @@
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
+var SessionStore = require('../stores/SessionStore.react.jsx');
+
+function getState() {
+  return {
+    isLogged: SessionStore.isLogged(),
+  };
+}
 
 var Header = React.createClass({
-	getInitialState: function(){
-		return {
-			isLogged: false
-		};
-	},
+	getInitialState: function() {
+      return getState();
+    },
+
+    componentDidMount: function() {
+		SessionStore.addChangeListener(this._onChange);
+    	window.addEventListener('click', this.handleClick);
+    },
+
+    componentWillUnmount: function() {
+    	SessionStore.removeChangeListener(this._onChange);
+    	window.removeEventListener('click', this.handleClick);
+    },
+
+    _onChange: function() {
+    	this.setState(getState());
+    },
 
 	handleClick: function(event) {
 	    if(!event.target.className.match("dropdown-button")) {
@@ -23,17 +43,14 @@ var Header = React.createClass({
 		}
 	},
 
-	componentDidMount: function() {
-    	window.addEventListener('click', this.handleClick);
-	},
-
-	componentWillUnmount: function() {
-    	window.removeEventListener('click', this.handleClick);
-	},
-
 	toggleDropdown: function(event) {
 		event.preventDefault();
 		this.refs.dropdownMenu.classList.toggle("dropdown-show");
+	},
+
+	logout: function() {
+		var accessToken = sessionStorage.getItem('accessToken');
+		SessionActionCreator.logout(accessToken);
 	},
 
     render: function() {
@@ -43,7 +60,7 @@ var Header = React.createClass({
     	if (this.state.isLogged) {
     		title = (
     			<Link to="/" id="header-title">NomeAzienda</Link>
-    		)
+    		);
 			headerMenu = (
 				<div id="header-menu">
 					<Link to="">Dashboard</Link>
@@ -58,9 +75,9 @@ var Header = React.createClass({
 					</Link>
 					<div className="dropdown-content" ref="dropdownMenu">
 						<ul>
-							<Link to=""><li>Dashboard attiva</li></Link>
-							<Link to=""><li>Editor di testo</li></Link>
-							<Link to="/logout"><li>Esci</li></Link>
+							<Link to=""><li>Active Dashboard</li></Link>
+							<Link to=""><li>Text editor</li></Link>
+							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>
 					</div>
 				</div>
@@ -68,7 +85,7 @@ var Header = React.createClass({
     	} else {
     		title = (
     			<Link to="/" id="header-title">MaaS</Link>
-    		)
+    		);
 			headerMenu = (
 				<div id="header-menu">
 					<p id="header-description">MongoDB as an Admin Service</p>

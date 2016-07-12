@@ -8,21 +8,11 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _users = [];//{ id: "a", email: "aaa" }, { id: "b", email: "bbb" }];
-//var _errors = [];
-var _user = { id: "", email: "" };
-
-function create(email) {
-
-  var id = _users.length; //Date.now() Using the current timestamp in place of a real id.
-  _users[id] = {
-    id: id,
-    email: email
-  };
-}
-
-function destroy(id) {
-  delete _users[id];
-}
+var _errors = [];
+var _user = {
+              id: sessionStorage.getItem('userId'),
+              email: sessionStorage.getItem('email')
+            };
 
 var UserStore = assign({}, EventEmitter.prototype, {
 
@@ -46,30 +36,55 @@ var UserStore = assign({}, EventEmitter.prototype, {
     return _user;
   },
 
-  /*getErrors: function() {
+  getErrors: function() {
     return _errors;
-  }*/
+  }
 
-  dispatcherIndex: Dispatcher.register(function(payload) {
+});
+
+UserStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
 
     switch(action.type) {
 
-      case ActionTypes.CREATE_USER:
-        create(action.email);
+      case ActionTypes.RESET_PASSWORD_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else if(action.json) {
+            var email = action.json.email;
+            _user.email = email;
+            sessionStorage.setItem('email', email);
+        }
         UserStore.emitChange();
         break;
 
-      case ActionTypes.DESTROY_USER:
-        destroy(action.id);
+      case ActionTypes.CHANGE_PASSWORD_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else if(action.email) {
+            _errors = []; // empty old errors
+            _user.email = action.email;
+            sessionStorage.setItem('email', action.email);
+        }
+        UserStore.emitChange();
+
+        break;
+
+      case ActionTypes.LOGOUT:
+        // remove user data
+        _user.id = null;
+        _user.email = null;
+        UserStore.emitChange();
+        break;
+
+      case ActionTypes.GET_ALL_USERS:
+        _users = action.json;
         UserStore.emitChange();
         break;
 
     }
 
     return true;  //Niente errori, richiesto dal Promise nel Dispatcher (? ..mah ok)
-  })
-
 });
 
 module.exports = UserStore;
