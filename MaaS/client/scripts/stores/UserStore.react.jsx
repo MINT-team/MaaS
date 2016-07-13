@@ -2,23 +2,23 @@ var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-//var WebAPIUtils = require('../utils/UserWebAPIUtils.js');
+var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _users = [];//{ id: "a", email: "aaa" }, { id: "b", email: "bbb" }];
-var _errors = [];
 var _user = {
-              id: sessionStorage.getItem('userId'),
-              email: sessionStorage.getItem('email')
+              id: SessionStore.getUserId,
+              email: SessionStore.getEmail(),
+              name: sessionStorage.getItem('userName') || "",
+              surname: sessionStorage.getItem('userSurname') || "",
+              dateOfBirth: sessionStorage.getItem('userDateOfBirth'),
+              gender: sessionStorage.getItem('userGender'),
+              avatar: sessionStorage.getItem('userAvatar'),
             };
+var _errors = [];
 
 var UserStore = assign({}, EventEmitter.prototype, {
-
-  getAll: function() {
-    return _users;
-  },
 
   emitChange: function() {
     this.emit(CHANGE_EVENT);
@@ -36,6 +36,34 @@ var UserStore = assign({}, EventEmitter.prototype, {
     return _user;
   },
 
+  getId: function() {
+    return _user.id;
+  },
+
+  getEmail: function() {
+    return _user.email;
+  },
+
+  getName: function() {
+    return _user.name;
+  },
+
+  getSurname: function() {
+    return _user.surname;
+  },
+
+  getDateOfBirth: function() {
+    return _user.dateOfBirth;
+  },
+
+  getGender: function() {
+    return _user.gender;
+  },
+
+  getAvatar: function() {
+    return _user.avatar;
+  },
+
   getErrors: function() {
     return _errors;
   }
@@ -47,13 +75,22 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
 
     switch(action.type) {
 
+      case ActionTypes.LOGIN_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else if(action.json && action.json.userId) {
+            _user.id = action.json.userId;
+        }
+        UserStore.emitChange();
+        break;
+
       case ActionTypes.RESET_PASSWORD_RESPONSE:
         if(action.errors) {
             _errors = action.errors;
         } else if(action.json) {
+            _errors = []; // empty old errors
             var email = action.json.email;
-            _user.email = email;
-            sessionStorage.setItem('email', email);
+            _user.email = email;    // email dell'utente corrente, anche se non loggato
         }
         UserStore.emitChange();
         break;
@@ -63,8 +100,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else if(action.email) {
             _errors = []; // empty old errors
-            _user.email = action.email;
-            sessionStorage.setItem('email', action.email);
+            _user.email = action.email;   // email dell'utente corrente, anche se non loggato
         }
         UserStore.emitChange();
 
@@ -77,14 +113,31 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         UserStore.emitChange();
         break;
 
-      case ActionTypes.GET_ALL_USERS:
-        _users = action.json;
+      case ActionTypes.GET_USER:
+        if(action.errors) {
+            _errors = action.errors;
+        } else if(action.json) {
+            _errors = []; // empty old errors
+            // set user data
+            _user.email = action.json.email;
+            _user.name = action.json.name;
+            _user.surname = action.json.surname;
+            _user.dateOfBirth = action.json.dateOfBirth;
+            _user.gender = action.json.gender;
+            _user.avatar = action.json.avatar;
+            // save session data
+            sessionStorage.setItem('userName', _user.name);
+            sessionStorage.setItem('userSurname', _user.surname);
+            sessionStorage.setItem('user_dateOfBirth', _user.dateOfBirth);
+            sessionStorage.setItem('userGender', _user.gender);
+            sessionStorage.setItem('userAvatar', _user.avatar);
+        }
         UserStore.emitChange();
         break;
 
     }
 
-    return true;  //Niente errori, richiesto dal Promise nel Dispatcher (? ..mah ok)
+    return true;  // richiesto dal Promise nel Dispatcher
 });
 
 module.exports = UserStore;

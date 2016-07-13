@@ -1,31 +1,111 @@
 var loopback = require('loopback');
 var config = require('../../server/config.json');
+var app = require('../../server/server.js');
 var path = require('path');
 var host = 'maas-navid94.c9users.io';
 var port = '8080';
 
+var MIN_PASSWORD_LENGTH = 8;
+
 module.exports = function(user) {
+
 
     // Registrazione - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
-
         if(!password || !confirmation) {
             var error = {
                 message: 'Insert the password and its confirmation'
             };
             return cb(null, error);   // callback di insuccesso
         }
-        /*
-        var Company = app.models.Company;
-        Company.create({name: company}, function(err, companyInstance) {
-            console.log('> company created:', companyInstance);
-        });
-        */
-        user.create({email: email, password: password}, function(err, userInstance) {
+        if(password != confirmation) {
+            error = {
+                message: 'Password confirmation doesn\'t match'
+            };
+            return cb(null, error);   // callback di insuccesso
+        }
+        if(password.length < MIN_PASSWORD_LENGTH) {
+            error = {
+                message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters'
+            };
+            return cb(null, error);   // callback di insuccesso
+        }
+        var Company = app.models.Company;   // working with loopback objects
+        // Search for an already existing company
+        Company.findOne({where: {name: company}, limit: 1}, function(err, existingCompany) {
             if(err) {
-                return cb(err);
+                return cb(null, err);
             }
-            console.log('> user created:', userInstance);
+            if(!err && existingCompany) {
+                console.log('> company already exists:', existingCompany);
+                error = {
+                    message: 'A company with this name already exists'
+                };
+                return cb(null, error);   // callback di insuccesso
+            }
+            // If company does not exists search for an already existing user
+            user.findOne({where: {email: email}, limit: 1}, function(err, existingUser) {
+                if(err) {
+                    return cb(null, err);
+                }
+                if(!err && existingUser) {
+                    console.log('> user already exists:', existingUser);
+                    error = {
+                        message: 'A user with this email already exists'
+                    };
+                    return cb(null, error);   // callback di insuccesso
+                }
+                // Create the company
+                Company.create({name: company}, function(err, companyInstance) {
+                    if(err) {
+                        return cb(null, err);
+                    }
+                    console.log('> company created:', companyInstance);
+                    // Create the user
+                    user.create({companyId: companyInstance.id, email: email, password: password}, function(err, userInstance) {
+                        if(err) {
+                            Company.destroyById(companyInstance.id, function(err) {
+                                if(err) {
+                                    console.log("> error destroying the company after an error occurred creating the user. Please clean your database, company id:", companyInstance.id);
+                                    return cb(null, err);
+                                }
+                            });
+                            console.log("> error creating the user, company destroyed");
+                            return cb(null, err);
+                        }
+                        console.log('> user created:', userInstance);
+
+                        // Set that user created belongs to the company
+                        //userInstance.company(companyInstance);
+                        //console.log('> users of the company:', companyInstance.users());
+                        //console.log('> user company:', userInstance.company());
+
+                        // Send verification email after registration
+                        var options = {
+                            type: 'email',
+                            host: host,
+                            to: userInstance.email,
+                            from: 'noreply@maas.com',
+                            subject: 'Welcome to MaaS',
+                            text: 'Please click on the link below to verify your email address and complete your registration:',
+                            template: path.resolve(__dirname, '../../server/views/verify.ejs'),
+                            redirect: '/%23/login', // percent encoding => /#/login
+                            user: userInstance
+                        };
+
+                        userInstance.verify(options, function(err, response) {
+                            if(err) {
+                                //return next(err);
+                                return cb(null, err);
+                            }
+                            console.log('> verification email sent:', response);
+                        });
+
+                        // Returns data to the client
+                        return cb(null, null, userInstance.email, companyInstance.name);   // callback di successo
+                    });
+                });
+            });
         });
     };
 
@@ -44,12 +124,52 @@ module.exports = function(user) {
                 {arg: 'email', type: 'string'},
                 {arg: 'company', type: 'string'}
             ],
-            http: { verb: 'post', path: '/:id/changePassword' }
+            http: { verb: 'post', path: '/signUp' }
         }
     );
 
+    // Controllo i dati di registrazione prima della creazione
+    /*user.beforeRemote('create', function(context, member, next) {
+        if(!context.req.password || !context.req.confirmation) {
+            var error = {
+                message: 'Insert the password and its confirmation'
+            };
+            //return cb(null, error);   // callback di insuccesso
+            //next(error);
+        }
+        if(context.req.password != context.req.confirmation) {
+            error = {
+                message: 'Password confirmation doesn\'t match'
+            };
+            //return cb(null, error);   // callback di insuccesso
+            //next(error);
+        }
+        var Company = app.models.Company;   // working with loopback objects
+        // search for an already existing company
+        Company.findOne({where: {name: context.req.company}, limit: 1}, function(err, existingCompany) {
+            if(err) {
+                //return cb(null, err);
+                //next(err);
+            }
+            if(!err && existingCompany) {
+                console.log('> company already exists:', existingCompany);
+                error = {
+                    message: 'Company already exists'
+                };
+                //return cb(null, error);   // callback di insuccesso
+                //next(error);
+            }
+            var newContext = {
+                email: context.req.email,
+                password: context.req.password
+            }
+            next(newContext);   // Quando creo la company?
+        });
+    });*/
+
+
     // Send verification email after registration
-    user.afterRemote('create', function(context, user, next) {
+    /*user.afterRemote('create', function(context, user, next) {
 
         var options = {
             type: 'email',
@@ -70,7 +190,7 @@ module.exports = function(user) {
             console.log('> verification email sent:', response);
         });
         next();
-    });
+    });*/
 
     // Send password reset link when requested
     user.on('resetPasswordRequest', function(info) {
@@ -89,7 +209,7 @@ module.exports = function(user) {
             html: html
         }, function(err) {
             if (err) {
-                return console.log('> ERROR sending password reset email');
+                return console.log('> error sending password reset email');
             }
             console.log('> sending password reset email to:', info.email);
         });
@@ -112,11 +232,16 @@ module.exports = function(user) {
                 };
                 return cb(null, error);   // callback di insuccesso
             }
+            if(password.length < MIN_PASSWORD_LENGTH) {
+                error = {
+                    message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters'
+                };
+                return cb(null, error);   // callback di insuccesso
+            }
             user.updateAttribute('password', password, function(err, user) {
                 if(err)
                     return cb(err);
                 console.log('> password reset processed successfully for: ', user.email);
-                //console.log('user:', user);
                 return cb(null, null, user.email);   // callback di successo
             });
         });

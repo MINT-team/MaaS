@@ -13,8 +13,12 @@ var UserActionCreator = {
         WebAPIUtils.changePassword(id, password, confirmation, accessToken);
     },
 
-    getUsers: function() {
-        WebAPIUtils.getAllUsers();
+    getUser: function(id) {
+        WebAPIUtils.getUser(id);
+    },
+
+    getCompany: function(userId) {
+        WebAPIUtils.getCompany(userId);
     }
 };
 

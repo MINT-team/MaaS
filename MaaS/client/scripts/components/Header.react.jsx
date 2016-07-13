@@ -1,31 +1,16 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
 
-function getState() {
-  return {
-    isLogged: SessionStore.isLogged(),
-  };
-}
 
 var Header = React.createClass({
-	getInitialState: function() {
-      return getState();
-    },
 
     componentDidMount: function() {
-		SessionStore.addChangeListener(this._onChange);
     	window.addEventListener('click', this.handleClick);
     },
 
     componentWillUnmount: function() {
-    	SessionStore.removeChangeListener(this._onChange);
     	window.removeEventListener('click', this.handleClick);
-    },
-
-    _onChange: function() {
-    	this.setState(getState());
     },
 
 	handleClick: function(event) {
@@ -57,9 +42,9 @@ var Header = React.createClass({
     	var title;
     	var headerMenu;
     	var headerPanel;
-    	if (this.state.isLogged) {
+    	if (this.props.isLogged) {
     		title = (
-    			<Link to="/" id="header-title">NomeAzienda</Link>
+    			<Link to="/" id="header-title">{this.props.companyName}</Link>
     		);
 			headerMenu = (
 				<div id="header-menu">
@@ -69,7 +54,7 @@ var Header = React.createClass({
     		);
 	    	headerPanel = (
 		    	<div id="header-panel">
-					<Link to="/profile" ><i className="material-icons md-36">&#xE7FD;</i></Link>
+					<Link to="/profile" ><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
 					<Link to="" id="settings-button" onClick={this.toggleDropdown}>
 						<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
 					</Link>

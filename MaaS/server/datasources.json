@@ -14,7 +14,7 @@
     "connector": "mongodb"
   },
   "gmail": {
-    "name": "mail",
+    "name": "gmail",
     "connector": "mail",
     "transports": [
       {

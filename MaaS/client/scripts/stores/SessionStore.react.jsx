@@ -10,7 +10,8 @@ var CHANGE_EVENT = 'change';
 // a 'remember me' using localSgorage
 var _accessToken = sessionStorage.getItem('accessToken');
 var _email = sessionStorage.getItem('email');
-var _user = sessionStorage.getItem('userId');   // user id
+var _userId = sessionStorage.getItem('userId');   // user id
+var _user = {};
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -31,12 +32,20 @@ var SessionStore = assign({}, EventEmitter.prototype, {
     return _accessToken ? true : false;
   },
 
+  isRegistered: function() {
+    return _email ? true : false;
+  },
+
   getAccessToken: function() {
     return _accessToken;
   },
 
   getEmail: function() {
     return _email;
+  },
+
+  getUserId: function() {
+    return _userId;
   },
 
   getErrors: function() {
@@ -66,10 +75,10 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else if(action.json && action.json.id) {
             _accessToken = action.json.id;
-            _user = action.json.userId;
+            _userId = action.json.userId;
             // Token will always live in the session, so that the API can grab it with no hassle
             sessionStorage.setItem('accessToken', _accessToken);
-            sessionStorage.setItem('userId', _user);
+            sessionStorage.setItem('userId', _userId);
         }
         SessionStore.emitChange();
         break;
@@ -77,14 +86,13 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
     case ActionTypes.LOGOUT:
       // remove session data
         _accessToken = null;
-        _user = null,
+        _userId = null,
         _email = null;
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('userId');
         sessionStorage.removeItem('email');
         SessionStore.emitChange();
         break;
-
   }
 
   return true;

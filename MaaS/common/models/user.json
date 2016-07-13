@@ -8,16 +8,46 @@
   "properties": {
     "avatar": {
       "type": "object"
+    },
+    "name": {
+      "type": "string"
+    },
+    "surname": {
+      "type": "string"
+    },
+    "dateOfBirth": {
+      "type": "date"
+    },
+    "gender": {
+      "type": "string"
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "company": {
+      "type": "belongsTo",
+      "model": "Company",
+      "foreignKey": "companyId"
+    }
+  },
   "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "signUp"
+    },
     {
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "changePassword"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__company"
     }
   ],
   "methods": {}

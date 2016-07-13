@@ -11,7 +11,7 @@ var Home = require('./components/Home.react.jsx');
 var Register = require('./components/Register.react.jsx');
 var Login = require('./components/Login.react.jsx');
 var ResetPwd = require('./components/ResetPwd.react.jsx');
-var RecoverPwd = require('./components/RecoverPwd.react.jsx');
+//var RecoverPwd = require('./components/RecoverPwd.react.jsx');
 var Profile = require('./components/Profile/Profile.react.jsx');
 var PersonalData = require('./components/Profile/PersonalData.react.jsx');
 var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
@@ -29,7 +29,7 @@ var Routes = React.createClass({
           <IndexRoute component={Home} />
           <Route path="login" component={Login} />
           <Route path="register" component={Register} />
-          <Route path="recoverpwd" component={RecoverPwd} />
+          <Route path="recoverpwd" component={ChangePassword} />
           <Route path="resetpwd" component={ResetPwd} />
           <Route path="profile" component={Profile}>
             <Route path="changeAvatar" component={ChangeAvatar} />

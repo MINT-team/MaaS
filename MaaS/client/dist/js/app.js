@@ -44,16 +44,17 @@ var ServerActionCreator = {
     },
 
     //RESPONSE
-    response_getUsers: function response_getUsers(json) {
+    response_getUser: function response_getUser(json, errors) {
         Dispatcher.handleServerAction({
-            type: ActionTypes.GET_ALL_USERS,
-            json: json
+            type: ActionTypes.GET_USER,
+            json: json,
+            errors: errors
         });
     },
 
-    receiveCreatedUser: function receiveCreatedUser(json, errors) {
+    response_getCompany: function response_getCompany(json, errors) {
         Dispatcher.handleServerAction({
-            type: ActionTypes.RECEIVE_CREATED_USER,
+            type: ActionTypes.GET_COMPANY,
             json: json,
             errors: errors
         });
@@ -62,7 +63,7 @@ var ServerActionCreator = {
 
 module.exports = ServerActionCreator;
 
-},{"../constants/Constants.js":19,"../dispatcher/Dispatcher.js":20}],2:[function(require,module,exports){
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19}],2:[function(require,module,exports){
 'use strict';
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
@@ -73,8 +74,8 @@ var ActionTypes = Constants.ActionTypes;
 
 var SessionActionCreator = {
 
-  signup: function signup(email, password) {
-    WebAPIUtils.signup(email, password);
+  signup: function signup(company, email, password, confirmation) {
+    WebAPIUtils.signup(company, email, password, confirmation);
   },
 
   login: function login(email, password) {
@@ -92,7 +93,7 @@ var SessionActionCreator = {
 
 module.exports = SessionActionCreator;
 
-},{"../constants/Constants.js":19,"../dispatcher/Dispatcher.js":20,"../utils/SessionWebAPIUtils.js":24}],3:[function(require,module,exports){
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19,"../utils/SessionWebAPIUtils.js":24}],3:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require("../dispatcher/Dispatcher.js");
@@ -110,14 +111,18 @@ var UserActionCreator = {
         WebAPIUtils.changePassword(id, password, confirmation, accessToken);
     },
 
-    getUsers: function getUsers() {
-        WebAPIUtils.getAllUsers();
+    getUser: function getUser(id) {
+        WebAPIUtils.getUser(id);
+    },
+
+    getCompany: function getCompany(userId) {
+        WebAPIUtils.getCompany(userId);
     }
 };
 
 module.exports = UserActionCreator;
 
-},{"../constants/Constants.js":19,"../dispatcher/Dispatcher.js":20,"../utils/UserWebAPIUtils.js":25}],4:[function(require,module,exports){
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19,"../utils/UserWebAPIUtils.js":25}],4:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -127,7 +132,7 @@ var Routes = require('./routes.jsx');
 
 ReactDOM.render(React.createElement(Routes, null), document.getElementById('content'));
 
-},{"./routes.jsx":21,"react":281,"react-dom":33}],5:[function(require,module,exports){
+},{"./routes.jsx":20,"react":281,"react-dom":33}],5:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -221,33 +226,17 @@ module.exports = Footer;
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
-
-function getState() {
-	return {
-		isLogged: SessionStore.isLogged()
-	};
-}
 
 var Header = React.createClass({
 	displayName: 'Header',
 
-	getInitialState: function getInitialState() {
-		return getState();
-	},
 
 	componentDidMount: function componentDidMount() {
-		SessionStore.addChangeListener(this._onChange);
 		window.addEventListener('click', this.handleClick);
 	},
 
 	componentWillUnmount: function componentWillUnmount() {
-		SessionStore.removeChangeListener(this._onChange);
 		window.removeEventListener('click', this.handleClick);
-	},
-
-	_onChange: function _onChange() {
-		this.setState(getState());
 	},
 
 	handleClick: function handleClick(event) {
@@ -279,11 +268,11 @@ var Header = React.createClass({
 		var title;
 		var headerMenu;
 		var headerPanel;
-		if (this.state.isLogged) {
+		if (this.props.isLogged) {
 			title = React.createElement(
 				Link,
 				{ to: '/', id: 'header-title' },
-				'NomeAzienda'
+				this.props.companyName
 			);
 			headerMenu = React.createElement(
 				'div',
@@ -305,6 +294,11 @@ var Header = React.createClass({
 				React.createElement(
 					Link,
 					{ to: '/profile' },
+					React.createElement(
+						'span',
+						{ id: 'header-user-name' },
+						this.props.userName
+					),
 					React.createElement(
 						'i',
 						{ className: 'material-icons md-36' },
@@ -398,7 +392,7 @@ var Header = React.createClass({
 
 module.exports = Header;
 
-},{"../actions/SessionActionCreator.react.jsx":2,"../stores/SessionStore.react.jsx":22,"react":281,"react-router":64}],8:[function(require,module,exports){
+},{"../actions/SessionActionCreator.react.jsx":2,"react":281,"react-router":64}],8:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -582,6 +576,8 @@ var Login = React.createClass({
   _onChange: function _onChange() {
     this.setState(getState());
     if (this.state.isLogged) {
+      UserActionCreator.getUser(SessionStore.getUserId());
+      UserActionCreator.getCompany(SessionStore.getUserId());
       var router = this.context.router;
 
       router.push('/'); // redirect to home page
@@ -679,16 +675,55 @@ module.exports = Login;
 'use strict';
 
 var React = require('react');
+var SessionStore = require('../stores/SessionStore.react.jsx');
+var CompanyStore = require('../stores/CompanyStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
 var Header = require('./Header.react.jsx');
 var Footer = require('./Footer.react.jsx');
 
+function getState() {
+    return {
+        isLogged: SessionStore.isLogged(),
+        company: CompanyStore.getName(),
+        user: {
+            name: UserStore.getName(),
+            surname: UserStore.getSurname(),
+            dateOfBirth: UserStore.getDateOfBirth(),
+            gender: UserStore.getGender(),
+            avatar: UserStore.getAvatar()
+        }
+    };
+}
+
 var MaaSApp = React.createClass({
     displayName: 'MaaSApp',
+
+
+    getInitialState: function getInitialState() {
+        return getState();
+    },
+
+    componentDidMount: function componentDidMount() {
+        SessionStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onChange);
+        CompanyStore.addChangeListener(this._onChange);
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        SessionStore.removeChangeListener(this._onChange);
+        UserStore.removeChangeListener(this._onChange);
+        CompanyStore.removeChangeListener(this._onChange);
+    },
+
+    _onChange: function _onChange() {
+        this.setState(getState());
+    },
+
     render: function render() {
         return React.createElement(
             'div',
             { id: 'app' },
-            React.createElement(Header, null),
+            React.createElement(Header, { isLogged: this.state.isLogged, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
             this.props.children,
             React.createElement(Footer, null)
         );
@@ -697,7 +732,7 @@ var MaaSApp = React.createClass({
 
 module.exports = MaaSApp;
 
-},{"./Footer.react.jsx":6,"./Header.react.jsx":7,"react":281}],11:[function(require,module,exports){
+},{"../stores/CompanyStore.react.jsx":21,"../stores/SessionStore.react.jsx":22,"../stores/UserStore.react.jsx":23,"./Footer.react.jsx":6,"./Header.react.jsx":7,"react":281}],11:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -797,57 +832,148 @@ var ChangeAvatar = React.createClass({
 module.exports = ChangeAvatar;
 
 },{"react":281,"react-dropzone":34}],12:[function(require,module,exports){
-"use strict";
+'use strict';
 
 var React = require('react');
+var Link = require('react-router').Link;
+var UserStore = require('../../stores/UserStore.react.jsx');
+var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
+
+function getState() {
+  return {
+    //accessToken: RecoverPwd.getState().accessToken,
+    //userId: RecoverPwd.getState().userId,
+    email: UserStore.getUser().email,
+    errors: UserStore.getErrors()
+  };
+}
 
 var ChangePassword = React.createClass({
-  displayName: "ChangePassword",
+  displayName: 'ChangePassword',
+
+
+  getInitialState: function getInitialState() {
+    return {
+      accessToken: sessionStorage.getItem('accessToken') || this.props.location.query.access_token,
+      userId: sessionStorage.getItem('userId') || this.props.location.query.uid,
+      email: null,
+      errors: []
+    };
+  },
+
+  componentDidMount: function componentDidMount() {
+    //console.log(this.props);  // visibile da chrome premendo F12 -> Console
+    //sessionStorage.setItem('accessToken', this.state.accessToken);
+    UserStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUnmount: function componentWillUnmount() {
+    UserStore.removeChangeListener(this._onChange);
+  },
+
+  _onChange: function _onChange() {
+    this.setState(getState());
+  },
+
+  _onSubmit: function _onSubmit(event) {
+    event.preventDefault(); //evita il ricaricamento della pagina da parte della form
+    var password = this.refs.password.value;
+    var confirmation = this.refs.confermaPassword.value;
+    var id = this.state.userId;
+    var accessToken = this.state.accessToken;
+    UserActionCreator.changePassword(id, password, confirmation, accessToken);
+  },
+
   render: function render() {
-    return React.createElement(
-      "div",
-      { className: "container" },
-      React.createElement(
-        "p",
-        { className: "container-title" },
-        "Password"
-      ),
-      React.createElement(
-        "form",
-        { className: "form-container" },
+    var title, content, errors;
+    if (!this.state.email) {
+      // in questo caso l'email serve solo per controllo
+      title = "Choose a new password";
+      if (this.state.errors.length > 0) {
+        errors = React.createElement(
+          'p',
+          { id: 'errors' },
+          this.state.errors
+        );
+      }
+      content = React.createElement(
+        'form',
+        { onSubmit: this._onSubmit, className: 'form-container' },
         React.createElement(
-          "div",
-          { className: "form-field" },
+          'div',
+          { className: 'form-field' },
           React.createElement(
-            "label",
-            { htmlFor: "password" },
-            "Nuova Password"
+            'label',
+            { htmlFor: 'password' },
+            'Password'
           ),
-          React.createElement("input", { type: "password", id: "password", ref: "password" })
+          React.createElement('input', { type: 'password', id: 'password', ref: 'password', required: true })
         ),
         React.createElement(
-          "div",
-          { className: "form-field" },
+          'div',
+          { className: 'form-field' },
           React.createElement(
-            "label",
-            { htmlFor: "confermaPassword" },
-            "Conferma Password"
+            'label',
+            { htmlFor: 'confermaPassword' },
+            'Confirm Password'
           ),
-          React.createElement("input", { type: "password", id: "confermaPassword", ref: "confermaPassword" })
+          React.createElement('input', { type: 'password', id: 'confermaPassword', ref: 'confermaPassword', required: true })
         ),
+        errors,
         React.createElement(
-          "button",
-          { type: "submit", className: "form-submit" },
-          "Cambia password"
+          'button',
+          { type: 'submit', className: 'form-submit' },
+          'Set password'
         )
-      )
+      );
+    } else {
+      if (this.props.location.pathname == "/profile/changePassword") {
+        // change password by logged profile
+        title = "Password changed";
+        content = React.createElement(
+          'div',
+          { id: 'successful-registration' },
+          React.createElement(
+            'p',
+            null,
+            'Your password has been changed successfully.'
+          )
+        );
+      } else if (this.props.location.pathname == "/recoverpwd") {
+        // change password by reset password
+        title = "Password changed successfully!";
+        content = React.createElement(
+          'div',
+          { id: 'successful-operation' },
+          React.createElement(
+            'p',
+            null,
+            'You changed your password, now you can log into MaaS.'
+          ),
+          React.createElement(
+            Link,
+            { id: 'successful-button', className: 'button', to: '/login' },
+            'Go to Login'
+          )
+        );
+      }
+    }
+    return React.createElement(
+      'div',
+      { className: 'container' },
+      React.createElement(
+        'p',
+        { className: 'container-title' },
+        title
+      ),
+      content
     );
   }
 });
 
 module.exports = ChangePassword;
 
-},{"react":281}],13:[function(require,module,exports){
+},{"../../actions/UserActionCreator.react.jsx":3,"../../stores/UserStore.react.jsx":23,"react":281,"react-router":64}],13:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -1006,137 +1132,10 @@ var Profile = React.createClass({
     );
   }
 });
-//labels={sidebarLabels} links={sidebarLinks} icons={sidebarIcons}
+
 module.exports = Profile;
 
-},{"../Sidebar.react.jsx":18,"react":281}],15:[function(require,module,exports){
-'use strict';
-
-var React = require('react');
-var Link = require('react-router').Link;
-var UserStore = require('../stores/UserStore.react.jsx');
-var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
-
-function getState() {
-  return {
-    //accessToken: RecoverPwd.getState().accessToken,
-    //userId: RecoverPwd.getState().userId,
-    email: UserStore.getUser().email,
-    errors: UserStore.getErrors()
-  };
-}
-
-var RecoverPwd = React.createClass({
-  displayName: 'RecoverPwd',
-
-
-  getInitialState: function getInitialState() {
-    return {
-      accessToken: this.props.location.query.access_token,
-      userId: this.props.location.query.uid,
-      email: null,
-      errors: []
-    };
-  },
-
-  componentDidMount: function componentDidMount() {
-    //console.log(this.props);  // visibile da chrome premendo F12 -> Console
-    //sessionStorage.setItem('accessToken', this.state.accessToken);
-    UserStore.addChangeListener(this._onChange);
-  },
-
-  componentWillUnmount: function componentWillUnmount() {
-    UserStore.removeChangeListener(this._onChange);
-  },
-
-  _onChange: function _onChange() {
-    this.setState(getState());
-  },
-
-  _onSubmit: function _onSubmit(event) {
-    event.preventDefault(); //evita il ricaricamento della pagina da parte della form
-    var password = this.refs.password.value;
-    var confirmation = this.refs.confermaPassword.value;
-    var id = this.state.userId;
-    var accessToken = this.state.accessToken;
-    UserActionCreator.changePassword(id, password, confirmation, accessToken);
-  },
-
-  render: function render() {
-    var title, content, errors;
-    if (this.state.email && !this.state.errors.length > 0) {
-      // in questo caso l'email serve solo per controllo
-      title = "Password changed successfully!";
-      content = React.createElement(
-        'div',
-        { id: 'successful-registration' },
-        React.createElement(
-          'p',
-          null,
-          'You changed your password, now you can log into MaaS.'
-        ),
-        React.createElement(
-          Link,
-          { id: 'successful-registration-login', className: 'button', to: '/login' },
-          'Go to Login'
-        )
-      );
-    } else {
-      title = "Choose a new password";
-      if (this.state.errors.length > 0) {
-        errors = React.createElement(
-          'p',
-          { id: 'errors' },
-          this.state.errors
-        );
-      }
-      content = React.createElement(
-        'form',
-        { onSubmit: this._onSubmit, className: 'form-container' },
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'password' },
-            'Password'
-          ),
-          React.createElement('input', { type: 'password', id: 'password', ref: 'password', required: true })
-        ),
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'confermaPassword' },
-            'Confirm Password'
-          ),
-          React.createElement('input', { type: 'password', id: 'confermaPassword', ref: 'confermaPassword', required: true })
-        ),
-        errors,
-        React.createElement(
-          'button',
-          { type: 'submit', className: 'form-submit' },
-          'Set password'
-        )
-      );
-    }
-    return React.createElement(
-      'div',
-      { className: 'container' },
-      React.createElement(
-        'p',
-        { className: 'container-title' },
-        title
-      ),
-      content
-    );
-  }
-});
-
-module.exports = RecoverPwd;
-
-},{"../actions/UserActionCreator.react.jsx":3,"../stores/UserStore.react.jsx":23,"react":281,"react-router":64}],16:[function(require,module,exports){
+},{"../Sidebar.react.jsx":17,"react":281}],15:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -1146,7 +1145,7 @@ var SessionStore = require('../stores/SessionStore.react.jsx');
 
 function getState() {
   return {
-    isRegistered: SessionStore.getEmail() ? true : false,
+    isRegistered: SessionStore.isRegistered(),
     errors: SessionStore.getErrors()
   };
 }
@@ -1156,7 +1155,7 @@ var Register = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      isRegistered: SessionStore.getEmail() ? true : false,
+      isRegistered: SessionStore.isRegistered(),
       errors: []
     };
   },
@@ -1175,11 +1174,11 @@ var Register = React.createClass({
 
   _onSubmit: function _onSubmit(event) {
     event.preventDefault(); //evita il ricaricamento della pagina da parte della form
-    var company = this.refs.azienda.value;
+    var company = this.refs.nomeAzienda.value;
     var email = this.refs.email.value;
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
-    if (company != "" && email != "" && password != "" && confirmation != "") {
+    if (company != "" || email != "" || password != "" || confirmation != "") {
       SessionActionCreator.signup(company, email, password, confirmation);
     } else {
       this._setError("Fill out all fields");
@@ -1215,7 +1214,7 @@ var Register = React.createClass({
             { htmlFor: 'azienda' },
             'Company Name'
           ),
-          React.createElement('input', { type: 'text', id: 'azienda', ref: 'azienda', required: true })
+          React.createElement('input', { type: 'text', id: 'azienda', ref: 'nomeAzienda', required: true })
         ),
         React.createElement(
           'div',
@@ -1258,7 +1257,7 @@ var Register = React.createClass({
       title = "Thanks for your registration!";
       content = React.createElement(
         'div',
-        { id: 'successful-registration' },
+        { id: 'successful-operation' },
         React.createElement(
           'p',
           null,
@@ -1270,13 +1269,13 @@ var Register = React.createClass({
           'Click the link we sent at: ',
           React.createElement(
             'span',
-            { id: 'registered-email' },
+            { id: 'successful-email' },
             SessionStore.getEmail()
           )
         ),
         React.createElement(
           Link,
-          { id: 'successful-registration-login', className: 'button', to: '/login' },
+          { id: 'successful-button', className: 'button', to: '/login' },
           'Go to Login'
         ),
         React.createElement(
@@ -1306,7 +1305,7 @@ var Register = React.createClass({
 
 module.exports = Register;
 
-},{"../actions/SessionActionCreator.react.jsx":2,"../stores/SessionStore.react.jsx":22,"react":281,"react-router":64}],17:[function(require,module,exports){
+},{"../actions/SessionActionCreator.react.jsx":2,"../stores/SessionStore.react.jsx":22,"react":281,"react-router":64}],16:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -1409,7 +1408,7 @@ var ResetPwd = React.createClass({
       title = "Request sent!";
       content = React.createElement(
         'div',
-        { id: 'successful-registration' },
+        { id: 'successful-operation' },
         React.createElement(
           'p',
           null,
@@ -1421,11 +1420,11 @@ var ResetPwd = React.createClass({
           'Click the link we sent at: ',
           React.createElement(
             'span',
-            { id: 'registered-email' },
+            { id: 'successful-email' },
             this.state.email
           )
         ),
-        React.createElement('div', { id: 'successful-registration-login' }),
+        React.createElement('div', { id: 'successful-button' }),
         React.createElement(
           'p',
           null,
@@ -1454,7 +1453,7 @@ var ResetPwd = React.createClass({
 
 module.exports = ResetPwd;
 
-},{"../actions/UserActionCreator.react.jsx":3,"../stores/UserStore.react.jsx":23,"react":281,"react-router":64}],18:[function(require,module,exports){
+},{"../actions/UserActionCreator.react.jsx":3,"../stores/UserStore.react.jsx":23,"react":281,"react-router":64}],17:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -1507,7 +1506,7 @@ var Sidebar = React.createClass({
 
 module.exports = Sidebar;
 
-},{"react":281,"react-router":64}],19:[function(require,module,exports){
+},{"react":281,"react-router":64}],18:[function(require,module,exports){
 "use strict";
 
 var keyMirror = require('keymirror');
@@ -1518,6 +1517,7 @@ module.exports = {
 
   APIEndpoints: {
     USERS: APIRoot + "/users",
+    SIGNUP: APIRoot + "/users/signUp",
     LOGIN: APIRoot + "/users/login",
     LOGOUT: APIRoot + "/users/logout",
     RESET_PASSWORD: APIRoot + "/users/reset"
@@ -1538,24 +1538,17 @@ module.exports = {
 
     // User
     RESET_PASSWORD: null,
-
     GET_USER: null,
-    RECEIVE_REQUESTED_USER: null,
-    GET_ALL_USERS: null
+    GET_COMPANY: null,
 
-    // Dashboard
-
-    // Collection
-
-    // Document
-
-    // Cell
+    // Company
+    GET_USERS: null
 
   })
 
 };
 
-},{"keymirror":31}],20:[function(require,module,exports){
+},{"keymirror":31}],19:[function(require,module,exports){
 'use strict';
 
 var Constants = require('../constants/Constants.js');
@@ -1585,7 +1578,7 @@ var Dispatcher = assign(new FluxDispatcher(), {
 
 module.exports = Dispatcher;
 
-},{"../constants/Constants.js":19,"flux":28,"object-assign":32}],21:[function(require,module,exports){
+},{"../constants/Constants.js":18,"flux":28,"object-assign":32}],20:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -1601,7 +1594,7 @@ var Home = require('./components/Home.react.jsx');
 var Register = require('./components/Register.react.jsx');
 var Login = require('./components/Login.react.jsx');
 var ResetPwd = require('./components/ResetPwd.react.jsx');
-var RecoverPwd = require('./components/RecoverPwd.react.jsx');
+//var RecoverPwd = require('./components/RecoverPwd.react.jsx');
 var Profile = require('./components/Profile/Profile.react.jsx');
 var PersonalData = require('./components/Profile/PersonalData.react.jsx');
 var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
@@ -1622,7 +1615,7 @@ var Routes = React.createClass({
         React.createElement(IndexRoute, { component: Home }),
         React.createElement(Route, { path: 'login', component: Login }),
         React.createElement(Route, { path: 'register', component: Register }),
-        React.createElement(Route, { path: 'recoverpwd', component: RecoverPwd }),
+        React.createElement(Route, { path: 'recoverpwd', component: ChangePassword }),
         React.createElement(Route, { path: 'resetpwd', component: ResetPwd }),
         React.createElement(
           Route,
@@ -1641,7 +1634,84 @@ var Routes = React.createClass({
 
 module.exports = Routes;
 
-},{"./components/Error404.react.jsx":5,"./components/Home.react.jsx":8,"./components/Login.react.jsx":9,"./components/MaaSApp.react.jsx":10,"./components/Profile/ChangeAvatar.react.jsx":11,"./components/Profile/ChangePassword.react.jsx":12,"./components/Profile/PersonalData.react.jsx":13,"./components/Profile/Profile.react.jsx":14,"./components/RecoverPwd.react.jsx":15,"./components/Register.react.jsx":16,"./components/ResetPwd.react.jsx":17,"react":281,"react-router":64}],22:[function(require,module,exports){
+},{"./components/Error404.react.jsx":5,"./components/Home.react.jsx":8,"./components/Login.react.jsx":9,"./components/MaaSApp.react.jsx":10,"./components/Profile/ChangeAvatar.react.jsx":11,"./components/Profile/ChangePassword.react.jsx":12,"./components/Profile/PersonalData.react.jsx":13,"./components/Profile/Profile.react.jsx":14,"./components/Register.react.jsx":15,"./components/ResetPwd.react.jsx":16,"react":281,"react-router":64}],21:[function(require,module,exports){
+'use strict';
+
+var Dispatcher = require('../dispatcher/Dispatcher.js');
+var Constants = require('../constants/Constants.js');
+var EventEmitter = require('events').EventEmitter;
+var assign = require('object-assign');
+var SessionStore = require('./SessionStore.react.jsx');
+
+var ActionTypes = Constants.ActionTypes;
+var CHANGE_EVENT = 'change';
+
+var _company = {
+    id: sessionStorage.getItem('companyId'),
+    name: sessionStorage.getItem('companyName')
+};
+var _users = []; // users of the company
+var _errors = [];
+
+var CompanyStore = assign({}, EventEmitter.prototype, {
+
+    emitChange: function emitChange() {
+        this.emit(CHANGE_EVENT);
+    },
+
+    addChangeListener: function addChangeListener(callback) {
+        this.on(CHANGE_EVENT, callback);
+    },
+
+    removeChangeListener: function removeChangeListener(callback) {
+        this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    getId: function getId() {
+        return _company.id;
+    },
+
+    getName: function getName() {
+        return _company.name;
+    },
+
+    getUsers: function getUsers() {
+        return _users;
+    },
+
+    getErrors: function getErrors() {
+        return _errors;
+    }
+
+});
+
+CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
+    var action = payload.action;
+
+    switch (action.type) {
+
+        case ActionTypes.GET_COMPANY:
+            if (action.errors) {
+                _errors = action.errors;
+            } else if (action.json) {
+                _errors = []; // empty old errors
+                // set company data
+                _company.id = action.json.id;
+                _company.name = action.json.name;
+                sessionStorage.setItem('companyId', _company.id);
+                sessionStorage.setItem('companyName', _company.name);
+            }
+            CompanyStore.emitChange();
+            break;
+
+    }
+
+    return true; // richiesto dal Promise nel Dispatcher
+});
+
+module.exports = CompanyStore;
+
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19,"./SessionStore.react.jsx":22,"events":26,"object-assign":32}],22:[function(require,module,exports){
 'use strict';
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
@@ -1656,7 +1726,8 @@ var CHANGE_EVENT = 'change';
 // a 'remember me' using localSgorage
 var _accessToken = sessionStorage.getItem('accessToken');
 var _email = sessionStorage.getItem('email');
-var _user = sessionStorage.getItem('userId'); // user id
+var _userId = sessionStorage.getItem('userId'); // user id
+var _user = {};
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -1677,12 +1748,20 @@ var SessionStore = assign({}, EventEmitter.prototype, {
     return _accessToken ? true : false;
   },
 
+  isRegistered: function isRegistered() {
+    return _email ? true : false;
+  },
+
   getAccessToken: function getAccessToken() {
     return _accessToken;
   },
 
   getEmail: function getEmail() {
     return _email;
+  },
+
+  getUserId: function getUserId() {
+    return _userId;
   },
 
   getErrors: function getErrors() {
@@ -1712,10 +1791,10 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else if (action.json && action.json.id) {
         _accessToken = action.json.id;
-        _user = action.json.userId;
+        _userId = action.json.userId;
         // Token will always live in the session, so that the API can grab it with no hassle
         sessionStorage.setItem('accessToken', _accessToken);
-        sessionStorage.setItem('userId', _user);
+        sessionStorage.setItem('userId', _userId);
       }
       SessionStore.emitChange();
       break;
@@ -1723,13 +1802,12 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
     case ActionTypes.LOGOUT:
       // remove session data
       _accessToken = null;
-      _user = null, _email = null;
+      _userId = null, _email = null;
       sessionStorage.removeItem('accessToken');
       sessionStorage.removeItem('userId');
       sessionStorage.removeItem('email');
       SessionStore.emitChange();
       break;
-
   }
 
   return true;
@@ -1737,30 +1815,30 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
 
 module.exports = SessionStore;
 
-},{"../constants/Constants.js":19,"../dispatcher/Dispatcher.js":20,"events":26,"object-assign":32}],23:[function(require,module,exports){
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19,"events":26,"object-assign":32}],23:[function(require,module,exports){
 'use strict';
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-//var WebAPIUtils = require('../utils/UserWebAPIUtils.js');
+var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _users = []; //{ id: "a", email: "aaa" }, { id: "b", email: "bbb" }];
-var _errors = [];
 var _user = {
-  id: sessionStorage.getItem('userId'),
-  email: sessionStorage.getItem('email')
+  id: SessionStore.getUserId,
+  email: SessionStore.getEmail(),
+  name: sessionStorage.getItem('userName') || "",
+  surname: sessionStorage.getItem('userSurname') || "",
+  dateOfBirth: sessionStorage.getItem('userDateOfBirth'),
+  gender: sessionStorage.getItem('userGender'),
+  avatar: sessionStorage.getItem('userAvatar')
 };
+var _errors = [];
 
 var UserStore = assign({}, EventEmitter.prototype, {
-
-  getAll: function getAll() {
-    return _users;
-  },
 
   emitChange: function emitChange() {
     this.emit(CHANGE_EVENT);
@@ -1778,6 +1856,34 @@ var UserStore = assign({}, EventEmitter.prototype, {
     return _user;
   },
 
+  getId: function getId() {
+    return _user.id;
+  },
+
+  getEmail: function getEmail() {
+    return _user.email;
+  },
+
+  getName: function getName() {
+    return _user.name;
+  },
+
+  getSurname: function getSurname() {
+    return _user.surname;
+  },
+
+  getDateOfBirth: function getDateOfBirth() {
+    return _user.dateOfBirth;
+  },
+
+  getGender: function getGender() {
+    return _user.gender;
+  },
+
+  getAvatar: function getAvatar() {
+    return _user.avatar;
+  },
+
   getErrors: function getErrors() {
     return _errors;
   }
@@ -1789,13 +1895,22 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
 
   switch (action.type) {
 
+    case ActionTypes.LOGIN_RESPONSE:
+      if (action.errors) {
+        _errors = action.errors;
+      } else if (action.json && action.json.userId) {
+        _user.id = action.json.userId;
+      }
+      UserStore.emitChange();
+      break;
+
     case ActionTypes.RESET_PASSWORD_RESPONSE:
       if (action.errors) {
         _errors = action.errors;
       } else if (action.json) {
+        _errors = []; // empty old errors
         var email = action.json.email;
-        _user.email = email;
-        sessionStorage.setItem('email', email);
+        _user.email = email; // email dell'utente corrente, anche se non loggato
       }
       UserStore.emitChange();
       break;
@@ -1805,8 +1920,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else if (action.email) {
         _errors = []; // empty old errors
-        _user.email = action.email;
-        sessionStorage.setItem('email', action.email);
+        _user.email = action.email; // email dell'utente corrente, anche se non loggato
       }
       UserStore.emitChange();
 
@@ -1819,19 +1933,36 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       UserStore.emitChange();
       break;
 
-    case ActionTypes.GET_ALL_USERS:
-      _users = action.json;
+    case ActionTypes.GET_USER:
+      if (action.errors) {
+        _errors = action.errors;
+      } else if (action.json) {
+        _errors = []; // empty old errors
+        // set user data
+        _user.email = action.json.email;
+        _user.name = action.json.name;
+        _user.surname = action.json.surname;
+        _user.dateOfBirth = action.json.dateOfBirth;
+        _user.gender = action.json.gender;
+        _user.avatar = action.json.avatar;
+        // save session data
+        sessionStorage.setItem('userName', _user.name);
+        sessionStorage.setItem('userSurname', _user.surname);
+        sessionStorage.setItem('user_dateOfBirth', _user.dateOfBirth);
+        sessionStorage.setItem('userGender', _user.gender);
+        sessionStorage.setItem('userAvatar', _user.avatar);
+      }
       UserStore.emitChange();
       break;
 
   }
 
-  return true; //Niente errori, richiesto dal Promise nel Dispatcher (? ..mah ok)
+  return true; // richiesto dal Promise nel Dispatcher
 });
 
 module.exports = UserStore;
 
-},{"../constants/Constants.js":19,"../dispatcher/Dispatcher.js":20,"events":26,"object-assign":32}],24:[function(require,module,exports){
+},{"../constants/Constants.js":18,"../dispatcher/Dispatcher.js":19,"./SessionStore.react.jsx":22,"events":26,"object-assign":32}],24:[function(require,module,exports){
 'use strict';
 
 var ServerActionCreators = require('../actions/ServerActionCreator.react.jsx');
@@ -1870,6 +2001,10 @@ function _getErrors(json) {
         if (JSON.stringify(message).match(/email has not been verified/)) {
             error = "You have to verify your email first";
         }
+        // Other cases
+        if (!error) {
+            error = message;
+        }
     }
     return error;
 }
@@ -1878,17 +2013,26 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
 
-    signup: function signup(email, password) {
-        request.post(APIEndpoints.USERS).send({
+    signup: function signup(company, email, password, confirmation) {
+        request.post(APIEndpoints.SIGNUP).send({
+            company: company,
             email: email,
-            password: password
+            password: password,
+            confirmation: confirmation
         }).set('Accept', 'application/json').end(function (err, res) {
             if (res) {
+                console.log(res);
                 if (res.error) {
+                    alert("res.error");
+                    ServerActionCreators.receiveSignup(null, res.error.message);
+                } else if (res.body.error) {
                     var errors = _getErrors(res.body.error);
                     ServerActionCreators.receiveSignup(null, errors);
                 } else {
-                    var json = JSON.parse(res.text);
+                    var json = {
+                        email: res.body.email,
+                        company: res.body.company
+                    };
                     ServerActionCreators.receiveSignup(json, null);
                 }
             }
@@ -1938,7 +2082,7 @@ module.exports = {
 
 };
 
-},{"../actions/ServerActionCreator.react.jsx":1,"../constants/Constants.js":19,"superagent":282}],25:[function(require,module,exports){
+},{"../actions/ServerActionCreator.react.jsx":1,"../constants/Constants.js":18,"superagent":282}],25:[function(require,module,exports){
 'use strict';
 
 var ServerActionCreators = require('../actions/ServerActionCreator.react.jsx');
@@ -2008,20 +2152,27 @@ module.exports = {
     });
   },
 
-  getAllUsers: function getAllUsers() {
-    request.get(APIEndpoints.UTENTI).set('Accept', 'application/json')
-    //.set('Authorization', sessionStorage.getItem('accessToken'))
-    .end(function (error, res) {
+  // get user data
+  getUser: function getUser(id) {
+    request.get(APIEndpoints.USERS + '/' + id).set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
-        var json = JSON.parse(res.text);
-        ServerActionCreators.response_getUsers(json);
+        ServerActionCreators.response_getUser(res.body);
+      }
+    });
+  },
+
+  // get the user company
+  getCompany: function getCompany(userId) {
+    request.get(APIEndpoints.USERS + '/' + userId + '/company').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
+      if (res) {
+        ServerActionCreators.response_getCompany(res.body);
       }
     });
   }
 
 };
 
-},{"../actions/ServerActionCreator.react.jsx":1,"../constants/Constants.js":19,"superagent":282}],26:[function(require,module,exports){
+},{"../actions/ServerActionCreator.react.jsx":1,"../constants/Constants.js":18,"superagent":282}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

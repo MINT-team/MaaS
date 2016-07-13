@@ -41,16 +41,17 @@ var ServerActionCreator = {
     },
 
     //RESPONSE
-    response_getUsers: function(json) {
+    response_getUser: function(json, errors) {
         Dispatcher.handleServerAction({
-            type: ActionTypes.GET_ALL_USERS,
-            json: json
+            type: ActionTypes.GET_USER,
+            json: json,
+            errors: errors
         });
     },
 
-    receiveCreatedUser: function(json, errors) {
+    response_getCompany: function(json, errors) {
         Dispatcher.handleServerAction({
-          type: ActionTypes.RECEIVE_CREATED_USER,
+          type: ActionTypes.GET_COMPANY,
           json: json,
           errors: errors
         });

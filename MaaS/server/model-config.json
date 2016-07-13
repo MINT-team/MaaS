@@ -42,5 +42,9 @@
     "options": {
       "emailVerificationRequired": true
     }
+  },
+  "Company": {
+    "dataSource": "maas",
+    "public": true
   }
 }

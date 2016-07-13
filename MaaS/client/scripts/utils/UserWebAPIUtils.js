@@ -72,15 +72,28 @@ module.exports = {
       });
   },
 
-  getAllUsers: function() {
+  // get user data
+  getUser: function(id) {
     request
-      .get(APIEndpoints.UTENTI)
+      .get(APIEndpoints.USERS + '/' + id)
       .set('Accept', 'application/json')
-      //.set('Authorization', sessionStorage.getItem('accessToken'))
+      .set('Authorization', sessionStorage.getItem('accessToken'))
       .end(function(error, res){
         if(res) {
-          var json = JSON.parse(res.text);
-          ServerActionCreators.response_getUsers(json);
+          ServerActionCreators.response_getUser(res.body);
+        }
+      });
+  },
+
+  // get the user company
+  getCompany: function(userId) {
+     request
+      .get(APIEndpoints.USERS + '/' + userId + '/company')
+      .set('Accept', 'application/json')
+      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .end(function(error, res){
+        if(res) {
+          ServerActionCreators.response_getCompany(res.body);
         }
       });
   }

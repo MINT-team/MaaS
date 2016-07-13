@@ -5,7 +5,7 @@ var SessionStore = require('../stores/SessionStore.react.jsx');
 
 function getState() {
   return {
-    isRegistered: SessionStore.getEmail() ? true : false,
+    isRegistered: SessionStore.isRegistered(),
     errors: SessionStore.getErrors()
   };
 }
@@ -13,7 +13,7 @@ function getState() {
 var Register = React.createClass({
   getInitialState: function() {
     return {
-      isRegistered: SessionStore.getEmail() ? true : false,
+      isRegistered: SessionStore.isRegistered(),
       errors: []
     };
   },
@@ -32,11 +32,11 @@ var Register = React.createClass({
 
   _onSubmit: function(event) {
     event.preventDefault();   //evita il ricaricamento della pagina da parte della form
-    var company = this.refs.azienda.value;
+    var company = this.refs.nomeAzienda.value;
     var email = this.refs.email.value;
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
-    if(company != "" && email != "" && password != "" && confirmation != "") {
+    if(company != "" || email != "" || password != "" || confirmation != "") {
       SessionActionCreator.signup(company, email, password, confirmation);
     } else {
       this._setError("Fill out all fields");
@@ -63,7 +63,7 @@ var Register = React.createClass({
         <form onSubmit={this._onSubmit} className="form-container">
           <div className="form-field">
             <label htmlFor="azienda">Company Name</label>
-            <input type="text" id="azienda" ref="azienda" required />
+            <input type="text" id="azienda" ref="nomeAzienda" required />
           </div>
           <div className="form-field">
             <label htmlFor="email">Email</label>
@@ -84,10 +84,10 @@ var Register = React.createClass({
     } else {
       title = "Thanks for your registration!";
       content = (
-        <div id="successful-registration">
+        <div id="successful-operation">
           <p>Now please confirm your account.</p>
-          <p>Click the link we sent at: <span id="registered-email">{SessionStore.getEmail()}</span></p>
-          <Link id="successful-registration-login" className="button" to="/login">Go to Login</Link>
+          <p>Click the link we sent at: <span id="successful-email">{SessionStore.getEmail()}</span></p>
+          <Link id="successful-button" className="button" to="/login">Go to Login</Link>
           <p>If you didn‘t receive your verification email <Link className="help-link" to="/verify">require another one</Link></p>
         </div>
       );

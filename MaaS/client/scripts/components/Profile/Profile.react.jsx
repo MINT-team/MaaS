@@ -45,5 +45,5 @@ var Profile = React.createClass({
       );
     }
 });
-//labels={sidebarLabels} links={sidebarLinks} icons={sidebarIcons}
+
 module.exports = Profile;

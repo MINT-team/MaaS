@@ -6,8 +6,8 @@ var ActionTypes = Constants.ActionTypes;
 
 var SessionActionCreator = {
 
-  signup: function(email, password) {
-    WebAPIUtils.signup(email, password);
+  signup: function(company, email, password, confirmation) {
+    WebAPIUtils.signup(company, email, password, confirmation);
   },
 
   login: function(email, password) {

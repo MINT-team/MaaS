@@ -6,6 +6,7 @@ module.exports = {
 
   APIEndpoints: {
     USERS:            APIRoot + "/users",
+    SIGNUP:           APIRoot + "/users/signUp",
     LOGIN:            APIRoot + "/users/login",
     LOGOUT:           APIRoot + "/users/logout",
     RESET_PASSWORD:   APIRoot + "/users/reset"
@@ -26,10 +27,11 @@ module.exports = {
 
     // User
     RESET_PASSWORD: null,
-
     GET_USER: null,
-    RECEIVE_REQUESTED_USER: null,
-    GET_ALL_USERS: null
+    GET_COMPANY: null,
+
+    // Company
+    GET_USERS: null,
 
     // Dashboard
 

@@ -34,6 +34,10 @@ function _getErrors(json) {
         if(JSON.stringify(message).match(/email has not been verified/)) {
             error = "You have to verify your email first";
         }
+        // Other cases
+        if(!error) {
+            error = message;
+        }
     }
     return error;
 }
@@ -42,20 +46,29 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
 
-    signup: function(email, password) {
-        request.post(APIEndpoints.USERS)
+    signup: function(company, email, password, confirmation) {
+        request.post(APIEndpoints.SIGNUP)
         .send({
+            company: company,
             email: email,
-            password: password
+            password: password,
+            confirmation: confirmation
         })
         .set('Accept', 'application/json')
         .end(function(err, res) {
             if(res) {
+                console.log(res);
                 if(res.error) {
+                    alert("res.error");
+                    ServerActionCreators.receiveSignup(null, res.error.message);
+                } else if(res.body.error) {
                     var errors = _getErrors(res.body.error);
                     ServerActionCreators.receiveSignup(null, errors);
                 } else {
-                    var json = JSON.parse(res.text);
+                    var json = {
+                        email: res.body.email,
+                        company: res.body.company
+                    };
                     ServerActionCreators.receiveSignup(json, null);
                 }
             }

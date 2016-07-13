@@ -35,6 +35,8 @@ var Login = React.createClass({
     _onChange: function() {
       this.setState(getState());
       if(this.state.isLogged) {
+        UserActionCreator.getUser(SessionStore.getUserId());
+        UserActionCreator.getCompany(SessionStore.getUserId());
         const { router } = this.context;
         router.push('/');   // redirect to home page
       }

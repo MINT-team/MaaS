@@ -1,0 +1,32 @@
+{
+  "name": "Company",
+  "plural": "Companies",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "users": {
+      "type": "hasMany",
+      "model": "user",
+      "foreignKey": "companyId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__users"
+    }
+  ],
+  "methods": {}
+}

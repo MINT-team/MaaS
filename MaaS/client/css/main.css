@@ -75,6 +75,11 @@ body {
 
 /*---------------------------------------------------- FORM ------------------------------------------------------------------*/
 
+#errors {
+    padding-top: 1em;
+    color: red;
+}
+
 .form-container{
     width: 25em;
     margin: auto;
@@ -226,6 +231,10 @@ input {
 #header #header-panel i, a {
     display: inline-block;
     vertical-align: middle;
+}
+
+#header-user-name {
+    margin-right: 1em;
 }
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
@@ -567,28 +576,24 @@ input {
     color: lightgrey;
 }
 
-/*------------------------------------------------ REGISTER ------------------------------------------------------------------*/
+/*--------------------------------------------- SUCCESSFUL OPERATIONS ------------------------------------------------------------------*/
+                                    /* REGISTER, RESET, CHANGE PASSWORD */
 
-#successful-registration {
+#successful-operation {
     padding-top: 2em;
 }
 
-#registered-email {
+#successful-operation p {
+    padding-bottom: 1em;
+}
+
+#successful-email {
     font-family: sans-serif;
     font-weight: bold;
 }
 
-#successful-registration p {
-    padding-bottom: 1em;
-}
-
-#successful-registration-login {
+#successful-button {
     margin-bottom: 2em;
-}
-
-#errors {
-    padding-top: 1em;
-    color: red;
 }
 
 /*-------------------------------------------- RESET PASSWORD ------------------------------------------------------------------*/
