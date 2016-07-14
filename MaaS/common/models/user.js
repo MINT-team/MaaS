@@ -61,7 +61,7 @@ module.exports = function(user) {
                         return cb(null, err);
                     }
                     console.log('> company created:', companyInstance);
-                    // Create the user
+                    // Create the user and set the company has him
                     user.create({companyId: companyInstance.id, email: email, password: password}, function(err, userInstance) {
                         if(err) {
                             Company.destroyById(companyInstance.id, function(err) {
@@ -76,9 +76,16 @@ module.exports = function(user) {
                         console.log('> user created:', userInstance);
 
                         // Set that user created belongs to the company
-                        //userInstance.company(companyInstance);
-                        //console.log('> users of the company:', companyInstance.users());
-                        //console.log('> user company:', userInstance.company());
+                        userInstance.company(companyInstance);
+
+                        // Set the user is the owner of the company
+                        companyInstance.owner(userInstance);
+
+                        // Save relations in the database
+                        userInstance.save();
+                        companyInstance.save();
+                        //console.log('> owner of the company:', companyInstance.owner());
+                        //console.log('> update company:', companyInstance);
 
                         // Send verification email after registration
                         var options = {
@@ -127,6 +134,8 @@ module.exports = function(user) {
             http: { verb: 'post', path: '/signUp' }
         }
     );
+
+    // TO DO: SIGN UP BY INVITE -> registrazione membri company
 
     // Controllo i dati di registrazione prima della creazione
     /*user.beforeRemote('create', function(context, member, next) {
