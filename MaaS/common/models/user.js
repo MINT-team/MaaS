@@ -10,7 +10,7 @@ var MIN_PASSWORD_LENGTH = 8;
 module.exports = function(user) {
 
 
-    // Registrazione - controllo credenziali
+    // Registrazione proprietario - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
         if(!password || !confirmation) {
             var error = {
@@ -84,8 +84,6 @@ module.exports = function(user) {
                         // Save relations in the database
                         userInstance.save();
                         companyInstance.save();
-                        //console.log('> owner of the company:', companyInstance.owner());
-                        //console.log('> update company:', companyInstance);
 
                         // Send verification email after registration
                         var options = {

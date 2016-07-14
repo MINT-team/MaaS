@@ -8,7 +8,6 @@
     "posttest": "nsp check"
   },
   "dependencies": {
-    "ace-builds": "^1.2.2",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "flux": "^2.1.1",

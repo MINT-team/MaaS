@@ -22,10 +22,16 @@
     "owner": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": ""
+      "foreignKey": "ownerId"
     }
   },
   "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
     {
       "principalType": "ROLE",
       "principalId": "$owner",

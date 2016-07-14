@@ -1,6 +1,6 @@
 @import "slick-carousel/slick/slick"; /* (T)  */
 @import "./normalize";
-/*
+
 #editor {
        position: absolute;
         top: 0;
@@ -8,7 +8,7 @@
         bottom: 0;
         left: 0;
 }
-*/
+
 * {
     margin: 0;
     padding: 0;
