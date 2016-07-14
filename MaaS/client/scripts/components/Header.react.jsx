@@ -42,11 +42,11 @@ var Header = React.createClass({
     	var title, headerMenu, headerPanel;
     	if (this.props.isLogged) {
     		title = (
-    			<Link to="/" id="header-title">{this.props.companyName}</Link>
+    			<Link to="/company" id="header-title">{this.props.companyName}</Link>
     		);
 			headerMenu = (
 				<div id="header-menu">
-					<Link to="">Dashboard</Link>
+					<Link to="/dashboard">Dashboard</Link>
 					<Link to="">Altro</Link>
 				</div>
     		);

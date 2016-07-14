@@ -58,10 +58,7 @@ module.exports = {
         .end(function(err, res) {
             if(res) {
                 console.log(res);
-                if(res.error) {
-                    alert("res.error");
-                    ServerActionCreators.receiveSignup(null, res.error.message);
-                } else if(res.body.error) {
+                if(res.body.error) {
                     var errors = _getErrors(res.body.error);
                     ServerActionCreators.receiveSignup(null, errors);
                 } else {

@@ -9,45 +9,35 @@ var MIN_PASSWORD_LENGTH = 8;
 
 module.exports = function(user) {
 
+    var Role = app.models.Role;     // working with loopback objects
+    var RoleMapping = app.models.RoleMapping;
 
     // Registrazione proprietario - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
         if(!password || !confirmation) {
-            var error = {
-                message: 'Insert the password and its confirmation'
-            };
+            var error = { message: 'Insert the password and its confirmation' };
             return cb(null, error);   // callback di insuccesso
         }
         if(password != confirmation) {
-            error = {
-                message: 'Password confirmation doesn\'t match'
-            };
+            error = { message: 'Password confirmation doesn\'t match' };
             return cb(null, error);   // callback di insuccesso
         }
         if(password.length < MIN_PASSWORD_LENGTH) {
-            error = {
-                message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters'
-            };
+            error = { message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters' };
             return cb(null, error);   // callback di insuccesso
         }
-        var Company = app.models.Company;   // working with loopback objects
         // Search for an already existing company
+        var Company = app.models.Company;
         Company.findOne({where: {name: company}, limit: 1}, function(err, existingCompany) {
-            if(err) {
-                return cb(null, err);
-            }
+            if(err) return cb(null, err);
             if(!err && existingCompany) {
                 console.log('> company already exists:', existingCompany);
-                error = {
-                    message: 'A company with this name already exists'
-                };
+                error = { message: 'A company with this name already exists' };
                 return cb(null, error);   // callback di insuccesso
             }
             // If company does not exists search for an already existing user
             user.findOne({where: {email: email}, limit: 1}, function(err, existingUser) {
-                if(err) {
-                    return cb(null, err);
-                }
+                if(err) return cb(null, err);
                 if(!err && existingUser) {
                     console.log('> user already exists:', existingUser);
                     error = {
@@ -57,9 +47,7 @@ module.exports = function(user) {
                 }
                 // Create the company
                 Company.create({name: company}, function(err, companyInstance) {
-                    if(err) {
-                        return cb(null, err);
-                    }
+                    if(err) return cb(null, err);
                     console.log('> company created:', companyInstance);
                     // Create the user and set the company has him
                     user.create({companyId: companyInstance.id, email: email, password: password}, function(err, userInstance) {
@@ -74,17 +62,11 @@ module.exports = function(user) {
                             return cb(null, err);
                         }
                         console.log('> user created:', userInstance);
-
-                        // Set that user created belongs to the company
-                        userInstance.company(companyInstance);
-
-                        // Set the user is the owner of the company
-                        companyInstance.owner(userInstance);
-
+                        userInstance.company(companyInstance);  // Set that user created belongs to the company
+                        companyInstance.owner(userInstance);    // Set the user is the owner of the company, dynamic role $owner
                         // Save relations in the database
                         userInstance.save();
                         companyInstance.save();
-
                         // Send verification email after registration
                         var options = {
                             type: 'email',
@@ -97,7 +79,6 @@ module.exports = function(user) {
                             redirect: '/%23/login', // percent encoding => /#/login
                             user: userInstance
                         };
-
                         userInstance.verify(options, function(err, response) {
                             if(err) {
                                 //return next(err);
@@ -105,7 +86,6 @@ module.exports = function(user) {
                             }
                             console.log('> verification email sent:', response);
                         });
-
                         // Returns data to the client
                         return cb(null, null, userInstance.email, companyInstance.name);   // callback di successo
                     });
@@ -133,7 +113,18 @@ module.exports = function(user) {
         }
     );
 
-    // TO DO: SIGN UP BY INVITE -> registrazione membri company
+    // TO DO: SIGN UP BY INVITE -> registrazione membri company (ruoli: admin, member, guest)
+        // Create the admin role
+        // Role.create({ name: 'admin' }, function(err, role) {
+        //     if(err) return cb(null, err);
+        //     // Make the user an admin
+        //     role.principals.create({
+        //         principalType: RoleMapping.USER,
+        //         principalId: userInstance.id
+        //     }, function(err, principal) {
+        //         return cb(null, err);
+        //     });
+        // });
 
     // Controllo i dati di registrazione prima della creazione
     /*user.beforeRemote('create', function(context, member, next) {
