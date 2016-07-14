@@ -40,6 +40,15 @@ var ServerActionCreator = {
         });
     },
 
+    //CHANGE PERSONAL DATA
+    receiveChangePersonalData: function(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DATA_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+
     //RESPONSE
     response_getUser: function(json, errors) {
         Dispatcher.handleServerAction({

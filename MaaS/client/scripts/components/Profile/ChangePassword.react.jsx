@@ -24,8 +24,6 @@ var ChangePassword = React.createClass({
   },
 
   componentDidMount: function() {
-      //console.log(this.props);  // visibile da chrome premendo F12 -> Console
-      //sessionStorage.setItem('accessToken', this.state.accessToken);
       UserStore.addChangeListener(this._onChange);
   },
 
@@ -48,7 +46,7 @@ var ChangePassword = React.createClass({
 
   render: function() {
     var title, content, errors;
-    if(!this.state.email) { // in questo caso l'email serve solo per controllo
+    if(!this.state.email || this.state.errors.length > 0) { // in questo caso l'email serve solo per controllo
       title = "Choose a new password";
       if(this.state.errors.length > 0) {
         errors = (
@@ -74,8 +72,9 @@ var ChangePassword = React.createClass({
       if(this.props.location.pathname == "/profile/changePassword") { // change password by logged profile
         title = "Password changed";
         content = (
-          <div id="successful-registration">
+          <div id="successful-operation">
             <p>Your password has been changed successfully.</p>
+            <Link id="successful-button" className="button" to="/profile">Back to your profile</Link>
           </div>
         );
       } else if(this.props.location.pathname == "/recoverpwd") {  // change password by reset password

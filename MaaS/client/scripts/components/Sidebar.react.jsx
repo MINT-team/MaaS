@@ -6,7 +6,7 @@ var Sidebar = React.createClass({
     render: function() {
         return (
             <div id="sidebar">
-				<p to="/" id="sidebar-title">{this.props.title}</p>
+				<p to="/" id="sidebar-title"><Link to={this.props.titleLink}>{this.props.title}</Link></p>
 			    {this.props.data.map((x) =>
 			    	<div className="sidebar-field">
     					<Link to={x.link}>{x.icon}{x.label}</Link>

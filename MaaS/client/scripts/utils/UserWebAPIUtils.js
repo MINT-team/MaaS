@@ -47,7 +47,7 @@ module.exports = {
     request
       .post(APIEndpoints.USERS + '/' + id + '/changePassword')
       .set('Accept', 'application/json')
-      .set('Authorization', accessToken)  // necessario per questa API
+      .set('Authorization', accessToken)  // necessario per questa API, in questo caso viene passato a mano perchè potrebbe provenire dalla query url - vedesi 'ChangePassword.react.jsx'
       //.type('form')
       //.set('Content-Type', 'application/x-www-form-urlencoded')
       .send({
@@ -57,13 +57,41 @@ module.exports = {
       })
       .end(function(err, res){
         if(res) {
-          res = JSON.parse(res.text);
           //console.log(res);
+          res = JSON.parse(res.text);
           if(res.error) {
             // res.error.message: errori di loopback e error definito dal remote method
             ServerActionCreators.receiveChangePassword(null, res.error.message);
           } else {
             ServerActionCreators.receiveChangePassword(res.email, null);
+          }
+        }
+        if(err){
+          //ServerActionCreators.receiveChangePassword(null, err);
+        }
+      });
+  },
+
+  changePersonalData: function(id, name, surname, dateOfBirth, gender) {
+    request
+      .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
+      .set('Accept', 'application/json')
+      .set('Authorization', sessionStorage.getItem('accessToken'))  // necessario per questa API
+      .send({
+        id: id,
+        name: name,
+        surname: surname,
+        dateOfBirth: dateOfBirth,
+        gender: gender
+      })
+      .end(function(err, res){
+        if(res) {
+          res = JSON.parse(res.text);
+          if(res.error) {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ServerActionCreators.receiveChangePersonalData(null, res.error.message);
+          } else {
+            ServerActionCreators.receiveChangePersonalData(res.newData, null);
           }
         }
         if(err){

@@ -39,9 +39,7 @@ var Header = React.createClass({
 	},
 
     render: function() {
-    	var title;
-    	var headerMenu;
-    	var headerPanel;
+    	var title, headerMenu, headerPanel;
     	if (this.props.isLogged) {
     		title = (
     			<Link to="/" id="header-title">{this.props.companyName}</Link>
@@ -54,7 +52,7 @@ var Header = React.createClass({
     		);
 	    	headerPanel = (
 		    	<div id="header-panel">
-					<Link to="/profile" ><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+					<Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
 					<Link to="" id="settings-button" onClick={this.toggleDropdown}>
 						<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
 					</Link>

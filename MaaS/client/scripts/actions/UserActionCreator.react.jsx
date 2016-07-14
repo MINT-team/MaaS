@@ -13,6 +13,10 @@ var UserActionCreator = {
         WebAPIUtils.changePassword(id, password, confirmation, accessToken);
     },
 
+    changePersonalData: function(id, name, surname, dateOfBirth, gender) {
+        WebAPIUtils.changePersonalData(id, name, surname, dateOfBirth, gender);
+    },
+
     getUser: function(id) {
         WebAPIUtils.getUser(id);
     },

@@ -22,11 +22,12 @@ module.exports = {
     LOGIN_RESPONSE: null,
     SIGNUP_RESPONSE: null,
     LOGOUT: null,
-    RESET_PASSWORD_RESPONSE: null,
-    CHANGE_PASSWORD_RESPONSE: null,
+    //SESSION_SET: null,
 
     // User
-    RESET_PASSWORD: null,
+    RESET_PASSWORD_RESPONSE: null,
+    CHANGE_PASSWORD_RESPONSE: null,
+    CHANGE_DATA_RESPONSE: null,
     GET_USER: null,
     GET_COMPANY: null,
 

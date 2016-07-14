@@ -2,7 +2,7 @@ var React = require('react');
 var Slider = require('react-slick');
 
 var Home = React.createClass({
-	render: function () {
+	render() {
 	var settings = {
   		accessibility: true,
     	dots: true,

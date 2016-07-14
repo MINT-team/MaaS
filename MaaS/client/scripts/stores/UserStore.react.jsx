@@ -12,7 +12,7 @@ var _user = {
               email: SessionStore.getEmail(),
               name: sessionStorage.getItem('userName') || "",
               surname: sessionStorage.getItem('userSurname') || "",
-              dateOfBirth: sessionStorage.getItem('userDateOfBirth'),
+              dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
             };
@@ -91,6 +91,9 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = []; // empty old errors
             var email = action.json.email;
             _user.email = email;    // email dell'utente corrente, anche se non loggato
+            if(!sessionStorage.getItem('email')) {
+              sessionStorage.setItem('email', _user.email);
+            }
         }
         UserStore.emitChange();
         break;
@@ -101,9 +104,29 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.email) {
             _errors = []; // empty old errors
             _user.email = action.email;   // email dell'utente corrente, anche se non loggato
+            if(!sessionStorage.getItem('email')) {
+              sessionStorage.setItem('email', _user.email);
+            }
         }
         UserStore.emitChange();
+        break;
 
+      case ActionTypes.CHANGE_DATA_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else if(action.json) {
+            _errors = []; // empty old errors
+            _user.name = action.json.name;
+            _user.surname = action.json.surname;
+            _user.dateOfBirth = new Date(action.json.dateOfBirth);
+            _user.gender = action.json.gender;
+            // save session data
+            sessionStorage.setItem('userName', _user.name);
+            sessionStorage.setItem('userSurname', _user.surname);
+            sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
+            sessionStorage.setItem('userGender', _user.gender);
+        }
+        UserStore.emitChange();
         break;
 
       case ActionTypes.LOGOUT:
@@ -120,15 +143,16 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = []; // empty old errors
             // set user data
             _user.email = action.json.email;
-            _user.name = action.json.name;
-            _user.surname = action.json.surname;
-            _user.dateOfBirth = action.json.dateOfBirth;
-            _user.gender = action.json.gender;
+            _user.name = action.json.name || "";
+            _user.surname = action.json.surname || "";
+            _user.dateOfBirth = new Date(action.json.dateOfBirth);
+            _user.gender = action.json.gender || "";
             _user.avatar = action.json.avatar;
             // save session data
+            sessionStorage.setItem('email', _user.email);
             sessionStorage.setItem('userName', _user.name);
             sessionStorage.setItem('userSurname', _user.surname);
-            sessionStorage.setItem('user_dateOfBirth', _user.dateOfBirth);
+            sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
             sessionStorage.setItem('userGender', _user.gender);
             sessionStorage.setItem('userAvatar', _user.avatar);
         }

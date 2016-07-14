@@ -6,12 +6,24 @@ var assign = require('object-assign');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-// Load an access token from the session storage, you might want to implement
-// a 'remember me' using localSgorage
+// Load values from the session storage, you might want to implement a 'remember me' using localSgorage
+
+// var _session = {};  //new Object();
+// _session['accessToken'] = sessionStorage.getItem('accessToken');
+// _session['email'] = sessionStorage.getItem('email');;
+// _session['userId'] = sessionStorage.getItem('userId');   // user id
+
+// show the values stored
+// for (var k in _session) {
+//     // use hasOwnProperty to filter out keys from the Object.prototype
+//     if (_session.hasOwnProperty(k)) {
+//         alert('key is: ' + k + ', value is: ' + _session[k]);
+//     }
+// }
+
 var _accessToken = sessionStorage.getItem('accessToken');
 var _email = sessionStorage.getItem('email');
 var _userId = sessionStorage.getItem('userId');   // user id
-var _user = {};
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -29,24 +41,34 @@ var SessionStore = assign({}, EventEmitter.prototype, {
   },
 
   isLogged: function() {
+    //return _session['accessToken'] ? true : false;
     return _accessToken ? true : false;
   },
 
   isRegistered: function() {
+    //return _session['email'] ? true : false;
     return _email ? true : false;
   },
 
   getAccessToken: function() {
+    //return _session['accessToken'];
     return _accessToken;
   },
 
   getEmail: function() {
+    //return _session['email'];
     return _email;
   },
 
   getUserId: function() {
+    //return _session['userId'];
     return _userId;
   },
+
+  // for all other items, defined by us
+  // getItem: function(key) {
+  //   return _session[key];
+  // },
 
   getErrors: function() {
     return _errors;
@@ -65,7 +87,8 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else if(action.json) {
             _email = action.json.email;
-            sessionStorage.setItem('email', _email);
+            // _session['email'] = action.json.email;
+            sessionStorage.setItem('email', action.json.email);
         }
         SessionStore.emitChange();
         break;
@@ -76,9 +99,10 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.json && action.json.id) {
             _accessToken = action.json.id;
             _userId = action.json.userId;
-            // Token will always live in the session, so that the API can grab it with no hassle
-            sessionStorage.setItem('accessToken', _accessToken);
-            sessionStorage.setItem('userId', _userId);
+            // _session['accessToken'] = action.json.id;
+            // _session['userId'] = action.json.userId;
+            sessionStorage.setItem('accessToken', action.json.id);
+            sessionStorage.setItem('userId', action.json.userId);
         }
         SessionStore.emitChange();
         break;
@@ -88,11 +112,24 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         _accessToken = null;
         _userId = null,
         _email = null;
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('userId');
-        sessionStorage.removeItem('email');
+        // _session['accessToken'] = null;
+        // _session['userId'] = null;
+        // _session['email'] = null;
+        // sessionStorage.removeItem('accessToken');
+        // sessionStorage.removeItem('userId');
+        // sessionStorage.removeItem('email');
+        sessionStorage.clear(); // clear all data
         SessionStore.emitChange();
         break;
+
+    // case ActionTypes.SESSION_SET:
+    //     var key = action.key;
+    //     var value = action.value;
+    //     if(key && value) {
+    //         sessionStorage.setItem(key, value);
+    //     }
+    //     SessionStore.emitChange();
+    //     break;
   }
 
   return true;

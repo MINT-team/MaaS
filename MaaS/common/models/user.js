@@ -239,8 +239,10 @@ module.exports = function(user) {
                 return cb(null, error);   // callback di insuccesso
             }
             user.updateAttribute('password', password, function(err, user) {
-                if(err)
+                if(err) {
+                    console.log('> failed resetting password for: ', user.email);
                     return cb(err);
+                }
                 console.log('> password reset processed successfully for: ', user.email);
                 return cb(null, null, user.email);   // callback di successo
             });
@@ -261,6 +263,67 @@ module.exports = function(user) {
                 {arg: 'email', type: 'string'}
             ],
             http: { verb: 'post', path: '/:id/changePassword' }
+        }
+    );
+
+    // Cambio i dati anagrafici - vedesi relativo ACL
+    user.changePersonalData = function(id, name, surname, dateOfBirth, gender, cb) {
+        user.findById(id, function(err, user) {
+            if(err)
+                return cb(err);
+            user.updateAttributes({ name: name, surname: surname, dateOfBirth: dateOfBirth, gender: gender }, function() {
+                if(err) {
+                    console.log('> failed changing data for: ', user.email);
+                    return cb(err);
+                }
+                console.log('> data change processed successfully for: ', user.email);
+                var newData = {
+                    name: name,
+                    surname: surname,
+                    dateOfBirth: dateOfBirth,
+                    gender: gender
+                };
+                return cb(null, null, newData);   // callback di successo
+            });
+        });
+
+    };
+
+    user.remoteMethod(
+        'changePersonalData',
+        {
+            description: 'Change user attributes by passing id.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'},
+                { arg: 'name', type: 'string', required: true, description: 'New name'},
+                { arg: 'surname', type: 'string', required: true, description: 'New surname'},
+                { arg: 'dateOfBirth', type: 'date', required: true, description: 'New date of birth'},
+                { arg: 'gender', type: 'string', required: true, description: 'New gender'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'newData', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/:id/changePersonalData' }
+        }
+    );
+
+    // Elimino l'utente - vedesi relativo ACL
+    user.deleteAccount = function(id, name, surname, dateOfBirth, gender, cb) {
+
+    };
+
+    user.remoteMethod(
+        'deleteAccount',
+        {
+            description: 'Change user attributes by passing id.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/:id/deleteAccount' }
         }
     );
 
