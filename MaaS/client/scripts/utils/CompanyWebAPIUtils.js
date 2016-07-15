@@ -22,18 +22,20 @@ module.exports = {
 
   getUsers: function(id) {
     request
-      .get(APIEndpoints.COMPANY)
+      .get(APIEndpoints.COMPANY + '/' + id + '/users')
       .set('Accept', 'application/json')
       .set('Authorization', sessionStorage.getItem('accessToken'))
       .send({ id: id })
       .end(function(err, res){
         if(res) {
-          if(res.error) {
-            var errors = _getErrors(res.body.error);
-            ServerActionCreators.receiveResetPassword(null, errors);
-          } else {
-            ServerActionCreators.receiveResetPassword(res.body, null);
-          }
+            if(res.error) {
+                alert(res.error);
+                var errors = _getErrors(res.body.error);
+                ServerActionCreators.receiveCompanyUsers(null, errors);
+            } else {
+                console.log(res.body);
+                ServerActionCreators.receiveCompanyUsers(res.body, null);
+            }
         }
         if(err){
           //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));

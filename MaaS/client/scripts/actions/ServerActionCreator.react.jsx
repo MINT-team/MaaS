@@ -64,7 +64,16 @@ var ServerActionCreator = {
           json: json,
           errors: errors
         });
-  }
+    },
+
+    //COMPANY
+    receiveCompanyUsers: function(json, errors) {
+        Dispatcher.handleServerAction({
+          type: ActionTypes.GET_USERS,
+          json: json,
+          errors: errors
+        });
+    }
 };
 
 module.exports = ServerActionCreator;

@@ -80,6 +80,56 @@ body {
     padding-bottom: 2em;
 }
 
+.table-content p {
+    display: inline-block;
+}
+
+.table-header {
+    font-weight: bold;
+    box-shadow: lightgrey 0em -0.05em 0.1em, lightgrey 0em 0.2em 0.2em;
+}
+
+.table-header span {
+    box-shadow: lightgrey -0.05em 0em 0.1em;
+}
+
+
+.table-row {
+    box-shadow: lightgrey 0em 0.2em 0.2em;
+}
+
+.table-row img {
+    display: inline-block;
+    position: absolute;
+    width: 2em;
+    height: 2em;
+    margin-left: -2em;
+    margin-top: -0.2em;
+    background-color: lightgray;
+}
+
+.table-column-small {
+    width: 10%;
+    box-shadow: none;
+}
+
+.table-column-normal {
+    width: 16%;
+}
+
+.table-column-big {
+    width: 35%;
+}
+
+.table-header span, .table-row span {
+    display: inline-block;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-align: center;
+}
+
+
+
 /*---------------------------------------------------- FORM ------------------------------------------------------------------*/
 
 #errors {

@@ -51,19 +51,30 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
 
     switch(action.type) {
 
-      case ActionTypes.GET_COMPANY:
-        if(action.errors) {
-            _errors = action.errors;
-        } else if(action.json) {
-            _errors = []; // empty old errors
-            // set company data
-            _company.id = action.json.id;
-            _company.name = action.json.name;
-            sessionStorage.setItem('companyId', _company.id);
-            sessionStorage.setItem('companyName', _company.name);
-        }
-        CompanyStore.emitChange();
-        break;
+        case ActionTypes.GET_COMPANY:
+            if(action.errors) {
+                _errors = action.errors;
+            } else if(action.json) {
+                _errors = []; // empty old errors
+                // set company data
+                _company.id = action.json.id;
+                _company.name = action.json.name;
+                sessionStorage.setItem('companyId', _company.id);
+                sessionStorage.setItem('companyName', _company.name);
+            }
+            CompanyStore.emitChange();
+            break;
+
+        case ActionTypes.GET_USERS:
+            if(action.errors) {
+                _errors = action.errors;
+            } else if(action.json) {
+                _errors = []; // empty old errors
+                // set users of the company
+                _users = action.json;
+            }
+            CompanyStore.emitChange();
+            break;
 
     }
 
