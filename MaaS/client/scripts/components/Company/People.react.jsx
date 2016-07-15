@@ -1,0 +1,1 @@
+// Avatar, nome, cognome, ruolo, email

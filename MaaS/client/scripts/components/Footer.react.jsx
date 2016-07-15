@@ -6,10 +6,9 @@ var Footer = React.createClass({
         return (
             <div id="footer">
                 <div className="footer-block">
-                    <ul>
-                        <li><Link to="/" id="footer-title">MaaS</Link></li>
-                        <li></li>
-                    </ul>
+                    <p><Link to="/" id="footer-title">MaaS</Link></p>
+                    <p>Developed by <a target="_blank" href="https://github.com/MINT-team/">MINT</a></p>
+
                 </div>
 
             </div>

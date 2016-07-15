@@ -314,7 +314,7 @@ module.exports = function(user) {
     user.remoteMethod(
         'deleteAccount',
         {
-            description: 'Change user attributes by passing id.',
+            description: 'Delete user by passing id.',
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'User id'}
             ],

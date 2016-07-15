@@ -1,21 +1,11 @@
 var React = require('react');
-
+/*var ace = require('brace');
+require('brace/mode/javascript');
+require('brace/theme/monokai');*/
+//var editor = ace.edit('editor');
+//editor.getSession().setMode('ace/mode/javascript');
+//editor.setTheme('ace/theme/monokai');
 var Editor = React.createClass({
-    componentDidMount: function() {
-        var script = document.createElement("script");
-        script.src = "ace-builds/src-noconflict/ace.js";
-        script.type = "text/javascript";
-        script.charset = "utf-8";
-        script.async = true;
-        document.body.appendChild(script);
-        var script = document.createElement("script");
-        script.src = "editor-config.js";
-        script.type = "text/javascript";
-        script.charset = "utf-8";
-        script.async = true;
-        document.body.appendChild(script);
-    },
-
     render() {
         return (
         /*<div>

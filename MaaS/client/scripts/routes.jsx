@@ -15,13 +15,14 @@ var Profile = require('./components/Profile/Profile.react.jsx');
 var ChangeAvatar = require('./components/Profile/ChangeAvatar.react.jsx');
 var PersonalData = require('./components/Profile/PersonalData.react.jsx');
 var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
-var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx');
-var Company = require('./components/Company.react.jsx');
+//var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx'); // <Route path="deleteAccount" component={DeleteAccount} />
+var Company = require('./components/Company/Company.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
+//var ManageDashboard = req
 
 var Routes = React.createClass({
-  render() {
+  render: function() {
     return (
       <Router history={hashHistory}>
         <Route path="/" component={MaaSApp}>
@@ -34,7 +35,6 @@ var Routes = React.createClass({
             <Route path="changeAvatar" component={ChangeAvatar} />
             <Route path="personalData" component={PersonalData} />
             <Route path="changePassword" component={ChangePassword} />
-            <Route path="deleteAccount" component={DeleteAccount} />
             <Redirect from="*" to="404" />
           </Route>
           <Route path="company" component={Company} />

@@ -8,6 +8,7 @@
     "posttest": "nsp check"
   },
   "dependencies": {
+    "brace": "^0.8.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "flux": "^2.1.1",
