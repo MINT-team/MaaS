@@ -19,7 +19,7 @@ var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
 var Company = require('./components/Company/Company.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-//var ManageDashboard = req
+var ManageDashboard = require('./components/ManageDashboard.react.jsx');
 
 var Routes = React.createClass({
   render: function() {
@@ -39,6 +39,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="company" component={Company} />
           <Route path="editor" component={Editor} />
+          <Route path="manageDashboard" component={ManageDashboard} />
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />
         </Route>

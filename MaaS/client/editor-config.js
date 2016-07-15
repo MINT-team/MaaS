@@ -1,3 +1,3 @@
 var editor = ace.edit("editor");
-editor.setTheme("ace/theme/monokai");
-editor.session.setMode("ace/mode/html");
+editor.setTheme("ace/theme/chaos");
+editor.session.setMode("ace/mode/javascript");

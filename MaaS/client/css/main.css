@@ -80,6 +80,54 @@ body {
     padding-bottom: 2em;
 }
 
+.table-content p {
+    display: inline-block;
+}
+
+.table-header {
+    font-weight: bold;
+    box-shadow: lightgrey 0em -0.05em 0.1em, lightgrey 0em 0.2em 0.2em;
+}
+
+.table-header span {
+    box-shadow: lightgrey -0.05em 0em 0.1em;
+}
+
+
+.table-row {
+    box-shadow: lightgrey 0em 0.2em 0.2em;
+}
+
+.table-row img {
+    display: inline-block;
+    position: absolute;
+    width: 2em;
+    height: 2em;
+    margin-left: -2em;
+    margin-top: -0.2em;
+    background-color: lightgray;
+}
+
+.table-column-small {
+    width: 10%;
+    box-shadow: none;
+}
+
+.table-column-normal {
+    width: 16%;
+}
+
+.table-column-big {
+    width: 35%;
+}
+
+.table-header span, .table-row span {
+    display: inline-block;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-align: center;
+}
+
 /*---------------------------------------------------- FORM ------------------------------------------------------------------*/
 
 #errors {
@@ -251,35 +299,152 @@ input {
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
 
-#footer{
-    width: 100%;
-    margin: auto;
-    min-height: 10em;
-    padding-top: 1em;
-    padding-bottom: 1em;
-    margin-top: 5em;
-    color: white;
-    background-color: #333;
-    box-shadow: lightgreen 0 -0.2em;
+.footer-distributed{
+	background-color: #292c2f;
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
+	box-sizing: border-box;
+	width: 100%;
+	text-align: left;
+	font: bold 16px sans-serif;
+
+	padding: 55px 50px;
+	margin-top: 80px;
 }
 
-#footer-title {
-    font-size: 2.2em;
-    margin-left: 2em;
-    margin-right: 2em;
+.footer-distributed .footer-left,
+.footer-distributed .footer-center,
+.footer-distributed .footer-right{
+	display: inline-block;
+	vertical-align: top;
 }
 
-#footer a {
-    margin-left: 1em;
-    margin-right: 1em;
-    color: white;
-    text-decoration: none;
+/* Footer left */
+
+.footer-distributed .footer-left{
+	width: 40%;
 }
 
-#footer a:hover {
-    color: lightgreen;
+/* The company logo */
 
+.footer-distributed h3{
+	color:  #ffffff;
+	font: normal 36px 'Cookie', cursive;
+	margin: 0;
 }
+
+.footer-distributed h3 span{
+	color:  #5383d3;
+}
+
+/* Footer links */
+
+.footer-distributed .footer-links{
+	color:  #ffffff;
+	margin: 20px 0 12px;
+	padding: 0;
+}
+
+.footer-distributed .footer-links a{
+	display:inline-block;
+	line-height: 1.8;
+	text-decoration: none;
+	color:  inherit;
+}
+
+.footer-distributed .footer-company-name{
+	color:  #8f9296;
+	font-size: 14px;
+	font-weight: normal;
+	margin: 0;
+}
+
+/* Footer Center */
+
+.footer-distributed .footer-center{
+	width: 35%;
+}
+
+.footer-distributed .footer-center i{
+	background-color:  #33383b;
+	color: #ffffff;
+	font-size: 25px;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 42px;
+	margin: 10px 15px;
+	vertical-align: middle;
+}
+
+.footer-distributed .footer-center i.fa-envelope{
+	font-size: 17px;
+	line-height: 38px;
+}
+
+.footer-distributed .footer-center p{
+	display: inline-block;
+	color: #ffffff;
+	vertical-align: middle;
+	margin:0;
+}
+
+.footer-distributed .footer-center p span{
+	display:block;
+	font-weight: normal;
+	font-size:14px;
+	line-height:2;
+}
+
+.footer-distributed .footer-center p a{
+	color:  #5383d3;
+	text-decoration: none;;
+}
+
+
+/* Footer Right */
+
+.footer-distributed .footer-right{
+	width: 20%;
+}
+
+.footer-distributed .footer-company-about{
+	line-height: 20px;
+	color:  #92999f;
+	font-size: 13px;
+	font-weight: normal;
+	margin: 0;
+}
+
+.footer-distributed .footer-company-about span{
+	display: block;
+	color:  #ffffff;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.footer-distributed .footer-icons{
+	margin-top: 25px;
+}
+
+.footer-distributed .footer-icons a{
+	display: inline-block;
+	width: 35px;
+	height: 35px;
+	cursor: pointer;
+	background-color:  #33383b;
+	border-radius: 2px;
+
+	font-size: 20px;
+	color: #ffffff;
+	text-align: center;
+	line-height: 35px;
+
+	margin-right: 3px;
+	margin-bottom: 5px;
+}
+
 
 /*-------------------------------------------- MENU DROPDOWN -----------------------------------------------------------------------*/
 

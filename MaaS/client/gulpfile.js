@@ -54,7 +54,7 @@ gulp.task('watchify', function() {
 });
 
 gulp.task('watch', ['clean'], function() {
-    gulp.start(['browserSync', 'watchify']);
+    gulp.start(['browserSync','watchify']);
 });
 
 /*gulp.task('buildApp', function() {
