@@ -22,7 +22,7 @@ var Company = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name = this.state.name;
+      var name; // = this.state.name;
       content = (
         <div className="container">
           <p className="container-title">{name}</p>
@@ -30,7 +30,7 @@ var Company = React.createClass({
           <div className="form-container">
             <div className="form-field">
               <label>:</label>
-              <p>{this.state.email}</p>
+              <p></p>
             </div>
           </div>
         </div>

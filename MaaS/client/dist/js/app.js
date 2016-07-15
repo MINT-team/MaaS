@@ -173,7 +173,7 @@ var Company = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name = this.state.name;
+      var name; // = this.state.name;
       content = React.createElement(
         'div',
         { className: 'container' },
@@ -194,11 +194,7 @@ var Company = React.createClass({
               null,
               ':'
             ),
-            React.createElement(
-              'p',
-              null,
-              this.state.email
-            )
+            React.createElement('p', null)
           )
         )
       );
@@ -1899,7 +1895,7 @@ module.exports = Sidebar;
 
 var keyMirror = require('keymirror');
 
-var APIRoot = "https://maas-navid94.c9users.io/api";
+var APIRoot = "https://maas-fabiano-navid94.c9users.io/api";
 
 module.exports = {
 
