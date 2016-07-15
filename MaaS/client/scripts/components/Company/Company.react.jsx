@@ -1,6 +1,13 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+
+function getState() {
+  return {
+          name: CompanyStore.getName()
+      };
+}
 
 var Company = React.createClass({
 
@@ -14,31 +21,39 @@ var Company = React.createClass({
 // doc: <i class="material-icons">&#xE873;</i>
 // cell: <i class="material-icons">&#xE06F;</i> / <i class="material-icons">&#xE3BC;</i>
 
+  getInitialState: function() {
+      return getState();
+  },
+
+  componentDidMount: function() {
+      CompanyStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUnmount: function() {
+      CompanyStore.removeChangeListener(this._onChange);
+  },
+
+  _onChange: function() {
+      this.setState(getState());
+  },
 
   render: function() {
-
     var content;
     if(this.props.children) {
-      // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name; // = this.state.name;
+      var name = this.state.name;
       content = (
         <div className="container">
           <p className="container-title">{name}</p>
-          <img id="avatar" src="" />
           <div className="form-container">
             <div className="form-field">
-              <label>:</label>
+              <label></label>
               <p></p>
             </div>
           </div>
         </div>
       );
-      /*<p className="container-description">
-            <i id="left-arrow" className="material-icons md-48">&#xE5CB;</i>
-            Seleziona sulla sinistra i dati che vuoi modificare
-          </p>*/
     }
 
     // SideBar initialization
@@ -49,19 +64,19 @@ var Company = React.createClass({
     };
     var people = {
       label: "People",
-      link: "/profile/people",
+      link: "/company/people",
       icon: (<i className="material-icons md-24">&#xE7FB;</i>)
     };
     var dsl = {
       label: "DSL",
-      link: "/profile/dsl",
+      link: "/company/dsl",
       icon: (<i className="material-icons md-24">&#xE1B2;</i>)
     };
     var sidebarData = [database, people, dsl];
 
     return (
       <div id="profile-settings">
-        <Sidebar title="Company" titleLink="/profile" data={sidebarData}/>
+        <Sidebar title="Company" titleLink="/company" data={sidebarData}/>
         {content}
       </div>
     );

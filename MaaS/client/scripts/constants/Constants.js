@@ -9,7 +9,8 @@ module.exports = {
     SIGNUP:           APIRoot + "/users/signUp",
     LOGIN:            APIRoot + "/users/login",
     LOGOUT:           APIRoot + "/users/logout",
-    RESET_PASSWORD:   APIRoot + "/users/reset"
+    RESET_PASSWORD:   APIRoot + "/users/reset",
+    COMPANY:          APIRoot + "/Companies"
   },
 
   PayloadSources: keyMirror({

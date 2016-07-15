@@ -17,6 +17,7 @@ var PersonalData = require('./components/Profile/PersonalData.react.jsx');
 var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
 //var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx'); // <Route path="deleteAccount" component={DeleteAccount} />
 var Company = require('./components/Company/Company.react.jsx');
+var People = require('./components/Company/People.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
 
@@ -36,7 +37,9 @@ var Routes = React.createClass({
             <Route path="changePassword" component={ChangePassword} />
             <Redirect from="*" to="404" />
           </Route>
-          <Route path="company" component={Company} />
+          <Route path="company" component={Company}>
+            <Route path="people" component={People} />
+          </Route>
           <Route path="editor" component={Editor} />
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />
