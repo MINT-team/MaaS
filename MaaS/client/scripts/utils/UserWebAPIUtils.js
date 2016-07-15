@@ -7,11 +7,15 @@ var request = require('superagent');
 function _getErrors(json) {
   var error, message;
     if(json.message) {
-      message = json.message;
-      // Email
-      if(JSON.stringify(message).match(/mail/)) {
+        message = json.message;
+        // Email
+        if(JSON.stringify(message).match(/mail/)) {
           error = "Email not found, insert your registered email";
-      }
+        }
+        // Other cases
+        if(!error) {
+            error = message;
+        }
     }
     return error;
 }
