@@ -19,7 +19,6 @@ var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
 var Company = require('./components/Company/Company.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-//var ManageDashboard = req
 
 var Routes = React.createClass({
   render: function() {
