@@ -32,6 +32,13 @@
   },
   "acls": [
     {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "Owner",
+      "permission": "DENY",
+      "property": "*"
+    },
+    {
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW",
