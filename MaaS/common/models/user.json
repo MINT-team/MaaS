@@ -22,7 +22,10 @@
       "type": "string"
     },
     "editor-config": {
-      "type": "object"
+      "type": "object",
+      "default": {
+          "theme": "chaos"
+      }
     }
   },
   "validations": [],

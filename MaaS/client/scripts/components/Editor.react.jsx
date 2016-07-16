@@ -1,9 +1,16 @@
 var React = require('react');
+var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/chaos');
 
 var Editor = React.createClass({
+
+    onload: function(){
+
+    },
+
     componentDidMount: function() {
         var script = document.createElement("script");
         script.src = "editor-config.js";

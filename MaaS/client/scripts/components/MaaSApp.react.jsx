@@ -46,7 +46,7 @@ var MaaSApp = React.createClass({
             <div id="app">
                 <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
                 {this.props.children}
-                <Footer />
+                <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
             </div>
 	    );
     }

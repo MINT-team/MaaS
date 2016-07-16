@@ -156,6 +156,10 @@ var UserActionCreator = {
 
     getCompany: function getCompany(userId) {
         WebAPIUtils.getCompany(userId);
+    },
+
+    getEditorConfig: function getEditorConfig(userId) {
+        WebAPIUtils.getEditorConfig(userId);
     }
 };
 
@@ -331,12 +335,17 @@ module.exports = Company;
 'use strict';
 
 var React = require('react');
+var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/chaos');
 
 var Editor = React.createClass({
     displayName: 'Editor',
+
+
+    onload: function onload() {},
 
     componentDidMount: function componentDidMount() {
         var script = document.createElement("script");
@@ -353,7 +362,7 @@ var Editor = React.createClass({
 
 module.exports = Editor;
 
-},{"brace":31,"brace/mode/javascript":32,"brace/theme/chaos":34,"react":291}],8:[function(require,module,exports){
+},{"../actions/UserActionCreator.react.jsx":4,"brace":31,"brace/mode/javascript":32,"brace/theme/chaos":34,"react":291}],8:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -409,76 +418,147 @@ module.exports = Error404;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
 
 var Footer = React.createClass({
 	displayName: 'Footer',
 
+
+	logout: function logout() {
+		var accessToken = sessionStorage.getItem('accessToken');
+		SessionActionCreator.logout(accessToken);
+	},
+
 	render: function render() {
-		return React.createElement(
-			'div',
-			{ id: 'footer' },
-			React.createElement(
+		var footerLeft, footerCenter, footerRight;
+		if (this.props.isLogged) {
+			footerCenter = React.createElement(
 				'div',
-				{ className: 'footer-left' },
-				React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo', height: '40',
-					width: '210' }),
+				{ className: 'Loggedfooter-center' },
+				React.createElement(
+					Link,
+					{ to: '/company', id: 'header-title' },
+					this.props.companyName
+				),
 				React.createElement(
 					'p',
 					{ className: 'footer-links' },
 					React.createElement(
-						'a',
-						{ target: '_black', href: 'http://redbabel.com' },
-						'Home'
+						Link,
+						{ to: '/', id: 'home' },
+						' Home '
 					),
 					'·',
 					React.createElement(
-						'a',
-						{ href: '#' },
-						'Contact'
+						Link,
+						{ onClick: this.logout, to: '' },
+						'Logout'
 					)
+				),
+				React.createElement(
+					'p',
+					{ className: 'text-footer' },
+					'MaaS is offer by RedBabel and develop by MINT with love. '
 				)
-			),
-			React.createElement(
+			);
+		} else {
+			footerCenter = React.createElement(
 				'div',
 				{ className: 'footer-center' },
 				React.createElement(
-					'div',
-					null,
-					React.createElement(
-						'p',
-						null,
-						'Maas is offered by RedBabel and developed by MINT with love.'
-					)
-				)
-			),
-			React.createElement(
-				'div',
-				{ className: 'footer-right' },
-				React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo', height: '90',
-					width: '200' }),
+					Link,
+					{ to: '/', id: 'header-title' },
+					'MaaS'
+				),
+				React.createElement(
+					'p',
+					{ id: 'header-description' },
+					'MongoDB as an Admin Service'
+				),
 				React.createElement(
 					'p',
 					{ className: 'footer-links' },
 					React.createElement(
-						'a',
-						{ target: '_black', href: 'https://github.com/MINT-team/' },
-						'Home'
+						Link,
+						{ to: '/', id: 'home' },
+						' Home '
 					),
 					'·',
 					React.createElement(
-						'a',
-						{ href: '#' },
-						'Contact'
+						Link,
+						{ to: '/login', id: 'login' },
+						' Login '
+					),
+					'·',
+					React.createElement(
+						Link,
+						{ to: '/register', id: 'register' },
+						' Sign Up '
 					)
+				),
+				React.createElement(
+					'p',
+					{ className: 'text-footer' },
+					'MaaS is offer by RedBabel and develop by MINT with love. '
+				)
+			);
+		}
+
+		footerLeft = React.createElement(
+			'div',
+			{ className: 'footer-left' },
+			React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo' }),
+			React.createElement(
+				'p',
+				{ className: 'footer-links' },
+				React.createElement(
+					'a',
+					{ href: 'http://redbabel.com' },
+					'Home'
+				),
+				'·',
+				React.createElement(
+					'a',
+					{ href: '#' },
+					'Contact'
 				)
 			)
+		);
+
+		footerRight = React.createElement(
+			'div',
+			{ className: 'footer-right' },
+			React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo' }),
+			React.createElement(
+				'p',
+				{ className: 'footer-links' },
+				React.createElement(
+					'a',
+					{ href: 'https://github.com/MINT-team/' },
+					'Home'
+				),
+				'·',
+				React.createElement(
+					'a',
+					{ href: '#' },
+					'Contact'
+				)
+			)
+		);
+
+		return React.createElement(
+			'div',
+			{ id: 'footer' },
+			footerLeft,
+			footerCenter,
+			footerRight
 		);
 	}
 });
 
 module.exports = Footer;
 
-},{"react":291,"react-router":74}],10:[function(require,module,exports){
+},{"../actions/SessionActionCreator.react.jsx":3,"react":291,"react-router":74}],10:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -980,7 +1060,7 @@ var MaaSApp = React.createClass({
             { id: 'app' },
             React.createElement(Header, { isLogged: this.state.isLogged, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
             this.props.children,
-            React.createElement(Footer, null)
+            React.createElement(Footer, { isLogged: this.state.isLogged, companyName: this.state.company })
         );
     }
 });
@@ -2814,6 +2894,14 @@ module.exports = {
     request.get(APIEndpoints.USERS + '/' + userId + '/company').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
         ServerActionCreators.response_getCompany(res.body);
+      }
+    });
+  },
+
+  getEditorConfig: function getEditorConfig(userId) {
+    request.get(APIEndpoints.USERS + '/' + userId).end(function (error, res) {
+      if (res) {
+        ServerActionCreators.response_getEditorConfig(res.body);
       }
     });
   }

@@ -124,6 +124,18 @@ module.exports = {
           ServerActionCreators.response_getCompany(res.body);
         }
       });
+  },
+
+  getEditorConfig: function(userId){
+      request
+        .get(APIEndpoints.USERS + '/' + userId )
+
+        .end(function(error, res){
+        if(res) {
+          ServerActionCreators.response_getEditorConfig(res.body);
+        }
+  });
   }
+
 
 };

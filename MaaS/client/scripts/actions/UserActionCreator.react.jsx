@@ -23,6 +23,10 @@ var UserActionCreator = {
 
     getCompany: function(userId) {
         WebAPIUtils.getCompany(userId);
+    },
+
+    getEditorConfig: function(userId){
+        WebAPIUtils.getEditorConfig(userId);
     }
 };
 
