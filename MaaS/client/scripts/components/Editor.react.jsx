@@ -6,11 +6,6 @@ require('brace/mode/javascript');
 require('brace/theme/chaos');
 
 var Editor = React.createClass({
-
-    onload: function(){
-
-    },
-
     componentDidMount: function() {
         var script = document.createElement("script");
         script.src = "editor-config.js";

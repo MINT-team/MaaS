@@ -308,17 +308,14 @@ input {
     color: white;
     text-decoration: none;
 }
-.footer-centerUnLogged .text-footer,
-.footer-centerLogged .text-footer{
+
+
+.text-footer{
     margin-top:6%;
 	font-size: 12px;
 	font-weight: normal;
 }
 
-#footer .footer-centerUnLogged.text-footer
-#footer .footer-centerLogged.text-footer {
-  font-size: 2pt;
-}
 
 
 #footer .footer-left,
