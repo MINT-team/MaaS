@@ -20,10 +20,7 @@ var Company = require('./components/Company/Company.react.jsx');
 var People = require('./components/Company/People.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-<<<<<<< HEAD
 var ManageDashboard = require('./components/ManageDashboard.react.jsx');
-=======
->>>>>>> c179a26a7483fe4668d5fcb4d6a534afa1990811
 
 var Routes = React.createClass({
   render: function() {

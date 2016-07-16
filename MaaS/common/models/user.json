@@ -20,6 +20,12 @@
     },
     "gender": {
       "type": "string"
+    },
+    "editor-config": {
+      "type": "object",
+      "default": {
+          "theme": "chaos"
+      }
     }
   },
   "validations": [],

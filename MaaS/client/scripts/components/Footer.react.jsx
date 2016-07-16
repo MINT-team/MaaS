@@ -1,64 +1,76 @@
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
 
 var Footer = React.createClass({
+
+	logout: function() {
+		var accessToken = sessionStorage.getItem('accessToken');
+		SessionActionCreator.logout(accessToken);
+	},
+
     render: function() {
-        return (
-        	<footer className="footer-distributed">
+		var footerLeft, footerCenter, footerRight;
+    	if (this.props.isLogged) {
+    		footerCenter = (
+    			<div className="footer-centerLooged">
+					<Link to="/company" id="header-title">{this.props.companyName}</Link>
+					<p className="footer-links">
+					<Link to="/" id="home"> Home </Link>
+					·
+					<Link onClick={this.logout} to="">Logout</Link>
+					</p>
+					<p className="text-footer">MaaS is offer by RedBabel and develop by MINT with love. </p>
+				</div>
+    		);
+    	}
+    	else{
+    		footerCenter = (
+    			<div className="footer-centerUnLooged">
+					<Link to="/" id="header-title">MaaS</Link>
+					<p id="header-description">MongoDB as an Admin Service</p>
+					<p className="footer-links">
+					<Link to="/" id="home"> Home </Link>
+					·
+					<Link to="/login" id="login"> Login </Link>
+					·
+					<Link to="/register" id="register"> Sign Up </Link>
+					</p>
+					<p className="text-footer">MaaS is offer by RedBabel and develop by MINT with love. </p>
+				</div>
+    		);
 
-			<div className="footer-left">
+    	}
 
-				<h3>Company<span>logo</span></h3>
-
+    	footerLeft = (
+    		<div className="footer-left">
+				<img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/>
 				<p className="footer-links">
-					<a href="#">Home</a>
-					·
-					<a href="#">Blog</a>
-					·
-					<a href="#">Pricing</a>
-					·
-					<a href="#">About</a>
-					·
-					<a href="#">Faq</a>
+					<a href="http://redbabel.com">Home</a>
 					·
 					<a href="#">Contact</a>
 				</p>
-
-				<p className="footer-company-name">Company Name &copy; 2015</p>
 			</div>
+    	);
 
-			<div className="footer-center">
-
-				<div>
-					<i className="fa fa-map-marker"></i>
-					<p><span>21 Revolution Street</span> Paris, France</p>
-				</div>
-
-				<div>
-					<i className="fa fa-phone"></i>
-					<p>+1 555 123456</p>
-				</div>
-
-				<div>
-					<i className="fa fa-envelope"></i>
-					<p><a href="mailto:support@company.com">support@company.com</a></p>
-				</div>
-
-			</div>
-
+    	footerRight = (
 			<div className="footer-right">
-
-				<p className="footer-company-about">
-					<span>About the company</span>
-					Lorem ipsum dolor sit amet, consectateur adispicing elit. Fusce euismod convallis velit, eu auctor lacus vehicula sit amet.
-				</p>
-
-
+				<img src="../../images/mint_logo.png" alt="MINT Logo"/>
+				<p className="footer-links">
+					<a href="https://github.com/MINT-team/">Home</a>
+					·
+					<a href="#">Contact</a>
+					</p>
 			</div>
+    	);
 
-		</footer>
-
-            );
+        return (
+        	<div id="footer">
+        		{footerLeft}
+			    {footerCenter}
+			    {footerRight}
+			</div>
+        );
     }
 });
 

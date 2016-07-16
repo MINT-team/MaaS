@@ -112,6 +112,15 @@ module.exports = function(user) {
         });
     };
 
+    user.getEditorConfig = function(userId,cb) {
+        user.findById(userId, function(err, user) {
+            if (err)
+                return cb(err);
+            console.log(user.property);
+        });
+    };
+
+
     user.remoteMethod(
         'signUp',
         {
