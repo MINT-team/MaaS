@@ -91,15 +91,6 @@ module.exports = function(user) {
         });
     };
 
-    user.getEditorConfig = function(userId,cb) {
-        user.findById(userId, function(err, user) {
-            if (err)
-                return cb(err);
-            console.log(user.property);
-        });
-    };
-
-
     user.remoteMethod(
         'signUp',
         {
@@ -119,18 +110,35 @@ module.exports = function(user) {
         }
     );
 
+    // Get editor configurations
+    user.getEditorConfig = function(id, cb) {
+        user.findById(id, function(err, user) {
+            if (err)
+                return cb(err);
+            console.log('prop:', user.editor_config);
+            return cb(null,user.editor_config);
+        });
+    };
+
+    user.remoteMethod(
+        'getEditorConfig',
+        {
+            description: 'Get editor configurations of the user.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'},
+            ],
+            returns: [
+                {arg: 'config', type: 'Object'}
+            ],
+            http: { verb: 'get', path: '/:id/getEditorConfig' }
+        }
+    );
+
+
+
+
     // TO DO: SIGN UP BY INVITE -> registrazione membri company (ruoli: admin, member, guest)
-        // Create the admin role
-        // Role.create({ name: 'admin' }, function(err, role) {
-        //     if(err) return cb(null, err);
-        //     // Make the user an admin
-        //     role.principals.create({
-        //         principalType: RoleMapping.USER,
-        //         principalId: userInstance.id
-        //     }, function(err, principal) {
-        //         return cb(null, err);
-        //     });
-        // });
+
 
     // Controllo i dati di registrazione prima della creazione
     /*user.beforeRemote('create', function(context, member, next) {

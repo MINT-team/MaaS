@@ -47,7 +47,7 @@ module.exports = {
       });
   },
 
-  changePassword: function(id, password, confirmation, accessToken){
+  changePassword: function(id, password, confirmation, accessToken){ //accessToken come parametro obbligatorio
     request
       .post(APIEndpoints.USERS + '/' + id + '/changePassword')
       .set('Accept', 'application/json')
@@ -123,7 +123,7 @@ module.exports = {
       .get(APIEndpoints.USERS + '/' + userId + '/company')
       .set('Accept', 'application/json')
       .set('Authorization', sessionStorage.getItem('accessToken'))
-      .end(function(error, res){
+      .end(function(error, res) {
         if(res) {
           ServerActionCreators.response_getCompany(res.body);
         }
@@ -132,14 +132,14 @@ module.exports = {
 
   getEditorConfig: function(userId){
       request
-        .get(APIEndpoints.USERS + '/' + userId )
-
+        .get(APIEndpoints.USERS + '/' + userId + '/getEditorConfig')
+        .set('Accept', 'application/json')
+        .set('Authorization', sessionStorage.getItem('accessToken'))
         .end(function(error, res){
-        if(res) {
-          ServerActionCreators.response_getEditorConfig(res.body);
-        }
-  });
+          /*if(res) {
+            ServerActionCreators.response_getEditorConfig(res.body);
+          }*/
+        });
   }
-
 
 };

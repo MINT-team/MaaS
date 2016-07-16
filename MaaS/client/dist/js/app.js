@@ -525,6 +525,7 @@ module.exports = People;
 
 var React = require('react');
 var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+var SessionStore = require('../stores/SessionStore.react.jsx');
 
 var ace = require('brace');
 require('brace/mode/javascript');
@@ -539,6 +540,7 @@ var Editor = React.createClass({
         script.type = "text/javascript";
         script.charset = "utf-8";
         document.body.appendChild(script);
+        UserActionCreator.getEditorConfig(SessionStore.getUserId());
     },
 
     render: function render() {
@@ -548,7 +550,7 @@ var Editor = React.createClass({
 
 module.exports = Editor;
 
-},{"../actions/UserActionCreator.react.jsx":4,"brace":33,"brace/mode/javascript":34,"brace/theme/chaos":36,"react":293}],10:[function(require,module,exports){
+},{"../actions/UserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":28,"brace":33,"brace/mode/javascript":34,"brace/theme/chaos":36,"react":293}],10:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -644,7 +646,7 @@ var Footer = React.createClass({
 				React.createElement(
 					'p',
 					{ className: 'text-footer' },
-					'MaaS is offer by RedBabel and develop by MINT with love. '
+					'MaaS is offered by RedBabel and developed with love by MINT. '
 				)
 			);
 		} else {
@@ -689,7 +691,6 @@ var Footer = React.createClass({
 				)
 			);
 		}
-
 		footerLeft = React.createElement(
 			'div',
 			{ className: 'footer-left' },
@@ -699,7 +700,6 @@ var Footer = React.createClass({
 				React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo' })
 			)
 		);
-
 		footerRight = React.createElement(
 			'div',
 			{ className: 'footer-right' },
@@ -709,7 +709,6 @@ var Footer = React.createClass({
 				React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo' })
 			)
 		);
-
 		return React.createElement(
 			'div',
 			{ id: 'footer' },
@@ -1504,6 +1503,7 @@ module.exports = ChangePassword;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
 
@@ -1544,7 +1544,7 @@ var PersonalData = React.createClass({
       dateOfBirth: UserStore.getDateOfBirth(),
       gender: UserStore.getGender(),
       radioGender: UserStore.getGender(),
-      errors: UserStore.getErrors(),
+      errors: [],
       email: null
     };
   },
@@ -1578,7 +1578,8 @@ var PersonalData = React.createClass({
     var gender = this.state.radioGender;
     // call the action only if something has changed
     if (name != this.state.name || surname != this.state.surname || dateOfBirth != getDateOfBirth(this.state.dateOfBirth) || gender != this.state.gender) {
-      UserActionCreator.changePersonalData(sessionStorage.getItem('userId'), name, surname, dateOfBirth, gender);
+      alert(SessionStore.getUserId());
+      UserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
     } else {
       this._setError("No changes to save");
     }
@@ -1705,7 +1706,7 @@ var PersonalData = React.createClass({
 
 module.exports = PersonalData;
 
-},{"../../actions/UserActionCreator.react.jsx":4,"../../stores/UserStore.react.jsx":29,"react":293,"react-router":76}],20:[function(require,module,exports){
+},{"../../actions/UserActionCreator.react.jsx":4,"../../stores/SessionStore.react.jsx":28,"../../stores/UserStore.react.jsx":29,"react":293,"react-router":76}],20:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -3020,6 +3021,7 @@ module.exports = {
   },
 
   changePassword: function changePassword(id, password, confirmation, accessToken) {
+    //accessToken come parametro obbligatorio
     request.post(APIEndpoints.USERS + '/' + id + '/changePassword').set('Accept', 'application/json').set('Authorization', accessToken) // necessario per questa API, in questo caso viene passato a mano perchè potrebbe provenire dalla query url - vedesi 'ChangePassword.react.jsx'
     //.type('form')
     //.set('Content-Type', 'application/x-www-form-urlencoded')
@@ -3087,10 +3089,10 @@ module.exports = {
   },
 
   getEditorConfig: function getEditorConfig(userId) {
-    request.get(APIEndpoints.USERS + '/' + userId).end(function (error, res) {
-      if (res) {
+    request.get(APIEndpoints.USERS + '/' + userId + '/getEditorConfig').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
+      /*if(res) {
         ServerActionCreators.response_getEditorConfig(res.body);
-      }
+      }*/
     });
   }
 

@@ -316,6 +316,7 @@ input {
     margin-top:6%;
 	font-size: 12px;
 	font-weight: normal;
+	color:  lightgreen;
 }
 
 #footer .footer-left,
@@ -367,11 +368,9 @@ input {
 }
 
 #footer .footer-centerLooged,
-#footer .footer-centerUnLooged p a{
-	color:  lightgreen;
-	text-decoration: none;;
+#footer .footer-centerUnLooged {
+	text-decoration: none;
 }
-
 
 /* Footer Right */
 

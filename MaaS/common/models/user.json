@@ -24,7 +24,7 @@
     "role": {
       "type": "string"
     },
-    "editor-config": {
+    "editor_config": {
       "type": "object",
       "default": {
           "theme": "chaos"
@@ -76,6 +76,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__company"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "getEditorConfig"
     }
   ],
   "methods": {}

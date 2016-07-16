@@ -5,12 +5,13 @@ var APIRoot = "https://maas-navid94.c9users.io/api";
 module.exports = {
 
   APIEndpoints: {
-    USERS:            APIRoot + "/users",
-    SIGNUP:           APIRoot + "/users/signUp",
-    LOGIN:            APIRoot + "/users/login",
-    LOGOUT:           APIRoot + "/users/logout",
-    RESET_PASSWORD:   APIRoot + "/users/reset",
-    COMPANY:          APIRoot + "/Companies"
+    USERS:              APIRoot + "/users",
+    SIGNUP:             APIRoot + "/users/signUp",
+    LOGIN:              APIRoot + "/users/login",
+    LOGOUT:             APIRoot + "/users/logout",
+    RESET_PASSWORD:     APIRoot + "/users/reset",
+    COMPANY:            APIRoot + "/Companies",
+    //GET_EDITOR_CONFIG:  APIRoot + "/users/getEditorConfig"
   },
 
   PayloadSources: keyMirror({
