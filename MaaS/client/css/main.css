@@ -308,14 +308,15 @@ input {
     color: white;
     text-decoration: none;
 }
-
-.footer-center .text-footer{
+.footer-centerUnLogged .text-footer,
+.footer-centerLogged .text-footer{
     margin-top:6%;
 	font-size: 12px;
 	font-weight: normal;
 }
 
-#footer.footer-center.text-footer {
+#footer .footer-centerUnLogged.text-footer
+#footer .footer-centerLogged.text-footer {
   font-size: 2pt;
 }
 
@@ -359,6 +360,7 @@ input {
 
 /* Footer Center */
 
+#footer .footer-centerLooged,
 #footer .footer-centerUnLooged{
 	text-align: center;
 	margin-top: 1%;
@@ -366,11 +368,12 @@ input {
 	width: 33%;
 }
 
-
+#footer .footer-centerLooged,
 #footer .footer-centerUnLooged h1{
     margin-bottom: 3.5%;
 }
 
+#footer .footer-centerLooged,
 #footer .footer-centerUnLooged p a{
 	color:  #5383d3;
 	text-decoration: none;;
@@ -397,7 +400,7 @@ input {
 	}
 
 	#footer .footer-left,
-	#footer .footer-centerLooged
+	#footer .footer-centerLooged,
 	#footer .footer-centerUnLooged,
 	#footer .footer-right{
 		display: block;
@@ -406,7 +409,7 @@ input {
 		text-align: center;
 	}
 
-    #footer .footer-centerLooged
+    #footer .footer-centerLooged,
 	#footer .footer-centerUnLooged i{
 		margin-left: 0;
 	}

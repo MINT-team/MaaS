@@ -13,7 +13,7 @@ var Footer = React.createClass({
 		var footerLeft, footerCenter, footerRight;
     	if (this.props.isLogged) {
     		footerCenter = (
-    			<div className="Loggedfooter-center">
+    			<div className="footer-centerLooged">
 					<Link to="/company" id="header-title">{this.props.companyName}</Link>
 					<p className="footer-links">
 					<Link to="/" id="home"> Home </Link>
@@ -26,7 +26,7 @@ var Footer = React.createClass({
     	}
     	else{
     		footerCenter = (
-    			<div className="footer-center">
+    			<div className="footer-centerUnLooged">
 					<Link to="/" id="header-title">MaaS</Link>
 					<p id="header-description">MongoDB as an Admin Service</p>
 					<p className="footer-links">

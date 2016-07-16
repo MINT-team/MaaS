@@ -434,7 +434,7 @@ var Footer = React.createClass({
 		if (this.props.isLogged) {
 			footerCenter = React.createElement(
 				'div',
-				{ className: 'Loggedfooter-center' },
+				{ className: 'footer-centerLooged' },
 				React.createElement(
 					Link,
 					{ to: '/company', id: 'header-title' },
@@ -464,7 +464,7 @@ var Footer = React.createClass({
 		} else {
 			footerCenter = React.createElement(
 				'div',
-				{ className: 'footer-center' },
+				{ className: 'footer-centerUnLooged' },
 				React.createElement(
 					Link,
 					{ to: '/', id: 'header-title' },
