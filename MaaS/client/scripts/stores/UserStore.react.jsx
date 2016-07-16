@@ -15,6 +15,7 @@ var _user = {
               dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
+              role: sessionStorage.getItem('userRole')
             };
 var _errors = [];
 
@@ -148,6 +149,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _user.dateOfBirth = new Date(action.json.dateOfBirth);
             _user.gender = action.json.gender || "";
             _user.avatar = action.json.avatar;
+            _user.role = action.json.role;
             // save session data
             sessionStorage.setItem('email', _user.email);
             sessionStorage.setItem('userName', _user.name);
@@ -155,6 +157,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
             sessionStorage.setItem('userGender', _user.gender);
             sessionStorage.setItem('userAvatar', _user.avatar);
+            sessionStorage.setItem('userRole', _user.role);
         }
         UserStore.emitChange();
         break;

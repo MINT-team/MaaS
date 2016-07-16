@@ -29,11 +29,9 @@ module.exports = {
       .end(function(err, res){
         if(res) {
             if(res.error) {
-                alert(res.error);
                 var errors = _getErrors(res.body.error);
                 ServerActionCreators.receiveCompanyUsers(null, errors);
             } else {
-                console.log(res.body);
                 ServerActionCreators.receiveCompanyUsers(res.body, null);
             }
         }

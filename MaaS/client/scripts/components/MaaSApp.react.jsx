@@ -41,7 +41,7 @@ var MaaSApp = React.createClass({
     	this.setState(getState());
     },
 
-    render() {
+    render: function() {
         return (
             <div id="app">
                 <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />

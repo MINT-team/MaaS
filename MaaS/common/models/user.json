@@ -7,7 +7,7 @@
   },
   "properties": {
     "avatar": {
-      "type": "object"
+      "type": "string"
     },
     "name": {
       "type": "string"
@@ -19,6 +19,9 @@
       "type": "date"
     },
     "gender": {
+      "type": "string"
+    },
+    "role": {
       "type": "string"
     },
     "editor-config": {

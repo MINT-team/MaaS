@@ -79,16 +79,10 @@ body {
 
 .table-header {
     font-weight: bold;
-    box-shadow: lightgrey 0em -0.05em 0.1em, lightgrey 0em 0.2em 0.2em;
 }
-
-.table-header span {
-    box-shadow: lightgrey -0.05em 0em 0.1em;
-}
-
 
 .table-row {
-    box-shadow: lightgrey 0em 0.2em 0.2em;
+    box-shadow: lightgrey 0em 0.2em 0.2em, lightgrey 0em -0.02em 0em;
 }
 
 .table-row img {
@@ -96,9 +90,15 @@ body {
     position: absolute;
     width: 2em;
     height: 2em;
-    margin-left: -2em;
+    margin-left: -1.8em;
     margin-top: -0.2em;
-    background-color: lightgray;
+}
+
+.table-row i {
+    position: absolute;
+    margin-left: -0.8em;
+    margin-top: -0.2em;
+    color: darkgray;
 }
 
 .table-column-small {
@@ -294,12 +294,11 @@ input {
 
 #footer{
 	background-color: #292c2f;
-	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
 	box-sizing: border-box;
 	color: #ffffff;
 	box-shadow: lightgreen 0 -0.2em;
-	padding: 1px 15px;
-	margin-top: 50px;
+	margin-top: 5em;
+	min-height: 15em;
 }
 
 #footer a {
@@ -309,14 +308,15 @@ input {
     text-decoration: none;
 }
 
+#footer a:hover{
+	color: lightgreen;
+}
 
 .text-footer{
     margin-top:6%;
 	font-size: 12px;
 	font-weight: normal;
 }
-
-
 
 #footer .footer-left,
 #footer .footer-centerUnLooged,
@@ -329,21 +329,18 @@ input {
 /* Footer left */
 
 #footer .footer-left{
-	margin-top: 3%;
 	width: 33%;
+	margin-top: 5em;
 	text-align: center;
 }
 
 #footer .footer-left img{
-	width:55%;
-	margin-top: 2%;
-	margin-bottom: 10%;
+	width: 55%;
 }
 
 /* Footer links */
 
 #footer .footer-links{
-	color:  #ffffff;
 	margin: 20px 0 12px;
 	padding: 0;
 }
@@ -352,7 +349,6 @@ input {
 	display:inline-block;
 	line-height: 1.8;
 	text-decoration: none;
-	color:  inherit;
 }
 
 /* Footer Center */
@@ -360,7 +356,7 @@ input {
 #footer .footer-centerLooged,
 #footer .footer-centerUnLooged{
 	text-align: center;
-	margin-top: 1%;
+	margin-top: 2em;
 	color: #ffffff;
 	width: 33%;
 }
@@ -372,7 +368,7 @@ input {
 
 #footer .footer-centerLooged,
 #footer .footer-centerUnLooged p a{
-	color:  #5383d3;
+	color:  lightgreen;
 	text-decoration: none;;
 }
 
@@ -381,11 +377,12 @@ input {
 
 #footer .footer-right{
 	width: 33%;
+	margin-top: 2em;
 	text-align: center;
 }
 
 #footer .footer-right img{
-	width:50%;
+	width: 50%;
 }
 
 /* Responive */
@@ -766,7 +763,12 @@ input {
     height: 5em;
     width: 5em;
     margin: 0 1em 2em 1em;
-    background-color: gray;
+}
+
+#avatar-i {
+    font-size: 6em;
+    color: darkgray;
+    margin: 0 0.1em 0.2em 0.1em;
 }
 
 #left-arrow {

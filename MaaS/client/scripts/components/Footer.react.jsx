@@ -16,10 +16,10 @@ var Footer = React.createClass({
     			<div className="footer-centerLooged">
 					<Link to="/company" id="header-title">{this.props.companyName}</Link>
 					<p className="footer-links">
-					<Link to="/" id="home"> Home </Link>
-					·
-					<Link onClick={this.logout} to="">Logout</Link>
-					</p>
+						<Link to="/" id="home"> Home </Link>
+						·
+						<Link onClick={this.logout} to="">Logout</Link>
+						</p>
 					<p className="text-footer">MaaS is offer by RedBabel and develop by MINT with love. </p>
 				</div>
     		);
@@ -30,13 +30,13 @@ var Footer = React.createClass({
 					<Link to="/" id="header-title">MaaS</Link>
 					<p id="header-description">MongoDB as an Admin Service</p>
 					<p className="footer-links">
-					<Link to="/" id="home"> Home </Link>
-					·
-					<Link to="/login" id="login"> Login </Link>
-					·
-					<Link to="/register" id="register"> Sign Up </Link>
+						<Link to="/" id="home"> Home </Link>
+						·
+						<Link to="/login" id="login"> Login </Link>
+						·
+						<Link to="/register" id="register"> Sign Up </Link>
 					</p>
-					<p className="text-footer">MaaS is offer by RedBabel and develop by MINT with love. </p>
+					<p className="text-footer">MaaS is offered by RedBabel and developed with love by MINT. </p>
 				</div>
     		);
 
@@ -44,23 +44,13 @@ var Footer = React.createClass({
 
     	footerLeft = (
     		<div className="footer-left">
-				<img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/>
-				<p className="footer-links">
-					<a href="http://redbabel.com">Home</a>
-					·
-					<a href="#">Contact</a>
-				</p>
+				<a href="http://redbabel.com"><img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/></a>
 			</div>
     	);
 
     	footerRight = (
 			<div className="footer-right">
-				<img src="../../images/mint_logo.png" alt="MINT Logo"/>
-				<p className="footer-links">
-					<a href="https://github.com/MINT-team/">Home</a>
-					·
-					<a href="#">Contact</a>
-					</p>
+				<a href="https://github.com/MINT-team/"><img src="../../images/mint_logo.png" alt="MINT Logo"/></a>
 			</div>
     	);
 

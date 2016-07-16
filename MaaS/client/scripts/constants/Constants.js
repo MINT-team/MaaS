@@ -1,6 +1,6 @@
 var keyMirror = require('keymirror');
 
-var APIRoot = "https://maas-fabiano-navid94.c9users.io/api";
+var APIRoot = "https://maas-navid94.c9users.io/api";
 
 module.exports = {
 

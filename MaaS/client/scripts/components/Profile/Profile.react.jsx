@@ -9,7 +9,7 @@ function getState() {
           email: UserStore.getEmail(),
           dateOfBirth: UserStore.getDateOfBirth(),
           gender: UserStore.getGender(),
-          //avatar: UserStore.getAvatar()   // TO DO
+          avatar: UserStore.getAvatar()
       };
 }
 
@@ -36,7 +36,7 @@ var Profile = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name, dateOfBirth, gender;
+      var name, dateOfBirth, gender, avatar = this.state.avatar;
       if((!this.state.name && !this.state.surname)) {
         name = "Complete your account here";
       } else {
@@ -56,10 +56,15 @@ var Profile = React.createClass({
       } else {
         gender = this.state.gender;
       }
+      if(!this.state.avatar || this.state.avatar=="undefined") {
+        avatar = (<i id="avatar-i" className="material-icons">&#xE851;</i>);
+      } else {
+        avatar = (<img id="avatar" src={"../../../images/"+this.state.avatar} />);  // da cambiare col servizio esterno
+      }
       content = (
         <div className="container">
           <p className="container-title">{name}</p>
-          <img id="avatar" src="" />
+          {avatar}
           <div className="form-container">
             <div className="form-field">
               <label>Email:</label>

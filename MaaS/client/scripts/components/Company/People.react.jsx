@@ -58,7 +58,7 @@ var People = React.createClass({
         );
     }
 
-    var title, content;
+    var title, content, avatar;
     if(!(this.props.users.length > 1)) {
         title = "Users of your Company";
                     // Avatar, nome, cognome, ruolo, email
@@ -72,15 +72,15 @@ var People = React.createClass({
                     <span className="table-column-big">Email</span>
                 </div>
                 {this.props.users.map((u) =>
-			    	<div className="table-row">
-    					<span className="table-column-small"><img src={u.avatar} /></span>
-    					<span className="table-column-normal">{u.name}</span>
-    					<span className="table-column-normal">{u.surname}</span>
-    					<span className="table-column-normal">{u.role}</span>
-    					<span className="table-column-big">{u.email}</span>
-    				</div>
-			    )}
-			    <Invite />
+                  <div className="table-row">
+          					<span className="table-column-small">{u.avatar? (<img src={"../../../images/"+u.avatar} />) : (<i className="material-icons md-36">&#xE851;</i>)}</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					<span className="table-column-big">{u.email}</span>
+          				</div>
+      			    )}
+			          <Invite />
             </div>
         );
     } else {

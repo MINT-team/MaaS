@@ -322,7 +322,7 @@ var Company = React.createClass({
 
     return React.createElement(
       'div',
-      { id: 'profile-settings' },
+      { id: 'company' },
       React.createElement(Sidebar, { title: 'Company', titleLink: '/company', data: sidebarData }),
       content
     );
@@ -423,16 +423,16 @@ var People = React.createClass({
             );
         }
 
-        var title, content;
+        var title, content, avatar;
         if (!(this.props.users.length > 1)) {
             title = "Users of your Company";
+            // Avatar, nome, cognome, ruolo, email
             content = React.createElement(
                 'div',
                 { className: 'table-content' },
                 React.createElement(
                     'div',
                     { className: 'table-header' },
-                    '// Avatar, nome, cognome, ruolo, email',
                     React.createElement('p', { className: 'table-column-small' }),
                     React.createElement(
                         'span',
@@ -462,7 +462,11 @@ var People = React.createClass({
                         React.createElement(
                             'span',
                             { className: 'table-column-small' },
-                            React.createElement('img', { src: u.avatar })
+                            u.avatar ? React.createElement('img', { src: "../../../images/" + u.avatar }) : React.createElement(
+                                'i',
+                                { className: 'material-icons md-36' },
+                                ''
+                            )
                         ),
                         React.createElement(
                             'span',
@@ -681,7 +685,7 @@ var Footer = React.createClass({
 				React.createElement(
 					'p',
 					{ className: 'text-footer' },
-					'MaaS is offer by RedBabel and develop by MINT with love. '
+					'MaaS is offered by RedBabel and developed with love by MINT. '
 				)
 			);
 		}
@@ -689,42 +693,20 @@ var Footer = React.createClass({
 		footerLeft = React.createElement(
 			'div',
 			{ className: 'footer-left' },
-			React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo' }),
 			React.createElement(
-				'p',
-				{ className: 'footer-links' },
-				React.createElement(
-					'a',
-					{ href: 'http://redbabel.com' },
-					'Home'
-				),
-				'·',
-				React.createElement(
-					'a',
-					{ href: '#' },
-					'Contact'
-				)
+				'a',
+				{ href: 'http://redbabel.com' },
+				React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo' })
 			)
 		);
 
 		footerRight = React.createElement(
 			'div',
 			{ className: 'footer-right' },
-			React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo' }),
 			React.createElement(
-				'p',
-				{ className: 'footer-links' },
-				React.createElement(
-					'a',
-					{ href: 'https://github.com/MINT-team/' },
-					'Home'
-				),
-				'·',
-				React.createElement(
-					'a',
-					{ href: '#' },
-					'Contact'
-				)
+				'a',
+				{ href: 'https://github.com/MINT-team/' },
+				React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo' })
 			)
 		);
 
@@ -1736,7 +1718,8 @@ function getState() {
     surname: UserStore.getSurname(),
     email: UserStore.getEmail(),
     dateOfBirth: UserStore.getDateOfBirth(),
-    gender: UserStore.getGender()
+    gender: UserStore.getGender(),
+    avatar: UserStore.getAvatar()
   };
 }
 
@@ -1765,7 +1748,10 @@ var Profile = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name, dateOfBirth, gender;
+      var name,
+          dateOfBirth,
+          gender,
+          avatar = this.state.avatar;
       if (!this.state.name && !this.state.surname) {
         name = "Complete your account here";
       } else {
@@ -1785,6 +1771,15 @@ var Profile = React.createClass({
       } else {
         gender = this.state.gender;
       }
+      if (!this.state.avatar || this.state.avatar == "undefined") {
+        avatar = React.createElement(
+          'i',
+          { id: 'avatar-i', className: 'material-icons' },
+          ''
+        );
+      } else {
+        avatar = React.createElement('img', { id: 'avatar', src: "../../../images/" + this.state.avatar }); // da cambiare col servizio esterno
+      }
       content = React.createElement(
         'div',
         { className: 'container' },
@@ -1793,7 +1788,7 @@ var Profile = React.createClass({
           { className: 'container-title' },
           name
         ),
-        React.createElement('img', { id: 'avatar', src: '' }),
+        avatar,
         React.createElement(
           'div',
           { className: 'form-container' },
@@ -2277,7 +2272,7 @@ module.exports = Sidebar;
 
 var keyMirror = require('keymirror');
 
-var APIRoot = "https://maas-fabiano-navid94.c9users.io/api";
+var APIRoot = "https://maas-navid94.c9users.io/api";
 
 module.exports = {
 
@@ -2660,7 +2655,8 @@ var _user = {
   surname: sessionStorage.getItem('userSurname') || "",
   dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
   gender: sessionStorage.getItem('userGender'),
-  avatar: sessionStorage.getItem('userAvatar')
+  avatar: sessionStorage.getItem('userAvatar'),
+  role: sessionStorage.getItem('userRole')
 };
 var _errors = [];
 
@@ -2794,6 +2790,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _user.dateOfBirth = new Date(action.json.dateOfBirth);
         _user.gender = action.json.gender || "";
         _user.avatar = action.json.avatar;
+        _user.role = action.json.role;
         // save session data
         sessionStorage.setItem('email', _user.email);
         sessionStorage.setItem('userName', _user.name);
@@ -2801,6 +2798,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
         sessionStorage.setItem('userGender', _user.gender);
         sessionStorage.setItem('userAvatar', _user.avatar);
+        sessionStorage.setItem('userRole', _user.role);
       }
       UserStore.emitChange();
       break;
@@ -2841,11 +2839,9 @@ module.exports = {
         request.get(APIEndpoints.COMPANY + '/' + id + '/users').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).send({ id: id }).end(function (err, res) {
             if (res) {
                 if (res.error) {
-                    alert(res.error);
                     var errors = _getErrors(res.body.error);
                     ServerActionCreators.receiveCompanyUsers(null, errors);
                 } else {
-                    console.log(res.body);
                     ServerActionCreators.receiveCompanyUsers(res.body, null);
                 }
             }

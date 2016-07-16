@@ -98,7 +98,7 @@ var Company = React.createClass({
     var sidebarData = [database, people, dsl];
 
     return (
-      <div id="profile-settings">
+      <div id="company">
         <Sidebar title="Company" titleLink="/company" data={sidebarData}/>
         {content}
       </div>
