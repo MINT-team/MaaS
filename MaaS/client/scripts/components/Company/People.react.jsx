@@ -61,10 +61,10 @@ var People = React.createClass({
     var title, content;
     if(!(this.props.users.length > 1)) {
         title = "Users of your Company";
+                    // Avatar, nome, cognome, ruolo, email
         content = (
             <div className="table-content">
                 <div className="table-header">
-                    // Avatar, nome, cognome, ruolo, email
                     <p className="table-column-small"></p>
                     <span className="table-column-normal">Name</span>
                     <span className="table-column-normal">Surname</span>

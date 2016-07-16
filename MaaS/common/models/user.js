@@ -9,9 +9,6 @@ var MIN_PASSWORD_LENGTH = 8;
 
 module.exports = function(user) {
 
-    var Role = app.models.Role;     // working with loopback objects
-    var RoleMapping = app.models.RoleMapping;
-
     // Registrazione proprietario - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
         if(!password || !confirmation) {
@@ -64,6 +61,27 @@ module.exports = function(user) {
                         console.log('> user created:', userInstance);
                         userInstance.company(companyInstance);  // Set that user created belongs to the company
                         companyInstance.owner(userInstance);    // Set the user is the owner of the company, dynamic role $owner
+
+                        // Make the user a Owner of the company
+                        var Role = app.models.Role;
+                        var RoleMapping = app.models.RoleMapping;
+                        Role.findOne({ where: { name: 'Owner'}, limit: 1 }, function(err, role) {
+                            if(err) {
+                                console.log("> error: role not found");
+                                Company.destroyById(companyInstance.id);
+                                user.destroyById(userInstance.id);
+                                return cb(null, err);
+                            }
+                            role.principals.create({
+                                principalType: RoleMapping.USER,
+                                principalId: userInstance.id
+                            }, function(err, principal) {
+                                if (err) throw err;
+                                console.log('Created principal:', principal);
+                            });
+                        });
+
+
                         // Save relations in the database
                         userInstance.save();
                         companyInstance.save();
