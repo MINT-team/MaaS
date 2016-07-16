@@ -20,6 +20,9 @@
     },
     "gender": {
       "type": "string"
+    },
+    "editor-config": {
+      "type": "object"
     }
   },
   "validations": [],
