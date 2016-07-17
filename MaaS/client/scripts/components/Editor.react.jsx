@@ -7,6 +7,12 @@ require('brace/mode/javascript');
 require('brace/theme/chaos');
 
 var Editor = React.createClass({
+
+    // -*-* usate questo!!  -*-*
+    getInitialState: function () {
+        //return UserStore.getEditorConfig();
+    },
+
     componentDidMount: function() {
         var script = document.createElement("script");
         script.src = "editor-config.js";
@@ -18,7 +24,9 @@ var Editor = React.createClass({
 
     render: function() {
         return (
-            <div id="editor"></div>
+            <div id="editorContainer">
+                <div id="editor"></div>
+            </div>
         );
     }
 });

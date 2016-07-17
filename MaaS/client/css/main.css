@@ -34,7 +34,6 @@ body {
 .material-icons.md-48 { font-size: 48px; }
 
 /*------------------------------------------------ CONTENITORI DELLA PAGINA --------------------------------------------------------------*/
-
 #page-content {
     width: 70%;
     margin: auto;
@@ -94,7 +93,7 @@ body {
     margin-top: -0.2em;
 }
 
-.table-row i {
+.table-row-icon {
     position: absolute;
     margin-left: -0.8em;
     margin-top: -0.2em;
@@ -122,7 +121,6 @@ body {
 }
 
 /*---------------------------------------------------- FORM ------------------------------------------------------------------*/
-
 #errors {
     padding-top: 1em;
     color: red;
@@ -196,6 +194,25 @@ body {
 	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
 }
 
+.inline-button {
+    cursor: pointer;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+	font-size:16px;
+	font-weight:700;
+	padding: 0.5em 2em;
+	text-shadow: black 1px 1px 2px;
+    text-decoration: none;
+	color: white;
+	background-color: #333;
+	border: none;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+	-webkit-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+}
+
 .form-submit:hover, .button:hover {
     box-shadow: lightgreen 0.1em 0.1em, lightgreen -0.1em -0.1em, lightgreen -0.1em 0.1em, lightgreen 0.1em -0.1em;
 }
@@ -226,7 +243,6 @@ input {
 }
 
 /*---------------------------------------------------- HEADER ------------------------------------------------------------------*/
-
 #header {
     width: 100%;
     margin: auto;
@@ -291,7 +307,6 @@ input {
 }
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
-
 #footer{
 	background-color: #292c2f;
 	box-sizing: border-box;
@@ -328,7 +343,6 @@ input {
 }
 
 /* Footer left */
-
 #footer .footer-left{
 	width: 33%;
 	margin-top: 5em;
@@ -340,7 +354,6 @@ input {
 }
 
 /* Footer links */
-
 #footer .footer-links{
 	margin: 20px 0 12px;
 	padding: 0;
@@ -353,7 +366,6 @@ input {
 }
 
 /* Footer Center */
-
 #footer .footer-centerLooged,
 #footer .footer-centerUnLooged{
 	text-align: center;
@@ -384,8 +396,7 @@ input {
 	width: 50%;
 }
 
-/* Responive */
-
+/* Responsive */
 @media (max-width: 880px) {
 
 	#footer{
@@ -409,10 +420,7 @@ input {
 
 }
 
-
-
 /*-------------------------------------------- MENU DROPDOWN -----------------------------------------------------------------------*/
-
 @-moz-keyframes dropDown {
     0% { -moz-transform: translateY(-1em); }
     100% { -moz-transform: translateY(0); }
@@ -479,7 +487,6 @@ input {
 }
 
 /*-------------------------------------------------- SIDEBAR -----------------------------------------------------------------------*/
-
 #sidebar {
     position: absolute;
     margin-left: -0.5em;
@@ -543,7 +550,6 @@ input {
 }
 
 /*-------------------------------------------------- SLIDER -----------------------------------------------------------------------*/
-
 .slick-list {
     position: relative;
     display: block;
@@ -700,7 +706,6 @@ input {
 }
 
 /*-------------------------------------------------- HOME -----------------------------------------------------------------------*/
-
 #home {
     text-align: center;
 }
@@ -714,7 +719,6 @@ input {
 }
 
 /*------------------------------------------------- LOGIN --------------------------------------------------------------------*/
-
 #login-help {
     font-size: 0.8em;
     padding: 1em 0em 0.5em 0em;
@@ -732,7 +736,6 @@ input {
 
 /*--------------------------------------------- SUCCESSFUL OPERATIONS ------------------------------------------------------------------*/
                                     /* REGISTER, RESET, CHANGE PASSWORD */
-
 #successful-operation {
     padding-top: 2em;
 }
@@ -751,13 +754,11 @@ input {
 }
 
 /*-------------------------------------------- RESET PASSWORD ------------------------------------------------------------------*/
-
 #reset-password form {
     margin-top: 2em;
 }
 
 /*--------------------------------------------- PROFILE ------------------------------------------------------------------*/
-
 #avatar {
     height: 5em;
     width: 5em;
@@ -815,7 +816,6 @@ input {
 
 
 /*------------------------------------------- ERROR 404 ------------------------------------------------------------------*/
-
 #sorry {
     font-family: arial;
 }
@@ -839,9 +839,92 @@ input {
 
 /*------------------------------------------------ EDITOR --------------------------------------------------------------*/
 #editor {
-       position: absolute;
+        position: absolute;
         top: 0;
         right: 0;
         bottom: 0;
         left: 0;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+}
+
+#editorContainer{
+    position: relative;
+    width: 50%;
+    min-height: 20em;
+    margin:auto;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 2px solid lightgrey;
+}
+
+/*------------------------------------------------ PEOPLE --------------------------------------------------------------*/
+#role-explaination {
+    list-style: none;
+    margin-top: 1em;
+    text-align: center;
+}
+
+#role-explaination .role {
+    display: inline-block;
+    width: 8em;
+    font-weight: bold;
+    text-align: center;
+}
+
+#role-explaination .role-description {
+    display: inline-block;
+    width: 25em;
+    margin: auto;
+    margin-left: 1%;
+    text-align: left;
+}
+
+/*------------------------------------------------ INVITE --------------------------------------------------------------*/
+#invite {
+    margin-top: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+#invite select {
+    display: inline-block;
+    margin-right: 2em;
+    padding: 0.5em 3em 0.5em 1em;
+    vertical-align: middle;
+    font-family: "Verdana", sans-serif;
+    font-size: 0.9em;
+    -moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    -ms-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid lightgray;
+    -webkit-appearance: none;
+   -moz-appearance: none;
+    appearance: none;
+    background: url("../images/select.png") 95% / 16% no-repeat white;
+}
+
+#invite option {
+    border-radius: 4px;
+}
+
+#invite input {
+    vertical-align: middle;
+	-moz-border-radius: 4px 4px 4px 4px;
+	-webkit-border-radius: 4px 4px 4px 4px;
+    -o-border-radius: 4px 4px 4px 4px;
+    -ms-border-radius: 4px 4px 4px 4px;
+}
+
+#invite button {
+    margin-left: 2em;
+}
+
+#invite-sent {
+    font-size: 1.5em;
+    padding: 0.1em;
 }
