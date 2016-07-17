@@ -107,6 +107,15 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         SessionStore.emitChange();
         break;
 
+    case ActionTypes.INVITE_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else {
+            _errors = []; //empty old errors
+        }
+        SessionStore.emitChange();
+        break;
+
     case ActionTypes.LOGOUT:
       // remove session data
         _accessToken = null;

@@ -34,10 +34,19 @@ var ServerActionCreator = {
             errors: errors
         });
     },
+
     receiveLogin: function receiveLogin(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOGIN_RESPONSE,
             json: json,
+            errors: errors
+        });
+    },
+
+    //INVITE
+    response_invite: function response_invite(errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.INVITE_RESPONSE,
             errors: errors
         });
     },
@@ -66,6 +75,14 @@ var ServerActionCreator = {
             type: ActionTypes.CHANGE_DATA_RESPONSE,
             json: json,
             errors: errors
+        });
+    },
+
+    //GET EDITOR CONFIGURATIONS
+    response_getEditorConfig: function response_getEditorConfig(json) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EDITOR_CONFIG_RESPONSE,
+            json: json
         });
     },
 
@@ -104,6 +121,7 @@ module.exports = ServerActionCreator;
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var WebAPIUtils = require('../utils/SessionWebAPIUtils.js');
+var UserWebAPIUtils = require('../utils/UserWebAPIUtils.js');
 
 var ActionTypes = Constants.ActionTypes;
 
@@ -117,6 +135,10 @@ var SessionActionCreator = {
     WebAPIUtils.login(email, password);
   },
 
+  invite: function invite(sender, company, role, email) {
+    WebAPIUtils.invite(sender, company, role, email);
+  },
+
   logout: function logout(accessToken) {
     Dispatcher.handleViewAction({
       type: ActionTypes.LOGOUT
@@ -124,11 +146,19 @@ var SessionActionCreator = {
     WebAPIUtils.logout(accessToken);
   }
 
+  // setItem: function(key, value) {
+  //   Dispatcher.handleViewAction({
+  //           type: ActionTypes.SESSION_SET,
+  //           key: key,
+  //           value: value
+  //       });
+  // }
+
 };
 
 module.exports = SessionActionCreator;
 
-},{"../constants/Constants.js":24,"../dispatcher/Dispatcher.js":25,"../utils/SessionWebAPIUtils.js":31}],4:[function(require,module,exports){
+},{"../constants/Constants.js":24,"../dispatcher/Dispatcher.js":25,"../utils/SessionWebAPIUtils.js":31,"../utils/UserWebAPIUtils.js":32}],4:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require("../dispatcher/Dispatcher.js");
@@ -336,17 +366,123 @@ module.exports = Company;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var UserStore = require('../../stores/UserStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var SessionActionCreator = require('../../actions/SessionActionCreator.react.jsx');
 
 var Invite = React.createClass({
     displayName: 'Invite',
+
+
+    getInitialState: function getInitialState() {
+        return {
+            role: "Administrator",
+            sent: false,
+            errors: []
+        };
+    },
+
+    componentDidMount: function componentDidMount() {
+        SessionStore.addChangeListener(this._onChange);
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        SessionStore.removeChangeListener(this._onChange);
+    },
+
+    _onChange: function _onChange() {
+        this.setState({ errors: SessionStore.getErrors() });
+    },
+
+    _onSubmit: function _onSubmit(event) {
+        event.preventDefault();
+        var name = UserStore.getName();
+        var surname = UserStore.getSurname();
+        var sender_email = UserStore.getEmail();
+        var company = CompanyStore.getName();
+        var sender;
+        if (name != "" || surname != "") {
+            sender = name + ' ' + surname;
+        } else {
+            sender = sender_email;
+        }
+        var role = this.state.role;
+        var email = this.refs.email.value;
+        if (email != "") {
+            SessionActionCreator.invite(sender, company, role, email);
+            this.setState({ sent: true });
+        } else {
+            this._setError("Insert an email to send invitation");
+        }
+    },
+
+    _setError: function _setError(error) {
+        this.setState({ errors: error });
+    },
+
+    _onSelectChange: function _onSelectChange(event) {
+        this.setState({ role: event.target.value });
+    },
+
     render: function render() {
-        return React.createElement('div', null);
+        var content, errors;
+        if (!this.state.sent || this.state.errors.length > 0) {
+            if (this.state.errors.length > 0) {
+                errors = React.createElement(
+                    'p',
+                    { id: 'errors' },
+                    this.state.errors
+                );
+            }
+            content = React.createElement(
+                'form',
+                { onSubmit: this._onSubmit },
+                React.createElement(
+                    'select',
+                    { id: 'role', onChange: this._onSelectChange },
+                    React.createElement(
+                        'option',
+                        { value: 'Administrator' },
+                        'Administrator'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: 'Member' },
+                        'Member'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: 'Guest' },
+                        'Guest'
+                    )
+                ),
+                React.createElement('input', { type: 'text', placeholder: 'Email', ref: 'email', required: true }),
+                React.createElement(
+                    'button',
+                    { type: 'email', className: 'inline-button' },
+                    'Invite'
+                ),
+                errors
+            );
+        } else {
+            content = React.createElement(
+                'div',
+                { id: 'invite-sent' },
+                'Invitation sent!'
+            );
+        }
+        return React.createElement(
+            'div',
+            { id: 'invite', className: 'table-row' },
+            content
+        );
     }
 });
 
 module.exports = Invite;
 
-},{"react":293,"react-router":76}],8:[function(require,module,exports){
+},{"../../actions/SessionActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":27,"../../stores/SessionStore.react.jsx":28,"../../stores/UserStore.react.jsx":29,"react":293,"react-router":76}],8:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -423,8 +559,8 @@ var People = React.createClass({
             );
         }
 
-        var title, content, avatar;
-        if (!(this.props.users.length > 1)) {
+        var title, content;
+        if (this.props.users.length > 1) {
             title = "Users of your Company";
             // Avatar, nome, cognome, ruolo, email
             content = React.createElement(
@@ -464,7 +600,7 @@ var People = React.createClass({
                             { className: 'table-column-small' },
                             u.avatar ? React.createElement('img', { src: "../../../images/" + u.avatar }) : React.createElement(
                                 'i',
-                                { className: 'material-icons md-36' },
+                                { className: 'material-icons md-36 table-row-icon' },
                                 ''
                             )
                         ),
@@ -502,7 +638,58 @@ var People = React.createClass({
                     null,
                     'You created your company, now it\'s time to invite someone to collaborate in your work.'
                 ),
-                React.createElement(Invite, null)
+                React.createElement(
+                    'p',
+                    null,
+                    'Choose the role and insert the email to send the invitation'
+                ),
+                React.createElement(Invite, null),
+                React.createElement(
+                    'ul',
+                    { id: 'role-explaination' },
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement(
+                            'span',
+                            { className: 'role' },
+                            'Administrator:'
+                        ),
+                        React.createElement(
+                            'span',
+                            { className: 'role-description' },
+                            'can execute all operation like you.'
+                        )
+                    ),
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement(
+                            'span',
+                            { className: 'role' },
+                            'Member:'
+                        ),
+                        React.createElement(
+                            'span',
+                            { className: 'role-description' },
+                            'is possible to select wich operation are allowed.'
+                        )
+                    ),
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement(
+                            'span',
+                            { className: 'role' },
+                            'Guest:'
+                        ),
+                        React.createElement(
+                            'span',
+                            { className: 'role-description' },
+                            'can only read some information.'
+                        )
+                    )
+                )
             );
         }
         return React.createElement(
@@ -534,6 +721,12 @@ require('brace/theme/chaos');
 var Editor = React.createClass({
     displayName: 'Editor',
 
+
+    // -*-* usate questo!!  -*-*
+    // getInitialState: function () {
+    //     //return UserStore.getEditorConfig();
+    // },
+
     componentDidMount: function componentDidMount() {
         var script = document.createElement("script");
         script.src = "editor-config.js";
@@ -544,7 +737,11 @@ var Editor = React.createClass({
     },
 
     render: function render() {
-        return React.createElement('div', { id: 'editor' });
+        return React.createElement(
+            'div',
+            { id: 'editorContainer' },
+            React.createElement('div', { id: 'editor' })
+        );
     }
 });
 
@@ -1900,11 +2097,14 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
+var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
 
 function getState() {
   return {
-    isRegistered: SessionStore.isRegistered(),
-    errors: SessionStore.getErrors()
+    isRegistered: SessionStore.isRegistered() || UserStore.getEmail() ? true : false,
+    errors: SessionStore.getErrors(),
+    inviteErrors: UserStore.getErrors()
   };
 }
 
@@ -1913,24 +2113,29 @@ var Register = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      isRegistered: SessionStore.isRegistered(),
-      errors: []
+      isRegistered: SessionStore.isRegistered() || UserStore.getEmail() ? true : false,
+      userId: this.props.location.query.uid,
+      accessToken: this.props.location.query.access_token,
+      errors: [],
+      inviteErrors: []
     };
   },
 
   componentDidMount: function componentDidMount() {
     SessionStore.addChangeListener(this._onChange);
+    UserStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SessionStore.removeChangeListener(this._onChange);
+    UserStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function _onChange() {
     this.setState(getState()); //this.state = getState();
   },
 
-  _onSubmit: function _onSubmit(event) {
+  _onRegisterSubmit: function _onRegisterSubmit(event) {
     event.preventDefault(); //evita il ricaricamento della pagina da parte della form
     var company = this.refs.nomeAzienda.value;
     var email = this.refs.email.value;
@@ -1943,10 +2148,24 @@ var Register = React.createClass({
     }
   },
 
+  _onInviteSubmit: function _onInviteSubmit(event) {
+    event.preventDefault(); //evita il ricaricamento della pagina da parte della form
+    var id = this.state.userId;
+    var accessToken = this.state.accessToken;
+    var password = this.refs.password.value;
+    var confirmation = this.refs.confermaPassword.value;
+    if (password != "" || confirmation != "") {
+      UserActionCreator.changePassword(id, password, confirmation, accessToken);
+    } else {
+      this._setError("Fill out all fields");
+    }
+  },
+
   _setError: function _setError(error) {
     this.setState({
       isRegistered: this.state.isRegistered,
-      errors: error
+      errors: error,
+      inviteErrors: error
     });
   },
 
@@ -1954,99 +2173,156 @@ var Register = React.createClass({
     var title, content, errors;
     if (!this.state.isRegistered) {
       title = "Sign Up to MaaS";
-      if (this.state.errors.length > 0) {
-        errors = React.createElement(
-          'p',
-          { id: 'errors' },
-          this.state.errors
+      if (this.state.userId && this.state.userId != "undefined") {
+        if (this.state.inviteErrors.length > 0) {
+          errors = React.createElement(
+            'p',
+            { id: 'errors' },
+            this.state.inviteErrors
+          );
+        }
+        content = React.createElement(
+          'form',
+          { onSubmit: this._onInviteSubmit, className: 'form-container' },
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'password' },
+              'Password'
+            ),
+            React.createElement('input', { type: 'password', id: 'password', ref: 'password', required: true })
+          ),
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'confermaPassword' },
+              'Confirm Password'
+            ),
+            React.createElement('input', { type: 'password', id: 'confermaPassword', ref: 'confermaPassword', required: true })
+          ),
+          errors,
+          React.createElement(
+            'button',
+            { type: 'submit', className: 'form-submit' },
+            'Join your company'
+          )
+        );
+      } else {
+        if (this.state.errors.length > 0) {
+          errors = React.createElement(
+            'p',
+            { id: 'errors' },
+            this.state.errors
+          );
+        }
+        content = React.createElement(
+          'form',
+          { onSubmit: this._onRegisterSubmit, className: 'form-container' },
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'azienda' },
+              'Company Name'
+            ),
+            React.createElement('input', { type: 'text', id: 'azienda', ref: 'nomeAzienda', required: true })
+          ),
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'email' },
+              'Email'
+            ),
+            React.createElement('input', { type: 'text', id: 'email', ref: 'email', required: true })
+          ),
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'password' },
+              'Password'
+            ),
+            React.createElement('input', { type: 'password', id: 'password', ref: 'password', required: true })
+          ),
+          React.createElement(
+            'div',
+            { className: 'form-field' },
+            React.createElement(
+              'label',
+              { htmlFor: 'confermaPassword' },
+              'Confirm Password'
+            ),
+            React.createElement('input', { type: 'password', id: 'confermaPassword', ref: 'confermaPassword', required: true })
+          ),
+          errors,
+          React.createElement(
+            'button',
+            { type: 'submit', className: 'form-submit' },
+            'Register your company'
+          )
         );
       }
-      content = React.createElement(
-        'form',
-        { onSubmit: this._onSubmit, className: 'form-container' },
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'azienda' },
-            'Company Name'
-          ),
-          React.createElement('input', { type: 'text', id: 'azienda', ref: 'nomeAzienda', required: true })
-        ),
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'email' },
-            'Email'
-          ),
-          React.createElement('input', { type: 'text', id: 'email', ref: 'email', required: true })
-        ),
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'password' },
-            'Password'
-          ),
-          React.createElement('input', { type: 'password', id: 'password', ref: 'password', required: true })
-        ),
-        React.createElement(
-          'div',
-          { className: 'form-field' },
-          React.createElement(
-            'label',
-            { htmlFor: 'confermaPassword' },
-            'Confirm Password'
-          ),
-          React.createElement('input', { type: 'password', id: 'confermaPassword', ref: 'confermaPassword', required: true })
-        ),
-        errors,
-        React.createElement(
-          'button',
-          { type: 'submit', className: 'form-submit' },
-          'Register your company'
-        )
-      );
     } else {
       title = "Thanks for your registration!";
-      content = React.createElement(
-        'div',
-        { id: 'successful-operation' },
-        React.createElement(
-          'p',
-          null,
-          'Now please confirm your account.'
-        ),
-        React.createElement(
-          'p',
-          null,
-          'Click the link we sent at: ',
+      if (this.state.userId && this.state.userId != "undefined") {
+        content = React.createElement(
+          'div',
+          { id: 'successful-operation' },
           React.createElement(
-            'span',
-            { id: 'successful-email' },
-            SessionStore.getEmail()
-          )
-        ),
-        React.createElement(
-          Link,
-          { id: 'successful-button', className: 'button', to: '/login' },
-          'Go to Login'
-        ),
-        React.createElement(
-          'p',
-          null,
-          'If you didn‘t receive your verification email ',
+            'p',
+            null,
+            'Now you that have confirmed your account you can log into MaaS.'
+          ),
           React.createElement(
             Link,
-            { className: 'help-link', to: '/verify' },
-            'require another one'
+            { id: 'successful-button', className: 'button', to: '/login' },
+            'Go to Login'
           )
-        )
-      );
+        );
+      } else {
+        content = React.createElement(
+          'div',
+          { id: 'successful-operation' },
+          React.createElement(
+            'p',
+            null,
+            'Now please confirm your account.'
+          ),
+          React.createElement(
+            'p',
+            null,
+            'Click the link we sent at: ',
+            React.createElement(
+              'span',
+              { id: 'successful-email' },
+              SessionStore.getEmail()
+            )
+          ),
+          React.createElement(
+            Link,
+            { id: 'successful-button', className: 'button', to: '/login' },
+            'Go to Login'
+          ),
+          React.createElement(
+            'p',
+            null,
+            'If you didn‘t receive your verification email ',
+            React.createElement(
+              Link,
+              { className: 'help-link', to: '/verify' },
+              'require another one'
+            )
+          )
+        );
+      }
     }
     return React.createElement(
       'div',
@@ -2063,7 +2339,7 @@ var Register = React.createClass({
 
 module.exports = Register;
 
-},{"../actions/SessionActionCreator.react.jsx":3,"../stores/SessionStore.react.jsx":28,"react":293,"react-router":76}],22:[function(require,module,exports){
+},{"../actions/SessionActionCreator.react.jsx":3,"../actions/UserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":28,"../stores/UserStore.react.jsx":29,"react":293,"react-router":76}],22:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -2295,6 +2571,7 @@ module.exports = {
     // Session
     LOGIN_RESPONSE: null,
     SIGNUP_RESPONSE: null,
+    INVITE_RESPONSE: null,
     LOGOUT: null,
     //SESSION_SET: null,
 
@@ -2302,6 +2579,7 @@ module.exports = {
     RESET_PASSWORD_RESPONSE: null,
     CHANGE_PASSWORD_RESPONSE: null,
     CHANGE_DATA_RESPONSE: null,
+    EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
     GET_COMPANY: null,
 
@@ -2608,6 +2886,15 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
       SessionStore.emitChange();
       break;
 
+    case ActionTypes.INVITE_RESPONSE:
+      if (action.errors) {
+        _errors = action.errors;
+      } else {
+        _errors = []; //empty old errors
+      }
+      SessionStore.emitChange();
+      break;
+
     case ActionTypes.LOGOUT:
       // remove session data
       _accessToken = null;
@@ -2657,7 +2944,8 @@ var _user = {
   dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
   gender: sessionStorage.getItem('userGender'),
   avatar: sessionStorage.getItem('userAvatar'),
-  role: sessionStorage.getItem('userRole')
+  role: sessionStorage.getItem('userRole'),
+  editorConfig: {} //sessionStorage.getItem('editorConfig')
 };
 var _errors = [];
 
@@ -2705,6 +2993,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getAvatar: function getAvatar() {
     return _user.avatar;
+  },
+
+  getRole: function getRole() {
+    return _user.role;
+  },
+
+  getEditorConfig: function getEditorConfig() {
+    return _user.editorConfig;
   },
 
   getErrors: function getErrors() {
@@ -2768,6 +3064,16 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         sessionStorage.setItem('userSurname', _user.surname);
         sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
         sessionStorage.setItem('userGender', _user.gender);
+      }
+      UserStore.emitChange();
+      break;
+
+    case ActionTypes.EDITOR_CONFIG_RESPONSE:
+      if (action.json) {
+        _errors = []; // empty old errors
+        _user.editorConfig = action.json.config;
+        // save session data
+        //sessionStorage.setItem('editorConfig', _user.editorConfig);
       }
       UserStore.emitChange();
       break;
@@ -2956,6 +3262,25 @@ module.exports = {
         });
     },
 
+    invite: function invite(sender, company, role, email) {
+        request.post(APIEndpoints.USERS + '/invite').send({
+            info: {
+                sender: sender,
+                company: company,
+                role: role,
+                email: email
+            }
+        }).set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (err, res) {
+            if (res.error || err) {
+                console.log(res.error);
+                var errors = _getErrors(res.body.error);
+                ServerActionCreators.response_invite(errors);
+            } else {
+                ServerActionCreators.response_invite(null);
+            }
+        });
+    },
+
     logout: function logout(accessToken) {
         request.post(APIEndpoints.LOGOUT).query({
             access_token: accessToken
@@ -3089,10 +3414,10 @@ module.exports = {
   },
 
   getEditorConfig: function getEditorConfig(userId) {
-    request.get(APIEndpoints.USERS + '/' + userId + '/getEditorConfig').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
-      /*if(res) {
+    request.get(APIEndpoints.USERS + '/' + userId + '/editorConfig').set('Accept', 'application/json').set('Authorization', sessionStorage.getItem('accessToken')).end(function (error, res) {
+      if (res) {
         ServerActionCreators.response_getEditorConfig(res.body);
-      }*/
+      }
     });
   }
 

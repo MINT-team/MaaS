@@ -10,8 +10,7 @@ module.exports = {
     LOGIN:              APIRoot + "/users/login",
     LOGOUT:             APIRoot + "/users/logout",
     RESET_PASSWORD:     APIRoot + "/users/reset",
-    COMPANY:            APIRoot + "/Companies",
-    //GET_EDITOR_CONFIG:  APIRoot + "/users/getEditorConfig"
+    COMPANY:            APIRoot + "/Companies"
   },
 
   PayloadSources: keyMirror({
@@ -23,6 +22,7 @@ module.exports = {
     // Session
     LOGIN_RESPONSE: null,
     SIGNUP_RESPONSE: null,
+    INVITE_RESPONSE: null,
     LOGOUT: null,
     //SESSION_SET: null,
 
@@ -30,6 +30,7 @@ module.exports = {
     RESET_PASSWORD_RESPONSE: null,
     CHANGE_PASSWORD_RESPONSE: null,
     CHANGE_DATA_RESPONSE: null,
+    EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
     GET_COMPANY: null,
 

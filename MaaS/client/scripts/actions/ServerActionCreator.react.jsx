@@ -14,11 +14,20 @@ var ServerActionCreator = {
             errors: errors
         });
     },
+
     receiveLogin: function(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOGIN_RESPONSE,
             json: json,
             errors: errors
+        });
+    },
+
+    //INVITE
+    response_invite: function(errors) {
+        Dispatcher.handleServerAction({
+           type: ActionTypes.INVITE_RESPONSE,
+           errors: errors
         });
     },
 
@@ -46,6 +55,14 @@ var ServerActionCreator = {
             type: ActionTypes.CHANGE_DATA_RESPONSE,
             json: json,
             errors: errors
+        });
+    },
+
+    //GET EDITOR CONFIGURATIONS
+    response_getEditorConfig: function(json) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EDITOR_CONFIG_RESPONSE,
+            json: json
         });
     },
 

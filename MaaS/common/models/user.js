@@ -6,6 +6,7 @@ var host = 'maas-navid94.c9users.io';
 var port = '8080';
 
 var MIN_PASSWORD_LENGTH = 8;
+var INVITATION_TTL = 1209600; // 2 weeks in seconds
 
 module.exports = function(user) {
 
@@ -110,35 +111,8 @@ module.exports = function(user) {
         }
     );
 
-    // Get editor configurations
-    user.getEditorConfig = function(id, cb) {
-        user.findById(id, function(err, user) {
-            if (err)
-                return cb(err);
-            console.log('prop:', user.editor_config);
-            return cb(null,user.editor_config);
-        });
-    };
-
-    user.remoteMethod(
-        'getEditorConfig',
-        {
-            description: 'Get editor configurations of the user.',
-            accepts: [
-                { arg: 'id', type: 'string', required: true, description: 'User id'},
-            ],
-            returns: [
-                {arg: 'config', type: 'Object'}
-            ],
-            http: { verb: 'get', path: '/:id/getEditorConfig' }
-        }
-    );
-
-
-
 
     // TO DO: SIGN UP BY INVITE -> registrazione membri company (ruoli: admin, member, guest)
-
 
     // Controllo i dati di registrazione prima della creazione
     /*user.beforeRemote('create', function(context, member, next) {
@@ -226,6 +200,92 @@ module.exports = function(user) {
             console.log('> sending password reset email to:', info.email);
         });
     });
+
+    // Send invitation link when requested
+    user.invite = function(info, cb) {
+        // Check if company exists
+        app.models.Company.findOne({where: {name: info.company}, limit: 1}, function(err, companyInstance) {
+            if(err) return cb(err);
+            // Initialize user account
+            user.create({email: info.email, password: ' ', role: info.role, companyId: companyInstance.id}, function(err, userInstance) {
+                if(err) return cb(err);
+                // Create a verification token to confirm the user
+                user.generateVerificationToken(userInstance, function(err, token) {
+                    if (err) { return cb(err); }
+                    userInstance.verificationToken = token;
+                    userInstance.save(function(err) {
+                        if(err) { return cb(err); }
+                    });
+                    // Create another token to set a new password after confirmation
+                    userInstance.accessTokens.create({ ttl: INVITATION_TTL }, function(err, accessToken) {
+                        if (err) { return cb(err); }
+                        var url = 'http://' + host + ':' + port + '/api/users/confirm';    // da cambiare con: config.host config.port
+                        var template = loopback.template(path.resolve(__dirname, '../../server/views/invite.ejs'));
+                        var options = {
+                            sender: info.sender,
+                            role: info.role,
+                            company: info.company,
+                            inviteHref: '' + url + '?uid=' + userInstance.id
+                            + '&redirect=/%23/register%3Fuid=' + userInstance.id + '%26access_token=' + accessToken.id
+                            + '&token=' + userInstance.verificationToken + ''
+                        };
+                        var html = template(options);
+
+                        user.app.models.Email.send({
+                            to: info.email,
+                            from: 'noreply@maas.com',
+                            subject: 'Invitation to MaaS',
+                            html: html
+                        }, function(err) {
+                            if (err) {
+                                return console.log('> error sending invitation email');
+                            }
+                            console.log('> sending invitation email to:', info.email);
+                            return cb(null);
+                        });
+                    });
+                });
+            });
+        });
+    };
+
+    user.remoteMethod(
+        'invite',
+        {
+            description: 'Invite a new user to the company.',
+            accepts: [
+                { arg: 'info', type: 'Object', required: true, description: 'Sender, company, role, email'},
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/invite' }
+        }
+    );
+
+    // Get editor configurations
+    user.getEditorConfig = function(id, cb) {
+        user.findById(id, function(err, user) {
+            if (err)
+                return cb(err);
+            console.log('prop:', user.editorConfig);
+            return cb(null,user.editorConfig);
+        });
+    };
+
+    user.remoteMethod(
+        'getEditorConfig',
+        {
+            description: 'Get editor configurations of the user.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'},
+            ],
+            returns: [
+                {arg: 'config', type: 'Object'}
+            ],
+            http: { verb: 'get', path: '/:id/editorConfig' }
+        }
+    );
 
     // Cambio password dopo l'email di verifica - vedesi relativo ACL
     user.changePassword = function(id, password, confirmation, cb) {

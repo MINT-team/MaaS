@@ -58,8 +58,8 @@ var People = React.createClass({
         );
     }
 
-    var title, content, avatar;
-    if(!(this.props.users.length > 1)) {
+    var title, content;
+    if(this.props.users.length > 1) {
         title = "Users of your Company";
                     // Avatar, nome, cognome, ruolo, email
         content = (
@@ -73,7 +73,11 @@ var People = React.createClass({
                 </div>
                 {this.props.users.map((u) =>
                   <div className="table-row">
-          					<span className="table-column-small">{u.avatar? (<img src={"../../../images/"+u.avatar} />) : (<i className="material-icons md-36">&#xE851;</i>)}</span>
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    (<img src={"../../../images/"+u.avatar} />) :
+          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
+          					</span>
           					<span className="table-column-normal">{u.name}</span>
           					<span className="table-column-normal">{u.surname}</span>
           					<span className="table-column-normal">{u.role}</span>
@@ -88,7 +92,22 @@ var People = React.createClass({
         content = (
             <div id="successful-operation">
                 <p>You created your company, now it's time to invite someone to collaborate in your work.</p>
+                <p>Choose the role and insert the email to send the invitation</p>
                 <Invite />
+                <ul id="role-explaination">
+                  <li>
+                    <span className="role">Administrator:</span>
+                    <span className="role-description">can execute all operation like you.</span>
+                  </li>
+                  <li>
+                    <span className="role">Member:</span>
+                    <span className="role-description">is possible to select wich operation are allowed.</span>
+                  </li>
+                  <li>
+                    <span className="role">Guest:</span>
+                    <span className="role-description">can only read some information.</span>
+                  </li>
+                </ul>
             </div>
         );
     }

@@ -15,7 +15,8 @@ var _user = {
               dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
-              role: sessionStorage.getItem('userRole')
+              role: sessionStorage.getItem('userRole'),
+              editorConfig: {}  //sessionStorage.getItem('editorConfig')
             };
 var _errors = [];
 
@@ -63,6 +64,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getAvatar: function() {
     return _user.avatar;
+  },
+
+  getRole: function() {
+    return _user.role;
+  },
+
+  getEditorConfig: function() {
+    return _user.editorConfig;
   },
 
   getErrors: function() {
@@ -126,6 +135,16 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             sessionStorage.setItem('userSurname', _user.surname);
             sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
             sessionStorage.setItem('userGender', _user.gender);
+        }
+        UserStore.emitChange();
+        break;
+
+      case ActionTypes.EDITOR_CONFIG_RESPONSE:
+        if(action.json) {
+            _errors = []; // empty old errors
+            _user.editorConfig = action.json.config;
+            // save session data
+            //sessionStorage.setItem('editorConfig', _user.editorConfig);
         }
         UserStore.emitChange();
         break;

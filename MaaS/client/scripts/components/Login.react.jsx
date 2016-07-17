@@ -59,7 +59,7 @@ var Login = React.createClass({
       });
     },
 
-    render() {
+    render: function() {
       var errors, help;
       help = (
         <p id="login-help">Forgot your password? <Link className="help-link" to="/resetpwd">Choose a new one</Link></p>

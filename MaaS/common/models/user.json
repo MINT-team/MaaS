@@ -24,7 +24,7 @@
     "role": {
       "type": "string"
     },
-    "editor_config": {
+    "editorConfig": {
       "type": "object",
       "default": {
           "theme": "chaos"
@@ -52,6 +52,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "signUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "invite"
     },
     {
       "principalType": "ROLE",

@@ -132,13 +132,13 @@ module.exports = {
 
   getEditorConfig: function(userId){
       request
-        .get(APIEndpoints.USERS + '/' + userId + '/getEditorConfig')
+        .get(APIEndpoints.USERS + '/' + userId + '/editorConfig')
         .set('Accept', 'application/json')
         .set('Authorization', sessionStorage.getItem('accessToken'))
         .end(function(error, res){
-          /*if(res) {
+          if(res) {
             ServerActionCreators.response_getEditorConfig(res.body);
-          }*/
+          }
         });
   }
 

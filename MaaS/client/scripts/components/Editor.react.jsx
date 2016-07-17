@@ -9,9 +9,9 @@ require('brace/theme/chaos');
 var Editor = React.createClass({
 
     // -*-* usate questo!!  -*-*
-    getInitialState: function () {
-        //return UserStore.getEditorConfig();
-    },
+    // getInitialState: function () {
+    //     //return UserStore.getEditorConfig();
+    // },
 
     componentDidMount: function() {
         var script = document.createElement("script");

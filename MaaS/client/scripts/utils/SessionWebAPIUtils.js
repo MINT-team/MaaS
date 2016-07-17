@@ -103,6 +103,29 @@ module.exports = {
         });
     },
 
+    invite: function(sender, company, role, email) {
+        request.post(APIEndpoints.USERS + '/invite')
+        .send({
+            info: {
+                sender: sender,
+                company: company,
+                role: role,
+                email: email
+            }
+        })
+        .set('Accept', 'application/json')
+        .set('Authorization', sessionStorage.getItem('accessToken'))
+        .end(function(err, res){
+            if(res.error || err){
+                console.log(res.error);
+                var errors = _getErrors(res.body.error);
+                ServerActionCreators.response_invite(errors);
+            } else {
+                ServerActionCreators.response_invite(null);
+            }
+        });
+    },
+
     logout: function(accessToken) {
         request.post(APIEndpoints.LOGOUT)
         .query({
