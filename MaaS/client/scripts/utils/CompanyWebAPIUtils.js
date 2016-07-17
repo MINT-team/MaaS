@@ -1,4 +1,4 @@
-var ServerActionCreators = require('../actions/ServerActionCreator.react.jsx');
+var ResponseCompanyActionCreator = require('../actions/Response/ResponseCompanyActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
@@ -22,7 +22,7 @@ module.exports = {
 
   getUsers: function(id) {
     request
-      .get(APIEndpoints.COMPANY + '/' + id + '/users')
+      .get(APIEndpoints.COMPANIES + '/' + id + '/users')
       .set('Accept', 'application/json')
       .set('Authorization', sessionStorage.getItem('accessToken'))
       .send({ id: id })
@@ -30,9 +30,9 @@ module.exports = {
         if(res) {
             if(res.error) {
                 var errors = _getErrors(res.body.error);
-                ServerActionCreators.receiveCompanyUsers(null, errors);
+                ResponseCompanyActionCreator.responseCompanyUsers(null, errors);
             } else {
-                ServerActionCreators.receiveCompanyUsers(res.body, null);
+                ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
             }
         }
         if(err){

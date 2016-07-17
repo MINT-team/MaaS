@@ -1,4 +1,4 @@
-var ServerActionCreators = require('../actions/ServerActionCreator.react.jsx');
+var ResponseSessionActionCreator = require('../actions/Response/ResponseSessionActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
@@ -47,7 +47,7 @@ var APIEndpoints = Constants.APIEndpoints;
 module.exports = {
 
     signup: function(company, email, password, confirmation) {
-        request.post(APIEndpoints.SIGNUP)
+        request.post(APIEndpoints.USERS + '/signUp')
         .send({
             company: company,
             email: email,
@@ -60,13 +60,13 @@ module.exports = {
                 console.log(res);
                 if(res.body.error) {
                     var errors = _getErrors(res.body.error);
-                    ServerActionCreators.receiveSignup(null, errors);
+                    ResponseSessionActionCreator.responseSignup(null, errors);
                 } else {
                     var json = {
                         email: res.body.email,
                         company: res.body.company
                     };
-                    ServerActionCreators.receiveSignup(json, null);
+                    ResponseSessionActionCreator.responseSignup(json, null);
                 }
             }
             if(err){
@@ -77,7 +77,7 @@ module.exports = {
     },
 
     login: function(email, password) {
-        request.post(APIEndpoints.LOGIN)
+        request.post(APIEndpoints.USERS + '/login')
         .send({
             email: email,
             password: password
@@ -87,10 +87,10 @@ module.exports = {
             if(res) {
                 if(res.error) {
                     var errors = _getErrors(res.body.error);
-                    ServerActionCreators.receiveLogin(null, errors);
+                    ResponseSessionActionCreator.responseLogin(null, errors);
                 } else {
                     var json = JSON.parse(res.text);
-                    ServerActionCreators.receiveLogin(json, null);
+                    ResponseSessionActionCreator.responseLogin(json, null);
                 }
                 //var errorMsgs = _getErrors(res);
                 //ServerActionCreators.recieveLogin(null, errorMsgs);
@@ -119,15 +119,15 @@ module.exports = {
             if(res.error || err){
                 console.log(res.error);
                 var errors = _getErrors(res.body.error);
-                ServerActionCreators.response_invite(errors);
+                ResponseSessionActionCreator.responseInvite(errors);
             } else {
-                ServerActionCreators.response_invite(null);
+                ResponseSessionActionCreator.responseInvite(null);
             }
         });
     },
 
     logout: function(accessToken) {
-        request.post(APIEndpoints.LOGOUT)
+        request.post(APIEndpoints.USERS + '/logout')
         .query({
             access_token: accessToken
         })

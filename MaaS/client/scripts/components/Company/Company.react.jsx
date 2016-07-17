@@ -3,7 +3,7 @@ var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-var CompanyActionCreator = require('../../actions/CompanyActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -24,7 +24,7 @@ var Company = React.createClass({
   componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
       CompanyStore.addChangeListener(this._onChange);
-      CompanyActionCreator.getUsers(this.state.id);
+      RequestCompanyActionCreator.getUsers(this.state.id);
   },
 
   componentWillUnmount: function() {

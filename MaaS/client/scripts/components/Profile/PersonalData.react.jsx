@@ -2,7 +2,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
-var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -74,7 +74,7 @@ var PersonalData = React.createClass({
       // call the action only if something has changed
       if(name!=this.state.name || surname!=this.state.surname || dateOfBirth!=getDateOfBirth(this.state.dateOfBirth) || gender!=this.state.gender) {
         alert(SessionStore.getUserId());
-        UserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
+        RequestUserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
       } else {
         this._setError("No changes to save");
       }

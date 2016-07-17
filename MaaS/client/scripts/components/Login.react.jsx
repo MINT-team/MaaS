@@ -1,8 +1,8 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
-var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
-var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
+var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -35,8 +35,8 @@ var Login = React.createClass({
     _onChange: function() {
       this.setState(getState());
       if(this.state.isLogged) {
-        UserActionCreator.getUser(SessionStore.getUserId());
-        UserActionCreator.getCompany(SessionStore.getUserId());
+        RequestUserActionCreator.getUser(SessionStore.getUserId());
+        RequestUserActionCreator.getCompany(SessionStore.getUserId());
         const { router } = this.context;
         router.push('/');   // redirect to home page
       }
@@ -47,7 +47,7 @@ var Login = React.createClass({
       var email = this.refs.email.value;
       var password = this.refs.password.value;
       if(email != "" && password != "")
-        SessionActionCreator.login(email, password);
+        RequestSessionActionCreator.login(email, password);
       else
         this._setError("Fill out all fields");
     },

@@ -1,7 +1,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
-var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {

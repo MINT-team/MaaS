@@ -6,11 +6,7 @@ module.exports = {
 
   APIEndpoints: {
     USERS:              APIRoot + "/users",
-    SIGNUP:             APIRoot + "/users/signUp",
-    LOGIN:              APIRoot + "/users/login",
-    LOGOUT:             APIRoot + "/users/logout",
-    RESET_PASSWORD:     APIRoot + "/users/reset",
-    COMPANY:            APIRoot + "/Companies"
+    COMPANIES:            APIRoot + "/Companies"
   },
 
   PayloadSources: keyMirror({

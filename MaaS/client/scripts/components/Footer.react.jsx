@@ -1,6 +1,6 @@
 var React = require('react');
 var Link = require('react-router').Link;
-var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 
 var Footer = React.createClass({
 

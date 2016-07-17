@@ -3,7 +3,7 @@ var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
-var SessionActionCreator = require('../../actions/SessionActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
 
 var Invite = React.createClass({
 
@@ -42,7 +42,7 @@ var Invite = React.createClass({
         var role = this.state.role;
         var email = this.refs.email.value;
         if(email != "") {
-            SessionActionCreator.invite(sender, company, role, email);
+            RequestSessionActionCreator.invite(sender, company, role, email);
             this.setState({sent: true});
         } else {
             this._setError("Insert an email to send invitation");

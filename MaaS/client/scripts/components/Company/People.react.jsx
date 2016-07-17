@@ -2,9 +2,9 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-var CompanyActionCreator = require('../../actions/CompanyActionCreator.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
-var UserActionCreator = require('../../actions/UserActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var Invite = require('./Invite.react.jsx');
 
 function getState() {

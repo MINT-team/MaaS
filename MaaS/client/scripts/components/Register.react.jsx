@@ -1,9 +1,9 @@
 var React = require('react');
 var Link = require('react-router').Link;
-var SessionActionCreator = require('../actions/SessionActionCreator.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore= require('../stores/UserStore.react.jsx');
-var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -45,7 +45,7 @@ var Register = React.createClass({
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
     if(company != "" || email != "" || password != "" || confirmation != "") {
-      SessionActionCreator.signup(company, email, password, confirmation);
+      RequestSessionActionCreator.signup(company, email, password, confirmation);
     } else {
       this._setError("Fill out all fields");
     }
@@ -58,7 +58,8 @@ var Register = React.createClass({
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
     if(password != "" || confirmation != "") {
-      UserActionCreator.changePassword(id, password, confirmation, accessToken);
+      // register by invite, the user already exists, we only have to change his password
+      RequestUserActionCreator.changePassword(id, password, confirmation, accessToken);
     } else {
       this._setError("Fill out all fields");
     }

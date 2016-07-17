@@ -1,7 +1,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
-var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -34,7 +34,7 @@ var ResetPwd = React.createClass({
         event.preventDefault();   //evita il ricaricamento della pagina da parte della form
         var email = this.refs.email.value;
         if(email != "") {
-            UserActionCreator.resetPassword(email);
+            RequestUserActionCreator.resetPassword(email);
         } else {
           this._setError("Fill out email field");
         }

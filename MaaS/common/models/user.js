@@ -268,7 +268,6 @@ module.exports = function(user) {
         user.findById(id, function(err, user) {
             if (err)
                 return cb(err);
-            console.log('prop:', user.editorConfig);
             return cb(null,user.editorConfig);
         });
     };

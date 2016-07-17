@@ -1,8 +1,7 @@
-var ServerActionCreators = require('../actions/ServerActionCreator.react.jsx');
+var ResponseUserActionCreator = require('../actions/Response/ResponseUserActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
-//var ReactDOM = require('react-dom');
 
 function _getErrors(json) {
   var error, message;
@@ -26,7 +25,7 @@ module.exports = {
 
   resetPassword: function(email) {
     request
-      .post(APIEndpoints.RESET_PASSWORD)
+      .post(APIEndpoints.USERS + '/reset')
       .set('Accept', 'application/json')
       //.set('Authorization', sessionStorage.getItem('accessToken'))
       .send({ email: email })
@@ -34,11 +33,11 @@ module.exports = {
         if(res) {
           if(res.error) {
             var errors = _getErrors(res.body.error);
-            ServerActionCreators.receiveResetPassword(null, errors);
+            ResponseUserActionCreator.responseResetPassword(null, errors);
           } else {
             //var json = JSON.parse(res.text);  //res ritorna vuoto!
             var json = { email: email};
-            ServerActionCreators.receiveResetPassword(json, null);
+            ResponseUserActionCreator.responseResetPassword(json, null);
           }
         }
         if(err){
@@ -65,13 +64,13 @@ module.exports = {
           res = JSON.parse(res.text);
           if(res.error) {
             // res.error.message: errori di loopback e error definito dal remote method
-            ServerActionCreators.receiveChangePassword(null, res.error.message);
+            ResponseUserActionCreator.responseChangePassword(null, res.error.message);
           } else {
-            ServerActionCreators.receiveChangePassword(res.email, null);
+            ResponseUserActionCreator.responseChangePassword(res.email, null);
           }
         }
         if(err){
-          //ServerActionCreators.receiveChangePassword(null, err);
+          //ServerActionCreators.responseChangePassword(null, err);
         }
       });
   },
@@ -93,13 +92,13 @@ module.exports = {
           res = JSON.parse(res.text);
           if(res.error) {
             // res.error.message: errori di loopback e error definito dal remote method
-            ServerActionCreators.receiveChangePersonalData(null, res.error.message);
+            ResponseUserActionCreator.responseChangePersonalData(null, res.error.message);
           } else {
-            ServerActionCreators.receiveChangePersonalData(res.newData, null);
+            ResponseUserActionCreator.responseChangePersonalData(res.newData, null);
           }
         }
         if(err){
-          //ServerActionCreators.receiveChangePassword(null, err);
+          //ResponseUserActionCreator.responseChangePassword(null, err);
         }
       });
   },
@@ -112,7 +111,7 @@ module.exports = {
       .set('Authorization', sessionStorage.getItem('accessToken'))
       .end(function(error, res){
         if(res) {
-          ServerActionCreators.response_getUser(res.body);
+          ResponseUserActionCreator.responseGetUser(res.body);
         }
       });
   },
@@ -125,7 +124,7 @@ module.exports = {
       .set('Authorization', sessionStorage.getItem('accessToken'))
       .end(function(error, res) {
         if(res) {
-          ServerActionCreators.response_getCompany(res.body);
+          ResponseUserActionCreator.responseGetCompany(res.body);
         }
       });
   },
@@ -137,7 +136,7 @@ module.exports = {
         .set('Authorization', sessionStorage.getItem('accessToken'))
         .end(function(error, res){
           if(res) {
-            ServerActionCreators.response_getEditorConfig(res.body);
+            ResponseUserActionCreator.responseGetEditorConfig(res.body);
           }
         });
   }

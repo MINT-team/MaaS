@@ -1,5 +1,5 @@
 var React = require('react');
-var UserActionCreator = require('../actions/UserActionCreator.react.jsx');
+var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 
 var ace = require('brace');
@@ -19,7 +19,8 @@ var Editor = React.createClass({
         script.type = "text/javascript";
         script.charset = "utf-8";
         document.body.appendChild(script);
-        UserActionCreator.getEditorConfig(SessionStore.getUserId());
+        RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+
     },
 
     render: function() {

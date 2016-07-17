@@ -4,12 +4,10 @@ var gulp = require('gulp');
 var browserify = require('browserify');
 var babelify = require('babelify');
 var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
 var del = require('del');
 var browserSync = require('browser-sync');
 var notify = require('gulp-notify');
 var watchify = require('watchify');
-var factor = require('factor-bundle');
 var reload = browserSync.reload;
 var p = {
     jsx: './scripts/app.jsx',
@@ -18,11 +16,6 @@ var p = {
     distCss: 'dist/css',
     distFont: 'dist/fonts'
 };
-/*var vendors = ['react','react-dom','react-router','flux','keymirror','object-assign','superagent'];
-var packageJson = require('../package.json')
-var dependencies = Object.keys(packageJson && packageJson.dependencies || {});
-
-var production = (process.env.NODE_ENV === 'production');*/
 
 gulp.task('clean',function(cb) {
     return del(['dist'], cb);
@@ -53,19 +46,11 @@ gulp.task('watchify', function() {
     return rebundle();
 });
 
-gulp.task('watch', ['clean'], function() {
+gulp.task('watch', function() {
     gulp.start(['browserSync','watchify']);
 });
 
-/*gulp.task('buildApp', function() {
-    gulp.start(['browserifyApp']);
-});
-
-gulp.task('buildVendor', function() {
-    gulp.start(['browserifyVendor']);
-});
-*/
-gulp.task('build', ['clean'], function() {
+gulp.task('build', function() {
     process.env.NODE_ENV = 'production';
     gulp.start(['browserify']);
 });
