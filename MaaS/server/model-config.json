@@ -46,5 +46,9 @@
   "Company": {
     "dataSource": "maas",
     "public": true
+  },
+  "ExternalDatabase": {
+    "dataSource": "maas",
+    "public": true
   }
 }
