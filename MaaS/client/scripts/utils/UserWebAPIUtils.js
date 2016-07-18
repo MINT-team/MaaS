@@ -136,8 +136,7 @@ module.exports = {
         .set('Authorization', sessionStorage.getItem('accessToken'))
         .end(function(error, res){
           if(res) {
-            var json = JSON.parse(res.text);
-            ResponseUserActionCreator.responseGetEditorConfig(json);
+            ResponseUserActionCreator.responseGetEditorConfig(res.body);
           }
         });
   }

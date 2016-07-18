@@ -20,7 +20,6 @@
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^2.4.0",
     "loopback-connector-mongodb": "^1.15.2",
-    "mongoose": "^4.5.4",
     "object-assign": "^4.1.0",
     "path": "^0.12.7",
     "react": "^15.1.0",

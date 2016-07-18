@@ -27,7 +27,7 @@
     "editorConfig": {
       "type": "object",
       "default": {
-        "theme": "chaos"
+          "theme": "chaos"
       }
     }
   },
