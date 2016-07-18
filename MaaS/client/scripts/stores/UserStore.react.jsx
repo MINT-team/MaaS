@@ -16,7 +16,7 @@ var _user = {
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
               role: sessionStorage.getItem('userRole'),
-              editorConfig: {}  //sessionStorage.getItem('editorConfig')
+              editorConfig: {}
             };
 var _errors = [];
 
@@ -143,8 +143,6 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         if(action.json) {
             _errors = []; // empty old errors
             _user.editorConfig = action.json.config;
-            // save session data
-            //sessionStorage.setItem('editorConfig', _user.editorConfig);
         }
         UserStore.emitChange();
         break;

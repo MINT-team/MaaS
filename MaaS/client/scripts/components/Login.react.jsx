@@ -37,6 +37,7 @@ var Login = React.createClass({
       if(this.state.isLogged) {
         RequestUserActionCreator.getUser(SessionStore.getUserId());
         RequestUserActionCreator.getCompany(SessionStore.getUserId());
+        RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
         const { router } = this.context;
         router.push('/');   // redirect to home page
       }
