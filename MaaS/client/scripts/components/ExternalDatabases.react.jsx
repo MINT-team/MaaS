@@ -1,20 +1,19 @@
 var React = require('react');
-var Table = require('material-ui/Table');
-/*
-var TableBody = require('material-ui/Table').TableBody;
-var TableHeader = require('material-ui/Table').TableHeader;
-var TableHeaderColumn = require('material-ui/Table').TableHeaderColumn;
-var TableRow = require('material-ui/Table').TableRow;
-var TableRowColumn = require('material-ui/Table').TableRowColumn;
+/*var MUI = require('material-ui').default;
+var Table = MUI.Table;
+var TableHeader = MUI.TableHeader;
+var TableRow = MUI.TableRow;
+var TableHeaderColumn = MUI.TableHeaderColumn;
+var TableBody = MUI.TableBody;
+var TableRowColumn = MUI.TableRowColumn;
 */
 var ExternalDatabases = React.createClass({
-	render: function() {
-	    return (
-	    <Table>
-	        Ciao
-        </Table>
+render: function() {
+    return (
+         <div>aa</div>
     );
-	}
+}
+
 });
 
 module.exports = ExternalDatabases;

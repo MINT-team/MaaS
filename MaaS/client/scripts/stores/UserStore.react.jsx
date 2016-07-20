@@ -16,7 +16,7 @@ var _user = {
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
               role: sessionStorage.getItem('userRole'),
-              editorConfig: []//sessionStorage.getItem('editorConfig')
+              editorConfig: [] //sessionStorage.getItem('editorConfig')
             };
 var _errors = [];
 
@@ -142,9 +142,8 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
 
       case ActionTypes.EDITOR_CONFIG_RESPONSE:
         if(action.json) {
-            _errors = []; // empty old error s
+            _errors = []; // empty old errors
             _user.editorConfig = action.json.config.theme;
-            window.alert("store: "+_user.editorConfig );
             //added by Thomas...molto probabilmente roba inutile
             //sessionStorage.setItem('editorConfig', _user.editorConfig.theme);
             //window.alert("CASE 2: "+sessionStorage.getItem('editorConfig'));

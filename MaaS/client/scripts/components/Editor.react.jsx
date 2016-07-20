@@ -22,9 +22,10 @@ require('brace/theme/twilight');
 
 function getState() {
     return {
-        config: {
+        /*config: {
             theme:  UserStore.getEditorConfig()
-        }
+        }*/
+        theme: UserStore.getEditorConfig()
     };
 }
 
@@ -36,13 +37,14 @@ var Editor = React.createClass({
 
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
-        window.alert(this.state.config.theme);
+        /*window.alert(this.state.theme);
         var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/"+ this.state.config.theme);
+        editor.setTheme("ace/theme/"+ this.state.theme);*/
     },
 
     componentWillUnmount: function() {
-      UserStore.removeChangeListener(this._onChange);
+        window.alert("unmount del componente");
+        UserStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function() {
