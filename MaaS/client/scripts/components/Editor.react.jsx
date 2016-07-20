@@ -18,32 +18,28 @@ var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/chaos');
 require('brace/theme/dawn');
+require('brace/theme/twilight');
+
+function getState() {
+    return {
+        config: {
+            theme:  UserStore.getEditorConfig()
+        }
+    };
+}
 
 var Editor = React.createClass({
 
-    getState: function() {
-        return UserStore.getEditorConfig();
+    getInitialState: function() {
+        return getState();
     },
 
-    /*getInitialState: function() {
-        return UserStore.getEditorConfig();
-    },
-*/
     componentDidMount: function() {
-        UserStore.addChangeListener(this._onChange);
-
-        /*var script = document.createElement("script");
-        script.src = "editor-config.js";
-        script.type = "text/javascript";
-        script.charset = "utf-8";
-        document.body.appendChild(script);*/
-        //RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
-
-        /*var theme = this.getState().theme;
-        window.alert(theme);
+        window.alert(this.state.config.theme);
         var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/".theme);
-        editor.session.setMode("ace/mode/javascript");*/
+        editor.setTheme("ace/theme/"+ this.state.config.theme);
+        UserStore.addChangeListener(this._onChange);
+        window.alert("dopo aggiunta store");
     },
 
     componentWillUnmount: function() {
@@ -51,10 +47,8 @@ var Editor = React.createClass({
     },
 
     _onChange: function() {
-        /*var theme = this.getState().theme;
-        var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/".theme);
-        editor.session.setMode("ace/mode/javascript");*/
+        window.alert("On change");
+        this.setState(getState());
     },
 
     render: function() {

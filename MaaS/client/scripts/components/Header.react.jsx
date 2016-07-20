@@ -59,6 +59,7 @@ var Header = React.createClass({
 					<div className="dropdown-content" ref="dropdownMenu">
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+							<Link to="/ExternalDatabases"><li>ExternaDatabase</li></Link>
 							<Link to=""><li>Text editor</li></Link>
 							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>

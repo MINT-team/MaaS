@@ -26,6 +26,7 @@ var UserActionCreator = {
     },
 
     getEditorConfig: function(userId){
+        //window.alert("request action web api util");
         WebAPIUtils.getEditorConfig(userId);
     }
 };

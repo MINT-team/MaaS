@@ -21,6 +21,7 @@ var People = require('./components/Company/People.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
 var ManageDashboard = require('./components/ManageDashboard.react.jsx');
+var ExternaDatabases = require('./components/ExternalDatabases.react.jsx');
 
 var Routes = React.createClass({
   render: function() {
@@ -43,6 +44,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="manageDashboard" component={ManageDashboard} />
+          <Route path="externalDataBases" component={ExternaDatabases} />
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />
         </Route>

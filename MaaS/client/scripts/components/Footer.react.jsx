@@ -6,7 +6,7 @@ var Footer = React.createClass({
 
 	logout: function() {
 		var accessToken = sessionStorage.getItem('accessToken');
-		SessionActionCreator.logout(accessToken);
+		RequestSessionActionCreator.logout(accessToken);
 	},
 
     render: function() {
@@ -17,7 +17,6 @@ var Footer = React.createClass({
 					<Link to="/company" id="header-title">{this.props.companyName}</Link>
 					<p className="footer-links">
 						<Link to="/" id="home"> Home </Link>
-						·
 						<Link onClick={this.logout} to="">Logout</Link>
 					</p>
 					<p className="text-footer">MaaS is offered by RedBabel and developed with love by MINT. </p>
@@ -43,12 +42,12 @@ var Footer = React.createClass({
     	}
     	footerLeft = (
     		<div className="footer-left">
-				<a href="http://redbabel.com"><img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/></a>
+				<a target="_blank" href="http://redbabel.com"><img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/></a>
 			</div>
     	);
     	footerRight = (
 			<div className="footer-right">
-				<a href="https://github.com/MINT-team/"><img src="../../images/mint_logo.png" alt="MINT Logo"/></a>
+				<a target="_blank" href="https://github.com/MINT-team/"><img src="../../images/mint_logo.png" alt="MINT Logo"/></a>
 			</div>
     	);
         return (
