@@ -746,11 +746,10 @@ var Editor = React.createClass({
     },
 
     componentDidMount: function componentDidMount() {
+        UserStore.addChangeListener(this._onChange);
         window.alert(this.state.config.theme);
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/" + this.state.config.theme);
-        UserStore.addChangeListener(this._onChange);
-        window.alert("dopo aggiunta store");
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -828,68 +827,24 @@ module.exports = Error404;
 'use strict';
 
 var React = require('react');
-var Table = require('material-ui/Table').Table;
+var Table = require('material-ui/Table');
+/*
 var TableBody = require('material-ui/Table').TableBody;
 var TableHeader = require('material-ui/Table').TableHeader;
 var TableHeaderColumn = require('material-ui/Table').TableHeaderColumn;
 var TableRow = require('material-ui/Table').TableRow;
 var TableRowColumn = require('material-ui/Table').TableRowColumn;
-
+*/
 var ExternalDatabases = React.createClass({
-    displayName: 'ExternalDatabases',
+	displayName: 'ExternalDatabases',
 
-    render: function render() {
-        return React.createElement(
-            Table,
-            null,
-            React.createElement(
-                TableHeader,
-                null,
-                React.createElement(
-                    TableRow,
-                    null,
-                    React.createElement(
-                        TableHeaderColumn,
-                        null,
-                        'Database'
-                    ),
-                    React.createElement(
-                        TableHeaderColumn,
-                        null,
-                        'Name'
-                    ),
-                    React.createElement(
-                        TableHeaderColumn,
-                        null,
-                        'Status'
-                    )
-                )
-            ),
-            React.createElement(
-                TableBody,
-                null,
-                React.createElement(
-                    TableRow,
-                    null,
-                    React.createElement(
-                        TableRowColumn,
-                        null,
-                        'Prova'
-                    ),
-                    React.createElement(
-                        TableRowColumn,
-                        null,
-                        'Prova'
-                    ),
-                    React.createElement(
-                        TableRowColumn,
-                        null,
-                        'Prova'
-                    )
-                )
-            )
-        );
-    }
+	render: function render() {
+		return React.createElement(
+			Table,
+			null,
+			'Ciao'
+		);
+	}
 });
 
 module.exports = ExternalDatabases;
@@ -1122,7 +1077,7 @@ var Header = React.createClass({
 						),
 						React.createElement(
 							Link,
-							{ to: '/ExternalDatabases' },
+							{ to: '/externalDataBases' },
 							React.createElement(
 								'li',
 								null,
@@ -2748,7 +2703,7 @@ var People = require('./components/Company/People.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
 var ManageDashboard = require('./components/ManageDashboard.react.jsx');
-var ExternaDatabases = require('./components/ExternalDatabases.react.jsx');
+var ExternalDatabases = require('./components/ExternalDatabases.react.jsx');
 
 var Routes = React.createClass({
   displayName: 'Routes',
@@ -2780,7 +2735,7 @@ var Routes = React.createClass({
         ),
         React.createElement(Route, { path: 'editor', component: Editor }),
         React.createElement(Route, { path: 'manageDashboard', component: ManageDashboard }),
-        React.createElement(Route, { path: 'externalDataBases', component: ExternaDatabases }),
+        React.createElement(Route, { path: 'externalDataBases', component: ExternalDatabases }),
         React.createElement(Route, { path: '404', component: Error404 }),
         React.createElement(Redirect, { from: '*', to: '404' })
       )

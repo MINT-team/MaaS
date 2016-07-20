@@ -35,11 +35,10 @@ var Editor = React.createClass({
     },
 
     componentDidMount: function() {
+        UserStore.addChangeListener(this._onChange);
         window.alert(this.state.config.theme);
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/"+ this.state.config.theme);
-        UserStore.addChangeListener(this._onChange);
-        window.alert("dopo aggiunta store");
     },
 
     componentWillUnmount: function() {
