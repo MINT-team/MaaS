@@ -50,5 +50,12 @@
   "ExternalDatabase": {
     "dataSource": "maas",
     "public": true
+  },
+  "SuperAdmin": {
+    "dataSource": "maas",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": true
+    }
   }
 }

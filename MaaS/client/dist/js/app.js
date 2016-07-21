@@ -746,11 +746,16 @@ var Editor = React.createClass({
         return getState();
     },
 
+    // componentDidMount: function() {
+    //     UserStore.addChangeListener(this._onChange);
+    //     window.alert(this.state.theme);
+    //     /*var editor = ace.edit("editor");
+    //     editor.setTheme("ace/theme/"+ this.state.theme);*/
+    // },
+
     componentDidMount: function componentDidMount() {
         UserStore.addChangeListener(this._onChange);
-        /*window.alert(this.state.theme);
-        var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/"+ this.state.theme);*/
+        window.alert("MOUNT del componente" + this.state.theme);
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -1089,7 +1094,7 @@ var Header = React.createClass({
 						),
 						React.createElement(
 							Link,
-							{ to: '' },
+							{ to: '/editor' },
 							React.createElement(
 								'li',
 								null,
@@ -3007,7 +3012,8 @@ var _user = {
   gender: sessionStorage.getItem('userGender'),
   avatar: sessionStorage.getItem('userAvatar'),
   role: sessionStorage.getItem('userRole'),
-  editorConfig: [] //sessionStorage.getItem('editorConfig')
+  editorConfig: sessionStorage.getItem('editorConfig')
+  //editorConfig: [] //sessionStorage.getItem('editorConfig')
 };
 var _errors = [];
 
@@ -3133,7 +3139,11 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
     case ActionTypes.EDITOR_CONFIG_RESPONSE:
       if (action.json) {
         _errors = []; // empty old errors
-        _user.editorConfig = action.json.config.theme;
+        // _user.editorConfig = action.json.config.theme;
+
+        sessionStorage.setItem('editorConfig', _user.editorConfig.theme);
+        window.alert("ciao");
+        window.alert("SONO NELLE STORE: " + sessionStorage.getItem('editorConfig'));
         //added by Thomas...molto probabilmente roba inutile
         //sessionStorage.setItem('editorConfig', _user.editorConfig.theme);
         //window.alert("CASE 2: "+sessionStorage.getItem('editorConfig'));

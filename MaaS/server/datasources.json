@@ -11,11 +11,6 @@
     "password": "mint2016",
     "name": "maas",
     "user": "mintswe",
-    "server": {
-      "auto_reconnect": true,
-      "reconnectTries": 100,
-      "reconnectInterval": 1000
-    },
     "connector": "mongodb"
   },
   "gmail": {
@@ -29,7 +24,7 @@
         "port": 465,
         "auth": {
           "user": "mint.swe.unipd@gmail.com",
-          "pass": "tullio1DInoi"
+          "pass": "mint.swe"
         }
       }
     ]

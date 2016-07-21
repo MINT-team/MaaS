@@ -60,7 +60,7 @@ var Header = React.createClass({
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
 							<Link to="/externalDataBases"><li>ExternaDatabase</li></Link>
-							<Link to=""><li>Text editor</li></Link>
+							<Link to="/editor"><li>Text editor</li></Link>
 							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>
 					</div>

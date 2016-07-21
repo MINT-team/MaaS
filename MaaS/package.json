@@ -8,6 +8,7 @@
     "posttest": "nsp check"
   },
   "dependencies": {
+    "async": "^2.0.0",
     "brace": "^0.8.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
@@ -27,6 +28,7 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-dropzone": "^3.5.1",
+    "react-native-mongoose": "^1.0.0",
     "react-router": "^2.5.1",
     "react-slick": "^0.12.2",
     "react-tap-event-plugin": "^1.0.0",
