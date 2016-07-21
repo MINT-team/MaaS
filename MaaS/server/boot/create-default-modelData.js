@@ -11,16 +11,26 @@ module.exports = function(app) {
         });
     });
 
-    function createSuperAdmins(cb) {
-        maas.isActual('SuperAdmin', function(err, actual) {
-            if (!actual) {
-                maas.autoupdate('SuperAdmin', function(err) {
-                if (err)
-                return cb(err);
-                var SuperAdmin = app.models.SuperAdmin;
-                SuperAdmin.create([
-                    { email: 'superadmin@gmail.com', password: '123456789' }
-                    ], cb);
+   function createSuperAdmins(cb) {
+       var email_value='ciacscso@gmail.com';
+       var user = app.models.user;
+       user.findOne({where: {email: email_value}, limit: 1}, function(err,results) {
+           if (results)
+           {
+                console.log('> Email già registrata come utente');
+           }
+           else
+           {
+               var SuperAdmin = app.models.SuperAdmin;
+               SuperAdmin.create([
+                   { email: email_value, password: '123456789' }
+                   ], cb);
+                   maas.isActual('SuperAdmin', function(err, actual) {
+                       if (!actual) {
+                           maas.autoupdate('SuperAdmin', function(err) {
+                               if (err) { return cb(err); }
+                        });
+                    }
                 });
             }
         });
