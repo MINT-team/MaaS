@@ -1,9 +1,26 @@
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var mui = require('material-ui'),
   RaisedButton = mui.RaisedButton,
-  Dialog = mui.Dialog;
+  Dialog = mui.Dialog,
+  RaisedButton = mui.RaisedButton;
 
 var ExternalDatabases = React.createClass({
+
+  handleClick: function() {
+    this.setState({open: true});
+  },
+
+  handleClose: function(){
+    this.setState({open: false});
+  },
 
  render: function() {
 
@@ -12,12 +29,19 @@ var ExternalDatabases = React.createClass({
   };
 
   return (
+
+
+
+
+
     <div>
-      <RaisedButton label="Aggiungi DataBase" style={style} onTouchTap={this.handleOpen} />
+      <RaisedButton label="Aggiungi DataBase" style={style} onClick={this.handleOpen}  />
       <Dialog
           title="Dialog With Actions"
+
           open={this.state.open}
           onRequestClose={this.handleClose}
+
         >
           The actions in this window were passed in as an array of React objects.
         </Dialog>

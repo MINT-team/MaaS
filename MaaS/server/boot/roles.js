@@ -1,3 +1,11 @@
+// Name: {roles.js}
+// Module: {Back-end}
+// Location: {/MaaS/server/boot/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 module.exports = function(app) {
     var Role = app.models.Role;
     var RoleMapping = app.models.RoleMapping;

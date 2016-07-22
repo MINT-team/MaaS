@@ -1,6 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
+// Name: {RequestCompanyActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/CompanyWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
@@ -21,6 +29,14 @@ module.exports = CompanyActionCreator;
 
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28,"../../utils/CompanyWebAPIUtils.js":33}],2:[function(require,module,exports){
 'use strict';
+
+// Name: {RequestSessionActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require('../../dispatcher/Dispatcher.js');
 var Constants = require('../../constants/Constants.js');
@@ -55,6 +71,14 @@ module.exports = SessionActionCreator;
 
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28,"../../utils/SessionWebAPIUtils.js":34}],3:[function(require,module,exports){
 "use strict";
+
+// Name: {RequestUserActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/UserWebAPIUtils.js");
@@ -94,6 +118,14 @@ module.exports = UserActionCreator;
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28,"../../utils/UserWebAPIUtils.js":35}],4:[function(require,module,exports){
 "use strict";
 
+// Name: {ResponseCompanyActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
 
@@ -113,6 +145,14 @@ module.exports = ResponseCompanyActionCreator;
 
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28}],5:[function(require,module,exports){
 "use strict";
+
+// Name: {ResponseSessionActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
@@ -146,6 +186,14 @@ module.exports = ResponseSessionActionCreator;
 
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28}],6:[function(require,module,exports){
 "use strict";
+
+// Name: {ResponseUserActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
@@ -202,6 +250,14 @@ module.exports = ResponseUserActionCreator;
 },{"../../constants/Constants.js":27,"../../dispatcher/Dispatcher.js":28}],7:[function(require,module,exports){
 'use strict';
 
+// Name: {app.jsx}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 window.React = React;
@@ -228,6 +284,14 @@ ReactDOM.render(React.createElement(App, null), document.getElementById('content
 
 },{"./routes.jsx":29,"material-ui":183,"material-ui/styles/baseThemes/darkBaseTheme":405,"material-ui/styles/getMuiTheme":408,"react":694,"react-dom":440,"react-tap-event-plugin":528}],8:[function(require,module,exports){
 'use strict';
+
+// Name: {Company.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Company/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -385,6 +449,14 @@ module.exports = Company;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../stores/CompanyStore.react.jsx":30,"../../stores/SessionStore.react.jsx":31,"../Sidebar.react.jsx":26,"react":694,"react-router":471}],9:[function(require,module,exports){
 'use strict';
 
+// Name: {Invite.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Company/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -505,6 +577,14 @@ module.exports = Invite;
 
 },{"../../actions/Request/RequestSessionActionCreator.react.jsx":2,"../../stores/CompanyStore.react.jsx":30,"../../stores/SessionStore.react.jsx":31,"../../stores/UserStore.react.jsx":32,"react":694,"react-router":471}],10:[function(require,module,exports){
 'use strict';
+
+// Name: {People.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Company/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -799,6 +879,14 @@ module.exports = Editor;
 },{"../actions/Request/RequestUserActionCreator.react.jsx":3,"../stores/SessionStore.react.jsx":31,"../stores/UserStore.react.jsx":32,"brace":36,"brace/mode/javascript":37,"brace/theme/chaos":39,"brace/theme/dawn":40,"brace/theme/twilight":41,"react":694}],12:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -850,14 +938,31 @@ module.exports = Error404;
 },{"react":694,"react-router":471}],13:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var mui = require('material-ui'),
     RaisedButton = mui.RaisedButton,
-    Dialog = mui.Dialog;
+    Dialog = mui.Dialog,
+    RaisedButton = mui.RaisedButton;
 
 var ExternalDatabases = React.createClass({
   displayName: 'ExternalDatabases',
 
+
+  handleClick: function handleClick() {
+    this.setState({ open: true });
+  },
+
+  handleClose: function handleClose() {
+    this.setState({ open: false });
+  },
 
   render: function render() {
 
@@ -868,13 +973,15 @@ var ExternalDatabases = React.createClass({
     return React.createElement(
       'div',
       null,
-      React.createElement(RaisedButton, { label: 'Aggiungi DataBase', style: style, onTouchTap: this.handleOpen }),
+      React.createElement(RaisedButton, { label: 'Aggiungi DataBase', style: style, onClick: this.handleOpen }),
       React.createElement(
         Dialog,
         {
           title: 'Dialog With Actions',
+
           open: this.state.open,
           onRequestClose: this.handleClose
+
         },
         'The actions in this window were passed in as an array of React objects.'
       )
@@ -886,6 +993,14 @@ module.exports = ExternalDatabases;
 
 },{"material-ui":183,"react":694}],14:[function(require,module,exports){
 'use strict';
+
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -1010,6 +1125,14 @@ module.exports = Footer;
 
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":2,"react":694,"react-router":471}],15:[function(require,module,exports){
 'use strict';
+
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -1181,6 +1304,14 @@ module.exports = Header;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":2,"react":694,"react-router":471}],16:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Slider = require('react-slick');
 
@@ -1322,6 +1453,14 @@ module.exports = Home;
 },{"react":694,"react-slick":507}],17:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
@@ -1460,6 +1599,14 @@ module.exports = Login;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":2,"../actions/Request/RequestUserActionCreator.react.jsx":3,"../stores/SessionStore.react.jsx":31,"react":694,"react-router":471}],18:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var CompanyStore = require('../stores/CompanyStore.react.jsx');
@@ -1521,6 +1668,14 @@ module.exports = MaaSApp;
 },{"../stores/CompanyStore.react.jsx":30,"../stores/SessionStore.react.jsx":31,"../stores/UserStore.react.jsx":32,"./Footer.react.jsx":14,"./Header.react.jsx":15,"react":694}],19:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -1544,6 +1699,14 @@ module.exports = ManageDashboard;
 
 },{"react":694,"react-router":471}],20:[function(require,module,exports){
 'use strict';
+
+// Name: {ChangeAvatar.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Profile/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Dropzone = require('react-dropzone');
@@ -1643,6 +1806,14 @@ module.exports = ChangeAvatar;
 
 },{"react":694,"react-dropzone":441}],21:[function(require,module,exports){
 'use strict';
+
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -1788,6 +1959,14 @@ module.exports = ChangePassword;
 
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":3,"../../stores/UserStore.react.jsx":32,"react":694,"react-router":471}],22:[function(require,module,exports){
 'use strict';
+
+// Name: {PersonalData.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Profile/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -1997,6 +2176,14 @@ module.exports = PersonalData;
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":3,"../../stores/SessionStore.react.jsx":31,"../../stores/UserStore.react.jsx":32,"react":694,"react-router":471}],23:[function(require,module,exports){
 'use strict';
 
+// Name: {Profile.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Profile/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -2183,6 +2370,14 @@ module.exports = Profile;
 
 },{"../../stores/UserStore.react.jsx":32,"../Sidebar.react.jsx":26,"react":694}],24:[function(require,module,exports){
 'use strict';
+
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -2434,6 +2629,14 @@ module.exports = Register;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":2,"../actions/Request/RequestUserActionCreator.react.jsx":3,"../stores/SessionStore.react.jsx":31,"../stores/UserStore.react.jsx":32,"react":694,"react-router":471}],25:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
@@ -2582,6 +2785,14 @@ module.exports = ResetPwd;
 },{"../actions/Request/RequestUserActionCreator.react.jsx":3,"../stores/UserStore.react.jsx":32,"react":694,"react-router":471}],26:[function(require,module,exports){
 'use strict';
 
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -2639,6 +2850,14 @@ module.exports = Sidebar;
 },{"react":694,"react-router":471}],27:[function(require,module,exports){
 "use strict";
 
+// Name: {Constants.js}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts/constants/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var keyMirror = require('keymirror');
 
 var APIRoot = "https://maas-navid94.c9users.io/api";
@@ -2682,6 +2901,14 @@ module.exports = {
 },{"keymirror":48}],28:[function(require,module,exports){
 'use strict';
 
+// Name: {Dispatcher.js}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts/dispatcher/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Constants = require('../constants/Constants.js');
 var FluxDispatcher = require('flux').Dispatcher;
 var assign = require('object-assign');
@@ -2711,6 +2938,14 @@ module.exports = Dispatcher;
 
 },{"../constants/Constants.js":27,"flux":45,"object-assign":439}],29:[function(require,module,exports){
 'use strict';
+
+// Name: {routes.jsx}
+// Module: {Front-end}
+// Location: {MaaS/client/scripts/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var React = require('react');
 var ReactRouter = require('react-router');
@@ -2779,6 +3014,14 @@ module.exports = Routes;
 
 },{"./components/Company/Company.react.jsx":8,"./components/Company/People.react.jsx":10,"./components/Editor.react.jsx":11,"./components/Error404.react.jsx":12,"./components/ExternalDatabases.react.jsx":13,"./components/Home.react.jsx":16,"./components/Login.react.jsx":17,"./components/MaaSApp.react.jsx":18,"./components/ManageDashboard.react.jsx":19,"./components/Profile/ChangeAvatar.react.jsx":20,"./components/Profile/ChangePassword.react.jsx":21,"./components/Profile/PersonalData.react.jsx":22,"./components/Profile/Profile.react.jsx":23,"./components/Register.react.jsx":24,"./components/ResetPwd.react.jsx":25,"react":694,"react-router":471}],30:[function(require,module,exports){
 'use strict';
+
+// Name: {CompanyStore.react.jsx}
+// Module: {Front-end::Stores}
+// Location: {/MaaS/client/scripts/stores/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -2867,6 +3110,14 @@ module.exports = CompanyStore;
 
 },{"../constants/Constants.js":27,"../dispatcher/Dispatcher.js":28,"./SessionStore.react.jsx":31,"events":43,"object-assign":439}],31:[function(require,module,exports){
 'use strict';
+
+// Name: {SessionStore.react.jsx}
+// Module: {Front-end::Stores}
+// Location: {/MaaS/client/scripts/stores/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -3017,6 +3268,14 @@ module.exports = SessionStore;
 
 },{"../constants/Constants.js":27,"../dispatcher/Dispatcher.js":28,"events":43,"object-assign":439}],32:[function(require,module,exports){
 'use strict';
+
+// Name: {UserStore.react.jsx}
+// Module: {Front-end::Stores}
+// Location: {/MaaS/client/scripts/stores/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -3217,6 +3476,14 @@ module.exports = UserStore;
 },{"../constants/Constants.js":27,"../dispatcher/Dispatcher.js":28,"./SessionStore.react.jsx":31,"events":43,"object-assign":439}],33:[function(require,module,exports){
 'use strict';
 
+// Name: {CompanyWebAPIUtils.js}
+// Module: {Front-end::WebAPIUtils}
+// Location: {/MaaS/client/scripts/utils/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var ResponseCompanyActionCreator = require('../actions/Response/ResponseCompanyActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
@@ -3277,6 +3544,14 @@ module.exports = {
 
 },{"../actions/Response/ResponseCompanyActionCreator.react.jsx":4,"../constants/Constants.js":27,"superagent":695}],34:[function(require,module,exports){
 'use strict';
+
+// Name: {SessionWebAPIUtils.js}
+// Module: {Front-end::WebAPIUtils}
+// Location: {/MaaS/client/scripts/utils/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var ResponseSessionActionCreator = require('../actions/Response/ResponseSessionActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
@@ -3430,6 +3705,14 @@ module.exports = {
 
 },{"../actions/Response/ResponseSessionActionCreator.react.jsx":5,"../constants/Constants.js":27,"superagent":695}],35:[function(require,module,exports){
 'use strict';
+
+// Name: {UserWebAPIUtils.js}
+// Module: {Front-end::WebAPIUtils}
+// Location: {/MaaS/client/scripts/utils/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
 
 var ResponseUserActionCreator = require('../actions/Response/ResponseUserActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');

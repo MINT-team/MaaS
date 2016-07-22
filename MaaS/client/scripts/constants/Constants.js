@@ -1,3 +1,11 @@
+// Name: {Constants.js}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts/constants/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var keyMirror = require('keymirror');
 
 var APIRoot = "https://maas-navid94.c9users.io/api";

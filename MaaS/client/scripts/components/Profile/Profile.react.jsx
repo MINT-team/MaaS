@@ -1,3 +1,11 @@
+// Name: {Profile.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Profile/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');

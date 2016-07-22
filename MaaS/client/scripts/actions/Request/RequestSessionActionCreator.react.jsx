@@ -1,3 +1,11 @@
+// Name: {RequestSessionActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Dispatcher = require('../../dispatcher/Dispatcher.js');
 var Constants = require('../../constants/Constants.js');
 var WebAPIUtils = require('../../utils/SessionWebAPIUtils.js');

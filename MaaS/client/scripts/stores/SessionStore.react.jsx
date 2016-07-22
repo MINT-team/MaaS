@@ -1,3 +1,11 @@
+// Name: {SessionStore.react.jsx}
+// Module: {Front-end::Stores}
+// Location: {/MaaS/client/scripts/stores/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;

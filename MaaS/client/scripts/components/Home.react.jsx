@@ -1,3 +1,11 @@
+// Name: {}
+// Module: {}
+// Location: {}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Slider = require('react-slick');
 

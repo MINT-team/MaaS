@@ -1,3 +1,11 @@
+// Name: {RequestUserActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/UserWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");

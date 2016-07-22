@@ -1,3 +1,11 @@
+// Name: {DeleteAccount.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/Profile/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');

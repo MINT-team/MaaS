@@ -1,3 +1,11 @@
+// Name: {Dispatcher.js}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts/dispatcher/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
 var Constants = require('../constants/Constants.js');
 var FluxDispatcher = require('flux').Dispatcher;
 var assign = require('object-assign');
