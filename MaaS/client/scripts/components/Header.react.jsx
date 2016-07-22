@@ -47,7 +47,8 @@ var Header = React.createClass({
 			headerMenu = (
 				<div id="header-menu">
 					<Link to="/dashboard">Dashboard</Link>
-					<Link to="">Altro</Link>
+					<Link to="/externalDataBases">ExternaDatabase</Link>
+
 				</div>
     		);
 	    	headerPanel = (
@@ -59,7 +60,6 @@ var Header = React.createClass({
 					<div className="dropdown-content" ref="dropdownMenu">
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
-							<Link to="/externalDataBases"><li>ExternaDatabase</li></Link>
 							<Link to="/editor"><li>Text editor</li></Link>
 							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>

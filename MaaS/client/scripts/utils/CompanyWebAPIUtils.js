@@ -39,6 +39,29 @@ module.exports = {
           //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
         }
       });
+  },
+
+  setExtDb: function(id, name, password) {
+    request
+      .get(APIEndpoints.COMPANIES + '/' + id + '/users')
+      .set('Accept', 'application/json')
+      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .send({id: id,
+      name: name,
+      password: password})
+      .end(function(err, res){
+        if(res) {
+            if(res.error) {
+                var errors = _getErrors(res.body.error);
+                ResponseCompanyActionCreator.responseCompanyUsers(null, errors);
+            } else {
+                ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
+            }
+        }
+        if(err){
+          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+        }
+      });
   }
 
 };

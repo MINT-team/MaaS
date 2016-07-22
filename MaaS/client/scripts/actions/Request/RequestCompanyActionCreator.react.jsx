@@ -7,6 +7,10 @@ var ActionTypes = Constants.ActionTypes;
 var CompanyActionCreator = {
     getUsers: function(id) {
         WebAPIUtils.getUsers(id);
+    },
+
+    setExtDb: function(companyId, name, password) {
+        WebAPIUtils.setExtDb(companyId, name, password);
     }
 };
 

@@ -35,16 +35,12 @@ var Editor = React.createClass({
         return getState();
     },
 
-    // componentDidMount: function() {
-    //     UserStore.addChangeListener(this._onChange);
-    //     window.alert(this.state.theme);
-    //     /*var editor = ace.edit("editor");
-    //     editor.setTheme("ace/theme/"+ this.state.theme);*/
-    // },
-
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
         window.alert("MOUNT del componente"+this.state.theme);
+        window.alert(this.state.theme);
+         var editor = ace.edit("editor");
+         editor.setTheme("ace/theme/"+ this.state.theme);
     },
 
     componentWillUnmount: function() {

@@ -1,19 +1,29 @@
 var React = require('react');
-/*var MUI = require('material-ui').default;
-var Table = MUI.Table;
-var TableHeader = MUI.TableHeader;
-var TableRow = MUI.TableRow;
-var TableHeaderColumn = MUI.TableHeaderColumn;
-var TableBody = MUI.TableBody;
-var TableRowColumn = MUI.TableRowColumn;
-*/
-var ExternalDatabases = React.createClass({
-render: function() {
-    return (
-         <div>aa</div>
-    );
-}
+var mui = require('material-ui'),
+  RaisedButton = mui.RaisedButton,
+  Dialog = mui.Dialog;
 
+var ExternalDatabases = React.createClass({
+
+ render: function() {
+
+  const style = {
+  margin: 12,
+  };
+
+  return (
+    <div>
+      <RaisedButton label="Aggiungi DataBase" style={style} onTouchTap={this.handleOpen} />
+      <Dialog
+          title="Dialog With Actions"
+          open={this.state.open}
+          onRequestClose={this.handleClose}
+        >
+          The actions in this window were passed in as an array of React objects.
+        </Dialog>
+    </div>
+     );
+    }
 });
 
 module.exports = ExternalDatabases;

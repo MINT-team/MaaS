@@ -6,7 +6,8 @@ module.exports = {
 
   APIEndpoints: {
     USERS:              APIRoot + "/users",
-    COMPANIES:            APIRoot + "/Companies"
+    COMPANIES:          APIRoot + "/Companies",
+    SUPERADMINS:        APIRoot + "/SuperAdmins"
   },
 
   PayloadSources: keyMirror({

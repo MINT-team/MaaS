@@ -7,35 +7,46 @@ var request = require('superagent');
 function _getErrors(json) {
     var error, message, email;
     // Email
-    if(json.details && json.details.codes) {
-        if(json.details.codes.email) {
+    if(json.details && json.details.codes)
+    {
+        if(json.details.codes.email)
+        {
             email = json.details.codes.email;
-            if(JSON.stringify(email).match(/uniqueness/)) {
+            if(JSON.stringify(email).match(/uniqueness/))
+            {
                 error = "Email already exists";
             }
-            if(JSON.stringify(email).match(/format/)) {
+            if(JSON.stringify(email).match(/format/))
+            {
                 error = "Invalid email";
             }
-            if(JSON.stringify(email).match(/presence/)) {
+            if(JSON.stringify(email).match(/presence/))
+            {
                 error = "Insert an email";
             }
         }
-    } else if(json.message) {
+    }
+    else if(json.message)
+    {
         message = json.message;
         // Password
-        if(JSON.stringify(message).match(/password/)) {
+        if(JSON.stringify(message).match(/password/))
+        {
             error = "Invalid password";
         }
         // Login
-        if(JSON.stringify(message).match(/login failed/)) {
+        if(JSON.stringify(message).match(/login failed/))
+        {
             error = "Email and password are incorrect";
         }
         // Email verification
-        if(JSON.stringify(message).match(/email has not been verified/)) {
+        if(JSON.stringify(message).match(/email has not been verified/))
+        {
             error = "You have to verify your email first";
         }
         // Other cases
-        if(!error) {
+        if(!error)
+        {
             error = message;
         }
     }
@@ -56,12 +67,16 @@ module.exports = {
         })
         .set('Accept', 'application/json')
         .end(function(err, res) {
-            if(res) {
+            if(res)
+            {
                 console.log(res);
-                if(res.body.error) {
+                if(res.body.error)
+                {
                     var errors = _getErrors(res.body.error);
                     ResponseSessionActionCreator.responseSignup(null, errors);
-                } else {
+                }
+                else
+                {
                     var json = {
                         email: res.body.email,
                         company: res.body.company
@@ -69,7 +84,8 @@ module.exports = {
                     ResponseSessionActionCreator.responseSignup(json, null);
                 }
             }
-            if(err){
+            if(err)
+            {
                 //var errorMsgs = _getErrors(err);  //ampliare questa funzione per usarla con "err"
                 //ServerActionCreators.recieveSignup(null, errorMsgs);
             }
@@ -83,13 +99,39 @@ module.exports = {
             password: password
         })
         .set('Accept', 'application/json')
-        .end(function(err, res){
-            if(res) {
-                if(res.error) {
-                    var errors = _getErrors(res.body.error);
-                    ResponseSessionActionCreator.responseLogin(null, errors);
-                } else {
-                    var json = JSON.parse(res.text);
+        .end(function(err, UserRes){
+            if(UserRes)
+            {
+                if(UserRes.error)
+                {
+                   request.post(APIEndpoints.SUPERADMINS + '/login')
+                   .send({
+                        email: email,
+                        password: password
+                    })
+                    .set('Accept', 'application/json')
+                    .end(function(err, SuperAdminRes){
+                         if(SuperAdminRes)
+                         {
+                            if(SuperAdminRes.error)
+                            {   //incorrect User and SuperAdmin credentials
+                                var errors = _getErrors(SuperAdminRes.body.error);
+                                ResponseSessionActionCreator.responseLogin(null, errors);
+                            }
+                            else
+                            {
+                                var json = JSON.parse(SuperAdminRes.text);
+                                ResponseSessionActionCreator.responseLogin(json, null);
+                            }
+                         }
+                    });
+
+                    // var errors = _getErrors(UserRes.body.error);
+                    // ResponseSessionActionCreator.responseLogin(null, errors);
+                }
+                else
+                {    //successfully logged in user
+                    var json = JSON.parse(UserRes.text);
                     ResponseSessionActionCreator.responseLogin(json, null);
                 }
                 //var errorMsgs = _getErrors(res);
@@ -97,7 +139,8 @@ module.exports = {
                 //var json = JSON.parse(res.text);<p>Email: {json.email}</p><p>Password: {json.password}</p>
                 //ReactDOM.render(<div>{res.text}</div>, document.getElementById('content'));
             }
-            if(err){
+            if(err)
+            {
                 //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
             }
         });
@@ -116,11 +159,14 @@ module.exports = {
         .set('Accept', 'application/json')
         .set('Authorization', sessionStorage.getItem('accessToken'))
         .end(function(err, res){
-            if(res.error || err){
+            if(res.error || err)
+            {
                 console.log(res.error);
                 var errors = _getErrors(res.body.error);
                 ResponseSessionActionCreator.responseInvite(errors);
-            } else {
+            }
+            else
+            {
                 ResponseSessionActionCreator.responseInvite(null);
             }
         });
@@ -133,10 +179,12 @@ module.exports = {
         })
         .set('Accept', 'application/json')
         .end(function(err, res){
-            if(res) {
+            if(res)
+            {
                 //ReactDOM.render(<div>{res.text}</div>, document.getElementById('content'));
             }
-            if(err){
+            if(err)
+            {
                 //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
             }
         });
