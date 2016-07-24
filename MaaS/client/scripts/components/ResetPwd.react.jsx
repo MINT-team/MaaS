@@ -1,6 +1,6 @@
-// Name: {}
-// Module: {}
-// Location: {}
+// Name: {ResetPwd.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/}
 
 // History:
 // Version         Date            Programmer

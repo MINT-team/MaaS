@@ -24,8 +24,8 @@ var _user = {
               gender: sessionStorage.getItem('userGender'),
               avatar: sessionStorage.getItem('userAvatar'),
               role: sessionStorage.getItem('userRole'),
-              //editorConfig: sessionStorage.getItem('editorConfig')
-              editorConfig: [] //sessionStorage.getItem('editorConfig')
+              theme: sessionStorage.getItem('theme')
+              //editorConfig: [] //sessionStorage.getItem('editorConfig')
             };
 var _errors = [];
 
@@ -81,11 +81,16 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getEditorConfig: function() {
     return _user.editorConfig;
-
   },
 
   getErrors: function() {
     return _errors;
+  },
+
+  getEditorTheme: function() {
+   // return _user.theme;
+   //window.alert("get theme: "+sessionStorage.getItem('theme'));
+    return _user.theme;
   }
 
 });
@@ -152,14 +157,11 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
       case ActionTypes.EDITOR_CONFIG_RESPONSE:
         if(action.json) {
             _errors = []; // empty old errors usare local
-            _user.editorConfig = action.json.config.theme;
-
-            //sessionStorage.setItem('editorConfig', _user.editorConfig.theme);
-            window.alert("ciao");
-            window.alert("SONO NELLE STORE: "+sessionStorage.getItem('editorConfig'));
-            //added by Thomas...molto probabilmente roba inutile
-            //sessionStorage.setItem('editorConfig', _user.editorConfig.theme);
-            //window.alert("CASE 2: "+sessionStorage.getItem('editorConfig'));
+            _user.theme = action.json.config.theme;
+            if(!sessionStorage.getItem('theme')){
+              sessionStorage.setItem('theme', action.json.config.theme);
+            }
+            //window.alert("SONO NELLE STORE: "+sessionStorage.getItem('theme'));
         }
         UserStore.emitChange();
         break;

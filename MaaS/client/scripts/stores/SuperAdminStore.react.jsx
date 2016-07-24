@@ -15,7 +15,7 @@ var SessionStore = require('./SessionStore.react.jsx');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _suerAdmin = {
+var _superAdmin = {
     id: SessionStore.getSuperAdminId,
     email: SessionStore.getSuperAdminEmail()
 }

@@ -13,6 +13,7 @@
 //     'url' : ''
 // }
 
+
 var loopback = require('loopback');
 var config = require('../../server/config.json');
 var app = require('../../server/server.js');
@@ -23,6 +24,8 @@ var port = '8080';
 module.exports = function(Externaldatabase) {
     Externaldatabase.connectDbs = function() {
         var Databases = app.models.Externaldatabase;
-        Databases.findById()
+        var user = loopback.getCurrentContext().get('currentUser');
+        // var Databases = request.get(user/ExternalDatabases/id/company);
+        Databases.findById(user.companyId);
     }
 };
