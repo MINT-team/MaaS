@@ -1,4 +1,4 @@
-// Name: {HomeSuperAdmin.react.jsx}
+// Name: {DashboardSuperAdmin.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/SuperAdmin/}
 
@@ -13,3 +13,20 @@
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
+
+
+var DashboardSuperAdmin = React.createClass({
+	 render: function() {
+
+    return (
+      <div>
+      ciao
+      </div>
+
+        );
+
+
+    }
+	});
+
+module.exports = DashboardSuperAdmin;

@@ -1,4 +1,4 @@
-// Name: {CompanyWebAPIUtils.js}
+// Name: {ExternalDatabasesWebAPIUtils.js}
 // Module: {Front-end::WebAPIUtils}
 // Location: {/MaaS/client/scripts/utils/}
 
@@ -6,11 +6,9 @@
 // Version         Date            Programmer
 // ==========================================
 
-var ResponseCompanyActionCreator = require('../actions/Response/ResponseCompanyActionCreator.react.jsx');
+var ResponseExternalDatabasesActionCreator = require('../actions/Response/ResponseExternalDatabasesActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
-
-//var ReactDOM = require('react-dom');
 
 function _getErrors(json) {
   var error, message;
@@ -28,27 +26,35 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
 
-  getUsers: function(id) {
+setExtDb: function(id, name, password) {
     request
-      .get(APIEndpoints.COMPANIES + '/' + id + '/users')
-      .set('Accept', 'application/json')
+      .get(APIEndpoints.DATABASES + '/' + id + '/databases')
       .set('Authorization', sessionStorage.getItem('accessToken'))
-      .send({ id: id })
+      .send({
+        id: id,
+        name: name,
+        password: password})
+      .set('Accept', 'application/json')
       .end(function(err, res){
         if(res) {
+          console.log(res);
             if(res.error) {
                 var errors = _getErrors(res.body.error);
-                ResponseCompanyActionCreator.responseCompanyUsers(null, errors);
+                ResponseExternalDatabasesActionCreator.responseSetExtDb(null, errors);
             } else {
-                ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
+                var json = {
+                        id: res.body.email,
+                        name: res.body.company,
+                        password: res.body.password
+
+                    };
+                ResponseExternalDatabasesActionCreator.responseSetExtDb(json, null);
             }
         }
         if(err){
           //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
         }
       });
-  },
-
-
+  }
 
 };

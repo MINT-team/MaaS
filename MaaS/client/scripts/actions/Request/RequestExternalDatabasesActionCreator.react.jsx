@@ -1,4 +1,4 @@
-// Name: {RequestCompanyActionCreator.react.jsx}
+// Name: {RequestExternalDatabaseActionCreator.react.jsx}
 // Module: {ActionCreators}
 // Location: {/MaaS/client/scripts/actions/Request/}
 
@@ -7,16 +7,16 @@
 // ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/CompanyWebAPIUtils.js");
+var WebAPIUtils = require("../../utils/ExternalDatabaseWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var CompanyActionCreator = {
-    getUsers: function(id) {
-        WebAPIUtils.getUsers(id);
-    },
 
+var ExternalDatabaseActionCreator = {
+    setExtDb: function(companyId, name, password) {
+            WebAPIUtils.setExtDb(companyId, name, password);
+        }
 };
 
-module.exports = CompanyActionCreator;
+module.exports = ExternalDatabaseActionCreator;

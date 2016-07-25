@@ -55,7 +55,7 @@ var Header = React.createClass({
 			headerMenu = (
 				<div id="header-menu">
 					<Link to="/dashboard">Dashboard</Link>
-					<Link to="/externalDataBases">ExternaDatabase</Link>
+					<Link to="/externalDatabases">ExternaDatabase</Link>
 
 				</div>
     		);
