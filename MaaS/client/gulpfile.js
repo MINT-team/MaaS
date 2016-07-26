@@ -9,6 +9,7 @@ var browserSync = require('browser-sync');
 var notify = require('gulp-notify');
 var watchify = require('watchify');
 var reload = browserSync.reload;
+var preprocess = require('gulp-preprocess');
 var p = {
     jsx: './scripts/app.jsx',
     bundleApp: 'app.js',
@@ -16,6 +17,12 @@ var p = {
     distCss: 'dist/css',
     distFont: 'dist/fonts'
 };
+
+gulp.task('env-config', function() {
+  gulp.src(['../.env'])
+    .pipe(preprocess())
+    .pipe(gulp.dest(p.distJs))
+});
 
 gulp.task('clean',function(cb) {
     return del(['dist'], cb);

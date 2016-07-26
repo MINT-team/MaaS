@@ -55,7 +55,7 @@
     "dataSource": "maas",
     "public": true,
     "options": {
-      "emailVerificationRequired": true
+      "emailVerificationRequired": false
     }
   }
 }

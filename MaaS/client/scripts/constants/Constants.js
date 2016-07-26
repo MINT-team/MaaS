@@ -15,7 +15,8 @@ module.exports = {
   APIEndpoints: {
     USERS:              APIRoot + "/users",
     COMPANIES:          APIRoot + "/Companies",
-    SUPERADMINS:        APIRoot + "/SuperAdmins"
+    SUPERADMINS:        APIRoot + "/SuperAdmins",
+    DATABASES:          APIRoot + "/ExternalDatabase"
   },
 
   PayloadSources: keyMirror({
@@ -49,6 +50,10 @@ module.exports = {
     // Document
 
     // Cell
+    
+    // Databases
+    SET_EXT_DB_RESPONSE: null,
+    CONNECT_DBS_RESPONSE: null,
 
   })
 

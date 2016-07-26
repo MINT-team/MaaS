@@ -55,6 +55,27 @@ setExtDb: function(id, name, password) {
           //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
         }
       });
-  }
+  },
+
+connectDbs: function() {
+  request
+    .get(APIEndpoints.DATABASES + '/connectDbs')
+    .set('Authorization', sessionStorage.getItem('accessToken'))
+    .set('Accept', 'application/json')
+    .end(function(err, res){
+      if(res) {
+        console.log(res);
+          if(res.error) {
+              var errors = _getErrors(res.body.error);
+              ResponseExternalDatabasesActionCreator.responseConnectDbs(errors);
+          }
+          else
+              ResponseExternalDatabasesActionCreator.responseConnectDbs(null);
+      }
+      if(err){
+        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+      }
+    });
+}
 
 };

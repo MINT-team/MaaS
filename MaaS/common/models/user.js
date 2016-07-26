@@ -119,9 +119,6 @@ module.exports = function(user) {
         }
     );
 
-
-    // TO DO: SIGN UP BY INVITE -> registrazione membri company (ruoli: admin, member, guest)
-
     // Controllo i dati di registrazione prima della creazione
     /*user.beforeRemote('create', function(context, member, next) {
         if(!context.req.password || !context.req.confirmation) {

@@ -15,9 +15,7 @@ injectTapEventPlugin();
 
 var App = React.createClass({
     render: function() {
-    return (
-            <Routes/>
-    );
+    return (<Routes/>);
     }
 });
 

@@ -1,6 +1,7 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-var path = require('path');
+//var path = require('path');
+var dotenv = require('dotenv').config();
 
 var app = module.exports = loopback();
 

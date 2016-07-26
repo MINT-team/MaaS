@@ -55,7 +55,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$everyone",
+      "principalId": "Owner",
       "permission": "ALLOW",
       "property": "invite"
     },

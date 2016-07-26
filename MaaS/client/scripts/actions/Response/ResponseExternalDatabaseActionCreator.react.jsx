@@ -18,6 +18,13 @@ var ResponseExternalDatabaseActionCreator = {
             json: json,
             errors: errors
         });
+    },
+    
+    responseConnectDbs: function(errors){
+         Dispatcher.handleServerAction({
+            type: ActionTypes.CONNECT_DBS_RESPONSE,
+            errors: errors
+        });
     }
 
 };

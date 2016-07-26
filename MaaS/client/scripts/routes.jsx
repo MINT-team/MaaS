@@ -29,8 +29,8 @@ var People = require('./components/Company/People.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
 var ManageDashboard = require('./components/ManageDashboard.react.jsx');
-var ExternalDatabases = require('./components/ExternalDatabases.react.jsx');
-var Toggle = require('./components/Toggle.react.jsx');
+var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
+var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 
 var Routes = React.createClass({
@@ -50,12 +50,12 @@ var Routes = React.createClass({
             <Redirect from="*" to="404" />
           </Route>
           <Route path="company" component={Company}>
+            <Route path="externalDatabases" component={ExternalDatabases} />
             <Route path="people" component={People} />
           </Route>
           <Route path="editor" component={Editor} />
-          <Route path="toggle" component={Toggle} />
+          <Route path="editorConfig" component={EditorConfig} />
           <Route path="manageDashboard" component={ManageDashboard} />
-          <Route path="externalDatabases" component={ExternalDatabases} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} />
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />

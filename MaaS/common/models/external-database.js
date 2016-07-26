@@ -25,8 +25,9 @@ var app = require('../../server/server.js');
 module.exports = function(ExternalDatabase) {
     ExternalDatabase.connectDbs = function(cb) {
         var Databases = app.models.ExternalDatabase;
-        var user = loopback.getCurrentContext().get('currentUser');
-        var company = user.companyId;
+        // var user = loopback.getCurrentContext().get('currentUser');
+        // var company = user.companyId;
+        var company = sessionStorage.getItem('companyName');
         var connections = []; //da discuterne l'inserimento in user per mantenere le connessioni nell'utente
         // var Databases = request.get(user/ExternalDatabases/id/company);
         if(company)
@@ -38,9 +39,9 @@ module.exports = function(ExternalDatabase) {
                     for(var i = 0; i < length; ++i){
                         //var dbName = name;
                         //var dbPassword = password;
-                        var host; //da definire in mLab
-                        var port; //da definire in mLab
-                        var connString = 'mongodb://' + Databases[i].name + ':' + Databases[i].password + '%40' + host + ':' + port + '/' + Databases[i].name;
+                        var host = 'ds029715.mlab.com'; //da definire in mLab
+                        var port = '29715'; //da definire in mLab
+                        var connString = 'mongodb://' + company + ':' + Databases[i].password + '%40' + host + ':' + port + '/' + Databases[i].name;
                         var conn = mongoose.createConnection(connString);
                         connections.push(conn);
                     }
@@ -50,14 +51,14 @@ module.exports = function(ExternalDatabase) {
                 {
                     if(length <= 0)
                     {
-                        console.log('> no databases found for: ', user.email);
+                        console.log('> no databases found for: ', sessionStorage.email);
                         return cb(err);
                     }
                     else
                     {
                         if(err)
                         {
-                            console.log('> failed connecting databases for: ', user.email);
+                            console.log('> failed connecting databases for: ', sessionStorage.email);
                             return cb(err);
                         }
                     }
