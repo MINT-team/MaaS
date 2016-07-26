@@ -10,9 +10,14 @@ var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 
+var ReactMotion = require('react-motion');
+var Collapse = require('react-collapse');
+var ReactHeight = require('react-height');
+
 function getState() {
   return {
           errors: CompanyStore.getErrors(),
+          isOpened: false,
           isLogged: SessionStore.isLogged()
       };
 }
@@ -23,6 +28,10 @@ var ExternalDatabases = React.createClass({
     getInitialState: function() {
       return getState();
   },
+  
+  openForm: function(){
+   this.setState({isOpened: !this.state.isOpened});
+ },
   
   componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
@@ -37,7 +46,7 @@ var ExternalDatabases = React.createClass({
   },
  
   render: function() {
-    
+    var isOpened = this.state.isOpened;
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
         return (
             <div className="container">
@@ -56,9 +65,11 @@ var ExternalDatabases = React.createClass({
             <div id="successful-operation">
                 <p>Manage your external database, add new or disable existing ones.</p>
             </div>
-            <div id="add-database" className="table-row">
             
-              <form action="" method="post" className="form-vertical-block">
+            <div id="add-database" >
+            <button onClick={() => this.setState({isOpened: !isOpened}) } className="inline-button">Add Database</button>
+              <Collapse isOpened={this.state.isOpened}>
+                <form action="" method="post" className="form-vertical-block">
                 <label>Name:</label>
                   <input id="name" name="name" type="text"/>
                 <label>Host:</label>
@@ -69,7 +80,8 @@ var ExternalDatabases = React.createClass({
                   <input id="password" name="password" type="text"/>  
                 <button className="inline-button">Add</button>
               </form>
-            
+            </Collapse>  
+              
             </div>
             <div id="table-database">
                 

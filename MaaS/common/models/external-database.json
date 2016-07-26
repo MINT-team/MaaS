@@ -13,16 +13,22 @@
     "password": {
       "type": "string",
       "required": true
+    },
+    "connString": {
+      "type": "string",
+      "required": true
+    },
+    "companyName": {
+      "type": "string",
+      "required": true
+    },
+    "allowed": {
+      "type": "boolean",
+      "required": true
     }
   },
   "validations": [],
-  "relations": {
-    "company": {
-      "type": "belongsTo",
-      "model": "Company",
-      "foreignKey": "companyId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }

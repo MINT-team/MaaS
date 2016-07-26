@@ -39,9 +39,10 @@ module.exports = function(ExternalDatabase) {
                     for(var i = 0; i < length; ++i){
                         //var dbName = name;
                         //var dbPassword = password;
-                        var host = 'ds029715.mlab.com'; //da definire in mLab
-                        var port = '29715'; //da definire in mLab
-                        var connString = 'mongodb://' + company + ':' + Databases[i].password + '%40' + host + ':' + port + '/' + Databases[i].name;
+                        // var host = 'ds029715.mlab.com'; //da definire in mLab
+                        // var port = '29715'; //da definire in mLab
+                        // var connString = 'mongodb://' + company + ':' + Databases[i].password + '%40' + host + ':' + port + '/' + Databases[i].name;
+                        var connString = Databases[i].connString;
                         var conn = mongoose.createConnection(connString);
                         connections.push(conn);
                     }
@@ -85,4 +86,28 @@ module.exports = function(ExternalDatabase) {
             http: { verb: 'post', path: '/connectDbs' }
         }
     );
+    
+    ExternalDatabase.addExtDb = function(name, password, connString, cb) {
+        var Database = app.models.ExternalDatabase;
+        if(name != "" && password != "" && connString != ""){
+            var company = sessionStorage.getItem('companyName');
+            ExternalDatabase.create({name: name, password: password, connString: connString, companyName: company, allowed: true}, function(err, databaseInstance){
+                if(err)
+                {
+                    Database.destroyById(databaseInstance.id);
+                    console.log('> failed creating database.');
+                    return cb(err);
+                }
+            });
+            return cb(null);
+        }
+        else
+        {
+            console.log('> failed creating database, required fields are missing.');
+            var err = {
+                    message: 'Missing required values'
+                };
+            return cb(err);
+        }
+    };
 };

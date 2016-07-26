@@ -32,6 +32,7 @@ var ManageDashboard = require('./components/ManageDashboard.react.jsx');
 var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
 var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
+var Collapse = require('./components/Collapse.react.jsx');
 
 var Routes = React.createClass({
   render: function() {
@@ -55,6 +56,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />
+          <Route path="collapse" component={Collapse} />
           <Route path="manageDashboard" component={ManageDashboard} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} />
           <Route path="404" component={Error404} />

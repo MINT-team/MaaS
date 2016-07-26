@@ -39,22 +39,16 @@
       "permission": "ALLOW"
     },
     {
-      "accessType": "*",
       "principalType": "ROLE",
       "principalId": "Administrator",
-      "permission": "ALLOW"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__users"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$owner",
+      "principalId": "Member",
       "permission": "ALLOW",
-      "property": "__get__owner"
+      "property": "__get__users"
     }
   ],
   "methods": {}

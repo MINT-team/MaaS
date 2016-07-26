@@ -25,7 +25,7 @@ var Footer = React.createClass({
 					<Link to="/company" id="header-title">{this.props.companyName}</Link>
 					<p className="footer-links">
 						<Link to="/" id="home"> Home </Link>
-						<Link to="/externalDataBases">ExternaDatabase</Link>
+						<Link to="/company/externalDatabases">Database</Link>
 						<Link onClick={this.logout} to="">Logout</Link>
 					</p>
 					<p className="text-footer">MaaS is offered by RedBabel and developed with love by MINT. </p>

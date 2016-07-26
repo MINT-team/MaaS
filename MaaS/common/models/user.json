@@ -55,12 +55,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "Owner",
-      "permission": "ALLOW",
-      "property": "invite"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "changePassword"
@@ -88,6 +82,18 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "getEditorConfig"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Owner",
+      "permission": "ALLOW",
+      "property": "invite"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "invite"
     }
   ],
   "methods": {}

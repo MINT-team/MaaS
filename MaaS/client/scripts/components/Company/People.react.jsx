@@ -20,7 +20,8 @@ function getState() {
           id: CompanyStore.getId(),
           name: CompanyStore.getName(),
           errors: CompanyStore.getErrors(),
-          isLogged: SessionStore.isLogged()
+          isLogged: SessionStore.isLogged(),
+          role: UserStore.getRole()
       };
 }
 
@@ -66,10 +67,13 @@ var People = React.createClass({
         );
     }
 
-    var title, content;
+    var title, content, invite;
     if(this.props.users.length > 1) {
         title = "Users of your Company";
                     // Avatar, nome, cognome, ruolo, email
+        if(this.state.role == "Owner" || this.state.role == "Administrator") {
+          invite = (<Invite />);
+        }
         content = (
             <div className="table-content">
                 <div className="table-header">
@@ -92,7 +96,7 @@ var People = React.createClass({
           					<span className="table-column-big">{u.email}</span>
           				</div>
       			    )}
-			          <Invite />
+			          {invite}
             </div>
         );
     } else {
