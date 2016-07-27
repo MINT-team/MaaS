@@ -29,7 +29,7 @@ module.exports = {
 setExtDb: function(id, name, password) {
     request
       .get(APIEndpoints.DATABASES + '/' + id + '/databases')
-      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .set('Authorization', localStorage.getItem('accessToken'))
       .send({
         id: id,
         name: name,
@@ -60,7 +60,7 @@ setExtDb: function(id, name, password) {
 connectDbs: function() {
   request
     .get(APIEndpoints.DATABASES + '/connectDbs')
-    .set('Authorization', sessionStorage.getItem('accessToken'))
+    .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){
       if(res) {

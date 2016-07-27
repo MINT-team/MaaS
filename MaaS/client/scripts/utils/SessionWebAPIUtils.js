@@ -165,7 +165,7 @@ module.exports = {
             }
         })
         .set('Accept', 'application/json')
-        .set('Authorization', sessionStorage.getItem('accessToken'))
+        .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(err, res){
             if(res.error || err)
             {

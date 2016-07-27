@@ -4,20 +4,21 @@
 
 // History:
 // Version         Date            Programmer
+// 1.0.0        27/07/2016      Fabiano Tavallini
 // ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-var SessionStore = require('./SessionStore.react.jsx');
+//var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _company = {
-                id: sessionStorage.getItem('companyId'),
-                name: sessionStorage.getItem('companyName'),
+                id: localStorage.getItem('companyId'),
+                name: localStorage.getItem('companyName'),
             };
 var _users = [];    // users of the company
 var _errors = [];
@@ -41,7 +42,7 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
     },
 
     getName: function() {
-        return _company.name
+        return _company.name;
     },
 
     getUsers: function() {
@@ -67,8 +68,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 // set company data
                 _company.id = action.json.id;
                 _company.name = action.json.name;
-                sessionStorage.setItem('companyId', _company.id);
-                sessionStorage.setItem('companyName', _company.name);
+                localStorage.setItem('companyId', _company.id);
+                localStorage.setItem('companyName', _company.name);
             }
             CompanyStore.emitChange();
             break;

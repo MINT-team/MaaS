@@ -8,12 +8,13 @@
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 
 var Footer = React.createClass({
 
 	logout: function() {
-		var accessToken = sessionStorage.getItem('accessToken');
+		var accessToken = SessionStore.getAccessToken();
 		RequestSessionActionCreator.logout(accessToken);
 	},
 

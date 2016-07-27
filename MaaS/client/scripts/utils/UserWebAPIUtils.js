@@ -35,7 +35,7 @@ module.exports = {
     request
       .post(APIEndpoints.USERS + '/reset')
       .set('Accept', 'application/json')
-      //.set('Authorization', sessionStorage.getItem('accessToken'))
+      //.set('Authorization', localStorage.getItem('accessToken'))
       .send({ email: email })
       .end(function(err, res){
         if(res) {
@@ -87,7 +87,7 @@ module.exports = {
     request
       .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
       .set('Accept', 'application/json')
-      .set('Authorization', sessionStorage.getItem('accessToken'))  // necessario per questa API
+      .set('Authorization', localStorage.getItem('accessToken'))  // necessario per questa API
       .send({
         id: id,
         name: name,
@@ -116,10 +116,32 @@ module.exports = {
     request
       .get(APIEndpoints.USERS + '/' + id)
       .set('Accept', 'application/json')
-      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .set('Authorization', localStorage.getItem('accessToken'))
       .end(function(error, res){
         if(res) {
           ResponseUserActionCreator.responseGetUser(res.body);
+        }
+      });
+  },
+  
+  // delete user account
+  deleteUser: function(email, id) {
+    request
+      .del(APIEndpoints.USERS + '/deleteUser/' + id)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        email: email
+      })
+      .end(function(error, res){
+        if(res) {
+           res = JSON.parse(res.text);
+          if(res.error) {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ResponseUserActionCreator.responseDeleteUser(res.error.message);
+          } else {
+            ResponseUserActionCreator.responseDeleteUser(null);
+          }
         }
       });
   },
@@ -129,7 +151,7 @@ module.exports = {
      request
       .get(APIEndpoints.USERS + '/' + userId + '/company')
       .set('Accept', 'application/json')
-      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .set('Authorization', localStorage.getItem('accessToken'))
       .end(function(error, res) {
         if(res) {
           ResponseUserActionCreator.responseGetCompany(res.body);
@@ -141,7 +163,7 @@ module.exports = {
       request
         .get(APIEndpoints.USERS + '/' + userId + '/editorConfig')
         .set('Accept', 'application/json')
-        .set('Authorization', sessionStorage.getItem('accessToken'))
+        .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res){
           if(res) {
             var json = JSON.parse(res.text);

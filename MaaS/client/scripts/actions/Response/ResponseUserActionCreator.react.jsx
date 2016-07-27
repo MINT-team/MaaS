@@ -47,6 +47,12 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
+    responseDeleteUser: function(errors){
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_USER,
+            errors: errors
+        });
+    },
     responseGetCompany: function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.GET_COMPANY,

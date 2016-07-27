@@ -17,9 +17,9 @@ var CHANGE_EVENT = 'change';
 // Load values from the session storage, you might want to implement a 'remember me' using localSgorage
 
 // var _session = {};  //new Object();
-// _session['accessToken'] = sessionStorage.getItem('accessToken');
-// _session['email'] = sessionStorage.getItem('email');;
-// _session['userId'] = sessionStorage.getItem('userId');   // user id
+// _session['accessToken'] = localStorage.getItem('accessToken');
+// _session['email'] = localStorage.getItem('email');;
+// _session['userId'] = localStorage.getItem('userId');   // user id
 
 // show the values stored
 // for (var k in _session) {
@@ -29,9 +29,9 @@ var CHANGE_EVENT = 'change';
 //     }
 // }
 
-var _accessToken = sessionStorage.getItem('accessToken');
-var _email = sessionStorage.getItem('email');
-var _userId = sessionStorage.getItem('userId');   // user id
+var _accessToken = localStorage.getItem('accessToken');
+var _email = localStorage.getItem('email');
+var _userId = localStorage.getItem('userId');   // user id
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -96,7 +96,7 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.json) {
             _email = action.json.email;
             // _session['email'] = action.json.email;
-            sessionStorage.setItem('email', action.json.email);
+            localStorage.setItem('email', action.json.email);
         }
         SessionStore.emitChange();
         break;
@@ -109,8 +109,8 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
             _userId = action.json.userId;
             // _session['accessToken'] = action.json.id;
             // _session['userId'] = action.json.userId;
-            sessionStorage.setItem('accessToken', action.json.id);
-            sessionStorage.setItem('userId', action.json.userId);
+            localStorage.setItem('accessToken', action.json.id);
+            localStorage.setItem('userId', action.json.userId);
         }
         SessionStore.emitChange();
         break;
@@ -132,10 +132,10 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         // _session['accessToken'] = null;
         // _session['userId'] = null;
         // _session['email'] = null;
-        // sessionStorage.removeItem('accessToken');
-        // sessionStorage.removeItem('userId');
-        // sessionStorage.removeItem('email');
-        sessionStorage.clear(); // clear all data
+        // localStorage.removeItem('accessToken');
+        // localStorage.removeItem('userId');
+        // localStorage.removeItem('email');
+        localStorage.clear(); // clear all data
         SessionStore.emitChange();
         break;
 
@@ -143,7 +143,7 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
     //     var key = action.key;
     //     var value = action.value;
     //     if(key && value) {
-    //         sessionStorage.setItem(key, value);
+    //         localStorage.setItem(key, value);
     //     }
     //     SessionStore.emitChange();
     //     break;

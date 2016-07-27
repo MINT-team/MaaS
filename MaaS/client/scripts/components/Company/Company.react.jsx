@@ -11,6 +11,7 @@ var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 function getState() {
@@ -19,7 +20,8 @@ function getState() {
           name: CompanyStore.getName(),
           users: CompanyStore.getUsers(),
           errors: CompanyStore.getErrors(),
-          isLogged: SessionStore.isLogged()
+          isLogged: SessionStore.isLogged(),
+          role: UserStore.getRole()
       };
 }
 
@@ -45,7 +47,6 @@ var Company = React.createClass({
   },
 
   render: function() {
-
     if(!this.state.isLogged || this.state.errors.length > 0) {
         return (
             <div className="container">
@@ -103,7 +104,17 @@ var Company = React.createClass({
       link: "/company/dsl",
       icon: (<i className="material-icons md-24">&#xE1B2;</i>)
     };
-    var sidebarData = [database, people, dsl];
+    var deleteCompany = {
+      label: "Delete company",
+      link: "/profile/deleteAccount",
+      icon: (<i className="material-icons md-24">&#xE5C9;</i>)
+    };
+    var sidebarData;
+    if(this.state.role == "Owner") {
+      sidebarData = [database, people, dsl, deleteCompany];
+    } else {
+      sidebarData = [database, people, dsl];
+    }
 
     return (
       <div id="company">

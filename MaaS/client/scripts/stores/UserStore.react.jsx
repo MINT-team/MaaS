@@ -16,16 +16,15 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _user = {
-              id: SessionStore.getUserId,
+              id: SessionStore.getUserId(),
               email: SessionStore.getEmail(),
-              name: sessionStorage.getItem('userName') || "",
-              surname: sessionStorage.getItem('userSurname') || "",
-              dateOfBirth: new Date(sessionStorage.getItem('userDateOfBirth')),
-              gender: sessionStorage.getItem('userGender'),
-              avatar: sessionStorage.getItem('userAvatar'),
-              role: sessionStorage.getItem('userRole'),
-              theme: sessionStorage.getItem('theme')
-              //editorConfig: [] //sessionStorage.getItem('editorConfig')
+              name: localStorage.getItem('userName') || "",
+              surname: localStorage.getItem('userSurname') || "",
+              dateOfBirth: new Date(localStorage.getItem('userDateOfBirth')),
+              gender: localStorage.getItem('userGender'),
+              avatar: localStorage.getItem('userAvatar'),
+              role: localStorage.getItem('userRole'),
+              theme: localStorage.getItem('theme')
             };
 var _errors = [];
 
@@ -88,8 +87,6 @@ var UserStore = assign({}, EventEmitter.prototype, {
   },
 
   getEditorTheme: function() {
-   // return _user.theme;
-   //window.alert("get theme: "+sessionStorage.getItem('theme'));
     return _user.theme;
   }
 
@@ -116,9 +113,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = []; // empty old errors
             var email = action.json.email;
             _user.email = email;    // email dell'utente corrente, anche se non loggato
-            if(!sessionStorage.getItem('email')) {
-              sessionStorage.setItem('email', _user.email);
-            }
+              localStorage.setItem('email', _user.email);
         }
         UserStore.emitChange();
         break;
@@ -129,8 +124,8 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.email) {
             _errors = []; // empty old errors
             _user.email = action.email;   // email dell'utente corrente, anche se non loggato
-            if(!sessionStorage.getItem('email')) {
-              sessionStorage.setItem('email', _user.email);
+            if(!localStorage.getItem('email')) {
+              localStorage.setItem('email', _user.email);
             }
         }
         UserStore.emitChange();
@@ -146,10 +141,10 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _user.dateOfBirth = new Date(action.json.dateOfBirth);
             _user.gender = action.json.gender;
             // save session data
-            sessionStorage.setItem('userName', _user.name);
-            sessionStorage.setItem('userSurname', _user.surname);
-            sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
-            sessionStorage.setItem('userGender', _user.gender);
+            localStorage.setItem('userName', _user.name);
+            localStorage.setItem('userSurname', _user.surname);
+            localStorage.setItem('userDateOfBirth', _user.dateOfBirth);
+            localStorage.setItem('userGender', _user.gender);
         }
         UserStore.emitChange();
         break;
@@ -158,10 +153,11 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         if(action.json) {
             _errors = []; // empty old errors usare local
             _user.theme = action.json.config.theme;
-            if(!sessionStorage.getItem('theme')){
-              sessionStorage.setItem('theme', action.json.config.theme);
-            }
-            //window.alert("SONO NELLE STORE: "+sessionStorage.getItem('theme'));
+            /*if(!localStorage.getItem('theme')){
+              localStorage.setItem('theme', action.json.config.theme);
+            }*/
+            localStorage.setItem('theme',action.json.config.theme);
+            //window.alert("SONO NELLE STORE: "+localStorage.getItem('theme'));
         }
         UserStore.emitChange();
         break;
@@ -187,13 +183,20 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _user.avatar = action.json.avatar;
             _user.role = action.json.role;
             // save session data
-            sessionStorage.setItem('email', _user.email);
-            sessionStorage.setItem('userName', _user.name);
-            sessionStorage.setItem('userSurname', _user.surname);
-            sessionStorage.setItem('userDateOfBirth', _user.dateOfBirth);
-            sessionStorage.setItem('userGender', _user.gender);
-            sessionStorage.setItem('userAvatar', _user.avatar);
-            sessionStorage.setItem('userRole', _user.role);
+            localStorage.setItem('email', _user.email);
+            localStorage.setItem('userName', _user.name);
+            localStorage.setItem('userSurname', _user.surname);
+            localStorage.setItem('userDateOfBirth', _user.dateOfBirth);
+            localStorage.setItem('userGender', _user.gender);
+            localStorage.setItem('userAvatar', _user.avatar);
+            localStorage.setItem('userRole', _user.role);
+        }
+        UserStore.emitChange();
+        break;
+        
+      case ActionTypes.DELETE_USER:
+        if(action.errors) {
+          _errors = action.errors;
         }
         UserStore.emitChange();
         break;
@@ -204,3 +207,10 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
 });
 
 module.exports = UserStore;
+
+
+/*
+
+Elimino al logout o alla chiusura del browser
+
+*/

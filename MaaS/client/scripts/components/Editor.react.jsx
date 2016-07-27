@@ -6,11 +6,6 @@
 // Version         Date            Programmer
 // ==========================================
 
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-
 
 var React = require('react');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');

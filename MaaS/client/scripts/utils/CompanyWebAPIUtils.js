@@ -32,7 +32,7 @@ module.exports = {
     request
       .get(APIEndpoints.COMPANIES + '/' + id + '/users')
       .set('Accept', 'application/json')
-      .set('Authorization', sessionStorage.getItem('accessToken'))
+      .set('Authorization', localStorage.getItem('accessToken'))
       .send({ id: id })
       .end(function(err, res){
         if(res) {

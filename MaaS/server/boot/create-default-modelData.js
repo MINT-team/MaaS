@@ -40,7 +40,6 @@ module.exports = function(app) {
                 });
             } else {
                 console.log('> Email already registered as SuperAdmin')
-                console.log(results)
             }
         });
     }

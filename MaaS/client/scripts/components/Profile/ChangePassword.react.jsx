@@ -9,6 +9,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
@@ -24,8 +25,8 @@ var ChangePassword = React.createClass({
 
   getInitialState: function() {
       return {
-          accessToken: sessionStorage.getItem('accessToken') || this.props.location.query.access_token,
-          userId: sessionStorage.getItem('userId') || this.props.location.query.uid,
+          accessToken: SessionStore.getAccessToken() || this.props.location.query.access_token,
+          userId: SessionStore.getUserId() || this.props.location.query.uid,
           email: null,
           errors: []
       };

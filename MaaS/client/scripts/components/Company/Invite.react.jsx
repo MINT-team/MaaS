@@ -7,7 +7,6 @@
 // ==========================================
 
 var React = require('react');
-var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');

@@ -14,6 +14,7 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var Invite = require('./Invite.react.jsx');
+var Delete = require('./Delete.react.jsx');
 
 function getState() {
   return {
@@ -55,6 +56,22 @@ var People = React.createClass({
 //       UserActionCreator.changePassword(id, password, confirmation, accessToken);
 //   },
 
+  isLowerGrade: function(role) {
+      var myRole = this.state.role;
+      if(myRole == "Owner") {
+        if(role == "Owner")
+          return false;
+        else
+          return true;
+      }
+      if(myRole == "Administrator") {
+        if(role == "Owner" || role == "Administrator")
+          return false;
+        else
+          return true;
+      }
+  },
+
   render: function() {
 
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
@@ -67,14 +84,40 @@ var People = React.createClass({
         );
     }
 
-    var title, content, invite;
+    var title, content;
     if(this.props.users.length > 1) {
         title = "Users of your Company";
                     // Avatar, nome, cognome, ruolo, email
         if(this.state.role == "Owner" || this.state.role == "Administrator") {
-          invite = (<Invite />);
-        }
-        content = (
+          content = (
+            <div className="table-content">
+                <div className="table-header">
+                    <p className="table-column-small"></p>
+                    <span className="table-column-normal">Name</span>
+                    <span className="table-column-normal">Surname</span>
+                    <span className="table-column-normal">Role</span>
+                    <span className="table-column-big">Email</span>
+                    <span className="table-spacing"></span>
+                </div>
+                {this.props.users.map((u) =>
+                  <div className="table-row">
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    (<img src={"../../../images/"+u.avatar} />) :
+          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
+          					</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					<span className="table-column-big">{u.email}</span>
+          					{this.isLowerGrade(u.role) ? <Delete email={u.email} /> : <span className="table-spacing"></span>}
+          				</div>
+      			    )}
+			          <Invite />
+            </div>
+          );
+        } else {
+          content = (
             <div className="table-content">
                 <div className="table-header">
                     <p className="table-column-small"></p>
@@ -96,9 +139,10 @@ var People = React.createClass({
           					<span className="table-column-big">{u.email}</span>
           				</div>
       			    )}
-			          {invite}
             </div>
-        );
+          );
+        }
+        
     } else {
         title = "Invite someone to your company";
         content = (

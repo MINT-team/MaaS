@@ -385,21 +385,49 @@ module.exports = function(user) {
     );
 
     // Elimino l'utente - vedesi relativo ACL
-    user.deleteAccount = function(id, name, surname, dateOfBirth, gender, cb) {
-
+    user.deleteUser = function(id, email, cb) {
+        user.findById(id, function(err, userInstance) {
+            if(err || !userInstance)
+                return cb(err);
+            console.log("user:",userInstance);
+            user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToDelete) {
+                if(err || !userToDelete)
+                    return cb(err);
+                console.log("deleting:", userToDelete);
+                if(userInstance.id != userToDelete.id) {
+                    var error = {
+                            message: 'You haven\'t the rights to delete this user'
+                        };
+                    if(userInstance.role != "Owner" || userInstance.role != "Administrator") {
+                        return cb(null, error);
+                    }
+                    // if userInstance.role == "Owner" then he's allowed to
+                    if(userInstance.role == "Administrator") {
+                        if(userToDelete.role == "Owner" || userToDelete.role == "Administrator")
+                            return cb(null, error);
+                    }
+                }
+                console.log("del...");
+                user.deleteById(userToDelete.id, function(err) {
+                    if(err) console.log("> error deleting user:", userToDelete.email);
+                    console.log("> user deleted:", userToDelete.email);
+                });
+            });
+        });
     };
 
     user.remoteMethod(
-        'deleteAccount',
+        'deleteUser',
         {
-            description: 'Delete user by passing id.',
+            description: 'Delete user by passing email to delete and id of the user making the request.',
             accepts: [
-                { arg: 'id', type: 'string', required: true, description: 'User id'}
+                { arg: 'id', type: 'string', required: true, description: 'User id making request'},
+                { arg: 'email', type: 'string', required: true, description: 'User email to delete'}
             ],
             returns: [
                 {arg: 'error', type: 'Object'}
             ],
-            http: { verb: 'post', path: '/:id/deleteAccount' }
+            http: { verb: 'delete', path: '/deleteUser/:id' }
         }
     );
 

@@ -8,6 +8,7 @@
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 
 
@@ -42,7 +43,7 @@ var Header = React.createClass({
 	},
 
 	logout: function() {
-		var accessToken = sessionStorage.getItem('accessToken');
+		var accessToken = SessionStore.getAccessToken();
 		RequestSessionActionCreator.logout(accessToken);
 	},
 
@@ -69,6 +70,7 @@ var Header = React.createClass({
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
 							<Link to="/editor"><li>Text editor</li></Link>
+							<Link to="/editorConfig"><li>Text editor</li></Link>
 							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>
 					</div>

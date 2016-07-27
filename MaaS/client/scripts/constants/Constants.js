@@ -38,6 +38,7 @@ module.exports = {
     CHANGE_DATA_RESPONSE: null,
     EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
+    DELETE_USER: null,
     GET_COMPANY: null,
 
     // Company
@@ -52,7 +53,7 @@ module.exports = {
     // Cell
     
     // Databases
-    SET_EXT_DB_RESPONSE: null,
+    ADD_EXT_DB_RESPONSE: null,
     CONNECT_DBS_RESPONSE: null,
 
   })

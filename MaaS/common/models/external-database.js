@@ -17,6 +17,7 @@
 var loopback = require('loopback');
 var mongoose = require('mongoose');
 //var config = require('../../server/config.json');
+//var ExternalDatabaseStore = require('../../scripts/stores/ExternalDatabaseStore.react.jsx');
 var app = require('../../server/server.js');
 //var path = require('path');
 //var host = 'maas-navid94.c9users.io';
@@ -27,12 +28,12 @@ module.exports = function(ExternalDatabase) {
         var Databases = app.models.ExternalDatabase;
         // var user = loopback.getCurrentContext().get('currentUser');
         // var company = user.companyId;
-        var company = sessionStorage.getItem('companyName');
+        var company = localStorage.getItem('companyName');
         var connections = []; //da discuterne l'inserimento in user per mantenere le connessioni nell'utente
         // var Databases = request.get(user/ExternalDatabases/id/company);
         if(company)
         {
-            Databases.find({where: {companyId: company}},  function(err) {
+            Databases.find({where: {companyName: company}},  function(err) {
                 var length = Databases.length;
                 if(!err && length > 0)
                 {
@@ -46,20 +47,22 @@ module.exports = function(ExternalDatabase) {
                         var conn = mongoose.createConnection(connString);
                         connections.push(conn);
                     }
+                    //ExternalDatabaseStore.setDbs(Databases, function(err){}); //da cambiare
+                    //ExternalDatabaseStore.setConnections(connections, function(err){}); //da cambiare
                     return cb(null);
                 }
                 else
                 {
                     if(length <= 0)
                     {
-                        console.log('> no databases found for: ', sessionStorage.email);
+                        console.log('> no databases found for: ', localStorage.email);
                         return cb(err);
                     }
                     else
                     {
                         if(err)
                         {
-                            console.log('> failed connecting databases for: ', sessionStorage.email);
+                            console.log('> failed connecting databases for: ', localStorage.email);
                             return cb(err);
                         }
                     }
@@ -90,7 +93,7 @@ module.exports = function(ExternalDatabase) {
     ExternalDatabase.addExtDb = function(name, password, connString, cb) {
         var Database = app.models.ExternalDatabase;
         if(name != "" && password != "" && connString != ""){
-            var company = sessionStorage.getItem('companyName');
+            var company = localStorage.getItem('companyName');
             ExternalDatabase.create({name: name, password: password, connString: connString, companyName: company, allowed: true}, function(err, databaseInstance){
                 if(err)
                 {

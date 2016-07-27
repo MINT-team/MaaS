@@ -28,6 +28,10 @@ var UserActionCreator = {
     getUser: function(id) {
         WebAPIUtils.getUser(id);
     },
+    
+    deleteUser: function(email, id) {
+        WebAPIUtils.deleteUser(email, id);
+    },
 
     getCompany: function(userId) {
         WebAPIUtils.getCompany(userId);
