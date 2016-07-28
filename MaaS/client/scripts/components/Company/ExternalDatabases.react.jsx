@@ -13,7 +13,6 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-
 var ReactMotion = require('react-motion');
 var Collapse = require('react-collapse');
 var ReactHeight = require('react-height');
@@ -34,7 +33,9 @@ var ExternalDatabases = React.createClass({
   },
   
   openForm: function(){
-   this.setState({isOpened: !this.state.isOpened});
+   this.setState({isOpened: !this.state.isOpened}
+   
+   );
  },
   
   componentDidMount: function() {
@@ -62,8 +63,6 @@ var ExternalDatabases = React.createClass({
             </div>
         );
     }
-
-    var title, content;
     
     var products = [
   {
@@ -92,6 +91,9 @@ var ExternalDatabases = React.createClass({
       price: 160
   }
 ];
+
+    
+    var title, content;
     
     title = "Manage Database";
     content = (
@@ -103,10 +105,10 @@ var ExternalDatabases = React.createClass({
             <div id="add-database">
             <button onClick={() => this.setState({isOpened: !isOpened}) } className="inline-button">Add Database</button>
               <Collapse isOpened={this.state.isOpened} >
-                <form action="" method="post" className="externaldb" >
+                <form action="" method="post" className="externaldb">
                 <fieldset>
                   <input id="name" name="name" placeholder="Database name" type="text" />
-                  <input id="password" name="password" placeholder="Database password" type="text" />    
+                  <input id="password" name="password" placeholder="Database password" type="password" />    
                   <input id="string" name="string" placeholder="Connection string" type="text" />
                   <button className="inline-button">Add</button>
                 </fieldset>
@@ -116,7 +118,7 @@ var ExternalDatabases = React.createClass({
               
             </div>
             <div id="table-database">
-               <BootstrapTable data={products} striped={true} hover={true}>
+              <BootstrapTable pagination={true} data={products} search={true} striped={true} hover={true}>
                 <TableHeaderColumn isKey={true} dataField="id">Product ID</TableHeaderColumn>
                 <TableHeaderColumn dataField="name">Product Name</TableHeaderColumn>
                 <TableHeaderColumn dataField="price">Product Price</TableHeaderColumn>
@@ -127,8 +129,8 @@ var ExternalDatabases = React.createClass({
         
     return (
       <div className="container">
-        <p className="container-title">{title}</p>
-        {content}
+      <p className="container-title">{title}</p>
+      {content}
       </div>
     );
   }
@@ -136,4 +138,3 @@ var ExternalDatabases = React.createClass({
 
 
 module.exports = ExternalDatabases;
-

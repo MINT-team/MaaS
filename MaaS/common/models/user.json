@@ -27,7 +27,8 @@
     "editorConfig": {
       "type": "object",
       "default": {
-        "theme": "chaos"
+        "theme": "chaos",
+        "softTabs": "true"
       }
     }
   },

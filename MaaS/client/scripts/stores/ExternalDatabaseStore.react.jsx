@@ -1,4 +1,4 @@
-// Name: {ExternalDatabase.react.jsx}
+// Name: {ExternalDatabaseStore.react.jsx}
 // Module: {Front-end::Stores}
 // Location: {/MaaS/client/scripts/stores/}
 
@@ -11,6 +11,7 @@ var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 var SessionStore = require('./SessionStore.react.jsx');
+var mongoose = require('mongoose');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
@@ -141,7 +142,35 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
     switch(action.type) {
+        case ActionTypes.GET_DBS:
+            if(action.errors) {
+                _errors = action.errors;
+            } else if(action.json) {
+                _errors = []; // empty old errors
+                // set databases of the company
+                _databases = action.json;
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
         
+        case ActionTypes.CONNECT_DBS_RESPONSE:
+            if(action.errors) {
+                _errors = action.errors;
+            } else if(action.name && action.name == localStorage.getItem('companyName')) {
+                _errors = []; // empty old errors
+                // connect databases of the company
+                var length = _databases.length;
+                if(length > 0)
+                {
+                    for(var i = 0; i < length; ++i){
+                        var connString = _databases[i].connString;
+                        var conn = mongoose.createConnection(connString);
+                        _connections.push(conn);
+                    }
+                }
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
     }
 })
 

@@ -73,10 +73,6 @@ body {
     padding-bottom: 2em;
 }
 
-.table-content p {
-    display: inline-block;
-}
-
 .table-header {
     font-weight: bold;
 }
@@ -200,6 +196,8 @@ body {
 }
 
 .inline-button {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
     cursor: pointer;
     font-family:'Helvetica Neue',Arial,sans-serif;
 	font-size:16px;
@@ -218,7 +216,7 @@ body {
 	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
 }
 
-.form-submit:hover, .button:hover {
+.form-submit:hover, .button:hover, .inline-button:hover {
     box-shadow: lightgreen 0.1em 0.1em, lightgreen -0.1em -0.1em, lightgreen -0.1em 0.1em, lightgreen 0.1em -0.1em;
 }
 
@@ -269,7 +267,7 @@ input {
     width: 26px;
     height: 26px;
     border-radius: 100px;
-    background: #fff;
+    background: #e1e1e1;
     box-shadow: 0px 3px 3px rgba(0,0,0,0.05);
     content: '';
     transition: all 0.3s ease;
@@ -280,12 +278,12 @@ input {
 }
 
 .cbx:checked ~ label { 
-    background: #6fbeb5;
+    background: lightgreen;
 }
 
 .cbx:checked ~ label:after {
     left: 20px;
-    background: #179588;
+    background: #149714;
 }
 
 .cbx:disabled ~ label {
@@ -301,6 +299,24 @@ input {
     display: none;
 }
 
+/*---------------------------------------- SELECT BOX ----------------------------------------------------------------*/
+
+.select {
+    font-family: "Verdana", sans-serif;
+    padding: 0.5em 3em 0.5em 1em;
+    vertical-align: middle;
+    font-size: 0.9em;
+    -moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    -ms-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid lightgray;
+    -webkit-appearance: none;
+   -moz-appearance: none;
+    appearance: none;
+    background: url("../images/select.png") 95% / 16% no-repeat white;
+}
 
 /*---------------------------------------------------- HEADER ------------------------------------------------------------------*/
 #header {
@@ -364,6 +380,25 @@ input {
 
 #header-user-name {
     margin-right: 1em;
+}
+
+#header-dropdown {
+    margin-top: 0.5em;
+    margin-left: 4em;
+    margin-right: 2em;
+}
+
+#header-dropdown ul li {
+    width: 10em;
+    margin: auto;
+    color: black;
+    display: inline-block;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+#header-dropdown ul li:hover {
+    color: lightgrey;
 }
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
@@ -480,7 +515,7 @@ input {
 
 }
 
-/*-------------------------------------------- MENU DROPDOWN -----------------------------------------------------------------------*/
+/*-------------------------------------------- DROPDOWN / POPUP -----------------------------------------------------------------------*/
 @-moz-keyframes dropDown {
     0% { -moz-transform: translateY(-1em); }
     100% { -moz-transform: translateY(0); }
@@ -496,36 +531,20 @@ input {
 
 .dropdown-button:focus {
     color: lightgreen;
-    background-color: red;
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
-    margin-top: 0.5em;
-    margin-left: 4em;
-    margin-right: 2em;
     padding: 1em 0.5em 1em 0.5em;
     text-align: left;
     background-color: white;
     overflow: auto;
     box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.2);
+    border: lightgray 1px solid;
     -webkit-border-radius: 0.4em;
     -moz-border-radius: 0.4em;
     border-radius: 0.4em;
-}
-
-.dropdown-content ul li {
-    width: 10em;
-    margin: auto;
-    color: black;
-    display: inline-block;
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
-}
-
-.dropdown-content ul li:hover {
-    color: lightgrey;
 }
 
 .dropdown-show {
@@ -544,6 +563,21 @@ input {
     animation-iteration-count: 1;
     animation-timing-function: ease;
     animation-duration: 0.4s;
+}
+
+.dropdown-title {
+    text-align: center;
+    font-size: 1.8em;
+}
+
+.dropdown-description {
+    text-align: center;
+    padding: 0.5em 1em 0.5em 1em;
+}
+
+.dropdown-buttons {
+    text-align: center;
+    margin-top: 1em;
 }
 
 /*-------------------------------------------------- SIDEBAR -----------------------------------------------------------------------*/
@@ -958,6 +992,25 @@ input {
     color: red;
 }
 
+#delete-dropdown {
+    width: 28%;
+    height: 20%;
+    overflow: auto;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+/*------------------------------------------------ DELETE COMPANY --------------------------------------------------------------*/
+#delete-button {
+    margin-left: 3em;
+    background-color: #E93F2C;
+}
+
+#delete-button:hover {
+    box-shadow: darkred 0.1em 0.1em, darkred -0.1em -0.1em, darkred -0.1em 0.1em, darkred 0.1em -0.1em;
+}
+
 /*------------------------------------------------ INVITE --------------------------------------------------------------*/
 #invite {
     margin-top: 1em;
@@ -968,20 +1021,6 @@ input {
 #invite select {
     display: inline-block;
     margin-right: 2em;
-    padding: 0.5em 3em 0.5em 1em;
-    vertical-align: middle;
-    font-family: "Verdana", sans-serif;
-    font-size: 0.9em;
-    -moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-    -o-border-radius: 4px;
-    -ms-border-radius: 4px;
-    border-radius: 4px;
-    border: 1px solid lightgray;
-    -webkit-appearance: none;
-   -moz-appearance: none;
-    appearance: none;
-    background: url("../images/select.png") 95% / 16% no-repeat white;
 }
 
 #invite option {
@@ -1008,21 +1047,27 @@ input {
 
 /*------------------------------------------------ EXTERNALDATABASES ---------------------------------------------------------*/
 
-.externaldb{
+.externaldb {
     max-width: 400px;
     margin: 10px auto;
     padding: 16px;
 }
 
 .externaldb input{
-   
-    outline: none;
-    box-sizing: border-box;
-    width: 100%;
-    background: #fff;
-    margin-bottom: 4%;
-    border: 1px solid #ccc;
-    padding: 3%;
+    color: #555;
+    text-align: center;
+    width: 70%;
+    padding: 3px 0px 3px 5px;
+    margin-top: 2px;
+    margin-right: 6px;
+    margin-bottom: 16px;
+    border: 1px solid #e5e5e5;
+    background: #fbfbfb;
+    height: 25px;
+    line-height:15px;
+    outline: 0;
+    -webkit-box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
+    box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
 }
 
 

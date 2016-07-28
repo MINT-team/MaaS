@@ -16,7 +16,7 @@ module.exports = {
     USERS:              APIRoot + "/users",
     COMPANIES:          APIRoot + "/Companies",
     SUPERADMINS:        APIRoot + "/SuperAdmins",
-    DATABASES:          APIRoot + "/ExternalDatabase"
+    DATABASES:          APIRoot + "/ExternalDatabases"
   },
 
   PayloadSources: keyMirror({
@@ -43,6 +43,7 @@ module.exports = {
 
     // Company
     GET_USERS: null,
+    DELETE_COMPANY: null,
 
     // Dashboard
 
@@ -55,6 +56,7 @@ module.exports = {
     // Databases
     ADD_EXT_DB_RESPONSE: null,
     CONNECT_DBS_RESPONSE: null,
+    GET_DBS: null
 
   })
 

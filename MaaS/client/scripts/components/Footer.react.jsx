@@ -29,7 +29,7 @@ var Footer = React.createClass({
 						<Link to="/company/externalDatabases">Database</Link>
 						<Link onClick={this.logout} to="">Logout</Link>
 					</p>
-					<p className="text-footer">MaaS is offered by RedBabel and developed with love by MINT. </p>
+					<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 				</div>
     		);
     	}
@@ -45,7 +45,7 @@ var Footer = React.createClass({
 						·
 						<Link to="/register" id="register"> Sign Up </Link>
 					</p>
-					<p className="text-footer">MaaS is offered by RedBabel and developed with love by MINT. </p>
+					<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 				</div>
     		);
 

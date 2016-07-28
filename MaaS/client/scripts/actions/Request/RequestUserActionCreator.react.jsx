@@ -37,9 +37,13 @@ var UserActionCreator = {
         WebAPIUtils.getCompany(userId);
     },
 
-    getEditorConfig: function(userId){
+    getEditorConfig: function(userId) {
         //window.alert("request action web api util");
         WebAPIUtils.getEditorConfig(userId);
+    },
+    
+    changeEditorConfig: function(id,softTabs,theme) {
+        WebAPIUtils.changeEditorConfig(id,softTabs,theme);
     }
 };
 

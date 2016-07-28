@@ -95,17 +95,21 @@ module.exports = {
         dateOfBirth: dateOfBirth,
         gender: gender
       })
-      .end(function(err, res){
+      .end(function(err, res) {
         if(res) {
           res = JSON.parse(res.text);
-          if(res.error) {
+          if(res.error) 
+          {
             // res.error.message: errori di loopback e error definito dal remote method
             ResponseUserActionCreator.responseChangePersonalData(null, res.error.message);
-          } else {
+          } 
+          else 
+          {
             ResponseUserActionCreator.responseChangePersonalData(res.newData, null);
           }
         }
-        if(err){
+        if(err) 
+        {
           //ResponseUserActionCreator.responseChangePassword(null, err);
         }
       });
@@ -117,8 +121,9 @@ module.exports = {
       .get(APIEndpoints.USERS + '/' + id)
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
-      .end(function(error, res){
-        if(res) {
+      .end(function(error, res) {
+        if(res) 
+        {
           ResponseUserActionCreator.responseGetUser(res.body);
         }
       });
@@ -138,17 +143,17 @@ module.exports = {
            res = JSON.parse(res.text);
           if(res.error) {
             // res.error.message: errori di loopback e error definito dal remote method
-            ResponseUserActionCreator.responseDeleteUser(res.error.message);
+            ResponseUserActionCreator.responseDeleteUser(res.error.message, null);
           } else {
-            ResponseUserActionCreator.responseDeleteUser(null);
+            ResponseUserActionCreator.responseDeleteUser(null, res.email);
           }
-        }
+        } 
       });
   },
 
   // get the user company
   getCompany: function(userId) {
-     request
+    request
       .get(APIEndpoints.USERS + '/' + userId + '/company')
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
@@ -159,17 +164,35 @@ module.exports = {
       });
   },
 
-  getEditorConfig: function(userId){
-      request
-        .get(APIEndpoints.USERS + '/' + userId + '/editorConfig')
-        .set('Accept', 'application/json')
-        .set('Authorization', localStorage.getItem('accessToken'))
-        .end(function(error, res){
-          if(res) {
-            var json = JSON.parse(res.text);
-            ResponseUserActionCreator.responseGetEditorConfig(json);
-          }
-        });
+  getEditorConfig: function(userId) {
+    request
+      .get(APIEndpoints.USERS + '/' + userId + '/editorConfig')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .end(function(error, res) {
+        if(res) {
+          var json = JSON.parse(res.text);
+          ResponseUserActionCreator.responseGetEditorConfig(json);
+        }
+      });
+  },
+  
+  changeEditorConfig: function(id,softTabs,theme) {
+    request
+      .put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig')
+      .set('Accept','application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        id: id,
+        softTabs: softTabs,
+        theme: theme
+      })
+      .end(function(error, res) {
+        if (res)
+        {
+          res = JSON.parse(res.text);
+        }
+      });
   }
 
 };

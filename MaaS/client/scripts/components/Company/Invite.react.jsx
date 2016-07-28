@@ -74,7 +74,7 @@ var Invite = React.createClass({
             }
             content = (
                 <form onSubmit={this._onSubmit}>
-                    <select id="role" onChange={this._onSelectChange}>
+                    <select id="role" className="select" onChange={this._onSelectChange}>
                         <option value="Administrator">Administrator</option>
                         <option value="Member">Member</option>
                         <option value="Guest">Guest</option>

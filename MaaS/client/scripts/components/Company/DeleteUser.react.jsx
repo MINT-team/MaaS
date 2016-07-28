@@ -13,7 +13,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 //var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
-var Delete = React.createClass({
+var DeleteUser = React.createClass({
 
     getInitialState: function() {
         return {
@@ -33,11 +33,19 @@ var Delete = React.createClass({
     },
 
     _onChange: function() {
-        alert("change");
         this.setState({errors: CompanyStore.getErrors() || UserStore.getErrors()});
     },
+    
+    toggleDropdown: function(event) {
+		event.preventDefault();
+		if(this.state.errors.length > 0) {
+		    this.refs.errorDropdown.classList.toggle("dropdown-show");
+		} else {
+		    this.refs.deleteDropdown.classList.toggle("dropdown-show");
+		}
+	},
 
-    _onClick: function(event) {
+    confirmDelete: function(event) {
         event.preventDefault();
         var email = this.props.email;
         var id = this.state.id;
@@ -50,20 +58,32 @@ var Delete = React.createClass({
 
     render: function() {
         var errors;
-        
-            alert(this.state.errors.length);
         if(this.state.errors.length > 0) {
             errors = (
-              <p id="delete-user-errors">{this.state.errors}</p>
+              <p id="errors">{this.state.errors}</p>
             );
         }
         return (
             <div id="delete-user">
-                <i onClick={this._onClick} className="material-icons md-24">&#xE5C9;</i>
-                {errors}
+                <i onClick={this.toggleDropdown} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+                <div id="delete-dropdown" className="dropdown-content" ref="errorDropdown">
+                    <p className="dropdown-title">Error</p>
+                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-buttons">
+                        <button className="button">Ok</button>
+                    </div>
+                </div>
+                <div id="delete-dropdown" className="dropdown-content dropdown-popup" ref="deleteDropdown">
+                    <p className="dropdown-title">Delete user</p>
+                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{this.props.email}</span>'s account?</p>
+                    <div className="dropdown-buttons">
+                        <button className="inline-button">Cancel</button>
+                        <button className="inline-button" onClick={this.confirmDelete}>Delete</button>
+                    </div>
+                </div>
             </div>
         );
     }
 });
 
-module.exports = Delete;
+module.exports = DeleteUser;

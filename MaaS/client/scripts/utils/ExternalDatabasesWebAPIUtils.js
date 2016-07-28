@@ -57,9 +57,10 @@ setExtDb: function(id, name, password) {
       });
   },
 
-connectDbs: function() {
+// connect db dovrebbe essere POST e passare dei dati al server per effettuare la connessione del db no?
+connectDb: function() {
   request
-    .get(APIEndpoints.DATABASES + '/connectDbs')
+    .get(APIEndpoints.DATABASES)
     .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){
@@ -67,10 +68,33 @@ connectDbs: function() {
         console.log(res);
           if(res.error) {
               var errors = _getErrors(res.body.error);
-              ResponseExternalDatabasesActionCreator.responseConnectDbs(errors);
+              ResponseExternalDatabasesActionCreator.responseConnectDbs(null, errors);
+          }
+          else{
+              //var company = localStorage.getItem('companyName'); // qua ci va una variabile ricevuta dal server!! (es. res.companyName)
+              ResponseExternalDatabasesActionCreator.responseConnectDb(company, null);
+          }
+      }
+      if(err){
+        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+      }
+    });
+},
+
+getDbs: function() {
+  request
+    .get(APIEndpoints.DATABASES + '?filter=%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D')
+    .set('Authorization', localStorage.getItem('accessToken'))
+    .set('Accept', 'application/json')
+    .end(function(err, res){
+      if(res) {
+        console.log(res);
+          if(res.error) {
+              var errors = _getErrors(res.body.error);
+              ResponseExternalDatabasesActionCreator.responseGetDbs(null, errors);
           }
           else
-              ResponseExternalDatabasesActionCreator.responseConnectDbs(null);
+              ResponseExternalDatabasesActionCreator.responseGetDbs(res.body, null);
       }
       if(err){
         //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));

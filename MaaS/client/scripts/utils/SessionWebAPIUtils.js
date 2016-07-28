@@ -167,14 +167,11 @@ module.exports = {
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(err, res){
-            if(res.error || err)
-            {
+            if(res.error || err) {
                 console.log(res.error);
                 var errors = _getErrors(res.body.error);
                 ResponseSessionActionCreator.responseInvite(errors);
-            }
-            else
-            {
+            } else {
                 ResponseSessionActionCreator.responseInvite(null);
             }
         });

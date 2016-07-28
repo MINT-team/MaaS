@@ -84,6 +84,32 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             CompanyStore.emitChange();
             break;
+            
+        case ActionTypes.DELETE_USER:
+            if(action.errors) {
+                _errors = action.errors;
+            } else {
+                var email = action.email;
+                var index;
+                _users.forEach(function(user, i) {
+                    if(user.email == email) {
+                        index = i;
+                    }
+                });
+                _users.splice(index, 1);
+            }
+            CompanyStore.emitChange();
+            break;
+            
+        case ActionTypes.DELETE_COMPANY:
+            if(action.errors) {
+                _errors = action.errors;
+            } else {
+                var json = action.json;
+                
+            }
+            CompanyStore.emitChange();
+            break;
 
     }
 

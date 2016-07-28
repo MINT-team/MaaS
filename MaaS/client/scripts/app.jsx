@@ -8,6 +8,7 @@
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+
 window.React = React;
 var Routes = require('./routes.jsx');
 var injectTapEventPlugin = require("react-tap-event-plugin");

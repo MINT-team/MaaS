@@ -47,10 +47,11 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
-    responseDeleteUser: function(errors){
+    responseDeleteUser: function(errors, email){
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_USER,
-            errors: errors
+            errors: errors,
+            email: email
         });
     },
     responseGetCompany: function(json, errors) {

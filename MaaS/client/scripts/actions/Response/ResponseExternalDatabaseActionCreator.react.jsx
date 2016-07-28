@@ -20,10 +20,19 @@ var ResponseExternalDatabaseActionCreator = {
         });
     },
     
-    responseConnectDbs: function(errors){
+    responseConnectDb: function(name, errors){
          Dispatcher.handleServerAction({
             type: ActionTypes.CONNECT_DBS_RESPONSE,
+            name: name,
             errors: errors
+        });
+    },
+    
+    responseGetDbs:function(json, errors){
+        Dispatcher.handleServerAction({
+          type: ActionTypes.GET_DBS,
+          json: json,
+          errors: errors
         });
     }
 

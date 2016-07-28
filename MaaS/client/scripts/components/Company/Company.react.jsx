@@ -68,14 +68,24 @@ var Company = React.createClass({
       content = childrenWithUsers;
     } else {
       var name = this.state.name;
-      var n = this.state.users.length;
+      var numberOfUsers = this.state.users.length;
+      var numberOfDatabases;
+      var numberOfDSL;
       content = (
         <div className="container">
           <p className="container-title">{name}</p>
           <div className="form-container">
             <div className="form-field">
               <label>Users:</label>
-              <p>{n>0? n : ''}</p>
+              <p>{numberOfUsers>0? numberOfUsers : ''}</p>
+            </div>
+            <div className="form-field">
+              <label>Databases:</label>
+              <p>{numberOfDatabases>0? numberOfDatabases : ''}</p>
+            </div>
+            <div className="form-field">
+              <label>DSL definitions:</label>
+              <p>{numberOfDSL>0? numberOfDSL : ''}</p>
             </div>
           </div>
         </div>
@@ -101,12 +111,12 @@ var Company = React.createClass({
     };
     var dsl = {
       label: "DSL",
-      link: "/company/dsl",
+      link: "/editor",
       icon: (<i className="material-icons md-24">&#xE1B2;</i>)
     };
     var deleteCompany = {
       label: "Delete company",
-      link: "/profile/deleteAccount",
+      link: "/company/deleteCompany",
       icon: (<i className="material-icons md-24">&#xE5C9;</i>)
     };
     var sidebarData;

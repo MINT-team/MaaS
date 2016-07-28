@@ -80,9 +80,16 @@ var PersonalData = React.createClass({
       var dateOfBirth = this.refs.date.value;
       var gender = this.state.radioGender;
       // call the action only if something has changed
-      if(name!=this.state.name || surname!=this.state.surname || dateOfBirth!=getDateOfBirth(this.state.dateOfBirth) || gender!=this.state.gender) {
+      
+      if( (name!=this.state.name || surname!=this.state.surname
+                                  || !(dateOfBirth!=getDateOfBirth(this.state.dateOfBirth) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
+                                  || gender!=this.state.gender)
+                                  && !(dateOfBirth==getDateOfBirth(this.state.dateOfBirth) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN")) ) 
+      {
         RequestUserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
-      } else {
+      } 
+      else 
+      {
         this._setError("No changes to save");
       }
   },

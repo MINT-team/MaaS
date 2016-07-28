@@ -66,7 +66,7 @@ var Header = React.createClass({
 					<Link to="" id="settings-button" onClick={this.toggleDropdown}>
 						<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
 					</Link>
-					<div className="dropdown-content" ref="dropdownMenu">
+					<div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
 							<Link to="/editor"><li>Text editor</li></Link>

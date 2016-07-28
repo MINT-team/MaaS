@@ -18,6 +18,14 @@ var ResponseCompanyActionCreator = {
           json: json,
           errors: errors
         });
+    },
+    
+    responseDeleteCompany: function(json, errors) {
+        Dispatcher.handleServerAction({
+          type: ActionTypes.DELETE_COMPANY,
+          json: json,
+          errors: errors
+        });
     }
 };
 

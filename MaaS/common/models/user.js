@@ -347,20 +347,70 @@ module.exports = function(user) {
         user.findById(id, function(err, user) {
             if(err)
                 return cb(err);
-            user.updateAttributes({ name: name, surname: surname, dateOfBirth: dateOfBirth, gender: gender }, function() {
-                if(err) {
-                    console.log('> failed changing data for: ', user.email);
-                    return cb(err);
+            if(name || surname || dateOfBirth.valueOf() || gender) 
+            {
+                if(name) 
+                {
+                    user.updateAttributes({ name: name }, function() {
+                        if(err) 
+                        {
+                            console.log('> failed changing name for: ', user.email);
+                            return cb(err);
+                        }
+                    });
                 }
-                console.log('> data change processed successfully for: ', user.email);
+                if(surname) 
+                {
+                    user.updateAttributes({ surname: surname }, function() {
+                        if(err) 
+                        {
+                            console.log('> failed changing surname for: ', user.email);
+                            return cb(err);
+                        }
+                    });
+                }
+                if(!dateOfBirth.valueOf()) 
+                {
+                    user.unsetAttribute("dateOfBirth");
+                    user.save();
+                } 
+                else 
+                {
+                    user.updateAttributes({ dateOfBirth: dateOfBirth}, function() {
+                        if(err) 
+                        {
+                            console.log('> failed changing date of birth for: ', user.email);
+                            return cb(err);
+                        }
+                    });
+                }
+                if(gender) 
+                {
+                    user.updateAttributes({ gender: gender }, function() {
+                        if(err) 
+                        {
+                            console.log('> failed changing gender for: ', user.email);
+                            return cb(err);
+                        }
+                    });
+                }
                 var newData = {
                     name: name,
                     surname: surname,
-                    dateOfBirth: dateOfBirth,
+                    dateOfBirth: dateOfBirth.valueOf() ? dateOfBirth : undefined,
                     gender: gender
                 };
+                console.log('> personal data changed successfully for: ', user.email);
                 return cb(null, null, newData);   // callback di successo
-            });
+            } 
+            else 
+            {
+                console.log('> no data to change for: ', user.email);
+                var error = {
+                    message: 'No data to change'
+                };
+                return cb(null, error);
+            }
         });
 
     };
@@ -371,10 +421,10 @@ module.exports = function(user) {
             description: 'Change user attributes by passing id.',
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'User id'},
-                { arg: 'name', type: 'string', required: true, description: 'New name'},
-                { arg: 'surname', type: 'string', required: true, description: 'New surname'},
-                { arg: 'dateOfBirth', type: 'date', required: true, description: 'New date of birth'},
-                { arg: 'gender', type: 'string', required: true, description: 'New gender'}
+                { arg: 'name', type: 'string', required: false, description: 'New name'},
+                { arg: 'surname', type: 'string', required: false, description: 'New surname'},
+                { arg: 'dateOfBirth', type: 'date', required: false, description: 'New date of birth'},
+                { arg: 'gender', type: 'string', required: false, description: 'New gender'}
             ],
             returns: [
                 {arg: 'error', type: 'Object'},
@@ -389,28 +439,27 @@ module.exports = function(user) {
         user.findById(id, function(err, userInstance) {
             if(err || !userInstance)
                 return cb(err);
-            console.log("user:",userInstance);
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToDelete) {
                 if(err || !userToDelete)
                     return cb(err);
-                console.log("deleting:", userToDelete);
                 if(userInstance.id != userToDelete.id) {
                     var error = {
-                            message: 'You haven\'t the rights to delete this user'
-                        };
-                    if(userInstance.role != "Owner" || userInstance.role != "Administrator") {
+                        message: 'You haven\'t the rights to delete this user'
+                    };
+                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") {
                         return cb(null, error);
                     }
                     // if userInstance.role == "Owner" then he's allowed to
                     if(userInstance.role == "Administrator") {
-                        if(userToDelete.role == "Owner" || userToDelete.role == "Administrator")
+                        if(userToDelete.role == "Owner" || userToDelete.role == "Administrator") {
                             return cb(null, error);
+                        }
                     }
                 }
-                console.log("del...");
                 user.deleteById(userToDelete.id, function(err) {
                     if(err) console.log("> error deleting user:", userToDelete.email);
                     console.log("> user deleted:", userToDelete.email);
+                    return cb(null, null, userToDelete.email);
                 });
             });
         });
@@ -425,10 +474,73 @@ module.exports = function(user) {
                 { arg: 'email', type: 'string', required: true, description: 'User email to delete'}
             ],
             returns: [
-                {arg: 'error', type: 'Object'}
+                {arg: 'error', type: 'Object'},
+                {arg: 'email', type: 'String'}
             ],
             http: { verb: 'delete', path: '/deleteUser/:id' }
         }
     );
-
+    
+    user.changeEditorConfig = function(id, softTabs, theme, cb) {
+        user.findById(id, function(err, user) {
+            if (err)
+                return cb(err);
+            if (softTabs || theme)
+            {
+                var editorConfig = user.editorConfig;
+                if (softTabs)
+                {
+                    editorConfig.softTabs = softTabs;
+                    user.updateAttribute({ editorConfig: editorConfig }, function() {
+                        if (err)
+                        {
+                            console.log('> failed changing softTabs for: ', user.email);
+                            return cb(err);
+                        }
+                    });
+                }
+                if (theme)
+                {
+                    editorConfig.theme = theme;
+                    user.updateAttribute({ editorConfig: editorConfig }, function() {
+                        if (err)
+                        {
+                            console.log('> failed changing theme for: ', user.email);
+                            return cb(err);
+                        }
+                    });
+                }
+                var newData = {
+                    theme: theme,
+                    softTabs: softTabs
+                };
+                return cb(null, null, newData);
+            }
+            else
+            {
+                console.log('> no data to change for: ', user.email);
+                var error = {
+                    message: 'No data to change'
+                };
+                return cb(null, error);
+            }
+        });
+    };
+    
+    user.remoteMethod(
+        'changeEditorConfig',
+        {
+            description: "Change user's editor configuration options",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id' },
+                { arg: 'softTabs', type: 'string', required: false, description: 'Soft tabs' },
+                { arg: 'theme', type: 'string', required: false, description: 'Theme' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'newData', type: 'Object'}
+            ],
+            http: { verb: 'put', path: '/:id/changeEditorConfig' }
+        }
+    );
 };

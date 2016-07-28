@@ -17,6 +17,9 @@ var CompanyActionCreator = {
         WebAPIUtils.getUsers(id);
     },
 
+    deleteCompany: function(id, email) {
+        WebAPIUtils.deleteCompany(id, email);
+    }
 };
 
 module.exports = CompanyActionCreator;

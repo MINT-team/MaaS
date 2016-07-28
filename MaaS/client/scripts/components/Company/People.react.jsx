@@ -14,7 +14,7 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var Invite = require('./Invite.react.jsx');
-var Delete = require('./Delete.react.jsx');
+var DeleteUser = require('./DeleteUser.react.jsx');
 
 function getState() {
   return {
@@ -34,11 +34,13 @@ var People = React.createClass({
 
   componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
+      CompanyStore.addChangeListener(this._onChange);
       UserStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
+      CompanyStore.removeChangeListener(this._onChange);
       UserStore.removeChangeListener(this._onChange);
   },
 
@@ -92,7 +94,7 @@ var People = React.createClass({
           content = (
             <div className="table-content">
                 <div className="table-header">
-                    <p className="table-column-small"></p>
+                    <span className="table-column-small"></span>
                     <span className="table-column-normal">Name</span>
                     <span className="table-column-normal">Surname</span>
                     <span className="table-column-normal">Role</span>
@@ -110,7 +112,7 @@ var People = React.createClass({
           					<span className="table-column-normal">{u.surname}</span>
           					<span className="table-column-normal">{u.role}</span>
           					<span className="table-column-big">{u.email}</span>
-          					{this.isLowerGrade(u.role) ? <Delete email={u.email} /> : <span className="table-spacing"></span>}
+          					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
           				</div>
       			    )}
 			          <Invite />

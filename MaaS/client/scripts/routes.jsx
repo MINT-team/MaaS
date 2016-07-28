@@ -23,13 +23,14 @@ var Profile = require('./components/Profile/Profile.react.jsx');
 var ChangeAvatar = require('./components/Profile/ChangeAvatar.react.jsx');
 var PersonalData = require('./components/Profile/PersonalData.react.jsx');
 var ChangePassword = require('./components/Profile/ChangePassword.react.jsx');
-//var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx'); // <Route path="deleteAccount" component={DeleteAccount} />
+var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx');
 var Company = require('./components/Company/Company.react.jsx');
+var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
 var People = require('./components/Company/People.react.jsx');
+var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
 var ManageDashboard = require('./components/ManageDashboard.react.jsx');
-var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
 var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var Collapse = require('./components/Collapse.react.jsx');
@@ -48,11 +49,13 @@ var Routes = React.createClass({
             <Route path="changeAvatar" component={ChangeAvatar} />
             <Route path="personalData" component={PersonalData} />
             <Route path="changePassword" component={ChangePassword} />
+            <Route path="deleteAccount" component={DeleteAccount} />
             <Redirect from="*" to="404" />
           </Route>
           <Route path="company" component={Company}>
             <Route path="externalDatabases" component={ExternalDatabases} />
             <Route path="people" component={People} />
+            <Route path="deleteCompany" component={DeleteCompany} />
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />

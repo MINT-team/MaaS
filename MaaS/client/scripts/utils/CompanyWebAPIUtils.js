@@ -49,6 +49,25 @@ module.exports = {
       });
   },
 
-
-
+  // delete company and all users account
+  deleteCompany: function(id, email) {
+    request
+      .del(APIEndpoints.COMPANIES + '/deleteCompany/' + id)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        email: email
+      })
+      .end(function(error, res){
+        if(res) {
+           res = JSON.parse(res.text);
+          if(res.error) {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ResponseUserActionCreator.responseDeleteCompany(null, res.error.message);
+          } else {
+          ResponseUserActionCreator.responseDeleteCompany(res.email, null);
+          }
+        } 
+      });
+  }
 };

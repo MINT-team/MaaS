@@ -24,7 +24,7 @@ var app = require('../../server/server.js');
 //var port = '8080';
 
 module.exports = function(ExternalDatabase) {
-    ExternalDatabase.connectDbs = function(cb) {
+    ExternalDatabase.connectDb = function(cb) {
         var Databases = app.models.ExternalDatabase;
         // var user = loopback.getCurrentContext().get('currentUser');
         // var company = user.companyId;
@@ -79,14 +79,14 @@ module.exports = function(ExternalDatabase) {
     };
 
     ExternalDatabase.remoteMethod(
-        'connectDbs',
+        'connectDb',
         {
             description: 'Connects all the external databases.',
             accepts: [],
             returns: [
                 {arg: 'error', type: 'Object'}
             ],
-            http: { verb: 'post', path: '/connectDbs' }
+            http: { verb: 'post', path: '/connectDb' }
         }
     );
     
@@ -113,4 +113,20 @@ module.exports = function(ExternalDatabase) {
             return cb(err);
         }
     };
+    
+    ExternalDatabase.remoteMethod(
+        'addExtDb',
+        {
+            description: 'Adds an external database to the company.',
+            accepts: [
+                { arg: 'name', type: 'string', required: true, description: 'Database name'},
+                { arg: 'password', type: 'string', required: true, description: 'Password'},
+                { arg: 'connString', type: 'string', required: true, description: 'Connection string'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/addExtDb' }
+        }
+    );
 };
