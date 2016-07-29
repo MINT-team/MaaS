@@ -55,7 +55,8 @@ var ExternalDatabases = React.createClass({
   _onChange: function() {
       this.setState(getState());
   },
- 
+  
+
   render: function() {
     var isOpened = this.state.isOpened;
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
@@ -69,6 +70,13 @@ var ExternalDatabases = React.createClass({
             </div>
         );
     }
+    
+  
+  var selectRowProp = {
+    mode: "checkbox",
+    clickToSelect: true,
+    bgColor: "rgba(144, 238, 144, 0.42)",
+};
   
  var products = [
   {
@@ -170,6 +178,7 @@ var ExternalDatabases = React.createClass({
   }
 ];
 
+  
 var data = [];
 
     RequestActionCreator.getDbs();
@@ -177,7 +186,7 @@ var data = [];
 
     
     var title, content;
-    
+  
     title = "Manage Database";
     content = (
           <div id="content">
@@ -201,7 +210,7 @@ var data = [];
               
             </div>
             <div id="table-database">
-              <BootstrapTable pagination={true} data={products} search={true} striped={true} hover={true}>
+              <BootstrapTable selectRow={selectRowProp} pagination={true} data={products} search={true} striped={true} hover={true}>
                 <TableHeaderColumn isKey={true} dataField="id">Product ID</TableHeaderColumn>
                 <TableHeaderColumn dataField="name">Product Name</TableHeaderColumn>
                 <TableHeaderColumn dataField="price">Product Price</TableHeaderColumn>

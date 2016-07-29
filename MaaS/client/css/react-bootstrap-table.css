@@ -1,6 +1,15 @@
-
-
 /* --------------------------------- BOOTSTRAP ----------------------- */
+
+
+#table-database a {
+  text-decoration: none;
+}
+
+#table-database input{
+  width:98.4%;
+  display: block;
+}
+
 table {
   border-spacing: 0;
   border-collapse: collapse;
@@ -356,7 +365,6 @@ fieldset[disabled] .btn-default.focus {
   z-index: 1000;
   display: none;
   float: left;
-  min-width: 160px;
   padding: 5px 0;
   margin: 2px 0 0;
   font-size: 14px;
@@ -597,7 +605,7 @@ fieldset[disabled] .btn-default.focus {
   padding: 6px 12px;
   margin-left: -1px;
   line-height: 1.42857143;
-  color: #337ab7;
+  color: #292c2f;
   text-decoration: none;
   background-color: #fff;
   border: 1px solid #ddd;
@@ -629,10 +637,10 @@ fieldset[disabled] .btn-default.focus {
 .pagination > .active > a:focus,
 .pagination > .active > span:focus {
   z-index: 3;
-  color: #fff;
+  color: #292c2f;
   cursor: default;
-  background-color: #337ab7;
-  border-color: #337ab7;
+  background-color: rgba(144, 238, 144, 0.42);
+  border-color: #dddddd;
 }
 .pagination > .disabled > span,
 .pagination > .disabled > span:hover,
@@ -826,91 +834,5 @@ fieldset[disabled] .btn-default.focus {
 
 .react-bs-table-no-data {
   text-align: center;
-}
-
-/*error tip style*/
-.animated {
-  animation-fill-mode: both;
-}
-
-.animated.bounceIn,
-.animated.bounceOut{
-  animation-duration: .75s;
-}
-.animated.shake{
-  animation-duration:.3s;
-}
-@keyframes shake {
-  from, to {
-    transform: translate3d(0, 0, 0);
-  }
-
-  10%,  50%,  90% {
-    transform: translate3d(-10px, 0, 0);
-  }
-
-  30%, 70%{
-    transform: translate3d(10px, 0, 0);
-  }
-}
-
-.shake {
-  animation-name: shake;
-}
-@keyframes bounceIn {
-  from, 20%, 40%, 60%, 80%, to {
-    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-  }
-
-  0% {
-    opacity: 0;
-    transform: scale3d(.3, .3, .3);
-  }
-
-  20% {
-    transform: scale3d(1.1, 1.1, 1.1);
-  }
-
-  40% {
-    transform: scale3d(.9, .9, .9);
-  }
-
-  60% {
-    opacity: 1;
-    transform: scale3d(1.03, 1.03, 1.03);
-  }
-
-  80% {
-    transform: scale3d(.97, .97, .97);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale3d(1, 1, 1);
-  }
-}
-
-.bounceIn {
-  animation-name: bounceIn;
-}
-
-@keyframes bounceOut {
-  20% {
-    transform: scale3d(.9, .9, .9);
-  }
-
-  50%, 55% {
-    opacity: 1;
-    transform: scale3d(1.1, 1.1, 1.1);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale3d(.3, .3, .3);
-  }
-}
-
-.bounceOut {
-  animation-name: bounceOut;
 }
 

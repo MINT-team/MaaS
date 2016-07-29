@@ -83,7 +83,7 @@ connectDb: function() {
 
 getDbs: function() {
   request
-    .get(APIEndpoints.DATABASES + '?filter=%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D')
+    .get(APIEndpoints.DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D')
     .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){

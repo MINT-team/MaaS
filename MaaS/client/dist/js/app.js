@@ -1038,6 +1038,12 @@ var ExternalDatabases = React.createClass({
             );
         }
 
+        var selectRowProp = {
+            mode: "checkbox",
+            clickToSelect: true,
+            bgColor: "rgba(144, 238, 144, 0.42)"
+        };
+
         var products = [{
             id: 1,
             name: "Product1",
@@ -1192,7 +1198,7 @@ var ExternalDatabases = React.createClass({
                 { id: 'table-database' },
                 React.createElement(
                     BootstrapTable,
-                    { pagination: true, data: products, search: true, striped: true, hover: true },
+                    { selectRow: selectRowProp, pagination: true, data: products, search: true, striped: true, hover: true },
                     React.createElement(
                         TableHeaderColumn,
                         { isKey: true, dataField: 'id' },
@@ -4397,6 +4403,7 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         for (var i = 0; i < length; ++i) {
             names.push({ name: _databases[i].name });
             localStorage.setItem('db' + i, _databases[i].name);
+            console.log('>' + _databases[i].name);
         }
         return names;
     },
@@ -5006,7 +5013,7 @@ module.exports = {
   },
 
   getDbs: function getDbs() {
-    request.get(APIEndpoints.DATABASES + '?filter=%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D').set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
+    request.get(APIEndpoints.DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D').set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
       if (res) {
         console.log(res);
         if (res.error) {
