@@ -1192,7 +1192,7 @@ var ExternalDatabases = React.createClass({
                 { id: 'table-database' },
                 React.createElement(
                     BootstrapTable,
-                    { pagination: true, data: data, search: true, striped: true, hover: true },
+                    { pagination: true, data: databases, search: true, striped: true, hover: true },
                     React.createElement(
                         TableHeaderColumn,
                         { isKey: true, dataField: 'id' },
@@ -4395,7 +4395,7 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         var names = [];
         var length = _databases.length;
         for (var i = 0; i < length; ++i) {
-            names.push(_databases[i].name);
+            names.push({ name: _databases[i].name });
         }
         return names;
     },
