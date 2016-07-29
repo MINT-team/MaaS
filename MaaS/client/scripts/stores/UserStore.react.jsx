@@ -24,6 +24,7 @@ var _user = {
               gender: localStorage.getItem('userGender'),
               avatar: localStorage.getItem('userAvatar'),
               role: localStorage.getItem('userRole'),
+              softTabs: localStorage.getItem('softTabs'),
               theme: localStorage.getItem('theme')
             };
 var _errors = [];
@@ -84,6 +85,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getEditorTheme: function() {
     return _user.theme;
+  },
+  
+  getEditorSoftTabs: function() {
+    return _user.softTabs;
   }
 
 });
@@ -154,7 +159,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         UserStore.emitChange();
         break;
 
-      case ActionTypes.EDITOR_CONFIG_RESPONSE:
+      case ActionTypes.GET_EDITOR_CONFIG_RESPONSE:
         if(action.json) 
         {
             _errors = []; // empty old errors usare local
@@ -198,6 +203,23 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         }
         UserStore.emitChange();
         break;
+        
+      case ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE:
+        if(action.errors) 
+        {
+          _errors = action.errors;
+        } 
+        else if(action.json) 
+        {
+          _errors = [];
+          _user.softTabs = action.json.softTabs;
+          _user.theme = action.json.theme;
+          localStorage.setItem('softTabs', _user.softTabs);
+          localStorage.setItem('theme', _user.theme);
+        }
+        UserStore.emitChange();
+        break;
+        
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });

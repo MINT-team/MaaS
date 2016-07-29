@@ -24,7 +24,8 @@ require('brace/theme/tomorrow_night_blue');
 
 function getState() {
     return {
-        theme: UserStore.getEditorTheme()
+        theme: UserStore.getEditorTheme(),
+        softTabs: UserStore.getEditorSoftTabs()
     };
 }
 

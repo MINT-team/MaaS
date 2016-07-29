@@ -36,7 +36,7 @@ module.exports = {
     RESET_PASSWORD_RESPONSE: null,
     CHANGE_PASSWORD_RESPONSE: null,
     CHANGE_DATA_RESPONSE: null,
-    EDITOR_CONFIG_RESPONSE: null,
+    GET_EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
     DELETE_USER: null,
     GET_COMPANY: null,

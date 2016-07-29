@@ -36,10 +36,18 @@ var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
-    
+    return {
+        theme: UserStore.getEditorTheme(),
+        softTabs: UserStore.getEditorSoftTabs(),
+        errors: UserStore.getErrors()
+    };
 }
 
 var EditorConfig = React.createClass({
+    getInitialState: function() {
+        return getState();
+    },
+    
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
     },
@@ -56,8 +64,17 @@ var EditorConfig = React.createClass({
       event.preventDefault();
       var softTabs = this.refs.softTabs.checked;
       var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-      RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(),softTabs,theme);
-      
+      if (softTabs != this.state.softTabs || theme != this.state.theme)
+      {
+          RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(),softTabs,theme);
+      }
+      else
+      {
+          window.alert('aa');
+          this.setState({
+              errors: "No changes to save"
+          });
+      }
     },
     
     render: function() {

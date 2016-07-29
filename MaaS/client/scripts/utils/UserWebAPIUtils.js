@@ -193,11 +193,11 @@ module.exports = {
           res = JSON.parse(res.text);
           if (res.error)
           {
-            ResponseUserActionCreator.responseGetEditorConfig(null,res.error.message);
+            ResponseUserActionCreator.responseChangeEditorConfig(null,res.error.message);
           }
           else
           {
-            ResponseUserActionCreator.responseGetEditorConfig(res.newData, null);
+            ResponseUserActionCreator.responseChangeEditorConfig(res.newData, null);
           }
         }
       });

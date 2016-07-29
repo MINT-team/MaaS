@@ -36,7 +36,7 @@ var ResponseUserActionCreator = {
     },
     responseGetEditorConfig: function(json) {
         Dispatcher.handleServerAction({
-            type: ActionTypes.EDITOR_CONFIG_RESPONSE,
+            type: ActionTypes.GET_EDITOR_CONFIG_RESPONSE,
             json: json
         });
     },

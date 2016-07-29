@@ -491,7 +491,6 @@ module.exports = function(user) {
                 if (softTabs)
                 {
                     editorConfig.softTabs = softTabs;
-                    console.log(editorConfig);
                     user.updateAttributes({ editorConfig: editorConfig }, function() {
                         if (err)
                         {
