@@ -343,6 +343,13 @@ var ResponseUserActionCreator = {
             json: json,
             errors: errors
         });
+    },
+    responseChangeEditorConfig: function responseChangeEditorConfig(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
+            json: json,
+            errors: errors
+        });
     }
 };
 
@@ -4046,6 +4053,7 @@ module.exports = {
     GET_USER: null,
     DELETE_USER: null,
     GET_COMPANY: null,
+    CHANGE_EDITOR_CONFIG_RESPONSE: null,
 
     // Company
     GET_USERS: null,
@@ -5340,7 +5348,7 @@ module.exports = {
   },
 
   changeEditorConfig: function changeEditorConfig(id, softTabs, theme) {
-    request.post(APIEndpoints.USERS + '/' + id + '/changeEditorConfig').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+    request.put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       softTabs: softTabs,
       theme: theme
@@ -5348,47 +5356,13 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          window.alert(res.text);
+          ResponseUserActionCreator.responseGetEditorConfig(null, res.error.message);
+        } else {
+          ResponseUserActionCreator.responseGetEditorConfig(res.newData, null);
         }
       }
     });
   }
-
-  /*
-  changePersonalData: function(id, name, surname, dateOfBirth, gender) {
-    request
-      .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
-      .set('Accept', 'application/json')
-      .set('Authorization', localStorage.getItem('accessToken'))  // necessario per questa API
-      .send({
-        id: id,
-        name: name,
-        surname: surname,
-        dateOfBirth: dateOfBirth,
-        gender: gender
-      })
-      .end(function(err, res) {
-        if(res) {
-          res = JSON.parse(res.text);
-          if(res.error) 
-          {
-            // res.error.message: errori di loopback e error definito dal remote method
-            ResponseUserActionCreator.responseChangePersonalData(null, res.error.message);
-          } 
-          else 
-          {
-            ResponseUserActionCreator.responseChangePersonalData(res.newData, null);
-          }
-        }
-        if(err) 
-        {
-          //ResponseUserActionCreator.responseChangePassword(null, err);
-        }
-      });
-  },
-  
-  */
-
 };
 
 },{"../actions/Response/ResponseUserActionCreator.react.jsx":8,"../constants/Constants.js":35,"superagent":477}],46:[function(require,module,exports){
@@ -27793,7 +27767,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -27810,7 +27784,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout(timeout);
+    cachedClearTimeout.call(null, timeout);
 }
 
 process.nextTick = function (fun) {
@@ -27822,7 +27796,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout(drainQueue, 0);
+        cachedSetTimeout.call(null, drainQueue, 0);
     }
 };
 
