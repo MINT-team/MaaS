@@ -40,6 +40,7 @@ module.exports = {
     GET_USER: null,
     DELETE_USER: null,
     GET_COMPANY: null,
+    CHANGE_EDITOR_CONFIG_RESPONSE: null,
 
     // Company
     GET_USERS: null,

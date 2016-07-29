@@ -482,8 +482,6 @@ module.exports = function(user) {
     );
     
     user.changeEditorConfig = function(id, softTabs, theme, cb) {
-        console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-        //console.log(theme);
         user.findById(id, function(err, user) {
             if (err)
                 return cb(err);
@@ -493,7 +491,8 @@ module.exports = function(user) {
                 if (softTabs)
                 {
                     editorConfig.softTabs = softTabs;
-                    user.updateAttribute({ editorConfig: editorConfig }, function() {
+                    console.log(editorConfig);
+                    user.updateAttributes({ editorConfig: editorConfig }, function() {
                         if (err)
                         {
                             console.log('> failed changing softTabs for: ', user.email);
@@ -504,7 +503,7 @@ module.exports = function(user) {
                 if (theme)
                 {
                     editorConfig.theme = theme;
-                    user.updateAttribute({ editorConfig: editorConfig }, function() {
+                    user.updateAttributes({ editorConfig: editorConfig}, function() {
                         if (err)
                         {
                             console.log('> failed changing theme for: ', user.email);
@@ -542,7 +541,7 @@ module.exports = function(user) {
                 { arg: 'error', type: 'Object' },
                 { arg: 'newData', type: 'Object'}
             ],
-            http: { verb: 'post', path: '/:id/changeEditorConfig' }
+            http: { verb: 'put', path: '/:id/changeEditorConfig' }
         }
     );
 };

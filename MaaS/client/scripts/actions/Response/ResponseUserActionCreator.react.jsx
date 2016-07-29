@@ -56,9 +56,16 @@ var ResponseUserActionCreator = {
     },
     responseGetCompany: function(json, errors) {
         Dispatcher.handleServerAction({
-          type: ActionTypes.GET_COMPANY,
-          json: json,
-          errors: errors
+            type: ActionTypes.GET_COMPANY,
+            json: json,
+            errors: errors
+        });
+    },
+    responseChangeEditorConfig: function(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
+            json: json,
+            errors: errors
         });
     }
 };
