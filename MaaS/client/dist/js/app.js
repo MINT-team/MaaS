@@ -976,259 +976,178 @@ var Collapse = require('react-collapse');
 var ReactHeight = require('react-height');
 
 function getState() {
-    RequestActionCreator.getDbs();
-    return {
-        //errors: CompanyStore.getErrors(),
-        errors: ExternalDatabaseStore.getErrors(),
-        isOpened: false,
-        isLogged: SessionStore.isLogged()
-    };
+  RequestActionCreator.getDbs();
+  return {
+    //errors: CompanyStore.getErrors(),
+    errors: ExternalDatabaseStore.getErrors(),
+    isOpened: false,
+    _isOpened: true,
+    isLogged: SessionStore.isLogged()
+  };
 }
 
 var ExternalDatabases = React.createClass({
-    displayName: 'ExternalDatabases',
+  displayName: 'ExternalDatabases',
 
 
-    getInitialState: function getInitialState() {
-        return getState();
-    },
+  getInitialState: function getInitialState() {
+    return getState();
+  },
 
-    openForm: function openForm() {
-        this.setState({ isOpened: !this.state.isOpened });
-    },
+  _onChange: function _onChange() {
+    this.setState(getState());
+  },
 
-    componentDidMount: function componentDidMount() {
-        SessionStore.addChangeListener(this._onChange);
-        ExternalDatabaseStore.addChangeListener(this._onChange());
-    },
-
-    componentWillUnmount: function componentWillUnmount() {
-        SessionStore.removeChangeListener(this._onChange);
-        ExternalDatabaseStore.removeChangeListener(this._onChange());
-    },
-
-    _onChange: function _onChange() {
-        this.setState(getState());
-    },
-
-    render: function render() {
-        var _this = this;
-
-        var isOpened = this.state.isOpened;
-        if (!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
-            return React.createElement(
-                'div',
-                { className: 'container' },
-                React.createElement(
-                    'p',
-                    { className: 'container-title' },
-                    'Authorization required'
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'container-description' },
-                    'You are not authorized to view this page',
-                    React.createElement('img', { src: '../images/jurassic.gif', alt: '' })
-                ),
-                React.createElement(
-                    Link,
-                    { to: '/', className: 'button' },
-                    'Back to home'
-                )
-            );
-        }
-
-        var selectRowProp = {
-            mode: "checkbox",
-            clickToSelect: true,
-            bgColor: "rgba(144, 238, 144, 0.42)"
-        };
-
-        var products = [{
-            id: 1,
-            name: "Product1",
-            price: 120
-        }, {
-            id: 2,
-            name: "Product2",
-            price: 80
-        }, {
-            id: 3,
-            name: "Product3",
-            price: 207
-        }, {
-            id: 4,
-            name: "Product4",
-            price: 100
-        }, {
-            id: 5,
-            name: "Product5",
-            price: 150
-        }, {
-            id: 6,
-            name: "Product1",
-            price: 160
-        }, {
-            id: 7,
-            name: "Product1",
-            price: 120
-        }, {
-            id: 8,
-            name: "Product2",
-            price: 80
-        }, {
-            id: 9,
-            name: "Product3",
-            price: 207
-        }, {
-            id: 10,
-            name: "Product4",
-            price: 100
-        }, {
-            id: 11,
-            name: "Product5",
-            price: 150
-        }, {
-            id: 12,
-            name: "Product1",
-            price: 160
-        }, {
-            id: 13,
-            name: "Product1",
-            price: 120
-        }, {
-            id: 14,
-            name: "Product2",
-            price: 80
-        }, {
-            id: 15,
-            name: "Product3",
-            price: 207
-        }, {
-            id: 16,
-            name: "Product4",
-            price: 100
-        }, {
-            id: 18,
-            name: "Product5",
-            price: 150
-        }, {
-            id: 19,
-            name: "Product1",
-            price: 160
-        }, {
-            id: 20,
-            name: "Product1",
-            price: 120
-        }, {
-            id: 21,
-            name: "Product2",
-            price: 80
-        }, {
-            id: 22,
-            name: "Product3",
-            price: 207
-        }, {
-            id: 23,
-            name: "Product4",
-            price: 100
-        }, {
-            id: 24,
-            name: "Product5",
-            price: 150
-        }, {
-            id: 25,
-            name: "Product1",
-            price: 160
-        }];
-
-        var data = [];
-
-        RequestActionCreator.getDbs();
-        var databases = ExternalDatabaseStore.getDbNames();
-
-        var title, content;
-
-        title = "Manage Database";
-        content = React.createElement(
-            'div',
-            { id: 'content' },
-            React.createElement(
-                'div',
-                { id: 'successful-operation' },
-                React.createElement(
-                    'p',
-                    null,
-                    'Manage your external database, add new or disable existing ones.'
-                )
-            ),
-            React.createElement(
-                'div',
-                { id: 'add-database' },
-                React.createElement(
-                    'button',
-                    { onClick: function onClick() {
-                            return _this.setState({ isOpened: !isOpened });
-                        }, className: 'inline-button' },
-                    'Add Database'
-                ),
-                React.createElement(
-                    Collapse,
-                    { isOpened: this.state.isOpened },
-                    React.createElement(
-                        'form',
-                        { action: '', method: 'post', className: 'externaldb' },
-                        React.createElement(
-                            'fieldset',
-                            null,
-                            React.createElement('input', { id: 'name', name: 'name', placeholder: 'Database name', type: 'text' }),
-                            React.createElement('input', { id: 'password', name: 'password', placeholder: 'Database password', type: 'password' }),
-                            React.createElement('input', { id: 'string', name: 'string', placeholder: 'Connection string', type: 'text' }),
-                            React.createElement(
-                                'button',
-                                { className: 'inline-button' },
-                                'Add'
-                            )
-                        )
-                    )
-                )
-            ),
-            React.createElement(
-                'div',
-                { id: 'table-database' },
-                React.createElement(
-                    BootstrapTable,
-                    { selectRow: selectRowProp, pagination: true, data: products, search: true, striped: true, hover: true },
-                    React.createElement(
-                        TableHeaderColumn,
-                        { isKey: true, dataField: 'id' },
-                        'Product ID'
-                    ),
-                    React.createElement(
-                        TableHeaderColumn,
-                        { dataField: 'name' },
-                        'Product Name'
-                    ),
-                    React.createElement(
-                        TableHeaderColumn,
-                        { dataField: 'price' },
-                        'Product Price'
-                    )
-                )
-            )
-        );
-
-        return React.createElement(
-            'div',
-            { className: 'container' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                title
-            ),
-            content
-        );
+  openForm: function openForm() {
+    this.setState({ isOpened: !this.state.isOpened });
+    if (this.state.isOpened) {
+      this.refs.table.setState({ _isOpened: false });
     }
+  },
+
+  handleChange: function handleChange(event) {
+    this.setState({ value: event.target.value });
+  },
+
+  componentDidMount: function componentDidMount() {
+    Collapse.addChangeListener(this._onChange);
+    SessionStore.addChangeListener(this._onChange);
+    ExternalDatabaseStore.addChangeListener(this._onChange());
+  },
+
+  componentWillUnmount: function componentWillUnmount() {
+    Collapse.removeChangeListener(this._onChange);
+    SessionStore.removeChangeListener(this._onChange);
+    ExternalDatabaseStore.removeChangeListener(this._onChange());
+  },
+
+  render: function render() {
+    if (!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
+      return React.createElement(
+        'div',
+        { className: 'container' },
+        React.createElement(
+          'p',
+          { className: 'container-title' },
+          'Authorization required'
+        ),
+        React.createElement(
+          'p',
+          { className: 'container-description' },
+          'You are not authorized to view this page',
+          React.createElement('img', { src: '../images/jurassic.gif', alt: '' })
+        ),
+        React.createElement(
+          Link,
+          { to: '/', className: 'button' },
+          'Back to home'
+        )
+      );
+    }
+
+    var selectRowProp = {
+      mode: "checkbox",
+      clickToSelect: true,
+      bgColor: "rgba(144, 238, 144, 0.42)"
+    };
+
+    var data = [{
+      name: "Prova",
+      allowed: "true"
+    }];
+
+    RequestActionCreator.getDbs();
+    var databases = ExternalDatabaseStore.getDbNames();
+
+    var title, content;
+
+    title = "Manage Database";
+    content = React.createElement(
+      'div',
+      { id: 'content' },
+      React.createElement(
+        'div',
+        { id: 'successful-operation' },
+        React.createElement(
+          'p',
+          null,
+          'Manage your external database, add new or disable existing ones.'
+        )
+      ),
+      React.createElement(
+        'div',
+        { id: 'add-database' },
+        React.createElement(
+          'button',
+          { onClick: this.openForm, className: 'inline-button' },
+          'Add Database'
+        ),
+        React.createElement(
+          'button',
+          { className: 'inline-button' },
+          'Delete Database'
+        ),
+        React.createElement(
+          'button',
+          { className: 'inline-button' },
+          'Disable Database'
+        ),
+        React.createElement(
+          Collapse,
+          { isOpened: this.state.isOpened },
+          React.createElement(
+            'form',
+            { action: '', method: 'post', className: 'externaldb' },
+            React.createElement(
+              'fieldset',
+              null,
+              React.createElement('input', { id: 'name', name: 'name', placeholder: 'Database name', type: 'text' }),
+              React.createElement('input', { id: 'password', name: 'password', placeholder: 'Database password', type: 'password' }),
+              React.createElement('input', { id: 'string', name: 'string', placeholder: 'Connection string', type: 'text' }),
+              React.createElement(
+                'button',
+                { className: 'inline-button' },
+                'Add'
+              )
+            )
+          )
+        )
+      ),
+      React.createElement(
+        'div',
+        { id: 'table-database' },
+        React.createElement(
+          Collapse,
+          { ref: 'table', _onChange: this.handleChange, isOpened: this.state._isOpened },
+          React.createElement(
+            BootstrapTable,
+            { selectRow: selectRowProp, pagination: true, data: databases, search: true, striped: true, hover: true },
+            React.createElement(
+              TableHeaderColumn,
+              { isKey: true, dataField: 'name' },
+              'Name'
+            ),
+            React.createElement(
+              TableHeaderColumn,
+              { dataField: 'allowed' },
+              'Status'
+            )
+          )
+        )
+      )
+    );
+
+    return React.createElement(
+      'div',
+      { className: 'container' },
+      React.createElement(
+        'p',
+        { className: 'container-title' },
+        title
+      ),
+      content
+    );
+  }
 });
 
 module.exports = ExternalDatabases;
@@ -4402,9 +4321,10 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         var names = [];
         var length = _databases.length;
         for (var i = 0; i < length; ++i) {
-            names.push({ name: _databases[i].name });
+            names.push({ name: _databases[i].name, allowed: _databases[i].allowed });
             localStorage.setItem('db' + i, _databases[i].name);
-            console.log('>' + _databases[i].name);
+            var el = _databases[i];
+            console.log('>' + el);
         }
         return names;
     },
@@ -4491,6 +4411,7 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = []; // empty old errors
                 // set databases of the company
                 _databases = action.json;
+                console.log(_databases);
                 localStorage.setItem('dbCount', _databases.length);
             }
             ExternalDatabaseStore.emitChange();
