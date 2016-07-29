@@ -191,6 +191,7 @@ module.exports = {
         if (res)
         {
           res = JSON.parse(res.text);
+          window.alert('good');
         }
       });
   }

@@ -6,7 +6,7 @@
 // Version         Date            Programmer
 // ==========================================
 
-var ResponseExternalDatabasesActionCreator = require('../actions/Response/ResponseExternalDatabasesActionCreator.react.jsx');
+var ResponseExternalDatabasesActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 

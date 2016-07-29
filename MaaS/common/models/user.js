@@ -482,6 +482,8 @@ module.exports = function(user) {
     );
     
     user.changeEditorConfig = function(id, softTabs, theme, cb) {
+        console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+        //console.log(theme);
         user.findById(id, function(err, user) {
             if (err)
                 return cb(err);

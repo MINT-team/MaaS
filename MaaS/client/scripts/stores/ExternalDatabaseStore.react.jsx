@@ -61,6 +61,15 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         return _databases;
     },
     
+    getDbNames: function() {
+        var names = [];
+        var length = _databases.length;
+        for(var i = 0; i < length; ++i){
+            names.push(_databases[i].name);
+        }
+        return names;
+    },
+    
     getConnections: function() {
         return _connections;
     },
@@ -149,6 +158,7 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = []; // empty old errors
                 // set databases of the company
                 _databases = action.json;
+                localStorage.setItem('dbCount', _databases.length);
             }
             ExternalDatabaseStore.emitChange();
             break;

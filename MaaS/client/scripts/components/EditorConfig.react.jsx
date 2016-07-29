@@ -56,7 +56,7 @@ var EditorConfig = React.createClass({
       event.preventDefault();
       var softTabs = this.refs.softTabs.checked;
       var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-      RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId,softTabs,theme)
+      RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId,softTabs,theme);
       
     },
     

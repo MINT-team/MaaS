@@ -7,7 +7,7 @@
 // ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/ExternalDatabaseWebAPIUtils.js");
+var WebAPIUtils = require("../../utils/ExternalDatabasesWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
@@ -20,6 +20,10 @@ var ExternalDatabaseActionCreator = {
     
     connectDb: function() {
         WebAPIUtils.connectDb();
+    },
+    
+    getDbs: function() {
+        WebAPIUtils.getDbs();
     }
 };
 
