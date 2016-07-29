@@ -25,6 +25,7 @@ function getState() {
           //errors: CompanyStore.getErrors(),
           errors: ExternalDatabaseStore.getErrors(),
           isOpened: false,
+          _isOpened: true,
           isLogged: SessionStore.isLogged()
       };
 }
@@ -36,29 +37,37 @@ var ExternalDatabases = React.createClass({
       return getState();
   },
   
+   _onChange: function() {
+    	this.setState(getState());
+    },
+
+  
   openForm: function(){
-   this.setState({isOpened: !this.state.isOpened}
+   this.setState({isOpened: !this.state.isOpened});
+   if(this.state.isOpened) { 
+      this.refs.table.setState({_isOpened: false});
+   }
    
-   );
  },
+ 
+ handleChange: function(event) {
+    this.setState({value: event.target.value});
+  },
   
   componentDidMount: function() {
+      Collapse.addChangeListener(this._onChange);    
       SessionStore.addChangeListener(this._onChange);
       ExternalDatabaseStore.addChangeListener(this._onChange());
   },
 
   componentWillUnmount: function() {
+      Collapse.removeChangeListener(this._onChange);
       SessionStore.removeChangeListener(this._onChange);
       ExternalDatabaseStore.removeChangeListener(this._onChange());
-  },
-
-  _onChange: function() {
-      this.setState(getState());
   },
   
 
   render: function() {
-    var isOpened = this.state.isOpened;
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
         return (
             <div className="container">
@@ -78,109 +87,14 @@ var ExternalDatabases = React.createClass({
     bgColor: "rgba(144, 238, 144, 0.42)",
 };
   
- var products = [
+ var data = [
   {
-      id: 1,
-      name: "Product1",
-      price: 120
-  },{
-      id: 2,
-      name: "Product2",
-      price: 80
-  },{
-      id: 3,
-      name: "Product3",
-      price: 207
-  },{
-      id: 4,
-      name: "Product4",
-      price: 100
-  },{
-      id: 5,
-      name: "Product5",
-      price: 150
-  },{
-      id: 6,
-      name: "Product1",
-      price: 160
-  },{
-      id: 7,
-      name: "Product1",
-      price: 120
-  },{
-      id: 8,
-      name: "Product2",
-      price: 80
-  },{
-      id: 9,
-      name: "Product3",
-      price: 207
-  },{
-      id: 10,
-      name: "Product4",
-      price: 100
-  },{
-      id: 11,
-      name: "Product5",
-      price: 150
-  },{
-      id: 12,
-      name: "Product1",
-      price: 160
-  },{
-      id: 13,
-      name: "Product1",
-      price: 120
-  },{
-      id: 14,
-      name: "Product2",
-      price: 80
-  },{
-      id: 15,
-      name: "Product3",
-      price: 207
-  },{
-      id: 16,
-      name: "Product4",
-      price: 100
-  },{
-      id: 18,
-      name: "Product5",
-      price: 150
-  },{
-      id: 19,
-      name: "Product1",
-      price: 160
-  },{
-      id: 20,
-      name: "Product1",
-      price: 120
-  },{
-      id: 21,
-      name: "Product2",
-      price: 80
-  },{
-      id: 22,
-      name: "Product3",
-      price: 207
-  },{
-      id: 23,
-      name: "Product4",
-      price: 100
-  },{
-      id: 24,
-      name: "Product5",
-      price: 150
-  },{
-      id: 25,
-      name: "Product1",
-      price: 160
+      name: "Prova",
+      allowed: "true"
   }
 ];
 
   
-var data = [];
-
     RequestActionCreator.getDbs();
     var databases = ExternalDatabaseStore.getDbNames();
 
@@ -195,7 +109,9 @@ var data = [];
             </div>
           
             <div id="add-database">
-            <button onClick={() => this.setState({isOpened: !isOpened}) } className="inline-button">Add Database</button>
+            <button onClick={this.openForm} className="inline-button">Add Database</button>
+            <button className="inline-button">Delete Database</button>
+            <button className="inline-button">Disable Database</button>
               <Collapse isOpened={this.state.isOpened} >
                 <form action="" method="post" className="externaldb">
                 <fieldset>
@@ -210,14 +126,16 @@ var data = [];
               
             </div>
             <div id="table-database">
-              <BootstrapTable selectRow={selectRowProp} pagination={true} data={products} search={true} striped={true} hover={true}>
-                <TableHeaderColumn isKey={true} dataField="id">Product ID</TableHeaderColumn>
-                <TableHeaderColumn dataField="name">Product Name</TableHeaderColumn>
-                <TableHeaderColumn dataField="price">Product Price</TableHeaderColumn>
+            <Collapse ref="table"  _onChange={this.handleChange} isOpened={this.state._isOpened} >
+              <BootstrapTable selectRow={selectRowProp} pagination={true} data={databases} search={true} striped={true} hover={true}>
+                <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
+                <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
               </BootstrapTable>
+              </Collapse>
             </div>
-          </div>
-        );
+            </div>
+          );  
+
         
     return (
       <div className="container">

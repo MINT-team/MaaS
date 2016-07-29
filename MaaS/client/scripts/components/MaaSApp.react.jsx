@@ -44,6 +44,7 @@ var MaaSApp = React.createClass({
     	UserStore.removeChangeListener(this._onChange);
 		CompanyStore.removeChangeListener(this._onChange);
     },
+    
 
     _onChange: function() {
     	this.setState(getState());

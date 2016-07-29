@@ -65,9 +65,10 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         var names = [];
         var length = _databases.length;
         for(var i = 0; i < length; ++i){
-            names.push({ name: (_databases[i]).name });
+            names.push({ name: (_databases[i]).name, allowed: (_databases[i]).allowed });
             localStorage.setItem('db' + i, _databases[i].name);
-            console.log('>' + _databases[i].name);
+            var el = _databases[i];
+            console.log('>' + el);
         }
         return names;
     },
@@ -160,6 +161,7 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = []; // empty old errors
                 // set databases of the company
                 _databases = action.json;
+                console.log(_databases);
                 localStorage.setItem('dbCount', _databases.length);
             }
             ExternalDatabaseStore.emitChange();
