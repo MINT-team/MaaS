@@ -179,7 +179,7 @@ module.exports = {
   
   changeEditorConfig: function(id,softTabs,theme) {
     request
-      .put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig')
+      .post(APIEndpoints.USERS + '/' + id + '/changeEditorConfig')
       .set('Accept','application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
       .send({
@@ -191,9 +191,47 @@ module.exports = {
         if (res)
         {
           res = JSON.parse(res.text);
-          window.alert('good');
+          if (res.error)
+          {
+            window.alert(res.text);
+          }
         }
       });
   }
+  
+  /*
+  changePersonalData: function(id, name, surname, dateOfBirth, gender) {
+    request
+      .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))  // necessario per questa API
+      .send({
+        id: id,
+        name: name,
+        surname: surname,
+        dateOfBirth: dateOfBirth,
+        gender: gender
+      })
+      .end(function(err, res) {
+        if(res) {
+          res = JSON.parse(res.text);
+          if(res.error) 
+          {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ResponseUserActionCreator.responseChangePersonalData(null, res.error.message);
+          } 
+          else 
+          {
+            ResponseUserActionCreator.responseChangePersonalData(res.newData, null);
+          }
+        }
+        if(err) 
+        {
+          //ResponseUserActionCreator.responseChangePassword(null, err);
+        }
+      });
+  },
+  
+  */
 
 };

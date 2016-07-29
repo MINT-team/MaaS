@@ -1192,7 +1192,7 @@ var ExternalDatabases = React.createClass({
                 { id: 'table-database' },
                 React.createElement(
                     BootstrapTable,
-                    { pagination: true, data: databases, search: true, striped: true, hover: true },
+                    { pagination: true, data: products, search: true, striped: true, hover: true },
                     React.createElement(
                         TableHeaderColumn,
                         { isKey: true, dataField: 'id' },
@@ -1800,7 +1800,7 @@ var EditorConfig = React.createClass({
         event.preventDefault();
         var softTabs = this.refs.softTabs.checked;
         var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-        RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId, softTabs, theme);
+        RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
     },
 
     render: function render() {
@@ -4396,6 +4396,7 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         var length = _databases.length;
         for (var i = 0; i < length; ++i) {
             names.push({ name: _databases[i].name });
+            localStorage.setItem('db' + i, _databases[i].name);
         }
         return names;
     },
@@ -5332,17 +5333,54 @@ module.exports = {
   },
 
   changeEditorConfig: function changeEditorConfig(id, softTabs, theme) {
-    request.put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+    request.post(APIEndpoints.USERS + '/' + id + '/changeEditorConfig').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       softTabs: softTabs,
       theme: theme
     }).end(function (error, res) {
       if (res) {
         res = JSON.parse(res.text);
-        window.alert('good');
+        if (res.error) {
+          window.alert(res.text);
+        }
       }
     });
   }
+
+  /*
+  changePersonalData: function(id, name, surname, dateOfBirth, gender) {
+    request
+      .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))  // necessario per questa API
+      .send({
+        id: id,
+        name: name,
+        surname: surname,
+        dateOfBirth: dateOfBirth,
+        gender: gender
+      })
+      .end(function(err, res) {
+        if(res) {
+          res = JSON.parse(res.text);
+          if(res.error) 
+          {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ResponseUserActionCreator.responseChangePersonalData(null, res.error.message);
+          } 
+          else 
+          {
+            ResponseUserActionCreator.responseChangePersonalData(res.newData, null);
+          }
+        }
+        if(err) 
+        {
+          //ResponseUserActionCreator.responseChangePassword(null, err);
+        }
+      });
+  },
+  
+  */
 
 };
 

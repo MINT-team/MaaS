@@ -201,7 +201,7 @@ var data = [];
               
             </div>
             <div id="table-database">
-              <BootstrapTable pagination={true} data={databases} search={true} striped={true} hover={true}>
+              <BootstrapTable pagination={true} data={products} search={true} striped={true} hover={true}>
                 <TableHeaderColumn isKey={true} dataField="id">Product ID</TableHeaderColumn>
                 <TableHeaderColumn dataField="name">Product Name</TableHeaderColumn>
                 <TableHeaderColumn dataField="price">Product Price</TableHeaderColumn>

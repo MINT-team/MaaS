@@ -65,7 +65,8 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
         var names = [];
         var length = _databases.length;
         for(var i = 0; i < length; ++i){
-            names.push({ name: _databases[i].name });
+            names.push({ name: (_databases[i]).name });
+            localStorage.setItem('db' + i, _databases[i].name);
         }
         return names;
     },

@@ -542,7 +542,7 @@ module.exports = function(user) {
                 { arg: 'error', type: 'Object' },
                 { arg: 'newData', type: 'Object'}
             ],
-            http: { verb: 'put', path: '/:id/changeEditorConfig' }
+            http: { verb: 'post', path: '/:id/changeEditorConfig' }
         }
     );
 };
