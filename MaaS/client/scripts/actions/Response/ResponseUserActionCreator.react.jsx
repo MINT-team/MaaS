@@ -67,6 +67,13 @@ var ResponseUserActionCreator = {
             json: json,
             errors: errors
         });
+    },
+    responseChangeRole: function(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_ROLE_RESPONSE,
+            email: email,
+            errors: errors
+        });
     }
 };
 

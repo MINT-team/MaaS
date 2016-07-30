@@ -257,7 +257,7 @@ module.exports = function(user) {
                     console.log('> failed resetting password for: ', user.email);
                     return cb(err);
                 }
-                console.log('> password reset processed successfully for: ', user.email);
+                console.log('> password changed successfully for: ', user.email);
                 return cb(null, null, user.email);   // callback di successo
             });
         });
@@ -276,7 +276,7 @@ module.exports = function(user) {
                 {arg: 'error', type: 'Object'},
                 {arg: 'email', type: 'string'}
             ],
-            http: { verb: 'post', path: '/:id/changePassword' }
+            http: { verb: 'put', path: '/:id/changePassword' }
         }
     );
 
@@ -368,7 +368,7 @@ module.exports = function(user) {
                 {arg: 'error', type: 'Object'},
                 {arg: 'newData', type: 'Object'}
             ],
-            http: { verb: 'post', path: '/:id/changePersonalData' }
+            http: { verb: 'put', path: '/:id/changePersonalData' }
         }
     );
 
@@ -425,7 +425,61 @@ module.exports = function(user) {
                 {arg: 'error', type: 'Object'},
                 {arg: 'email', type: 'String'}
             ],
-            http: { verb: 'delete', path: '/deleteUser/:id' }
+            http: { verb: 'delete', path: '/:id/deleteUser' }
+        }
+    );
+    
+    // Cambio il ruolo dell'utente
+    user.changeRole = function(email, role, id, cb) {
+        user.findById(id, function(err, userInstance) {
+            if(err || !userInstance)
+                return cb(err);
+            user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToChange) {
+                if(err || !userToChange)
+                    return cb(err);
+                // user trying to change role of another user, only this case is allowed
+                if(userInstance.email != userToChange.email) {
+                    var error = {
+                        message: 'You haven\'t the rights to change this user'
+                    };
+                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") {
+                        return cb(null, error);
+                    }
+                    // if userInstance.role == "Owner" then he's allowed to
+                    if(userInstance.role == "Administrator") {
+                        if(userToChange.role == "Owner" || userToChange.role == "Administrator") {
+                            return cb(null, error);
+                        }
+                    }
+                    // successful request
+                    userToChange.updateAttributes({ role: role }, function() {
+                        if(err) 
+                        {
+                            var error = {
+                                message: 'Failed changing role for: '+userToChange.email
+                            };
+                            console.log('> failed changing role for: ', userToChange.email);
+                            return cb(null, error);
+                        }
+                    });
+                }
+            });
+        });
+    };
+
+    user.remoteMethod(
+        'changeRole',
+        {
+            description: 'Change user role by passing email to change role for and id of the user making the request.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id making request'},
+                { arg: 'email', type: 'string', required: true, description: 'User email to change role for'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'email', type: 'String'}
+            ],
+            http: { verb: 'put', path: '/:id/changeRole' }
         }
     );
     

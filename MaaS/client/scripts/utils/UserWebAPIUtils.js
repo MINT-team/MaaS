@@ -56,7 +56,7 @@ module.exports = {
 
   changePassword: function(id, password, confirmation, accessToken){ //accessToken come parametro obbligatorio
     request
-      .post(APIEndpoints.USERS + '/' + id + '/changePassword')
+      .put(APIEndpoints.USERS + '/' + id + '/changePassword')
       .set('Accept', 'application/json')
       .set('Authorization', accessToken)  // necessario per questa API, in questo caso viene passato a mano perchè potrebbe provenire dalla query url - vedesi 'ChangePassword.react.jsx'
       //.type('form')
@@ -85,7 +85,7 @@ module.exports = {
 
   changePersonalData: function(id, name, surname, dateOfBirth, gender) {
     request
-      .post(APIEndpoints.USERS + '/' + id + '/changePersonalData')
+      .put(APIEndpoints.USERS + '/' + id + '/changePersonalData')
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))  // necessario per questa API
       .send({
@@ -132,7 +132,7 @@ module.exports = {
   // delete user account
   deleteUser: function(email, id) {
     request
-      .del(APIEndpoints.USERS + '/deleteUser/' + id)
+      .del(APIEndpoints.USERS + '/' + id + '/deleteUser')
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
       .send({
@@ -198,6 +198,31 @@ module.exports = {
           else
           {
             ResponseUserActionCreator.responseChangeEditorConfig(res.newData, null);
+          }
+        }
+      });
+  },
+  
+  changeRole: function(email, role, id) {
+    request
+      .put(APIEndpoints.USERS + '/' + id + '/changeRole')
+      .set('Accept','application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        email: email,
+        role: role
+      })
+      .end(function(error, res) {
+        if (res)
+        {
+          res = JSON.parse(res.text);
+          if (res.error)
+          {
+            ResponseUserActionCreator.responseChangeRole(null,res.error.message);
+          }
+          else
+          {
+            ResponseUserActionCreator.responseChangeRole(res.email, null);
           }
         }
       });

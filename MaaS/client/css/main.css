@@ -49,9 +49,9 @@ body {
 }
 
 .container, #home-container{
-    width: 50%;
+    width: 65%;
     min-height: 22em;
-    margin: auto;
+    margin-left: 23%;
     padding: 2em;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -65,10 +65,12 @@ body {
 /* responsive page for large resolutions */
 @media (min-width: 1600px) {
     .container {
-        padding-top: 3em;
-        height: 25em;
+        width: 50%;
+        min-height: 25em;
+        margin: auto;
         margin-top: 5%;
         margin-bottom: 5%;
+        padding-top: 3em;
     }
 }
 
@@ -537,10 +539,6 @@ input {
 @keyframes dropDown {
     0% { transform: translateY(-1em); opacity: 0;}
     100% { transform: translateY(0); opacity: 1;}
-}
-
-.dropdown-button:focus {
-    color: lightgreen;
 }
 
 .dropdown-content {
@@ -1029,12 +1027,12 @@ input {
     text-align: left;
 }
 
-/*------------------------------------------------ DELETE USER, DELETE COMPANY --------------------------------------------------------------*/
-#delete-user {
+/*------------------------------------------------ DELETE USER, DELETE COMPANY, CHANGE ROLE --------------------------------------------------------------*/
+#delete-user, #change-role {
     display: inline;
 }
 
-#delete-user i {
+#delete-user i, #change-role i {
     cursor: pointer;
     vertical-align: middle;
     padding: 0.1em;
@@ -1042,6 +1040,33 @@ input {
 
 #delete-user i:hover {
     color: red;
+}
+
+#change-role i:hover {
+    color: lightgrey;
+}
+
+#change-role select  {
+    display: block;
+    margin: auto;
+    margin-bottom: 3em;
+}
+
+#change-role-dropdown {
+    height: 25%;
+    overflow: auto;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+#confirm-button {
+    margin-left: 3em;
+    background-color: #60D42E;
+}
+
+#confirm-button:hover {
+    box-shadow: darkgreen 0.1em 0.1em, darkgreen -0.1em -0.1em, darkgreen -0.1em 0.1em, darkgreen 0.1em -0.1em;
 }
 
 #delete-button {

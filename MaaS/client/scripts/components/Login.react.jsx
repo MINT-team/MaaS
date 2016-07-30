@@ -34,21 +34,29 @@ var Login = React.createClass({
 
     componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
+      this.handleRedirect();
     },
 
     componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
     },
+    
+    handleRedirect: function() {
+      if(this.state.isLogged) {
+        const { router } = this.context;
+        router.push('/');   // redirect to Dashboard page
+      }
+    },
 
     _onChange: function() {
       this.setState(getState());
       if(this.state.isLogged) {
+        // loads data to the session
         RequestUserActionCreator.getUser(SessionStore.getUserId());
         RequestUserActionCreator.getCompany(SessionStore.getUserId());
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
-        const { router } = this.context;
-        router.push('/');   // redirect to home page
       }
+      this.handleRedirect();
     },
 
     _onSubmit: function(e) {
