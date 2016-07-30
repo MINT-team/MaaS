@@ -1950,7 +1950,6 @@ var Editor = React.createClass({
 
     componentDidMount: function componentDidMount() {
         UserStore.addChangeListener(this._onChange);
-        window.alert(this.state.theme);
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/" + this.state.theme);
     },
@@ -1964,11 +1963,7 @@ var Editor = React.createClass({
     },
 
     render: function render() {
-        return React.createElement(
-            'div',
-            { id: 'editorContainer' },
-            React.createElement('div', { id: 'editor' })
-        );
+        return React.createElement('div', { id: 'editor' });
     }
 });
 
@@ -2014,6 +2009,7 @@ var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
+var Editor = require('./Editor.react.jsx');
 
 function getState() {
     return {
@@ -2043,6 +2039,17 @@ var EditorConfig = React.createClass({
 
     componentWillUnmount: function componentWillUnmount() {
         UserStore.removeChangeListener(this._onChange);
+    },
+
+    componentDidUpdate: function componentDidUpdate() {
+        if (!this.state.submit) {
+            if (this.state.softTabs == "true") {
+                document.getElementById('softTabs').checked = true;
+            } else {
+                document.getElementById('softTabs').checked = false;
+            }
+            document.getElementById('theme').value = this.state.theme;
+        }
     },
 
     _onChange: function _onChange() {
@@ -2082,103 +2089,112 @@ var EditorConfig = React.createClass({
                 );
             }
             content = React.createElement(
-                'form',
-                { onSubmit: this._onSubmit, className: 'form-container' },
+                'div',
+                null,
                 React.createElement(
-                    'div',
-                    { className: 'form-field' },
-                    React.createElement(
-                        'label',
-                        { htmlFor: 'tabSize' },
-                        'Tab size'
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'form-field' },
-                    React.createElement(
-                        'label',
-                        { htmlFor: 'softTabs' },
-                        'Soft tabs'
-                    ),
+                    'form',
+                    { onSubmit: this._onSubmit, className: 'form-container' },
                     React.createElement(
                         'div',
-                        { className: 'form-right-block' },
-                        React.createElement('input', { type: 'checkbox', id: 'softTabs', className: 'cbx hidden', ref: 'softTabs' }),
-                        React.createElement('label', { htmlFor: 'softTabs', className: 'lbl' })
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'form-field' },
-                    React.createElement(
-                        'label',
-                        { htmlFor: 'fontSize' },
-                        'Font size'
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'form-field' },
-                    React.createElement(
-                        'label',
-                        { htmlFor: 'theme' },
-                        'Theme'
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'form-right-block' },
+                        { className: 'form-field' },
                         React.createElement(
-                            'select',
-                            { id: 'theme', className: 'select', ref: 'theme' },
+                            'label',
+                            { htmlFor: 'tabSize' },
+                            'Tab size'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'softTabs' },
+                            'Soft tabs'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement('input', { type: 'checkbox', id: 'softTabs', className: 'cbx hidden', ref: 'softTabs' }),
+                            React.createElement('label', { htmlFor: 'softTabs', className: 'lbl' })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'fontSize' },
+                            'Font size'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'theme' },
+                            'Theme'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
                             React.createElement(
-                                'option',
-                                { value: 'chaos' },
-                                'Chaos'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'dawn' },
-                                'Dawn'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'twilight' },
-                                'Twilight'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'ambiance' },
-                                'Ambiance'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'cobalt' },
-                                'Cobalt'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'tomorrow' },
-                                'Tomorrow'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'tomorrow_night' },
-                                'Tomorrow night'
-                            ),
-                            React.createElement(
-                                'option',
-                                { value: 'tomorrow_night_blue' },
-                                'Tomorrow night blue'
+                                'select',
+                                { id: 'theme', className: 'select', ref: 'theme' },
+                                React.createElement(
+                                    'option',
+                                    { value: 'chaos' },
+                                    'Chaos'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'dawn' },
+                                    'Dawn'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'twilight' },
+                                    'Twilight'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'ambiance' },
+                                    'Ambiance'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'cobalt' },
+                                    'Cobalt'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow' },
+                                    'Tomorrow'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow_night' },
+                                    'Tomorrow night'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow_night_blue' },
+                                    'Tomorrow night blue'
+                                )
                             )
                         )
+                    ),
+                    errors,
+                    React.createElement(
+                        'button',
+                        { type: 'submit', className: 'form-submit' },
+                        'Save changes'
                     )
                 ),
-                errors,
                 React.createElement(
-                    'button',
-                    { type: 'submit', className: 'form-submit' },
-                    'Save changes'
+                    'div',
+                    { id: 'editorContainerPreview' },
+                    React.createElement(Editor, null)
                 )
             );
         } else {
@@ -2214,7 +2230,7 @@ var EditorConfig = React.createClass({
 
 module.exports = EditorConfig;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":41,"../stores/UserStore.react.jsx":42,"react":477,"react-router":247}],20:[function(require,module,exports){
+},{"../actions/Request/RequestUserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":41,"../stores/UserStore.react.jsx":42,"./Editor.react.jsx":18,"react":477,"react-router":247}],20:[function(require,module,exports){
 'use strict';
 
 // Name: {Error404.react.jsx}

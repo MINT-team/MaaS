@@ -37,7 +37,6 @@ var Editor = React.createClass({
 
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
-        window.alert(this.state.theme);
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/"+ this.state.theme);
     },
@@ -52,9 +51,7 @@ var Editor = React.createClass({
 
     render: function() {
         return (
-            <div id="editorContainer">
-                <div id="editor"></div>
-            </div>
+            <div id="editor"></div>
         );
     }
 });

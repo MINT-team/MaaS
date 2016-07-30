@@ -35,6 +35,7 @@ var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
+var Editor = require('./Editor.react.jsx');
 
 function getState() {
     return {
@@ -65,6 +66,21 @@ var EditorConfig = React.createClass({
     
     componentWillUnmount: function() {
         UserStore.removeChangeListener(this._onChange);
+    },
+    
+    componentDidUpdate: function() {
+        if (!this.state.submit)
+        {
+            if (this.state.softTabs == "true")
+            {
+                document.getElementById('softTabs').checked = true;
+            }
+            else
+            {
+                document.getElementById('softTabs').checked = false;
+            }
+            document.getElementById('theme').value = this.state.theme;
+        }
     },
     
     _onChange: function() {
@@ -107,38 +123,43 @@ var EditorConfig = React.createClass({
                 );
             }
             content = (
-            <form onSubmit={this._onSubmit} className="form-container">
-                    <div className="form-field">
-                        <label htmlFor="tabSize">Tab size</label>
-                    </div>
-                    <div className="form-field">
-                        <label htmlFor="softTabs">Soft tabs</label>
-                        <div className="form-right-block">
-                            <input type="checkbox" id="softTabs" className="cbx hidden" ref="softTabs"/>
-                            <label htmlFor="softTabs" className="lbl"></label>
+                <div>
+                    <form onSubmit={this._onSubmit} className="form-container">
+                        <div className="form-field">
+                            <label htmlFor="tabSize">Tab size</label>
                         </div>
-                    </div>
-                    <div className="form-field">
-                        <label htmlFor="fontSize">Font size</label>
-                    </div>
-                    <div className="form-field">
-                        <label htmlFor="theme">Theme</label>
-                        <div className="form-right-block">
-                            <select id="theme" className="select" ref="theme">
-                                <option value="chaos">Chaos</option>
-                                <option value="dawn">Dawn</option>
-                                <option value="twilight">Twilight</option>
-                                <option value="ambiance">Ambiance</option>
-                                <option value="cobalt">Cobalt</option>
-                                <option value="tomorrow">Tomorrow</option>
-                                <option value="tomorrow_night">Tomorrow night</option>
-                                <option value="tomorrow_night_blue">Tomorrow night blue</option>
-                            </select>
+                        <div className="form-field">
+                            <label htmlFor="softTabs">Soft tabs</label>
+                            <div className="form-right-block">
+                                <input type="checkbox" id="softTabs" className="cbx hidden" ref="softTabs"/>
+                                <label htmlFor="softTabs" className="lbl"></label>
+                            </div>
                         </div>
+                        <div className="form-field">
+                            <label htmlFor="fontSize">Font size</label>
+                        </div>
+                        <div className="form-field">
+                            <label htmlFor="theme">Theme</label>
+                            <div className="form-right-block">
+                                <select id="theme" className="select" ref="theme">
+                                    <option value="chaos">Chaos</option>
+                                    <option value="dawn">Dawn</option>
+                                    <option value="twilight">Twilight</option>
+                                    <option value="ambiance">Ambiance</option>
+                                    <option value="cobalt">Cobalt</option>
+                                    <option value="tomorrow">Tomorrow</option>
+                                    <option value="tomorrow_night">Tomorrow night</option>
+                                    <option value="tomorrow_night_blue">Tomorrow night blue</option>
+                                </select>
+                            </div>
+                        </div>
+                        {errors}
+                        <button type="submit" className="form-submit">Save changes</button>
+                    </form>
+                    <div id="editorContainerPreview">
+                        <Editor />
                     </div>
-                    {errors}
-                    <button type="submit" className="form-submit">Save changes</button>
-                </form>
+                </div>
             );
         }
         else
