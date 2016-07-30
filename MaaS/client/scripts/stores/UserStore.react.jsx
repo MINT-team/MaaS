@@ -177,7 +177,9 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         {
             _errors = []; // empty old errors usare local
             _user.theme = action.json.config.theme;
-            localStorage.setItem('theme',action.json.config.theme);
+            _user.softTabs = action.json.config.softTabs;
+            localStorage.setItem('softTabs',_user.softTabs);
+            localStorage.setItem('theme',_user.theme);
         }
         UserStore.emitChange();
         break;

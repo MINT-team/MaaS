@@ -50,6 +50,15 @@ var EditorConfig = React.createClass({
     
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
+        if (this.state.softTabs == "true")
+        {
+            document.getElementById('softTabs').checked = true;
+        }
+        else
+        {
+            document.getElementById('softTabs').checked = false;
+        }
+        document.getElementById('theme').value = this.state.theme;
     },
     
     componentWillUnmount: function() {
@@ -101,7 +110,7 @@ var EditorConfig = React.createClass({
                     <div className="form-field">
                         <label htmlFor="theme">Theme</label>
                         <div className="form-right-block">
-                            <select className="select" ref="theme">
+                            <select id="theme" className="select" ref="theme">
                                 <option value="chaos">Chaos</option>
                                 <option value="dawn">Dawn</option>
                                 <option value="twilight">Twilight</option>
