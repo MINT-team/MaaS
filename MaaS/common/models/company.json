@@ -49,6 +49,12 @@
       "principalId": "Member",
       "permission": "ALLOW",
       "property": "__get__users"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Guest",
+      "permission": "ALLOW",
+      "property": "__get__users"
     }
   ],
   "methods": {}

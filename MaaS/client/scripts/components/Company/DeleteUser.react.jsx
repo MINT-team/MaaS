@@ -66,14 +66,14 @@ var DeleteUser = React.createClass({
         return (
             <div id="delete-user">
                 <i onClick={this.toggleDropdown} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
-                <div id="delete-dropdown" className="dropdown-content dropdown-popup" ref="errorDropdown">
+                <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>
                     <p className="dropdown-description">{errors}</p>
                     <div className="dropdown-buttons">
                         <button className="button">Ok</button>
                     </div>
                 </div>
-                <div id="delete-dropdown" className="dropdown-content dropdown-popup" ref="deleteDropdown">
+                <div className="dropdown-content dropdown-popup" ref="deleteDropdown">
                     <p className="dropdown-title">Delete user</p>
                     <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{this.props.email}</span>'s account?</p>
                     <div className="dropdown-buttons">

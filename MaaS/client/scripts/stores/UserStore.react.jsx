@@ -235,15 +235,25 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         UserStore.emitChange();
         break;
         
-        case ActionTypes.DELETE_USER:
-            if(action.errors) {
-                _errors = action.errors;
-            } else {
-                _errors = [];
-                //var email = action.email;
-            }
-            UserStore.emitDelete();
-            break;
+      case ActionTypes.CHANGE_ROLE_RESPONSE:
+        if(action.errors) {
+            _errors = action.errors;
+        } else {
+            _errors = [];
+            //var email = action.email;
+        }
+        UserStore.emitChange();
+        break;
+        
+      case ActionTypes.DELETE_USER:
+        if(action.errors) {
+            _errors = action.errors;
+        } else {
+            _errors = [];
+            //var email = action.email;
+        }
+        UserStore.emitDelete();
+        break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });

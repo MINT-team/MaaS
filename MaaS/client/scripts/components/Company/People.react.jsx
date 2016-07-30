@@ -15,6 +15,8 @@ var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyA
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var Invite = require('./Invite.react.jsx');
 var DeleteUser = require('./DeleteUser.react.jsx');
+var ChangeRole = require('./ChangeRole.react.jsx');
+
 
 function getState() {
   return {
@@ -98,6 +100,7 @@ var People = React.createClass({
                     <span className="table-column-normal">Name</span>
                     <span className="table-column-normal">Surname</span>
                     <span className="table-column-normal">Role</span>
+                    <span className="table-spacing"></span>
                     <span className="table-column-big">Email</span>
                     <span className="table-spacing"></span>
                 </div>
@@ -111,6 +114,7 @@ var People = React.createClass({
           					<span className="table-column-normal">{u.name}</span>
           					<span className="table-column-normal">{u.surname}</span>
           					<span className="table-column-normal">{u.role}</span>
+          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role}/> : <span className="table-spacing"></span>}
           					<span className="table-column-big">{u.email}</span>
           					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
           				</div>

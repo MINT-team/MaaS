@@ -28,7 +28,14 @@ function getState() {
 var Company = React.createClass({
 
   getInitialState: function() {
-      return getState();
+      return {
+          id: CompanyStore.getId(),
+          name: CompanyStore.getName(),
+          users: CompanyStore.getUsers(),
+          errors: [],
+          isLogged: SessionStore.isLogged(),
+          role: UserStore.getRole()
+      };
   },
 
   componentDidMount: function() {
