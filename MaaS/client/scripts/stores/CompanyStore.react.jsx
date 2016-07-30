@@ -123,7 +123,6 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             CompanyStore.emitDelete();
             break;
-
     }
 
     return true;  // richiesto dal Promise nel Dispatcher

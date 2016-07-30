@@ -505,6 +505,7 @@ module.exports = CollapseElement;
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 var ChangeRole = React.createClass({
     displayName: 'ChangeRole',
@@ -512,7 +513,8 @@ var ChangeRole = React.createClass({
 
     getInitialState: function getInitialState() {
         return {
-            active: false,
+            active: false, // used to show errors only for active forms
+            companyId: this.props.companyId,
             id: UserStore.getId(),
             role: this.props.role,
             errors: []
@@ -537,7 +539,8 @@ var ChangeRole = React.createClass({
         if (this.state.active && this.state.errors.length > 0) {
             this.refs.errorDropdown.classList.toggle("dropdown-show");
         } else {
-            // success dropdown ?
+            this.setState({ active: false });
+            RequestCompanyActionCreator.getUsers(this.state.companyId);
         }
     },
 
@@ -556,7 +559,6 @@ var ChangeRole = React.createClass({
         } else {
             this.setState({ errors: "Error retrieving some information" });
         }
-        this.setState({ active: false });
     },
 
     _onSelectChange: function _onSelectChange(event) {
@@ -661,7 +663,7 @@ var ChangeRole = React.createClass({
 
 module.exports = ChangeRole;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":4,"../../stores/UserStore.react.jsx":42,"react":477}],12:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":4,"../../stores/UserStore.react.jsx":42,"react":477}],12:[function(require,module,exports){
 'use strict';
 
 // Name: {Company.react.jsx}
@@ -1611,7 +1613,8 @@ function getState() {
     name: CompanyStore.getName(),
     errors: CompanyStore.getErrors(),
     isLogged: SessionStore.isLogged(),
-    role: UserStore.getRole()
+    role: UserStore.getRole(),
+    email: UserStore.getEmail()
   };
 }
 
@@ -1722,7 +1725,7 @@ var People = React.createClass({
           this.props.users.map(function (u) {
             return React.createElement(
               'div',
-              { className: 'table-row' },
+              { className: 'table-row', id: _this.state.email == u.email ? "user-profile" : "" },
               React.createElement(
                 'span',
                 { className: 'table-column-small' },
@@ -1747,7 +1750,7 @@ var People = React.createClass({
                 { className: 'table-column-normal' },
                 u.role
               ),
-              _this.isLowerGrade(u.role) ? React.createElement(ChangeRole, { email: u.email, role: u.role }) : React.createElement('span', { className: 'table-spacing' }),
+              _this.isLowerGrade(u.role) ? React.createElement(ChangeRole, { email: u.email, role: u.role, companyId: _this.state.id }) : React.createElement('span', { className: 'table-spacing' }),
               React.createElement(
                 'span',
                 { className: 'table-column-big' },
@@ -2007,12 +2010,14 @@ module.exports = Editor;
 * First structure of the file.
 */
 var React = require('react');
+var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
     return {
+        submit: false,
         theme: UserStore.getEditorTheme(),
         softTabs: UserStore.getEditorSoftTabs(),
         errors: UserStore.getErrors()
@@ -2028,6 +2033,12 @@ var EditorConfig = React.createClass({
 
     componentDidMount: function componentDidMount() {
         UserStore.addChangeListener(this._onChange);
+        if (this.state.softTabs == "true") {
+            document.getElementById('softTabs').checked = true;
+        } else {
+            document.getElementById('softTabs').checked = false;
+        }
+        document.getElementById('theme').value = this.state.theme;
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -2036,32 +2047,41 @@ var EditorConfig = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
+        this.setState({ submit: true });
     },
 
     _onSubmit: function _onSubmit(event) {
         event.preventDefault();
-        var softTabs = this.refs.softTabs.checked;
+        var checked;
+        this.refs.softTabs.checked ? checked = "true" : checked = "false";
+        var softTabs = checked;
         var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
         if (softTabs != this.state.softTabs || theme != this.state.theme) {
             RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
         } else {
-            window.alert('aa');
             this.setState({
                 errors: "No changes to save"
             });
         }
     },
 
+    backToConfig: function backToConfig(event) {
+        event.preventDefault();
+        this.setState({ submit: false });
+    },
+
     render: function render() {
-        return React.createElement(
-            'div',
-            { className: 'container' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                'Editor configuration'
-            ),
-            React.createElement(
+        var title, content, errors;
+        if (!this.state.submit || this.state.errors.length > 0) {
+            title = "Editor configuration";
+            if (this.state.errors.length > 0) {
+                errors = React.createElement(
+                    'p',
+                    { id: 'errors' },
+                    this.state.errors
+                );
+            }
+            content = React.createElement(
                 'form',
                 { onSubmit: this._onSubmit, className: 'form-container' },
                 React.createElement(
@@ -2093,15 +2113,6 @@ var EditorConfig = React.createClass({
                     { className: 'form-field' },
                     React.createElement(
                         'label',
-                        { htmlFor: 'fontFamily' },
-                        'Font family'
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'form-field' },
-                    React.createElement(
-                        'label',
                         { htmlFor: 'fontSize' },
                         'Font size'
                     )
@@ -2119,7 +2130,7 @@ var EditorConfig = React.createClass({
                         { className: 'form-right-block' },
                         React.createElement(
                             'select',
-                            { className: 'select', ref: 'theme' },
+                            { id: 'theme', className: 'select', ref: 'theme' },
                             React.createElement(
                                 'option',
                                 { value: 'chaos' },
@@ -2163,19 +2174,47 @@ var EditorConfig = React.createClass({
                         )
                     )
                 ),
+                errors,
                 React.createElement(
                     'button',
                     { type: 'submit', className: 'form-submit' },
                     'Save changes'
                 )
-            )
+            );
+        } else {
+            title = "Editor configuration changed";
+            content = React.createElement(
+                'div',
+                { id: 'successful-operation' },
+                React.createElement(
+                    'p',
+                    null,
+                    'Your editor configuration has been changed successfully.'
+                ),
+                React.createElement(
+                    Link,
+                    { onClick: this.backToConfig, id: 'successful-button', className: 'button', to: '' },
+                    'Back to your editor configuration'
+                )
+            );
+        }
+
+        return React.createElement(
+            'div',
+            { className: 'container' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                title
+            ),
+            content
         );
     }
 });
 
 module.exports = EditorConfig;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":41,"../stores/UserStore.react.jsx":42,"react":477}],20:[function(require,module,exports){
+},{"../actions/Request/RequestUserActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":41,"../stores/UserStore.react.jsx":42,"react":477,"react-router":247}],20:[function(require,module,exports){
 'use strict';
 
 // Name: {Error404.react.jsx}
@@ -2281,8 +2320,18 @@ var Footer = React.createClass({
 					),
 					React.createElement(
 						Link,
+						{ to: '/company' },
+						'Company'
+					),
+					React.createElement(
+						Link,
 						{ to: '/company/externalDatabases' },
 						'Database'
+					),
+					React.createElement(
+						Link,
+						{ to: '/manageDSL' },
+						'DSL'
 					),
 					React.createElement(
 						Link,
@@ -2318,13 +2367,11 @@ var Footer = React.createClass({
 						{ to: '/', id: 'home' },
 						' Home '
 					),
-					'·',
 					React.createElement(
 						Link,
 						{ to: '/login', id: 'login' },
 						' Login '
 					),
-					'·',
 					React.createElement(
 						Link,
 						{ to: '/register', id: 'register' },
@@ -2434,13 +2481,18 @@ var Header = React.createClass({
 				{ id: 'header-menu' },
 				React.createElement(
 					Link,
-					{ to: '/dashboard' },
-					'Dashboard'
+					{ to: '/company' },
+					'Company'
 				),
 				React.createElement(
 					Link,
 					{ to: '/company/externalDatabases' },
 					'Database'
+				),
+				React.createElement(
+					Link,
+					{ to: '/company/manageDSL' },
+					'DSL'
 				)
 			);
 			headerPanel = React.createElement(
@@ -2769,7 +2821,7 @@ var Login = React.createClass({
               ''
             )
           ),
-          React.createElement('input', { type: 'text', id: 'email', ref: 'email', placeholder: 'Email', className: 'iconized-input', required: true })
+          React.createElement('input', { type: 'text', id: 'email', ref: 'email', placeholder: 'Email', className: 'iconized-input login-input', required: true })
         ),
         React.createElement(
           'div',
@@ -2783,7 +2835,7 @@ var Login = React.createClass({
               ''
             )
           ),
-          React.createElement('input', { type: 'password', id: 'password', ref: 'password', placeholder: 'Password', className: 'iconized-input', required: true }),
+          React.createElement('input', { type: 'password', id: 'password', ref: 'password', placeholder: 'Password', className: 'iconized-input login-input', required: true }),
           errors,
           help
         ),
@@ -4604,7 +4656,6 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             CompanyStore.emitDelete();
             break;
-
     }
 
     return true; // richiesto dal Promise nel Dispatcher
@@ -5088,7 +5139,9 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       if (action.json) {
         _errors = []; // empty old errors usare local
         _user.theme = action.json.config.theme;
-        localStorage.setItem('theme', action.json.config.theme);
+        _user.softTabs = action.json.config.softTabs;
+        localStorage.setItem('softTabs', _user.softTabs);
+        localStorage.setItem('theme', _user.theme);
       }
       UserStore.emitChange();
       break;

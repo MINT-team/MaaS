@@ -109,7 +109,8 @@ var PersonalData = React.createClass({
 
   render: function() {
     var title, content, errors;
-    if(!this.state.email || this.state.errors.length > 0) {
+    if(!this.state.email || this.state.errors.length > 0) 
+    {
       title = "Personal data";
       if(this.state.errors.length > 0) {
         errors = (
@@ -143,7 +144,9 @@ var PersonalData = React.createClass({
           <button type="submit" className="form-submit">Save changes</button>
         </form>
       );
-    } else {
+    } 
+    else 
+    {
       title = "Personal data changed";
       content = (
         <div id="successful-operation">

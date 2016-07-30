@@ -430,16 +430,22 @@ module.exports = function(user) {
     );
     
     // Cambio il ruolo dell'utente
-    user.changeRole = function(email, role, id, cb) {
+    user.changeRole = function(id, email, role, cb) {
         user.findById(id, function(err, userInstance) {
             if(err || !userInstance)
-                return cb(err);
+                return cb(err, null, null);
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToChange) {
-                if(err || !userToChange)
-                    return cb(err);
+                if(err) {console.log(err);}
+                if(!userToChange) {
+                    console.log("non trovato");
+                    var error = {
+                        message: 'User to change role not found'
+                    };
+                    return cb(null, error, null);
+                }
                 // user trying to change role of another user, only this case is allowed
                 if(userInstance.email != userToChange.email) {
-                    var error = {
+                    error = {
                         message: 'You haven\'t the rights to change this user'
                     };
                     if(userInstance.role != "Owner" && userInstance.role != "Administrator") {
@@ -460,6 +466,9 @@ module.exports = function(user) {
                             };
                             console.log('> failed changing role for: ', userToChange.email);
                             return cb(null, error);
+                        } else {
+                            console.log("> role changed for:", userToChange.email);
+                            return cb(null, null, userToChange.email);
                         }
                     });
                 }
@@ -473,7 +482,8 @@ module.exports = function(user) {
             description: 'Change user role by passing email to change role for and id of the user making the request.',
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'User id making request'},
-                { arg: 'email', type: 'string', required: true, description: 'User email to change role for'}
+                { arg: 'email', type: 'string', required: true, description: 'User email to change role for'},
+                { arg: 'role', type: 'string', required: true, description: 'New role'}
             ],
             returns: [
                 {arg: 'error', type: 'Object'},

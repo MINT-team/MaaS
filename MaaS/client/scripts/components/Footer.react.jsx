@@ -26,7 +26,9 @@ var Footer = React.createClass({
 					<Link to="/company" id="header-title">{this.props.companyName}</Link>
 					<p className="footer-links">
 						<Link to="/" id="home"> Home </Link>
+						<Link to="/company">Company</Link>
 						<Link to="/company/externalDatabases">Database</Link>
+						<Link to="/manageDSL">DSL</Link>
 						<Link onClick={this.logout} to="">Logout</Link>
 					</p>
 					<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
@@ -40,9 +42,7 @@ var Footer = React.createClass({
 					<p id="header-description">MongoDB as an Admin Service</p>
 					<p className="footer-links">
 						<Link to="/" id="home"> Home </Link>
-						·
 						<Link to="/login" id="login"> Login </Link>
-						·
 						<Link to="/register" id="register"> Sign Up </Link>
 					</p>
 					<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>

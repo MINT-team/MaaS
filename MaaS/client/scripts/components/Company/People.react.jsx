@@ -24,7 +24,8 @@ function getState() {
           name: CompanyStore.getName(),
           errors: CompanyStore.getErrors(),
           isLogged: SessionStore.isLogged(),
-          role: UserStore.getRole()
+          role: UserStore.getRole(),
+          email: UserStore.getEmail()
       };
 }
 
@@ -105,16 +106,16 @@ var People = React.createClass({
                     <span className="table-spacing"></span>
                 </div>
                 {this.props.users.map((u) =>
-                  <div className="table-row">
+                  <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
           					<span className="table-column-small">
           					  {u.avatar?
-          					    (<img src={"../../../images/"+u.avatar} />) :
-          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
+          					    <img src={"../../../images/"+u.avatar} /> :
+          					    <i className="material-icons md-36 table-row-icon">&#xE851;</i>}
           					</span>
           					<span className="table-column-normal">{u.name}</span>
           					<span className="table-column-normal">{u.surname}</span>
           					<span className="table-column-normal">{u.role}</span>
-          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role}/> : <span className="table-spacing"></span>}
+          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role} companyId={this.state.id}/> : <span className="table-spacing"></span>}
           					<span className="table-column-big">{u.email}</span>
           					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
           				</div>

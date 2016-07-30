@@ -94,11 +94,11 @@ var Login = React.createClass({
           <form onSubmit={this._onSubmit}>
             <div className="form-vertical-block">
               <label htmlFor="email"><i className="material-icons md-24 input-icon">&#xE853;</i></label>
-              <input type="text" id="email" ref="email" placeholder="Email" className="iconized-input" required/>
+              <input type="text" id="email" ref="email" placeholder="Email" className="iconized-input login-input" required/>
             </div>
             <div className="form-vertical-block">
               <label htmlFor="password"><i className="material-icons md-24 input-icon">&#xE897;</i></label>
-              <input type="password" id="password" ref="password" placeholder="Password" className="iconized-input" required/>
+              <input type="password" id="password" ref="password" placeholder="Password" className="iconized-input login-input" required/>
               {errors}
               {help}
             </div>

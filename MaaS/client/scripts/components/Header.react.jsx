@@ -55,8 +55,9 @@ var Header = React.createClass({
     		);
 			headerMenu = (
 				<div id="header-menu">
-					<Link to="/dashboard">Dashboard</Link>
+					<Link to="/company">Company</Link>
 					<Link to="/company/externalDatabases">Database</Link>
+					<Link to="/company/manageDSL">DSL</Link>
 				</div>
     		);
 	    	headerPanel = (

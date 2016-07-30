@@ -10,12 +10,14 @@
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 var ChangeRole = React.createClass({
 
     getInitialState: function() {
         return {
-            active: false,
+            active: false,  // used to show errors only for active forms
+            companyId: this.props.companyId,
             id: UserStore.getId(),
             role: this.props.role,
             errors: []
@@ -45,7 +47,8 @@ var ChangeRole = React.createClass({
 		if(this.state.active && this.state.errors.length > 0) {
 		    this.refs.errorDropdown.classList.toggle("dropdown-show");
 		} else {
-		    // success dropdown ?
+    	    this.setState({active: false});
+            RequestCompanyActionCreator.getUsers(this.state.companyId);
 		}
 	},
 	
@@ -64,7 +67,6 @@ var ChangeRole = React.createClass({
         } else {
             this.setState({ errors: "Error retrieving some information" });
         }
-	    this.setState({active: false});
     },
     
     _onSelectChange: function(event) {

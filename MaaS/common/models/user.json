@@ -76,6 +76,12 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
+      "property": "changeRole"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
       "property": "__get__company"
     },
     {
