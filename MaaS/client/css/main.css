@@ -48,7 +48,7 @@ body {
     box-shadow: lightgray 1px 1px 4px;
 }
 
-.container {
+.container, #home-container{
     width: 50%;
     min-height: 22em;
     margin: auto;
@@ -60,6 +60,16 @@ body {
     background-color: white;
     text-align: center;
     box-shadow: lightgray 1px 1px 4px;
+}
+
+/* responsive page for large resolutions */
+@media (min-width: 1600px) {
+    .container {
+        padding-top: 3em;
+        height: 25em;
+        margin-top: 5%;
+        margin-bottom: 5%;
+    }
 }
 
 .container-title {
@@ -572,13 +582,29 @@ input {
 
 .dropdown-description {
     text-align: center;
-    padding: 0.5em 1em 0.5em 1em;
+    padding-top: 1em;
+    padding-right: 1em;
+    padding-left: 1em;
+    min-height: 1em;
 }
 
 .dropdown-buttons {
     text-align: center;
-    margin-top: 1em;
+    margin-top: 3%;
 }
+
+
+
+.dropdown-popup {
+    width: 28%;
+    height: 22%;
+    overflow: auto;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+
 
 /*-------------------------------------------------- SIDEBAR -----------------------------------------------------------------------*/
 #sidebar {
@@ -608,6 +634,13 @@ input {
     animation-iteration-count: 1;
     animation-timing-function: ease;
     animation-duration: 1s;
+}
+
+/* responsive page for large resolutions */
+@media (min-width: 1600px) {
+    #sidebar {
+         min-height: 30em;
+    }
 }
 
 #sidebar-title {
@@ -759,7 +792,7 @@ input {
     background-color: #333;
 }
 
-.slick-prev, .slick-next{
+.slick-prev, .slick-next {
     position: absolute;
     top: 50%;
     margin: 0.5em;
@@ -799,6 +832,19 @@ input {
   background: #419be0;
 }
 
+@media (max-width: 1400px) {
+    .slick-prev {
+        left: 10%;
+    }
+    
+    .slick-next {
+        right: 10%;
+    }
+    .slick-prev, .slick-next {
+        top: 60%;
+    }
+}
+
 /*-------------------------------------------------- HOME -----------------------------------------------------------------------*/
 #home {
     text-align: center;
@@ -810,6 +856,12 @@ input {
 
 #home-description {
     padding-bottom: 2em;
+}
+
+@media (max-width: 1400px) {
+    #home-title {
+        padding: 1em;
+    }
 }
 
 /*------------------------------------------------- LOGIN --------------------------------------------------------------------*/
@@ -977,7 +1029,7 @@ input {
     text-align: left;
 }
 
-/*------------------------------------------------ DELETE USER --------------------------------------------------------------*/
+/*------------------------------------------------ DELETE USER, DELETE COMPANY --------------------------------------------------------------*/
 #delete-user {
     display: inline;
 }
@@ -992,16 +1044,6 @@ input {
     color: red;
 }
 
-#delete-dropdown {
-    width: 28%;
-    height: 20%;
-    overflow: auto;
-    margin: auto;
-    position: absolute;
-    top: 0; left: 0; bottom: 25%; right: 0;
-}
-
-/*------------------------------------------------ DELETE COMPANY --------------------------------------------------------------*/
 #delete-button {
     margin-left: 3em;
     background-color: #E93F2C;
@@ -1035,15 +1077,18 @@ input {
     -ms-border-radius: 4px 4px 4px 4px;
 }
 
-#invite button {
+#invite-button {
     margin-left: 2em;
 }
 
-#invite-sent {
-    font-size: 1.5em;
-    padding: 0.1em;
+#invite-dropdown {
+    width: 22%;
+    height: 15%;
+    overflow: auto;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 25%; right: 0;
 }
-
 
 /*------------------------------------------------ EXTERNALDATABASES ---------------------------------------------------------*/
 

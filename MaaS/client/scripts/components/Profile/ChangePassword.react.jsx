@@ -50,7 +50,7 @@ var ChangePassword = React.createClass({
       var confirmation = this.refs.confermaPassword.value;
       var id = this.state.userId;
       var accessToken = this.state.accessToken;
-      UserActionCreator.changePassword(id, password, confirmation, accessToken);
+      RequestUserActionCreator.changePassword(id, password, confirmation, accessToken);
   },
 
   render: function() {

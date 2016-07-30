@@ -97,7 +97,6 @@ var SessionActionCreator = {
     });
     WebAPIUtils.logout(accessToken);
   }
-
 };
 
 module.exports = SessionActionCreator;
@@ -181,10 +180,10 @@ var ResponseCompanyActionCreator = {
         });
     },
 
-    responseDeleteCompany: function responseDeleteCompany(json, errors) {
+    responseDeleteCompany: function responseDeleteCompany(name, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
-            json: json,
+            name: name,
             errors: errors
         });
     }
@@ -268,10 +267,11 @@ var ResponseSessionActionCreator = {
             errors: errors
         });
     },
-    responseInvite: function responseInvite(errors) {
+    responseInvite: function responseInvite(errors, email) {
         Dispatcher.handleServerAction({
             type: ActionTypes.INVITE_RESPONSE,
-            errors: errors
+            errors: errors,
+            email: email
         });
     }
 };
@@ -319,7 +319,7 @@ var ResponseUserActionCreator = {
     },
     responseGetEditorConfig: function responseGetEditorConfig(json) {
         Dispatcher.handleServerAction({
-            type: ActionTypes.EDITOR_CONFIG_RESPONSE,
+            type: ActionTypes.GET_EDITOR_CONFIG_RESPONSE,
             json: json
         });
     },
@@ -340,6 +340,13 @@ var ResponseUserActionCreator = {
     responseGetCompany: function responseGetCompany(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_COMPANY,
+            json: json,
+            errors: errors
+        });
+    },
+    responseChangeEditorConfig: function responseChangeEditorConfig(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
             json: json,
             errors: errors
         });
@@ -696,119 +703,181 @@ module.exports = Company;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
 
 function getState() {
-  return {
-    companyId: CompanyStore.getId(),
-    email: UserStore.getUser().email,
-    errors: UserStore.getErrors()
-  };
+    return {
+        companyId: CompanyStore.getId(),
+        name: CompanyStore.getName(),
+        email: UserStore.getUser().email,
+        errors: CompanyStore.getErrors()
+    };
 }
 
 var DeleteCompany = React.createClass({
-  displayName: 'DeleteCompany',
+    displayName: 'DeleteCompany',
 
 
-  getInitialState: function getInitialState() {
-    return {
-      companyId: CompanyStore.getId(),
-      email: UserStore.getUser().email,
-      errors: []
-    };
-  },
+    contextTypes: { // serve per utilizzare il router
+        router: React.PropTypes.object.isRequired
+    },
 
-  componentDidMount: function componentDidMount() {
-    CompanyStore.addChangeListener(this._onChange);
-  },
+    getInitialState: function getInitialState() {
+        return {
+            companyId: CompanyStore.getId(),
+            name: CompanyStore.getName(),
+            email: UserStore.getUser().email,
+            errors: []
+        };
+    },
 
-  componentWillUnmount: function componentWillUnmount() {
-    CompanyStore.removeChangeListener(this._onChange);
-  },
+    componentDidMount: function componentDidMount() {
+        CompanyStore.addDeleteListener(this._onDelete);
+    },
 
-  _onChange: function _onChange() {
-    this.setState(getState());
-  },
+    componentWillUnmount: function componentWillUnmount() {
+        CompanyStore.removeDeleteListener(this._onDelete);
+        window.removeEventListener('click', this.handleLogoutClick);
+    },
 
-  deleteCompany: function deleteCompany(event) {
-    event.preventDefault();
-    var id = this.state.companyId;
-    var email = this.state.email;
-    RequestCompanyActionCreator.deleteCompany(id, email);
-  },
+    _onDelete: function _onDelete() {
+        this.setState(getState());
+        this.toggleDropdown();
+        if (this.state.errors.length <= 0) window.addEventListener('click', this.handleLogoutClick);
+    },
 
-  render: function render() {
-    var title, content, errors;
-    if (!this.state.errors.length > 0) {
-      title = "Delete your company";
-      if (this.state.errors.length > 0) {
-        errors = React.createElement(
-          'p',
-          { id: 'errors' },
-          this.state.errors
+    toggleDropdown: function toggleDropdown() {
+        if (this.state.errors.length > 0) {
+            this.refs.error.classList.toggle("dropdown-show");
+        } else {
+            this.refs.deleted.classList.toggle("dropdown-show");
+        }
+    },
+
+    handleLogoutClick: function handleLogoutClick() {
+        this.logout();
+        var router = this.context.router;
+
+        router.push('/'); // redirect to home page
+    },
+
+    logout: function logout() {
+        var accessToken = SessionStore.getAccessToken();
+        RequestSessionActionCreator.logout(accessToken);
+    },
+
+    deleteCompany: function deleteCompany(event) {
+        event.preventDefault();
+        var id = this.state.companyId;
+        var email = this.state.email;
+        RequestCompanyActionCreator.deleteCompany(id, email);
+    },
+
+    render: function render() {
+        var title = "Delete your company";
+        var errors;
+        if (this.state.errors.length > 0) {
+            errors = React.createElement(
+                'p',
+                { id: 'errors' },
+                this.state.errors
+            );
+        }
+        return React.createElement(
+            'div',
+            { className: 'container' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                title
+            ),
+            React.createElement(
+                'div',
+                { id: 'successful-operation' },
+                React.createElement(
+                    'p',
+                    null,
+                    'Are you sure you want to remove your company?'
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    'All users collaborating and all DSL defined in it will be lost'
+                ),
+                React.createElement(
+                    Link,
+                    { className: 'button', to: '/company' },
+                    'No'
+                ),
+                React.createElement(
+                    Link,
+                    { id: 'delete-button', className: 'button', onClick: this.deleteCompany, to: '/' },
+                    'Delete my company'
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', ref: 'error' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    errors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', ref: 'deleted' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Company deleted!'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    'Your company "',
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        this.state.name
+                    ),
+                    '" has been deleted'
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            )
         );
-      }
-      content = React.createElement(
-        'div',
-        { id: 'successful-operation' },
-        React.createElement(
-          'p',
-          null,
-          'Are you sure you want to remove your company?'
-        ),
-        React.createElement(
-          'p',
-          null,
-          'All users collaborating and all DSL defined in it will be lost'
-        ),
-        React.createElement(
-          Link,
-          { className: 'button', to: '/company' },
-          'No'
-        ),
-        React.createElement(
-          Link,
-          { id: 'delete-button', className: 'button', onClick: this.deleteCompany, to: '/' },
-          'Delete my company'
-        )
-      );
-    } else {
-      //   if(this.props.location.pathname == "/profile/changePassword") { // change password by logged profile
-      //      title = "Password changed";
-      //      content = (
-      //       <div id="successful-operation">
-      //          <p>Your password has been changed successfully.</p>
-      //          <Link id="successful-button" className="button" to="/profile">Back to your profile</Link>
-      //       </div>
-      //      );
-      //   } else if(this.props.location.pathname == "/recoverpwd") {  // change password by reset password
-      //      title = "Password changed successfully!";
-      //      content = (
-      //       <div id="successful-operation">
-      //          <p>You changed your password, now you can log into MaaS.</p>
-      //          <Link id="successful-button" className="button" to="/login">Go to Login</Link>
-      //       </div>
-      //      );
-      //   }
     }
-    return React.createElement(
-      'div',
-      { className: 'container' },
-      React.createElement(
-        'p',
-        { className: 'container-title' },
-        title
-      ),
-      content
-    );
-  }
 });
 
 module.exports = DeleteCompany;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../stores/CompanyStore.react.jsx":38,"../../stores/UserStore.react.jsx":41,"react":476,"react-router":246}],13:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":38,"../../stores/SessionStore.react.jsx":40,"../../stores/UserStore.react.jsx":41,"react":476,"react-router":246}],13:[function(require,module,exports){
 'use strict';
 
 // Name: {Delete.react.jsx}
@@ -890,7 +959,7 @@ var DeleteUser = React.createClass({
             ),
             React.createElement(
                 'div',
-                { id: 'delete-dropdown', className: 'dropdown-content', ref: 'errorDropdown' },
+                { id: 'delete-dropdown', className: 'dropdown-content dropdown-popup', ref: 'errorDropdown' },
                 React.createElement(
                     'p',
                     { className: 'dropdown-title' },
@@ -940,7 +1009,7 @@ var DeleteUser = React.createClass({
                     ),
                     React.createElement(
                         'button',
-                        { className: 'inline-button', onClick: this.confirmDelete },
+                        { id: 'delete-button', className: 'inline-button', onClick: this.confirmDelete },
                         'Delete'
                     )
                 )
@@ -1034,8 +1103,7 @@ var ExternalDatabases = React.createClass({
         React.createElement(
           'p',
           { className: 'container-description' },
-          'You are not authorized to view this page',
-          React.createElement('img', { src: '../images/jurassic.gif', alt: '' })
+          'You are not authorized to view this page'
         ),
         React.createElement(
           Link,
@@ -1043,6 +1111,7 @@ var ExternalDatabases = React.createClass({
           'Back to home'
         )
       );
+      // <img src="../images/jurassic.gif" alt=""/>
     }
 
     var selectRowProp = {
@@ -1058,9 +1127,7 @@ var ExternalDatabases = React.createClass({
 
     RequestActionCreator.getDbs();
     var databases = ExternalDatabaseStore.getDbNames();
-
     var title, content;
-
     title = "Manage Database";
     content = React.createElement(
       'div',
@@ -1168,6 +1235,7 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 var Invite = React.createClass({
     displayName: 'Invite',
@@ -1175,8 +1243,9 @@ var Invite = React.createClass({
 
     getInitialState: function getInitialState() {
         return {
+            companyId: this.props.companyId,
             role: "Administrator",
-            sent: false,
+            sent: SessionStore.getEmail() ? true : false,
             errors: []
         };
     },
@@ -1191,6 +1260,17 @@ var Invite = React.createClass({
 
     _onChange: function _onChange() {
         this.setState({ errors: SessionStore.getErrors() });
+        this.toggleDropdown();
+        RequestCompanyActionCreator.getUsers(this.state.companyId);
+        this.refs.email.value = "";
+    },
+
+    toggleDropdown: function toggleDropdown() {
+        if (this.state.errors.length > 0) {
+            this.refs.error.classList.toggle("dropdown-show");
+        } else {
+            this.refs.invite.classList.toggle("dropdown-show");
+        }
     },
 
     _onSubmit: function _onSubmit(event) {
@@ -1224,7 +1304,8 @@ var Invite = React.createClass({
     },
 
     render: function render() {
-        var content, errors;
+        var errors;
+
         if (!this.state.sent || this.state.errors.length > 0) {
             if (this.state.errors.length > 0) {
                 errors = React.createElement(
@@ -1233,7 +1314,11 @@ var Invite = React.createClass({
                     this.state.errors
                 );
             }
-            content = React.createElement(
+        }
+        return React.createElement(
+            'div',
+            { id: 'invite', className: 'table-row' },
+            React.createElement(
                 'form',
                 { onSubmit: this._onSubmit },
                 React.createElement(
@@ -1255,32 +1340,62 @@ var Invite = React.createClass({
                         'Guest'
                     )
                 ),
-                React.createElement('input', { type: 'text', placeholder: 'Email', ref: 'email', required: true }),
+                React.createElement('input', { type: 'email', placeholder: 'Email', ref: 'email', required: true }),
                 React.createElement(
                     'button',
-                    { type: 'email', className: 'inline-button' },
+                    { id: 'invite-button', className: 'inline-button dropdown-button' },
                     'Invite'
-                ),
-                errors
-            );
-        } else {
-            content = React.createElement(
+                )
+            ),
+            React.createElement(
                 'div',
-                { id: 'invite-sent' },
-                'Invitation sent!'
-            );
-        }
-        return React.createElement(
-            'div',
-            { id: 'invite', className: 'table-row' },
-            content
+                { className: 'dropdown-content dropdown-popup', ref: 'error' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    errors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { id: 'invite-dropdown', className: 'dropdown-content dropdown-popup', ref: 'invite' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Invitation sent!'
+                ),
+                React.createElement('p', { className: 'dropdown-description' }),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'inline-button' },
+                        'Ok'
+                    )
+                )
+            )
         );
     }
 });
 
 module.exports = Invite;
 
-},{"../../actions/Request/RequestSessionActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":38,"../../stores/SessionStore.react.jsx":40,"../../stores/UserStore.react.jsx":41,"react":476}],16:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":38,"../../stores/SessionStore.react.jsx":40,"../../stores/UserStore.react.jsx":41,"react":476}],16:[function(require,module,exports){
 'use strict';
 
 // Name: {People.react.jsx}
@@ -1450,7 +1565,7 @@ var People = React.createClass({
               _this.isLowerGrade(u.role) ? React.createElement(DeleteUser, { email: u.email }) : React.createElement('span', { className: 'table-spacing' })
             );
           }),
-          React.createElement(Invite, null)
+          React.createElement(Invite, { companyId: this.state.id })
         );
       } else {
         content = React.createElement(
@@ -1533,7 +1648,7 @@ var People = React.createClass({
           null,
           'Choose the role and insert the email to send the invitation'
         ),
-        React.createElement(Invite, null),
+        React.createElement(Invite, { companyId: this.state.id }),
         React.createElement(
           'ul',
           { id: 'role-explaination' },
@@ -1626,7 +1741,8 @@ require('brace/theme/tomorrow_night_blue');
 
 function getState() {
     return {
-        theme: UserStore.getEditorTheme()
+        theme: UserStore.getEditorTheme(),
+        softTabs: UserStore.getEditorSoftTabs()
     };
 }
 
@@ -1704,10 +1820,20 @@ var UserStore = require('../stores/UserStore.react.jsx');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
-function getState() {}
+function getState() {
+    return {
+        theme: UserStore.getEditorTheme(),
+        softTabs: UserStore.getEditorSoftTabs(),
+        errors: UserStore.getErrors()
+    };
+}
 
 var EditorConfig = React.createClass({
     displayName: 'EditorConfig',
+
+    getInitialState: function getInitialState() {
+        return getState();
+    },
 
     componentDidMount: function componentDidMount() {
         UserStore.addChangeListener(this._onChange);
@@ -1725,7 +1851,14 @@ var EditorConfig = React.createClass({
         event.preventDefault();
         var softTabs = this.refs.softTabs.checked;
         var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-        RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
+        if (softTabs != this.state.softTabs || theme != this.state.theme) {
+            RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
+        } else {
+            window.alert('aa');
+            this.setState({
+                errors: "No changes to save"
+            });
+        }
     },
 
     render: function render() {
@@ -2247,139 +2380,79 @@ var React = require('react');
 var Slider = require('react-slick');
 
 var Home = React.createClass({
-	displayName: 'Home',
-	render: function render() {
-		var settings = {
-			accessibility: true,
-			dots: true,
-			slidesToShow: 1,
-			autoplay: true,
-			autoplaySpeed: 5000,
-			cssEase: 'ease',
-			speed: 1000,
-			centerMode: true,
-			adaptiveHeight: false,
-			prevArrow: React.createElement(
-				'div',
-				null,
-				React.createElement(
-					'i',
-					{ className: 'material-icons md-36' },
-					''
-				)
-			),
-			nextArrow: React.createElement(
-				'div',
-				null,
-				React.createElement(
-					'i',
-					{ className: 'material-icons md-36' },
-					''
-				)
-			)
-		};
+		displayName: 'Home',
+		render: function render() {
+				var settings = {
+						accessibility: true,
+						dots: true,
+						slidesToShow: 1,
+						autoplay: true,
+						autoplaySpeed: 5000,
+						cssEase: 'ease',
+						speed: 1000,
+						centerMode: true,
+						adaptiveHeight: false,
+						prevArrow: React.createElement(
+								'div',
+								null,
+								React.createElement(
+										'i',
+										{ className: 'material-icons md-36' },
+										''
+								)
+						),
+						nextArrow: React.createElement(
+								'div',
+								null,
+								React.createElement(
+										'i',
+										{ className: 'material-icons md-36' },
+										''
+								)
+						)
+				};
 
-		return React.createElement(
-			'div',
-			{ id: 'home' },
-			React.createElement(
-				'h1',
-				{ id: 'home-title' },
-				'MongoDB as an Admin Service'
-			),
-			React.createElement(
-				'p',
-				{ id: 'home-description' },
-				'MaaS is the Software as a Service you need'
-			),
-			React.createElement(
-				'div',
-				{ className: 'container' },
-				React.createElement(
-					Slider,
-					settings,
-					React.createElement(
+				return React.createElement(
 						'div',
-						null,
-						React.createElement('img', { src: '../images/text1.gif', alt: '' })
-					),
-					React.createElement(
-						'div',
-						null,
-						React.createElement('img', { src: '../images/text2.gif', alt: '' })
-					),
-					React.createElement(
-						'div',
-						null,
-						React.createElement('img', { src: '../images/text3.gif', alt: '' })
-					)
-				)
-			)
-		);
-	}
+						{ id: 'home' },
+						React.createElement(
+								'h1',
+								{ id: 'home-title' },
+								'MongoDB as an Admin Service'
+						),
+						React.createElement(
+								'p',
+								{ id: 'home-description' },
+								'MaaS is the Software as a Service you need'
+						),
+						React.createElement(
+								'div',
+								{ id: 'home-container' },
+								React.createElement(
+										Slider,
+										settings,
+										React.createElement(
+												'div',
+												null,
+												React.createElement('img', { src: '../images/text1.gif', alt: '' })
+										),
+										React.createElement(
+												'div',
+												null,
+												React.createElement('img', { src: '../images/text2.gif', alt: '' })
+										),
+										React.createElement(
+												'div',
+												null,
+												React.createElement('img', { src: '../images/text3.gif', alt: '' })
+										)
+								)
+						)
+				);
+		}
 });
 
 module.exports = Home;
-
-/*render: function() {
-    return (
-     <div class="container">
-<div class="codrops-top">
-             <a href="http://tympanus.net/Tutorials/ItemBlur/">
-                 <strong>&laquo; Previous Demo: </strong>Item Blur Effect
-             </a>
-             <span class="right">
-		<a href="http://www.behance.net/qstra" target="_blank">Images by Joanna Kustra</a>
-                 <a href="http://tympanus.net/codrops/2011/12/19/experimental-css3-animations-for-image-transitions/">
-                     <strong>Back to the Codrops Article</strong>
-                 </a>
-             </span>
-             <div class="clr"></div>
-         </div>
-<header>
-	<h1>Experimental <span>CSS3</span> Animations <span>for (3D) Image Transitions <strong id="message">Webkit only!</strong></span></h1>
-	<p class="codrops-demos">
-		<a class="current-demo" href="index.html">Flip</a>
-		<a href="index2.html">Rotation</a>
-		<a href="index3.html">Multi-flip</a>
-		<a href="index4.html">Cube</a>
-		<a href="index5.html">Unfold</a>
-		<a href="index6.html">Others</a>
-	</p>
-</header>
-	<div class="te-container">
-		<div class="te-controls">
-		<select id="type">
-			<option value="te-flip1">Flip 1</option>
-			<option value="te-flip2">Flip 2</option>
-			<option value="te-flip3">Flip 3</option>
-			<option value="te-flip4">Flip 4</option>
-		</select>
-		<a id="te-next" href="#" class="te-next">next</a>
-		<div class="te-shadow"></div>
-	</div>
-		<div id="te-wrapper" class="te-wrapper">
-			<div class="te-images">
-			<img src="images/1.jpg"/>
-			<img src="images/2.jpg"/>
-			<img src="images/3.jpg"/>
-			<img src="images/4.jpg"/>
-			<img src="images/5.jpg"/>
-		</div>
-			<div class="te-cover">
-			<img src="images/1.jpg"/>
-		</div>
-			<div class="te-transition">
-			<div class="te-card">
-				<div class="te-front"></div>
-				<div class="te-back"></div>
-			</div>
-		</div>
-		</div>
-	</div>
-     </div>
-    );
-}*/
 
 },{"react":476,"react-slick":283}],23:[function(require,module,exports){
 'use strict';
@@ -2792,7 +2865,7 @@ var ChangePassword = React.createClass({
     var confirmation = this.refs.confermaPassword.value;
     var id = this.state.userId;
     var accessToken = this.state.accessToken;
-    UserActionCreator.changePassword(id, password, confirmation, accessToken);
+    RequestUserActionCreator.changePassword(id, password, confirmation, accessToken);
   },
 
   render: function render() {
@@ -2904,99 +2977,173 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
-var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+//var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
 
 function getState() {
-  return {
-    userId: UserStore.getId(),
-    email: UserStore.getUser().email,
-    errors: UserStore.getErrors()
-  };
+    return {
+        userId: UserStore.getId(),
+        email: UserStore.getUser().email,
+        errors: UserStore.getErrors()
+    };
 }
 
 var DeleteAccount = React.createClass({
-  displayName: 'DeleteAccount',
+    displayName: 'DeleteAccount',
 
 
-  getInitialState: function getInitialState() {
-    return {
-      userId: UserStore.getId(),
-      email: UserStore.getUser().email,
-      errors: []
-    };
-  },
+    contextTypes: { // serve per utilizzare il router
+        router: React.PropTypes.object.isRequired
+    },
 
-  componentDidMount: function componentDidMount() {
-    CompanyStore.addChangeListener(this._onChange);
-  },
+    getInitialState: function getInitialState() {
+        return {
+            userId: UserStore.getId(),
+            email: UserStore.getUser().email,
+            errors: []
+        };
+    },
 
-  componentWillUnmount: function componentWillUnmount() {
-    CompanyStore.removeChangeListener(this._onChange);
-  },
+    componentDidMount: function componentDidMount() {
+        UserStore.addDeleteListener(this._onDelete);
+    },
 
-  _onChange: function _onChange() {
-    this.setState(getState());
-  },
+    componentWillUnmount: function componentWillUnmount() {
+        UserStore.removeDeleteListener(this._onDelete);
+        window.removeEventListener('click', this.handleLogoutClick);
+    },
 
-  deleteAccount: function deleteAccount(event) {
-    var id = this.state.userId;
-    var email = this.state.email;
-    alert("del");
-    RequestUserActionCreator.deleteUser(email, id);
-    // logout
-    var accessToken = SessionStore.getAccessToken();
-    RequestSessionActionCreator.logout(accessToken);
-  },
+    _onDelete: function _onDelete() {
+        this.setState(getState());
+        this.toggleDropdown();
+        if (this.state.errors.length <= 0) window.addEventListener('click', this.handleLogoutClick);
+    },
 
-  render: function render() {
-    var title, content, errors;
-    if (!this.state.errors.length > 0) {
-      title = "Delete your account";
-      if (this.state.errors.length > 0) {
-        errors = React.createElement(
-          'p',
-          { id: 'errors' },
-          this.state.errors
+    toggleDropdown: function toggleDropdown() {
+        if (this.state.errors.length > 0) {
+            this.refs.error.classList.toggle("dropdown-show");
+        } else {
+            this.refs.deleted.classList.toggle("dropdown-show");
+        }
+    },
+
+    handleLogoutClick: function handleLogoutClick() {
+        this.logout();
+        var router = this.context.router;
+
+        router.push('/'); // redirect to home page
+    },
+
+    deleteAccount: function deleteAccount(event) {
+        event.preventDefault();
+        var id = this.state.userId;
+        var email = this.state.email;
+        RequestUserActionCreator.deleteUser(email, id);
+    },
+
+    logout: function logout() {
+        var accessToken = SessionStore.getAccessToken();
+        RequestSessionActionCreator.logout(accessToken);
+    },
+
+    render: function render() {
+        var title = "Delete your account";
+        var errors;
+        if (this.state.errors.length > 0) {
+            errors = React.createElement(
+                'p',
+                { id: 'errors' },
+                this.state.errors
+            );
+        }
+
+        return React.createElement(
+            'div',
+            { className: 'container' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                title
+            ),
+            React.createElement(
+                'div',
+                { id: 'successful-operation' },
+                React.createElement(
+                    'p',
+                    null,
+                    'Are you sure you want to remove your account from this company?'
+                ),
+                React.createElement(
+                    Link,
+                    { className: 'button', to: '/company' },
+                    'No'
+                ),
+                React.createElement(
+                    Link,
+                    { id: 'delete-button', className: 'button', onClick: this.deleteAccount, to: '/' },
+                    'Delete my account'
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', ref: 'error' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    errors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', ref: 'deleted' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Account deleted!'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    'Your account "',
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        this.state.email
+                    ),
+                    '" has been deleted'
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            )
         );
-      }
-      content = React.createElement(
-        'div',
-        { id: 'successful-operation' },
-        React.createElement(
-          'p',
-          null,
-          'Are you sure you want to remove your account from this company?'
-        ),
-        React.createElement(
-          Link,
-          { className: 'button', to: '/company' },
-          'No'
-        ),
-        React.createElement(
-          Link,
-          { id: 'delete-button', className: 'button', onClick: this.deleteAccount, to: '/' },
-          'Delete my account'
-        )
-      );
-    } else {}
-    return React.createElement(
-      'div',
-      { className: 'container' },
-      React.createElement(
-        'p',
-        { className: 'container-title' },
-        title
-      ),
-      content
-    );
-  }
+    }
 });
 
 module.exports = DeleteAccount;
 
-},{"../../actions/Request/RequestSessionActionCreator.react.jsx":3,"../../actions/Request/RequestUserActionCreator.react.jsx":4,"../../stores/CompanyStore.react.jsx":38,"../../stores/SessionStore.react.jsx":40,"../../stores/UserStore.react.jsx":41,"react":476,"react-router":246}],29:[function(require,module,exports){
+},{"../../actions/Request/RequestSessionActionCreator.react.jsx":3,"../../actions/Request/RequestUserActionCreator.react.jsx":4,"../../stores/SessionStore.react.jsx":40,"../../stores/UserStore.react.jsx":41,"react":476,"react-router":246}],29:[function(require,module,exports){
 'use strict';
 
 // Name: {PersonalData.react.jsx}
@@ -3961,7 +4108,7 @@ module.exports = {
     RESET_PASSWORD_RESPONSE: null,
     CHANGE_PASSWORD_RESPONSE: null,
     CHANGE_DATA_RESPONSE: null,
-    EDITOR_CONFIG_RESPONSE: null,
+    GET_EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
     DELETE_USER: null,
     GET_COMPANY: null,
@@ -4149,6 +4296,7 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _company = {
     id: localStorage.getItem('companyId'),
@@ -4163,12 +4311,24 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
         this.emit(CHANGE_EVENT);
     },
 
+    emitDelete: function emitDelete() {
+        this.emit(DELETE_EVENT);
+    },
+
     addChangeListener: function addChangeListener(callback) {
         this.on(CHANGE_EVENT, callback);
     },
 
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    addDeleteListener: function addDeleteListener(callback) {
+        this.on(DELETE_EVENT, callback);
+    },
+
+    removeDeleteListener: function removeDeleteListener(callback) {
+        this.removeListener(DELETE_EVENT, callback);
     },
 
     getId: function getId() {
@@ -4239,9 +4399,10 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             if (action.errors) {
                 _errors = action.errors;
             } else {
-                var json = action.json;
+                _errors = [];
+                _company.name = action.name;
             }
-            CompanyStore.emitChange();
+            CompanyStore.emitDelete();
             break;
 
     }
@@ -4458,21 +4619,7 @@ var assign = require('object-assign');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-// Load values from the session storage, you might want to implement a 'remember me' using localSgorage
-
-// var _session = {};  //new Object();
-// _session['accessToken'] = localStorage.getItem('accessToken');
-// _session['email'] = localStorage.getItem('email');;
-// _session['userId'] = localStorage.getItem('userId');   // user id
-
-// show the values stored
-// for (var k in _session) {
-//     // use hasOwnProperty to filter out keys from the Object.prototype
-//     if (_session.hasOwnProperty(k)) {
-//         alert('key is: ' + k + ', value is: ' + _session[k]);
-//     }
-// }
-
+// Load values from the  localSgorage
 var _accessToken = localStorage.getItem('accessToken');
 var _email = localStorage.getItem('email');
 var _userId = localStorage.getItem('userId'); // user id
@@ -4493,39 +4640,28 @@ var SessionStore = assign({}, EventEmitter.prototype, {
   },
 
   isLogged: function isLogged() {
-    //return _session['accessToken'] ? true : false;
     return _accessToken ? true : false;
   },
 
   isRegistered: function isRegistered() {
-    //return _session['email'] ? true : false;
     return _email ? true : false;
   },
 
   getAccessToken: function getAccessToken() {
-    //return _session['accessToken'];
     return _accessToken;
   },
 
   getEmail: function getEmail() {
-    //return _session['email'];
     return _email;
   },
 
   getUserId: function getUserId() {
-    //return _session['userId'];
     return _userId;
   },
-
-  // for all other items, defined by us
-  // getItem: function(key) {
-  //   return _session[key];
-  // },
 
   getErrors: function getErrors() {
     return _errors;
   }
-
 });
 
 SessionStore.dispatchToken = Dispatcher.register(function (payload) {
@@ -4539,7 +4675,6 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else if (action.json) {
         _email = action.json.email;
-        // _session['email'] = action.json.email;
         localStorage.setItem('email', action.json.email);
       }
       SessionStore.emitChange();
@@ -4551,8 +4686,6 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
       } else if (action.json && action.json.id) {
         _accessToken = action.json.id;
         _userId = action.json.userId;
-        // _session['accessToken'] = action.json.id;
-        // _session['userId'] = action.json.userId;
         localStorage.setItem('accessToken', action.json.id);
         localStorage.setItem('userId', action.json.userId);
       }
@@ -4562,8 +4695,10 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
     case ActionTypes.INVITE_RESPONSE:
       if (action.errors) {
         _errors = action.errors;
+        _email = null;
       } else {
         _errors = []; //empty old errors
+        _email = action.email;
       }
       SessionStore.emitChange();
       break;
@@ -4571,25 +4706,11 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
     case ActionTypes.LOGOUT:
       // remove session data
       _accessToken = null;
-      _userId = null, _email = null;
-      // _session['accessToken'] = null;
-      // _session['userId'] = null;
-      // _session['email'] = null;
-      // localStorage.removeItem('accessToken');
-      // localStorage.removeItem('userId');
-      // localStorage.removeItem('email');
+      _userId = null;
+      _email = null;
       localStorage.clear(); // clear all data
       SessionStore.emitChange();
       break;
-
-    // case ActionTypes.SESSION_SET:
-    //     var key = action.key;
-    //     var value = action.value;
-    //     if(key && value) {
-    //         localStorage.setItem(key, value);
-    //     }
-    //     SessionStore.emitChange();
-    //     break;
   }
 
   return true;
@@ -4616,6 +4737,7 @@ var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _user = {
   id: SessionStore.getUserId(),
@@ -4626,6 +4748,7 @@ var _user = {
   gender: localStorage.getItem('userGender'),
   avatar: localStorage.getItem('userAvatar'),
   role: localStorage.getItem('userRole'),
+  softTabs: localStorage.getItem('softTabs'),
   theme: localStorage.getItem('theme')
 };
 var _errors = [];
@@ -4636,12 +4759,24 @@ var UserStore = assign({}, EventEmitter.prototype, {
     this.emit(CHANGE_EVENT);
   },
 
+  emitDelete: function emitDelete() {
+    this.emit(DELETE_EVENT);
+  },
+
   addChangeListener: function addChangeListener(callback) {
     this.on(CHANGE_EVENT, callback);
   },
 
   removeChangeListener: function removeChangeListener(callback) {
     this.removeListener(CHANGE_EVENT, callback);
+  },
+
+  addDeleteListener: function addDeleteListener(callback) {
+    this.on(DELETE_EVENT, callback);
+  },
+
+  removeDeleteListener: function removeDeleteListener(callback) {
+    this.removeListener(DELETE_EVENT, callback);
   },
 
   getUser: function getUser() {
@@ -4686,6 +4821,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getEditorTheme: function getEditorTheme() {
     return _user.theme;
+  },
+
+  getEditorSoftTabs: function getEditorSoftTabs() {
+    return _user.softTabs;
   }
 
 });
@@ -4745,7 +4884,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       UserStore.emitChange();
       break;
 
-    case ActionTypes.EDITOR_CONFIG_RESPONSE:
+    case ActionTypes.GET_EDITOR_CONFIG_RESPONSE:
       if (action.json) {
         _errors = []; // empty old errors usare local
         _user.theme = action.json.config.theme;
@@ -4784,6 +4923,29 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         localStorage.setItem('userRole', _user.role);
       }
       UserStore.emitChange();
+      break;
+
+    case ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE:
+      if (action.errors) {
+        _errors = action.errors;
+      } else if (action.json) {
+        _errors = [];
+        _user.softTabs = action.json.softTabs;
+        _user.theme = action.json.theme;
+        localStorage.setItem('softTabs', _user.softTabs);
+        localStorage.setItem('theme', _user.theme);
+      }
+      UserStore.emitChange();
+      break;
+
+    case ActionTypes.DELETE_USER:
+      if (action.errors) {
+        _errors = action.errors;
+      } else {
+        _errors = [];
+        //var email = action.email;
+      }
+      UserStore.emitDelete();
       break;
   }
   return true; // richiesto dal Promise nel Dispatcher
@@ -4849,9 +5011,9 @@ module.exports = {
         res = JSON.parse(res.text);
         if (res.error) {
           // res.error.message: errori di loopback e error definito dal remote method
-          ResponseUserActionCreator.responseDeleteCompany(null, res.error.message);
+          ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
         } else {
-          ResponseUserActionCreator.responseDeleteCompany(res.email, null);
+          ResponseCompanyActionCreator.responseDeleteCompany(res.name, null);
         }
       }
     });
@@ -5044,24 +5206,31 @@ module.exports = {
         }).set('Accept', 'application/json').end(function (err, UserRes) {
             if (UserRes) {
                 if (UserRes.error) {
-                    request.post(APIEndpoints.SUPERADMINS + '/login').send({
-                        email: email,
-                        password: password
-                    }).set('Accept', 'application/json').end(function (err, SuperAdminRes) {
-                        if (SuperAdminRes) {
-                            if (SuperAdminRes.error) {
-                                //incorrect User and SuperAdmin credentials
-                                var errors = _getErrors(SuperAdminRes.body.error);
-                                ResponseSessionActionCreator.responseLogin(null, errors);
-                            } else {
-                                var json = JSON.parse(SuperAdminRes.text);
-                                ResponseSessionActionCreator.responseLogin(json, null);
-                            }
-                        }
-                    });
+                    // NON FUNZIONA BENE QUI STA ROBA :/ MI OCCULTA IL CODICE SOTTO
+                    //   request.post(APIEndpoints.SUPERADMINS + '/login')
+                    //   .send({
+                    //         email: email,
+                    //         password: password
+                    //     })
+                    //     .set('Accept', 'application/json')
+                    //     .end(function(err, SuperAdminRes){
+                    //          if(SuperAdminRes)
+                    //          {
+                    //             if(SuperAdminRes.error)
+                    //             {   //incorrect User and SuperAdmin credentials
+                    //                 var errors = _getErrors(SuperAdminRes.body.error);
+                    //                 ResponseSessionActionCreator.responseLogin(null, errors);
+                    //             }
+                    //             else
+                    //             {
+                    //                 var json = JSON.parse(SuperAdminRes.text);
+                    //                 ResponseSessionActionCreator.responseLogin(json, null);
+                    //             }
+                    //          }
+                    //     });
 
-                    // var errors = _getErrors(UserRes.body.error);
-                    // ResponseSessionActionCreator.responseLogin(null, errors);
+                    var errors = _getErrors(UserRes.body.error);
+                    ResponseSessionActionCreator.responseLogin(null, errors);
                 } else {
                     //successfully logged in user
                     var json = JSON.parse(UserRes.text);
@@ -5088,19 +5257,17 @@ module.exports = {
             }
         }).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
             if (res.error || err) {
-                console.log(res.error);
                 var errors = _getErrors(res.body.error);
-                ResponseSessionActionCreator.responseInvite(errors);
+                ResponseSessionActionCreator.responseInvite(errors, null);
             } else {
-                ResponseSessionActionCreator.responseInvite(null);
+                var email = res.body.email;
+                ResponseSessionActionCreator.responseInvite(null, email);
             }
         });
     },
 
     logout: function logout(accessToken) {
-        request.post(APIEndpoints.USERS + '/logout').query({
-            access_token: accessToken
-        }).set('Accept', 'application/json').end(function (err, res) {
+        request.post(APIEndpoints.USERS + '/logout').query({ access_token: accessToken }).set('Accept', 'application/json').end(function (err, res) {
             if (res) {
                 //ReactDOM.render(<div>{res.text}</div>, document.getElementById('content'));
             }
@@ -5270,9 +5437,9 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          ResponseUserActionCreator.responseGetEditorConfig(null, res.error.message);
+          ResponseUserActionCreator.responseChangeEditorConfig(null, res.error.message);
         } else {
-          ResponseUserActionCreator.responseGetEditorConfig(res.newData, null);
+          ResponseUserActionCreator.responseChangeEditorConfig(res.newData, null);
         }
       }
     });

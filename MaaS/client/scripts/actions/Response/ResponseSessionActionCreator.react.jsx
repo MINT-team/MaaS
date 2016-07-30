@@ -26,10 +26,11 @@ var ResponseSessionActionCreator = {
             errors: errors
         });
     },
-    responseInvite: function(errors) {
+    responseInvite: function(errors, email) {
         Dispatcher.handleServerAction({
            type: ActionTypes.INVITE_RESPONSE,
-           errors: errors
+           errors: errors,
+           email: email
         });
     }
 };

@@ -119,70 +119,6 @@ module.exports = function(user) {
         }
     );
 
-    // Controllo i dati di registrazione prima della creazione
-    /*user.beforeRemote('create', function(context, member, next) {
-        if(!context.req.password || !context.req.confirmation) {
-            var error = {
-                message: 'Insert the password and its confirmation'
-            };
-            //return cb(null, error);   // callback di insuccesso
-            //next(error);
-        }
-        if(context.req.password != context.req.confirmation) {
-            error = {
-                message: 'Password confirmation doesn\'t match'
-            };
-            //return cb(null, error);   // callback di insuccesso
-            //next(error);
-        }
-        var Company = app.models.Company;   // working with loopback objects
-        // search for an already existing company
-        Company.findOne({where: {name: context.req.company}, limit: 1}, function(err, existingCompany) {
-            if(err) {
-                //return cb(null, err);
-                //next(err);
-            }
-            if(!err && existingCompany) {
-                console.log('> company already exists:', existingCompany);
-                error = {
-                    message: 'Company already exists'
-                };
-                //return cb(null, error);   // callback di insuccesso
-                //next(error);
-            }
-            var newContext = {
-                email: context.req.email,
-                password: context.req.password
-            }
-            next(newContext);   // Quando creo la company?
-        });
-    });*/
-
-
-    // Send verification email after registration
-    /*user.afterRemote('create', function(context, user, next) {
-
-        var options = {
-            type: 'email',
-            host: host,
-            to: user.email,
-            from: 'noreply@maas.com',
-            subject: 'Welcome to MaaS',
-            text: 'Please click on the link below to verify your email address and complete your registration:',
-            template: path.resolve(__dirname, '../../server/views/verify.ejs'),
-            redirect: '/%23/login', // percent encoding => /#/login
-            user: user
-        };
-
-        user.verify(options, function(err, response) {
-            if(err) {
-                return next(err);
-            }
-            console.log('> verification email sent:', response);
-        });
-        next();
-    });*/
-
     // Send password reset link when requested
     user.on('resetPasswordRequest', function(info) {
         var url = 'http://' + host + ':' + port + '/';    // da cambiare con: config.host config.port
@@ -243,10 +179,11 @@ module.exports = function(user) {
                             html: html
                         }, function(err) {
                             if (err) {
-                                return console.log('> error sending invitation email');
+                                console.log('> error sending invitation email');
+                                return cb(null, "error sending invitation email", null);
                             }
                             console.log('> sending invitation email to:', info.email);
-                            return cb(null);
+                            return cb(null, null, info.email);
                         });
                     });
                 });
@@ -262,7 +199,8 @@ module.exports = function(user) {
                 { arg: 'info', type: 'Object', required: true, description: 'Sender, company, role, email'},
             ],
             returns: [
-                {arg: 'error', type: 'Object'}
+                {arg: 'error', type: 'Object'},
+                {arg: 'email', type: 'string'}
             ],
             http: { verb: 'post', path: '/invite' }
         }
@@ -442,7 +380,8 @@ module.exports = function(user) {
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToDelete) {
                 if(err || !userToDelete)
                     return cb(err);
-                if(userInstance.id != userToDelete.id) {
+                // user trying to delete another user
+                if(userInstance.email != userToDelete.email) {
                     var error = {
                         message: 'You haven\'t the rights to delete this user'
                     };
@@ -455,7 +394,16 @@ module.exports = function(user) {
                             return cb(null, error);
                         }
                     }
+                // user trying to delete his own account
+                } else {
+                    if(userToDelete.role == "Owner") {
+                        error = {
+                            message: 'You are the Owner of this company, you can\'t simply delete your account. Delete your company first.'
+                        };
+                        return cb(null, error);
+                    }
                 }
+                // successful request
                 user.deleteById(userToDelete.id, function(err) {
                     if(err) console.log("> error deleting user:", userToDelete.email);
                     console.log("> user deleted:", userToDelete.email);

@@ -115,7 +115,7 @@ var People = React.createClass({
           					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
           				</div>
       			    )}
-			          <Invite />
+			          <Invite companyId={this.state.id}/>
             </div>
           );
         } else {
@@ -151,7 +151,7 @@ var People = React.createClass({
             <div id="successful-operation">
                 <p>You created your company, now it's time to invite someone to collaborate in your work.</p>
                 <p>Choose the role and insert the email to send the invitation</p>
-                <Invite />
+                <Invite companyId={this.state.id} />
                 <ul id="role-explaination">
                   <li>
                     <span className="role">Administrator:</span>

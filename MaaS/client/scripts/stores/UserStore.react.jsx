@@ -14,6 +14,7 @@ var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _user = {
               id: SessionStore.getUserId(),
@@ -34,6 +35,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
   emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
+  
+  emitDelete: function() {
+    this.emit(DELETE_EVENT);
+  },
 
   addChangeListener: function(callback) {
     this.on(CHANGE_EVENT, callback);
@@ -41,6 +46,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeChangeListener: function(callback) {
     this.removeListener(CHANGE_EVENT, callback);
+  },
+  
+  addDeleteListener: function(callback) {
+      this.on(DELETE_EVENT, callback);
+  },
+
+  removeDeleteListener: function(callback) {
+      this.removeListener(DELETE_EVENT, callback);
   },
 
   getUser: function() {
@@ -220,6 +233,15 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         UserStore.emitChange();
         break;
         
+        case ActionTypes.DELETE_USER:
+            if(action.errors) {
+                _errors = action.errors;
+            } else {
+                _errors = [];
+                //var email = action.email;
+            }
+            UserStore.emitDelete();
+            break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });

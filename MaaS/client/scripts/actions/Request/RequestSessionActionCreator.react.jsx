@@ -31,16 +31,7 @@ var SessionActionCreator = {
       type: ActionTypes.LOGOUT
     });
     WebAPIUtils.logout(accessToken);
-  },
-
-  // setItem: function(key, value) {
-  //   Dispatcher.handleViewAction({
-  //           type: ActionTypes.SESSION_SET,
-  //           key: key,
-  //           value: value
-  //       });
-  // }
-
+  }
 };
 
 module.exports = SessionActionCreator;

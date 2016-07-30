@@ -11,13 +11,15 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 var Invite = React.createClass({
 
     getInitialState: function() {
         return {
+            companyId: this.props.companyId,
             role: "Administrator",
-            sent: false,
+            sent: SessionStore.getEmail() ? true : false,
             errors: []
         };
     },
@@ -32,7 +34,18 @@ var Invite = React.createClass({
 
     _onChange: function() {
         this.setState({errors: SessionStore.getErrors()});
+        this.toggleDropdown();
+        RequestCompanyActionCreator.getUsers(this.state.companyId);
+		this.refs.email.value = "";
     },
+    
+    toggleDropdown: function() {
+		if(this.state.errors.length > 0) {
+		    this.refs.error.classList.toggle("dropdown-show");
+		} else {
+		    this.refs.invite.classList.toggle("dropdown-show");
+		}
+	},
 
     _onSubmit: function(event) {
         event.preventDefault();
@@ -65,33 +78,38 @@ var Invite = React.createClass({
     },
 
     render: function() {
-        var content, errors;
+        var errors;
+        
         if(!this.state.sent || (this.state.errors.length > 0)) {
             if(this.state.errors.length > 0) {
-                errors = (
-                  <p id="errors">{this.state.errors}</p>
-                );
+                errors = ( <p id="errors">{this.state.errors}</p> );
             }
-            content = (
+        }
+        return (
+            <div id="invite" className="table-row">
                 <form onSubmit={this._onSubmit}>
                     <select id="role" className="select" onChange={this._onSelectChange}>
                         <option value="Administrator">Administrator</option>
                         <option value="Member">Member</option>
                         <option value="Guest">Guest</option>
                     </select>
-                    <input type="text" placeholder="Email" ref="email" required />
-                    <button type="email" className="inline-button">Invite</button>
-                    {errors}
+                    <input type="email" placeholder="Email" ref="email" required />
+                    <button id="invite-button" className="inline-button dropdown-button">Invite</button>
                 </form>
-            );
-        } else {
-            content = (
-                <div id="invite-sent">Invitation sent!</div>
-            );
-        }
-        return (
-            <div id="invite" className="table-row">
-                {content}
+                <div className="dropdown-content dropdown-popup" ref="error">
+                    <p className="dropdown-title">Error</p>
+                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-buttons">
+                        <button className="button">Ok</button>
+                    </div>
+                </div>
+                <div id="invite-dropdown" className="dropdown-content dropdown-popup" ref="invite">
+                    <p className="dropdown-title">Invitation sent!</p>
+                    <p className="dropdown-description"></p>
+                    <div className="dropdown-buttons">
+                        <button className="inline-button">Ok</button>
+                    </div>
+                </div>
             </div>
         );
     }

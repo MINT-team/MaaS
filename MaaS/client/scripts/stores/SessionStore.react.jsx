@@ -14,21 +14,7 @@ var assign = require('object-assign');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-// Load values from the session storage, you might want to implement a 'remember me' using localSgorage
-
-// var _session = {};  //new Object();
-// _session['accessToken'] = localStorage.getItem('accessToken');
-// _session['email'] = localStorage.getItem('email');;
-// _session['userId'] = localStorage.getItem('userId');   // user id
-
-// show the values stored
-// for (var k in _session) {
-//     // use hasOwnProperty to filter out keys from the Object.prototype
-//     if (_session.hasOwnProperty(k)) {
-//         alert('key is: ' + k + ', value is: ' + _session[k]);
-//     }
-// }
-
+// Load values from the  localSgorage
 var _accessToken = localStorage.getItem('accessToken');
 var _email = localStorage.getItem('email');
 var _userId = localStorage.getItem('userId');   // user id
@@ -49,39 +35,28 @@ var SessionStore = assign({}, EventEmitter.prototype, {
   },
 
   isLogged: function() {
-    //return _session['accessToken'] ? true : false;
     return _accessToken ? true : false;
   },
 
   isRegistered: function() {
-    //return _session['email'] ? true : false;
     return _email ? true : false;
   },
 
   getAccessToken: function() {
-    //return _session['accessToken'];
     return _accessToken;
   },
 
   getEmail: function() {
-    //return _session['email'];
     return _email;
   },
 
   getUserId: function() {
-    //return _session['userId'];
     return _userId;
   },
-
-  // for all other items, defined by us
-  // getItem: function(key) {
-  //   return _session[key];
-  // },
 
   getErrors: function() {
     return _errors;
   }
-
 });
 
 SessionStore.dispatchToken = Dispatcher.register(function(payload) {
@@ -95,7 +70,6 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else if(action.json) {
             _email = action.json.email;
-            // _session['email'] = action.json.email;
             localStorage.setItem('email', action.json.email);
         }
         SessionStore.emitChange();
@@ -107,8 +81,6 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.json && action.json.id) {
             _accessToken = action.json.id;
             _userId = action.json.userId;
-            // _session['accessToken'] = action.json.id;
-            // _session['userId'] = action.json.userId;
             localStorage.setItem('accessToken', action.json.id);
             localStorage.setItem('userId', action.json.userId);
         }
@@ -118,8 +90,10 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
     case ActionTypes.INVITE_RESPONSE:
         if(action.errors) {
             _errors = action.errors;
+            _email = null;
         } else {
             _errors = []; //empty old errors
+            _email = action.email;
         }
         SessionStore.emitChange();
         break;
@@ -127,26 +101,11 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
     case ActionTypes.LOGOUT:
       // remove session data
         _accessToken = null;
-        _userId = null,
+        _userId = null;
         _email = null;
-        // _session['accessToken'] = null;
-        // _session['userId'] = null;
-        // _session['email'] = null;
-        // localStorage.removeItem('accessToken');
-        // localStorage.removeItem('userId');
-        // localStorage.removeItem('email');
         localStorage.clear(); // clear all data
         SessionStore.emitChange();
         break;
-
-    // case ActionTypes.SESSION_SET:
-    //     var key = action.key;
-    //     var value = action.value;
-    //     if(key && value) {
-    //         localStorage.setItem(key, value);
-    //     }
-    //     SessionStore.emitChange();
-    //     break;
   }
 
   return true;

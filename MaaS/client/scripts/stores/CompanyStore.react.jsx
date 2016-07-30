@@ -15,6 +15,7 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _company = {
                 id: localStorage.getItem('companyId'),
@@ -28,6 +29,10 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
     emitChange: function() {
         this.emit(CHANGE_EVENT);
     },
+    
+    emitDelete: function() {
+        this.emit(DELETE_EVENT);
+    },
 
     addChangeListener: function(callback) {
         this.on(CHANGE_EVENT, callback);
@@ -35,6 +40,14 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+    
+    addDeleteListener: function(callback) {
+        this.on(DELETE_EVENT, callback);
+    },
+
+    removeDeleteListener: function(callback) {
+        this.removeListener(DELETE_EVENT, callback);
     },
 
     getId: function() {
@@ -105,10 +118,10 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             if(action.errors) {
                 _errors = action.errors;
             } else {
-                var json = action.json;
-                
+                _errors = [];
+                _company.name = action.name;
             }
-            CompanyStore.emitChange();
+            CompanyStore.emitDelete();
             break;
 
     }

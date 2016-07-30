@@ -63,9 +63,9 @@ module.exports = {
            res = JSON.parse(res.text);
           if(res.error) {
             // res.error.message: errori di loopback e error definito dal remote method
-            ResponseUserActionCreator.responseDeleteCompany(null, res.error.message);
+            ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
           } else {
-          ResponseUserActionCreator.responseDeleteCompany(res.email, null);
+            ResponseCompanyActionCreator.responseDeleteCompany(res.name, null);
           }
         } 
       });

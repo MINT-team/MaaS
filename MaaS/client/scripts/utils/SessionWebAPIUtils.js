@@ -112,30 +112,31 @@ module.exports = {
             {
                 if(UserRes.error)
                 {
-                   request.post(APIEndpoints.SUPERADMINS + '/login')
-                   .send({
-                        email: email,
-                        password: password
-                    })
-                    .set('Accept', 'application/json')
-                    .end(function(err, SuperAdminRes){
-                         if(SuperAdminRes)
-                         {
-                            if(SuperAdminRes.error)
-                            {   //incorrect User and SuperAdmin credentials
-                                var errors = _getErrors(SuperAdminRes.body.error);
-                                ResponseSessionActionCreator.responseLogin(null, errors);
-                            }
-                            else
-                            {
-                                var json = JSON.parse(SuperAdminRes.text);
-                                ResponseSessionActionCreator.responseLogin(json, null);
-                            }
-                         }
-                    });
+                    // NON FUNZIONA BENE QUI STA ROBA :/ MI OCCULTA IL CODICE SOTTO
+                //   request.post(APIEndpoints.SUPERADMINS + '/login')
+                //   .send({
+                //         email: email,
+                //         password: password
+                //     })
+                //     .set('Accept', 'application/json')
+                //     .end(function(err, SuperAdminRes){
+                //          if(SuperAdminRes)
+                //          {
+                //             if(SuperAdminRes.error)
+                //             {   //incorrect User and SuperAdmin credentials
+                //                 var errors = _getErrors(SuperAdminRes.body.error);
+                //                 ResponseSessionActionCreator.responseLogin(null, errors);
+                //             }
+                //             else
+                //             {
+                //                 var json = JSON.parse(SuperAdminRes.text);
+                //                 ResponseSessionActionCreator.responseLogin(json, null);
+                //             }
+                //          }
+                //     });
 
-                    // var errors = _getErrors(UserRes.body.error);
-                    // ResponseSessionActionCreator.responseLogin(null, errors);
+                    var errors = _getErrors(UserRes.body.error);
+                    ResponseSessionActionCreator.responseLogin(null, errors);
                 }
                 else
                 {    //successfully logged in user
@@ -168,20 +169,18 @@ module.exports = {
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(err, res){
             if(res.error || err) {
-                console.log(res.error);
                 var errors = _getErrors(res.body.error);
-                ResponseSessionActionCreator.responseInvite(errors);
+                ResponseSessionActionCreator.responseInvite(errors, null);
             } else {
-                ResponseSessionActionCreator.responseInvite(null);
+                var email = res.body.email;
+                ResponseSessionActionCreator.responseInvite(null, email);
             }
         });
     },
 
     logout: function(accessToken) {
         request.post(APIEndpoints.USERS + '/logout')
-        .query({
-            access_token: accessToken
-        })
+        .query({ access_token: accessToken })
         .set('Accept', 'application/json')
         .end(function(err, res){
             if(res)
