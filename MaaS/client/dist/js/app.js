@@ -1936,7 +1936,9 @@ require('brace/theme/tomorrow_night_blue');
 function getState() {
     return {
         theme: UserStore.getEditorTheme(),
-        softTabs: UserStore.getEditorSoftTabs()
+        softTabs: UserStore.getEditorSoftTabs(),
+        tabSize: UserStore.getEditorTabSize(),
+        fontSize: UserStore.getEditorFontSize()
     };
 }
 
@@ -1952,6 +1954,9 @@ var Editor = React.createClass({
         UserStore.addChangeListener(this._onChange);
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/" + this.state.theme);
+        editor.session.setUseSoftTabs(this.state.softTabs == "true");
+        editor.setFontSize(parseInt(this.state.fontSize, 10));
+        editor.session.setTabSize(parseInt(this.state.tabSize, 10));
     },
 
     componentWillUnmount: function componentWillUnmount() {
