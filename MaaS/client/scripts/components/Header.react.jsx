@@ -69,7 +69,6 @@ var Header = React.createClass({
 					<div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
 						<ul>
 							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
-							<Link to="/editor"><li>Text editor</li></Link>
 							<Link to="/editorConfig"><li>Text editor</li></Link>
 							<Link onClick={this.logout} to=""><li>Logout</li></Link>
 						</ul>

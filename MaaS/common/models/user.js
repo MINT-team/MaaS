@@ -493,38 +493,30 @@ module.exports = function(user) {
         }
     );
     
-    user.changeEditorConfig = function(id, softTabs, theme, cb) {
+    user.changeEditorConfig = function(id, softTabs, theme, tabSize, fontSize, cb) {
         user.findById(id, function(err, user) {
             if (err)
                 return cb(err);
-            if (softTabs || theme)
+            if (softTabs != user.editorConfig.softTabs || theme != user.editorConfig.theme || tabSize != user.editorConfig.tabSize 
+            || fontSize != user.editorConfig.fontSize)
             {
                 var editorConfig = user.editorConfig;
-                if (softTabs)
-                {
-                    editorConfig.softTabs = softTabs;
-                    user.updateAttributes({ editorConfig: editorConfig }, function() {
-                        if (err)
-                        {
-                            console.log('> failed changing softTabs for: ', user.email);
-                            return cb(err);
-                        }
-                    });
-                }
-                if (theme)
-                {
-                    editorConfig.theme = theme;
-                    user.updateAttributes({ editorConfig: editorConfig}, function() {
-                        if (err)
-                        {
-                            console.log('> failed changing theme for: ', user.email);
-                            return cb(err);
-                        }
-                    });
-                }
+                editorConfig.softTabs = softTabs;
+                editorConfig.theme = theme;
+                editorConfig.tabSize = tabSize;
+                editorConfig.fontSize = fontSize;
+                user.updateAttributes({ editorConfig: editorConfig }, function() {
+                    if (err)
+                    {
+                        console.log('> failed changing editor configuration for: ', user.email);
+                        return cb(err);
+                    }
+                });
                 var newData = {
                     theme: theme,
-                    softTabs: softTabs
+                    softTabs: softTabs,
+                    tabSize: tabSize,
+                    fontSize: fontSize
                 };
                 return cb(null, null, newData);
             }
@@ -546,7 +538,9 @@ module.exports = function(user) {
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'User id' },
                 { arg: 'softTabs', type: 'string', required: false, description: 'Soft tabs' },
-                { arg: 'theme', type: 'string', required: false, description: 'Theme' }
+                { arg: 'theme', type: 'string', required: false, description: 'Theme' },
+                { arg: 'tabSize', type: 'string', required: false, description: 'Tab size' },
+                { arg: 'fontSize', type: 'string', required: false, description: 'Font size' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -555,4 +549,26 @@ module.exports = function(user) {
             http: { verb: 'put', path: '/:id/changeEditorConfig' }
         }
     );
+    
+    user.afterRemote('login', function(ctx, remoteMethodOutput, next) {
+        console.log(">afterRemote USER");
+        var ctx_ttl = ctx.result.ttl ;
+        var ctx_userId = ctx.result.userId ;
+        var ctx_created = ctx.result.created ;
+        var ctx_id = ctx.result.id ;
+        var ctx_type = "commonUse";
+    
+        ctx.result = {
+                ttl: ctx_ttl,
+                userId: ctx_userId,
+                created :ctx_created,
+                id: ctx_id,
+                type: ctx_type
+            };
+            
+        next();
+    });
+
 };
+
+

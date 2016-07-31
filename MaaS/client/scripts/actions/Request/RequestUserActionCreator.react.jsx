@@ -41,8 +41,8 @@ var UserActionCreator = {
         WebAPIUtils.getEditorConfig(userId);
     },
     
-    changeEditorConfig: function(id,softTabs,theme) {
-        WebAPIUtils.changeEditorConfig(id,softTabs,theme);
+    changeEditorConfig: function(id, softTabs, theme, tabSize, fontSize) {
+        WebAPIUtils.changeEditorConfig(id,softTabs,theme, tabSize, fontSize);
     },
     
     changeRole: function(email, role, id) {

@@ -26,7 +26,9 @@ var _user = {
               avatar: localStorage.getItem('userAvatar'),
               role: localStorage.getItem('userRole'),
               softTabs: localStorage.getItem('softTabs'),
-              theme: localStorage.getItem('theme')
+              theme: localStorage.getItem('theme'),
+              tabSize: localStorage.getItem('tabSize'),
+              fontSize: localStorage.getItem('fontSize')
             };
 var _errors = [];
 
@@ -102,6 +104,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
   
   getEditorSoftTabs: function() {
     return _user.softTabs;
+  },
+  
+  getEditorTabSize: function() {
+    return _user.tabSize;
+  },
+  
+  getEditorFontSize: function() {
+    return _user.fontSize;
   }
 
 });
@@ -178,8 +188,12 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = []; // empty old errors usare local
             _user.theme = action.json.config.theme;
             _user.softTabs = action.json.config.softTabs;
+            _user.tabSize = action.json.config.tabSize;
+            _user.fontSize = action.json.config.fontSize;
             localStorage.setItem('softTabs',_user.softTabs);
             localStorage.setItem('theme',_user.theme);
+            localStorage.setItem('tabSize',_user.tabSize);
+            localStorage.setItem('fontSize',_user.fontSize);
         }
         UserStore.emitChange();
         break;
@@ -229,8 +243,12 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           _errors = [];
           _user.softTabs = action.json.softTabs;
           _user.theme = action.json.theme;
+          _user.tabSize = action.json.tabSize;
+          _user.fontSize = action.json.fontSize;
           localStorage.setItem('softTabs', _user.softTabs);
           localStorage.setItem('theme', _user.theme);
+          localStorage.setItem('tabSize', _user.tabSize);
+          localStorage.setItem('fontSize', _user.fontSize);
         }
         UserStore.emitChange();
         break;

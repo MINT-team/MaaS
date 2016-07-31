@@ -147,8 +147,8 @@ var UserActionCreator = {
         WebAPIUtils.getEditorConfig(userId);
     },
 
-    changeEditorConfig: function changeEditorConfig(id, softTabs, theme) {
-        WebAPIUtils.changeEditorConfig(id, softTabs, theme);
+    changeEditorConfig: function changeEditorConfig(id, softTabs, theme, tabSize, fontSize) {
+        WebAPIUtils.changeEditorConfig(id, softTabs, theme, tabSize, fontSize);
     },
 
     changeRole: function changeRole(email, role, id) {
@@ -2016,6 +2016,8 @@ function getState() {
         submit: false,
         theme: UserStore.getEditorTheme(),
         softTabs: UserStore.getEditorSoftTabs(),
+        tabSize: UserStore.getEditorTabSize(),
+        fontSize: UserStore.getEditorFontSize(),
         errors: UserStore.getErrors()
     };
 }
@@ -2035,6 +2037,8 @@ var EditorConfig = React.createClass({
             document.getElementById('softTabs').checked = false;
         }
         document.getElementById('theme').value = this.state.theme;
+        document.getElementById('tabSize').value = this.state.tabSize;
+        document.getElementById('fontSize').value = this.state.fontSize;
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -2049,6 +2053,8 @@ var EditorConfig = React.createClass({
                 document.getElementById('softTabs').checked = false;
             }
             document.getElementById('theme').value = this.state.theme;
+            document.getElementById('tabSize').value = this.state.tabSize;
+            document.getElementById('fontSize').value = this.state.fontSize;
         }
     },
 
@@ -2063,8 +2069,10 @@ var EditorConfig = React.createClass({
         this.refs.softTabs.checked ? checked = "true" : checked = "false";
         var softTabs = checked;
         var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-        if (softTabs != this.state.softTabs || theme != this.state.theme) {
-            RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
+        var tabSize = this.refs.tabSize.value;
+        var fontSize = this.refs.fontSize.value;
+        if (softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize) {
+            RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme, tabSize, fontSize);
         } else {
             this.setState({
                 errors: "No changes to save"
@@ -2101,6 +2109,11 @@ var EditorConfig = React.createClass({
                             'label',
                             { htmlFor: 'tabSize' },
                             'Tab size'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement('input', { type: 'number', id: 'tabSize', ref: 'tabSize', min: '1', max: '64' })
                         )
                     ),
                     React.createElement(
@@ -2113,7 +2126,7 @@ var EditorConfig = React.createClass({
                         ),
                         React.createElement(
                             'div',
-                            { className: 'form-right-block' },
+                            { className: 'form-right-block-checkbox' },
                             React.createElement('input', { type: 'checkbox', id: 'softTabs', className: 'cbx hidden', ref: 'softTabs' }),
                             React.createElement('label', { htmlFor: 'softTabs', className: 'lbl' })
                         )
@@ -2125,6 +2138,11 @@ var EditorConfig = React.createClass({
                             'label',
                             { htmlFor: 'fontSize' },
                             'Font size'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement('input', { type: 'number', id: 'fontSize', ref: 'fontSize', min: '1', max: '72' })
                         )
                     ),
                     React.createElement(
@@ -2554,15 +2572,6 @@ var Header = React.createClass({
 						),
 						React.createElement(
 							Link,
-							{ to: '/editor' },
-							React.createElement(
-								'li',
-								null,
-								'Text editor'
-							)
-						),
-						React.createElement(
-							Link,
 							{ to: '/editorConfig' },
 							React.createElement(
 								'li',
@@ -2894,7 +2903,8 @@ function getState() {
             surname: UserStore.getSurname(),
             dateOfBirth: UserStore.getDateOfBirth(),
             gender: UserStore.getGender(),
-            avatar: UserStore.getAvatar()
+            avatar: UserStore.getAvatar(),
+            type: SessionStore.whoIam() // commonUser or superAdmin
         }
     };
 }
@@ -2924,13 +2934,32 @@ var MaaSApp = React.createClass({
     },
 
     render: function render() {
-        return React.createElement(
-            'div',
-            { id: 'app' },
-            React.createElement(Header, { isLogged: this.state.isLogged, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
-            this.props.children,
-            React.createElement(Footer, { isLogged: this.state.isLogged, companyName: this.state.company })
-        );
+        //     return (
+        //         <div id="app">
+        //             <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+        //             {this.props.children}
+        //             <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
+        //         </div>
+        // );
+        var content;
+        if (this.state.user.type == "superAdmin") {
+            content = React.createElement(
+                'div',
+                { id: 'app' },
+                React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.type, companyName: 'Red Babel' }),
+                this.props.children,
+                React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.type, companyName: 'Red Babel' })
+            );
+        } else {
+            content = React.createElement(
+                'div',
+                { id: 'app' },
+                React.createElement(Header, { isLogged: this.state.isLogged, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
+                this.props.children,
+                React.createElement(Footer, { isLogged: this.state.isLogged, companyName: this.state.company })
+            );
+        }
+        return content;
     }
 });
 
@@ -4890,6 +4919,7 @@ var CHANGE_EVENT = 'change';
 var _accessToken = localStorage.getItem('accessToken');
 var _email = localStorage.getItem('email');
 var _userId = localStorage.getItem('userId'); // user id
+var _userType = localStorage.getItem('userType');
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -4928,7 +4958,12 @@ var SessionStore = assign({}, EventEmitter.prototype, {
 
   getErrors: function getErrors() {
     return _errors;
+  },
+
+  whoIam: function whoIam() {
+    return _userType;
   }
+
 });
 
 SessionStore.dispatchToken = Dispatcher.register(function (payload) {
@@ -4953,8 +4988,10 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
       } else if (action.json && action.json.id) {
         _accessToken = action.json.id;
         _userId = action.json.userId;
+        _userType = action.json.type;
         localStorage.setItem('accessToken', action.json.id);
         localStorage.setItem('userId', action.json.userId);
+        localStorage.setItem('userType', action.json.type);
       }
       SessionStore.emitChange();
       break;
@@ -5016,7 +5053,9 @@ var _user = {
   avatar: localStorage.getItem('userAvatar'),
   role: localStorage.getItem('userRole'),
   softTabs: localStorage.getItem('softTabs'),
-  theme: localStorage.getItem('theme')
+  theme: localStorage.getItem('theme'),
+  tabSize: localStorage.getItem('tabSize'),
+  fontSize: localStorage.getItem('fontSize')
 };
 var _errors = [];
 
@@ -5092,6 +5131,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getEditorSoftTabs: function getEditorSoftTabs() {
     return _user.softTabs;
+  },
+
+  getEditorTabSize: function getEditorTabSize() {
+    return _user.tabSize;
+  },
+
+  getEditorFontSize: function getEditorFontSize() {
+    return _user.fontSize;
   }
 
 });
@@ -5156,8 +5203,12 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = []; // empty old errors usare local
         _user.theme = action.json.config.theme;
         _user.softTabs = action.json.config.softTabs;
+        _user.tabSize = action.json.config.tabSize;
+        _user.fontSize = action.json.config.fontSize;
         localStorage.setItem('softTabs', _user.softTabs);
         localStorage.setItem('theme', _user.theme);
+        localStorage.setItem('tabSize', _user.tabSize);
+        localStorage.setItem('fontSize', _user.fontSize);
       }
       UserStore.emitChange();
       break;
@@ -5201,8 +5252,12 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = [];
         _user.softTabs = action.json.softTabs;
         _user.theme = action.json.theme;
+        _user.tabSize = action.json.tabSize;
+        _user.fontSize = action.json.fontSize;
         localStorage.setItem('softTabs', _user.softTabs);
         localStorage.setItem('theme', _user.theme);
+        localStorage.setItem('tabSize', _user.tabSize);
+        localStorage.setItem('fontSize', _user.fontSize);
       }
       UserStore.emitChange();
       break;
@@ -5707,11 +5762,13 @@ module.exports = {
     });
   },
 
-  changeEditorConfig: function changeEditorConfig(id, softTabs, theme) {
+  changeEditorConfig: function changeEditorConfig(id, softTabs, theme, tabSize, fontSize) {
     request.put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       softTabs: softTabs,
-      theme: theme
+      theme: theme,
+      tabSize: tabSize,
+      fontSize: fontSize
     }).end(function (error, res) {
       if (res) {
         res = JSON.parse(res.text);

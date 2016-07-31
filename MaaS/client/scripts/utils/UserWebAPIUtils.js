@@ -177,7 +177,7 @@ module.exports = {
       });
   },
   
-  changeEditorConfig: function(id,softTabs,theme) {
+  changeEditorConfig: function(id,softTabs,theme, tabSize, fontSize) {
     request
       .put(APIEndpoints.USERS + '/' + id + '/changeEditorConfig')
       .set('Accept','application/json')
@@ -185,7 +185,9 @@ module.exports = {
       .send({
         id: id,
         softTabs: softTabs,
-        theme: theme
+        theme: theme,
+        tabSize: tabSize,
+        fontSize: fontSize
       })
       .end(function(error, res) {
         if (res)

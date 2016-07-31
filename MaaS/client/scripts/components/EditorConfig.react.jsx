@@ -42,6 +42,8 @@ function getState() {
         submit: false,
         theme: UserStore.getEditorTheme(),
         softTabs: UserStore.getEditorSoftTabs(),
+        tabSize: UserStore.getEditorTabSize(),
+        fontSize: UserStore.getEditorFontSize(),
         errors: UserStore.getErrors()
     };
 }
@@ -62,6 +64,8 @@ var EditorConfig = React.createClass({
             document.getElementById('softTabs').checked = false;
         }
         document.getElementById('theme').value = this.state.theme;
+        document.getElementById('tabSize').value = this.state.tabSize;
+        document.getElementById('fontSize').value = this.state.fontSize;
     },
     
     componentWillUnmount: function() {
@@ -80,6 +84,8 @@ var EditorConfig = React.createClass({
                 document.getElementById('softTabs').checked = false;
             }
             document.getElementById('theme').value = this.state.theme;
+            document.getElementById('tabSize').value = this.state.tabSize;
+            document.getElementById('fontSize').value = this.state.fontSize;
         }
     },
     
@@ -94,9 +100,11 @@ var EditorConfig = React.createClass({
       this.refs.softTabs.checked ? checked = "true" : checked = "false";
       var softTabs = checked;
       var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-      if (softTabs != this.state.softTabs || theme != this.state.theme)
+      var tabSize = this.refs.tabSize.value;
+      var fontSize = this.refs.fontSize.value;
+      if (softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize)
       {
-          RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme);
+          RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme, tabSize, fontSize);
       }
       else
       {
@@ -127,16 +135,22 @@ var EditorConfig = React.createClass({
                     <form onSubmit={this._onSubmit} className="form-container">
                         <div className="form-field">
                             <label htmlFor="tabSize">Tab size</label>
+                            <div className="form-right-block">
+                                <input type="number" id="tabSize" ref="tabSize" min="1" max="64"/>
+                            </div>
                         </div>
                         <div className="form-field">
                             <label htmlFor="softTabs">Soft tabs</label>
-                            <div className="form-right-block">
+                            <div className="form-right-block-checkbox">
                                 <input type="checkbox" id="softTabs" className="cbx hidden" ref="softTabs"/>
                                 <label htmlFor="softTabs" className="lbl"></label>
                             </div>
                         </div>
                         <div className="form-field">
                             <label htmlFor="fontSize">Font size</label>
+                            <div className="form-right-block">
+                                <input type="number" id="fontSize" ref="fontSize" min="1" max="72"/>
+                            </div>
                         </div>
                         <div className="form-field">
                             <label htmlFor="theme">Theme</label>

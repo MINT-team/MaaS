@@ -193,6 +193,15 @@ body {
     margin: 0.5em;
 }
 
+.form-right-block-checkbox {
+    float: right;
+    min-width: 16em;
+    font-size: 0.8em;
+    margin-top: 1em;
+    text-align: center;
+    margin-right: 6em;
+}
+
 .form-submit, .button {
     margin-top: 2em;
     margin-bottom: 1em;
@@ -276,6 +285,7 @@ input {
     border-radius: 100px;
     cursor: pointer;
     transition: all 0.3s ease;
+    float: right;
 }
 
 .lbl:after {

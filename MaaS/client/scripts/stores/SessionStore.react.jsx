@@ -18,6 +18,7 @@ var CHANGE_EVENT = 'change';
 var _accessToken = localStorage.getItem('accessToken');
 var _email = localStorage.getItem('email');
 var _userId = localStorage.getItem('userId');   // user id
+var _userType = localStorage.getItem('userType');
 var _errors = [];
 
 var SessionStore = assign({}, EventEmitter.prototype, {
@@ -56,7 +57,12 @@ var SessionStore = assign({}, EventEmitter.prototype, {
 
   getErrors: function() {
     return _errors;
+  },
+  
+  whoIam: function(){
+    return _userType;
   }
+  
 });
 
 SessionStore.dispatchToken = Dispatcher.register(function(payload) {
@@ -81,8 +87,10 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
         } else if(action.json && action.json.id) {
             _accessToken = action.json.id;
             _userId = action.json.userId;
+            _userType = action.json.type;
             localStorage.setItem('accessToken', action.json.id);
             localStorage.setItem('userId', action.json.userId);
+            localStorage.setItem('userType', action.json.type);
         }
         SessionStore.emitChange();
         break;

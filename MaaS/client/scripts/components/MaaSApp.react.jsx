@@ -22,7 +22,8 @@ function getState() {
         	surname:	UserStore.getSurname(),
         	dateOfBirth: UserStore.getDateOfBirth(),
             gender: UserStore.getGender(),
-            avatar: UserStore.getAvatar()
+            avatar: UserStore.getAvatar(),
+            type: SessionStore.whoIam()   // commonUser or superAdmin
         }
     };
 }
@@ -51,12 +52,35 @@ var MaaSApp = React.createClass({
     },
 
     render: function() {
+        //     return (
+        //         <div id="app">
+        //             <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+        //             {this.props.children}
+        //             <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
+        //         </div>
+    	// );
+        var content;
+        if(this.state.user.type == "superAdmin")
+        {
+            content =( 
+                <div id="app">
+                    <Header isLogged={this.state.isLogged}  type={this.state.type} companyName="Red Babel" />
+                        {this.props.children}
+                    <Footer isLogged={this.state.isLogged} type={this.state.type} companyName="Red Babel" />
+                </div>
+                );
+        }else
+        {
+            content =( 
+                <div id="app">
+                   <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+                        {this.props.children}
+                   <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
+               </div>
+               );
+        }
         return (
-            <div id="app">
-                <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
-                {this.props.children}
-                <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
-            </div>
+           content
 	    );
     }
 });

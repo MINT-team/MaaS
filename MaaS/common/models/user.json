@@ -28,7 +28,9 @@
       "type": "object",
       "default": {
         "theme": "chaos",
-        "softTabs": "true"
+        "softTabs": "true",
+        "tabSize": "4",
+        "fontSize": "12"
       }
     }
   },
