@@ -50,7 +50,7 @@ var ChangeAvatar = React.createClass({
         );
       }
         return (
-          <div className="container">
+          <div className="container sidebar-container">
             <p className="container-title">Avatar</p>
             <form className="form-container">
               <div className="form-field" id="avatar-container">

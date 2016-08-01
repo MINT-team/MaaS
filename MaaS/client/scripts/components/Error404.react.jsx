@@ -17,7 +17,7 @@ var Error404 = React.createClass({
           <div className="container">
             <p className="container-title">Oops, page not found</p>
             <div id="error-404">
-                <p>The page you're looking for doesn't exist. <span id="sorry">Sorry :(</span></p>
+                <p>The page you're looking for doesn't exist.</p>
                 <i id="alert"className="material-icons">&#xE002;</i>
                 <div id="links">
                     <Link to="/">Back to the Home page</Link>

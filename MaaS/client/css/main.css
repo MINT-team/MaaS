@@ -56,9 +56,13 @@ body {
     width: 65%;
 }
 
+.sidebar-container {
+    margin-left: 23% !important;
+}
+
 .container, #home-container{
     min-height: 22em;
-    margin-left: 23%;
+    margin: auto;
     padding: 2em;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -608,8 +612,6 @@ input {
     margin-top: 3%;
 }
 
-
-
 .dropdown-popup {
     width: 28%;
     height: 22%;
@@ -619,6 +621,12 @@ input {
     top: 0; left: 0; bottom: 25%; right: 0;
 }
 
+@media (max-width: 1400px) {
+    .dropdown-popup {
+        width: 35%;
+        height: 30%;
+    }
+}
 
 
 /*-------------------------------------------------- SIDEBAR -----------------------------------------------------------------------*/
@@ -981,10 +989,6 @@ input {
 
 
 /*------------------------------------------- ERROR 404 ------------------------------------------------------------------*/
-#sorry {
-    font-family: arial;
-}
-
 #alert {
     display: block;
     font-size: 10em;
@@ -1087,6 +1091,13 @@ input {
     top: 0; left: 0; bottom: 25%; right: 0;
 }
 
+@media (max-width: 1400px) {
+    #change-role-dropdown {
+        width: 35%;
+        height: 35%;
+    }
+}
+
 #confirm-button {
     margin-left: 3em;
     background-color: #60D42E;
@@ -1122,6 +1133,7 @@ input {
 }
 
 #invite input {
+    width: 15em;
     vertical-align: middle;
 	-moz-border-radius: 4px 4px 4px 4px;
 	-webkit-border-radius: 4px 4px 4px 4px;
@@ -1140,6 +1152,17 @@ input {
     margin: auto;
     position: absolute;
     top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+@media (max-width: 1400px) {
+    #invite-dropdown {
+        width: 22%;
+        height: 20%;
+        overflow: auto;
+        margin: auto;
+        position: absolute;
+        top: 0; left: 0; bottom: 25%; right: 0;
+    }
 }
 
 /*------------------------------------------------ EXTERNALDATABASES ---------------------------------------------------------*/

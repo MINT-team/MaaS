@@ -70,7 +70,7 @@ var Profile = React.createClass({
         avatar = (<img id="avatar" src={"../../../images/"+this.state.avatar} />);  // da cambiare col servizio esterno
       }
       content = (
-        <div className="container">
+        <div className="container sidebar-container">
           <p className="container-title">{name}</p>
           {avatar}
           <div className="form-container">

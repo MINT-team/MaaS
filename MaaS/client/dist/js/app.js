@@ -378,7 +378,7 @@ module.exports = ResponseUserActionCreator;
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-
+alert("https://maas-navid94.c9users.io" + "/api");
 window.React = React;
 var Routes = require('./routes.jsx');
 var injectTapEventPlugin = require("react-tap-event-plugin");
@@ -764,7 +764,7 @@ var Company = React.createClass({
       var numberOfDSL;
       content = React.createElement(
         'div',
-        { className: 'container' },
+        { className: 'container sidebar-container' },
         React.createElement(
           'p',
           { className: 'container-title' },
@@ -979,7 +979,7 @@ var DeleteCompany = React.createClass({
         }
         return React.createElement(
             'div',
-            { className: 'container' },
+            { className: 'container sidebar-container' },
             React.createElement(
                 'p',
                 { className: 'container-title' },
@@ -1396,7 +1396,7 @@ var ExternalDatabases = React.createClass({
 
     return React.createElement(
       'div',
-      { className: 'container' },
+      { className: 'container sidebar-container' },
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -1513,7 +1513,7 @@ var Invite = React.createClass({
                 { onSubmit: this._onSubmit },
                 React.createElement(
                     'select',
-                    { id: 'role', className: 'select', onChange: this._onSelectChange },
+                    { className: 'select', onChange: this._onSelectChange },
                     React.createElement(
                         'option',
                         { value: 'Administrator' },
@@ -1530,7 +1530,7 @@ var Invite = React.createClass({
                         'Guest'
                     )
                 ),
-                React.createElement('input', { type: 'email', placeholder: 'Email', ref: 'email', required: true }),
+                React.createElement('input', { id: 'invite-email', type: 'email', placeholder: 'Email', ref: 'email', required: true }),
                 React.createElement(
                     'button',
                     { id: 'invite-button', className: 'inline-button dropdown-button' },
@@ -1630,6 +1630,10 @@ var People = React.createClass({
     SessionStore.addChangeListener(this._onChange);
     CompanyStore.addChangeListener(this._onChange);
     UserStore.addChangeListener(this._onChange);
+    // Update user list
+    RequestCompanyActionCreator.getUsers(this.state.id);
+    // Needed if role has been changed for example
+    RequestUserActionCreator.getUser(SessionStore.getUserId());
   },
 
   componentWillUnmount: function componentWillUnmount() {
@@ -1690,7 +1694,6 @@ var People = React.createClass({
     var title, content;
     if (this.props.users.length > 1) {
       title = "Users of your Company";
-      // Avatar, nome, cognome, ruolo, email
       if (this.state.role == "Owner" || this.state.role == "Administrator") {
         content = React.createElement(
           'div',
@@ -1893,7 +1896,7 @@ var People = React.createClass({
     }
     return React.createElement(
       'div',
-      { className: 'container' },
+      { className: 'container sidebar-container' },
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -2285,12 +2288,7 @@ var Error404 = React.createClass({
                 React.createElement(
                     'p',
                     null,
-                    'The page you\'re looking for doesn\'t exist. ',
-                    React.createElement(
-                        'span',
-                        { id: 'sorry' },
-                        'Sorry :('
-                    )
+                    'The page you\'re looking for doesn\'t exist.'
                 ),
                 React.createElement(
                     'i',
@@ -3072,7 +3070,7 @@ var ChangeAvatar = React.createClass({
     }
     return React.createElement(
       'div',
-      { className: 'container' },
+      { className: 'container sidebar-container' },
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -3250,7 +3248,7 @@ var ChangePassword = React.createClass({
     }
     return React.createElement(
       'div',
-      { className: 'container' },
+      { className: 'container sidebar-container' },
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -3361,7 +3359,7 @@ var DeleteAccount = React.createClass({
 
         return React.createElement(
             'div',
-            { className: 'container' },
+            { className: 'container sidebar-container' },
             React.createElement(
                 'p',
                 { className: 'container-title' },
@@ -3647,7 +3645,7 @@ var PersonalData = React.createClass({
     }
     return React.createElement(
       'div',
-      { className: 'container' },
+      { className: 'container sidebar-container' },
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -3745,7 +3743,7 @@ var Profile = React.createClass({
       }
       content = React.createElement(
         'div',
-        { className: 'container' },
+        { className: 'container sidebar-container' },
         React.createElement(
           'p',
           { className: 'container-title' },
@@ -4381,7 +4379,8 @@ module.exports = DashboardSuperAdmin;
 
 var keyMirror = require('keymirror');
 
-var APIRoot = "https://maas-navid94.c9users.io/api";
+//var APIRoot = "https://maas-navid94.c9users.io/api";
+var APIRoot = "https://maas-navid94.c9users.io" + "/api";
 
 module.exports = {
 

@@ -8,7 +8,8 @@
 
 var keyMirror = require('keymirror');
 
-var APIRoot = "https://maas-navid94.c9users.io/api";
+//var APIRoot = "https://maas-navid94.c9users.io/api";
+var APIRoot = process.env.HOST + process.env.API_ROOT;
 
 module.exports = {
 

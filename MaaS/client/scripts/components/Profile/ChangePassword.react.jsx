@@ -97,7 +97,7 @@ var ChangePassword = React.createClass({
       }
     }
     return (
-      <div className="container">
+      <div className="container sidebar-container">
         <p className="container-title">{title}</p>
         {content}
       </div>

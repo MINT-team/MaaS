@@ -79,7 +79,7 @@ var Company = React.createClass({
       var numberOfDatabases;
       var numberOfDSL;
       content = (
-        <div className="container">
+        <div className="container sidebar-container">
           <p className="container-title">{name}</p>
           <div className="form-container">
             <div className="form-field">

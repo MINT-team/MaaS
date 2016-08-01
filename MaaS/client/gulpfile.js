@@ -10,6 +10,7 @@ var notify = require('gulp-notify');
 var watchify = require('watchify');
 var reload = browserSync.reload;
 var preprocess = require('gulp-preprocess');
+var localenvify = require('localenvify');
 var p = {
     jsx: './scripts/app.jsx',
     bundleApp: 'app.js',
@@ -48,7 +49,9 @@ gulp.task('watchify', function() {
             .pipe(reload({stream: true}));
     }
 
-    bundler.transform(babelify, {presets: ["es2015", "react"]})
+    bundler
+    .transform(babelify, {presets: ["es2015", "react"]})
+    .transform(localenvify, {envfile: "../.env"})
     .on('update', rebundle);
     return rebundle();
 });

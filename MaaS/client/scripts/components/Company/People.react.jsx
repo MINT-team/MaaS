@@ -39,6 +39,10 @@ var People = React.createClass({
       SessionStore.addChangeListener(this._onChange);
       CompanyStore.addChangeListener(this._onChange);
       UserStore.addChangeListener(this._onChange);
+      // Update user list
+      RequestCompanyActionCreator.getUsers(this.state.id);
+      // Needed if role has been changed for example
+      RequestUserActionCreator.getUser(SessionStore.getUserId());
   },
 
   componentWillUnmount: function() {
@@ -88,11 +92,10 @@ var People = React.createClass({
             </div>
         );
     }
-
+    
     var title, content;
     if(this.props.users.length > 1) {
         title = "Users of your Company";
-                    // Avatar, nome, cognome, ruolo, email
         if(this.state.role == "Owner" || this.state.role == "Administrator") {
           content = (
             <div className="table-content">
@@ -175,7 +178,7 @@ var People = React.createClass({
         );
     }
     return (
-      <div className="container">
+      <div className="container sidebar-container">
         <p className="container-title">{title}</p>
         {content}
       </div>

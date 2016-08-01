@@ -88,12 +88,12 @@ var Invite = React.createClass({
         return (
             <div id="invite" className="table-row">
                 <form onSubmit={this._onSubmit}>
-                    <select id="role" className="select" onChange={this._onSelectChange}>
+                    <select className="select" onChange={this._onSelectChange}>
                         <option value="Administrator">Administrator</option>
                         <option value="Member">Member</option>
                         <option value="Guest">Guest</option>
                     </select>
-                    <input type="email" placeholder="Email" ref="email" required />
+                    <input id="invite-email" type="email" placeholder="Email" ref="email" required />
                     <button id="invite-button" className="inline-button dropdown-button">Invite</button>
                 </form>
                 <div className="dropdown-content dropdown-popup" ref="error">

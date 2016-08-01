@@ -88,7 +88,7 @@ var DeleteAccount = React.createClass({
         }
         
         return (
-            <div className="container">
+            <div className="container sidebar-container">
                 <p className="container-title">{title}</p>
                 <div id="successful-operation">
                     <p>Are you sure you want to remove your account from this company?</p>
