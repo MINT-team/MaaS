@@ -49,6 +49,7 @@ module.exports = {
     DELETE_COMPANY: null,
 
     // Dashboard
+    GET_DASHBOARDS: null,
 
     // Collection
 

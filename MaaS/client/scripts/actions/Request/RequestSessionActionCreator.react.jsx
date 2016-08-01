@@ -12,7 +12,7 @@ var WebAPIUtils = require('../../utils/SessionWebAPIUtils.js');
 
 var ActionTypes = Constants.ActionTypes;
 
-var SessionActionCreator = {
+var RequestSessionActionCreator = {
 
   signup: function(company, email, password, confirmation) {
     WebAPIUtils.signup(company, email, password, confirmation);
@@ -34,4 +34,4 @@ var SessionActionCreator = {
   }
 };
 
-module.exports = SessionActionCreator;
+module.exports = RequestSessionActionCreator;

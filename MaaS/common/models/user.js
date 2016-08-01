@@ -7,12 +7,13 @@
 // ==========================================
 
 var loopback = require('loopback');
-var config = require('../../server/config.json');
 var app = require('../../server/server.js');
 var path = require('path');
-var host = 'maas-navid94.c9users.io';
-var port = '8080';
 
+var HOST_NAME = process.env.HOST_NAME;
+var HOST_URL = process.env.HOST_URL;
+var PORT = process.env.HOST_PORT;
+var API_ROOT = process.env.API_ROOT;
 var MIN_PASSWORD_LENGTH = 8;
 var INVITATION_TTL = 1209600; // 2 weeks in seconds
 
@@ -76,7 +77,7 @@ module.exports = function(user) {
                         // Send verification email after registration
                         var options = {
                             type: 'email',
-                            host: host,
+                            host: HOST_NAME,
                             to: userInstance.email,
                             from: 'noreply@maas.com',
                             subject: 'Welcome to MaaS',
@@ -121,7 +122,7 @@ module.exports = function(user) {
 
     // Send password reset link when requested
     user.on('resetPasswordRequest', function(info) {
-        var url = 'http://' + host + ':' + port + '/';    // da cambiare con: config.host config.port
+        var url = HOST_URL + ':' + PORT + '/';
         var template = loopback.template(path.resolve(__dirname, '../../server/views/reset.ejs'));
         var options = {
             resetHref: '' + url + '#/recoverpwd?uid=' + info.user.id + '&access_token=' + info.accessToken.id + ''
@@ -160,7 +161,7 @@ module.exports = function(user) {
                     // Create another token to set a new password after confirmation
                     userInstance.accessTokens.create({ ttl: INVITATION_TTL }, function(err, accessToken) {
                         if (err) { return cb(err); }
-                        var url = 'http://' + host + ':' + port + '/api/users/confirm';    // da cambiare con: config.host config.port
+                        var url = HOST_URL + ':' + PORT + API_ROOT + '/users/confirm';
                         var template = loopback.template(path.resolve(__dirname, '../../server/views/invite.ejs'));
                         var options = {
                             sender: info.sender,
@@ -285,7 +286,7 @@ module.exports = function(user) {
         user.findById(id, function(err, user) {
             if(err)
                 return cb(err);
-            if(name || surname || dateOfBirth.valueOf() || gender) 
+            if(name != user.name || surname != user.surname || dateOfBirth.valueOf() || gender != user.gender) 
             {
                 if(name) 
                 {
@@ -522,7 +523,7 @@ module.exports = function(user) {
             }
             else
             {
-                console.log('> no data to change for: ', user.email);
+                console.log('> No data to change for: ', user.email);
                 var error = {
                     message: 'No data to change'
                 };

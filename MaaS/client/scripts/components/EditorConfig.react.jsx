@@ -55,17 +55,7 @@ var EditorConfig = React.createClass({
     
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
-        if (this.state.softTabs == "true")
-        {
-            document.getElementById('softTabs').checked = true;
-        }
-        else
-        {
-            document.getElementById('softTabs').checked = false;
-        }
-        document.getElementById('theme').value = this.state.theme;
-        document.getElementById('tabSize').value = this.state.tabSize;
-        document.getElementById('fontSize').value = this.state.fontSize;
+        this.initForm();
     },
     
     componentWillUnmount: function() {
@@ -73,6 +63,10 @@ var EditorConfig = React.createClass({
     },
     
     componentDidUpdate: function() {
+        this.initForm();
+    },
+    
+    initForm: function() {
         if (!this.state.submit)
         {
             if (this.state.softTabs == "true")
@@ -142,7 +136,7 @@ var EditorConfig = React.createClass({
                         <div className="form-field">
                             <label htmlFor="softTabs">Soft tabs</label>
                             <div className="form-right-block-checkbox">
-                                <input type="checkbox" id="softTabs" className="cbx hidden" ref="softTabs"/>
+                                <input type="checkbox" id="softTabs" className="cbx hidden" ref="softTabs" />
                                 <label htmlFor="softTabs" className="lbl"></label>
                             </div>
                         </div>

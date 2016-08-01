@@ -12,7 +12,7 @@ var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var UserActionCreator = {
+var RequestUserActionCreator = {
     resetPassword: function(email) {
         WebAPIUtils.resetPassword(email);
     },
@@ -50,4 +50,4 @@ var UserActionCreator = {
     }
 };
 
-module.exports = UserActionCreator;
+module.exports = RequestUserActionCreator;

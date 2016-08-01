@@ -163,15 +163,15 @@ var People = React.createClass({
                 <ul id="role-explaination">
                   <li>
                     <span className="role">Administrator:</span>
-                    <span className="role-description">can execute all operation like you.</span>
+                    <span className="role-description">Can execute all operation like you.</span>
                   </li>
                   <li>
                     <span className="role">Member:</span>
-                    <span className="role-description">is possible to select wich operation are allowed.</span>
+                    <span className="role-description">Is possible to select wich operation are allowed.</span>
                   </li>
                   <li>
                     <span className="role">Guest:</span>
-                    <span className="role-description">can only read some information.</span>
+                    <span className="role-description">Can only read some information.</span>
                   </li>
                 </ul>
             </div>

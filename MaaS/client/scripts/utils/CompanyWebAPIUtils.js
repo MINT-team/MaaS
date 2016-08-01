@@ -10,8 +10,6 @@ var ResponseCompanyActionCreator = require('../actions/Response/ResponseCompanyA
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
-//var ReactDOM = require('react-dom');
-
 function _getErrors(json) {
   var error, message;
     if(json.message) {

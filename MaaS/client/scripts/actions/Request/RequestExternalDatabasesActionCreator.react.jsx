@@ -13,7 +13,7 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 
-var ExternalDatabaseActionCreator = {
+var RequestExternalDatabaseActionCreator = {
     setExtDb: function(companyId, name, password) {
         WebAPIUtils.setExtDb(companyId, name, password);
     },
@@ -27,4 +27,4 @@ var ExternalDatabaseActionCreator = {
     }
 };
 
-module.exports = ExternalDatabaseActionCreator;
+module.exports = RequestExternalDatabaseActionCreator;

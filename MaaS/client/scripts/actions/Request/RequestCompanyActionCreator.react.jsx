@@ -12,7 +12,7 @@ var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var CompanyActionCreator = {
+var RequestCompanyActionCreator = {
     getUsers: function(id) {
         WebAPIUtils.getUsers(id);
     },
@@ -22,4 +22,4 @@ var CompanyActionCreator = {
     }
 };
 
-module.exports = CompanyActionCreator;
+module.exports = RequestCompanyActionCreator;
