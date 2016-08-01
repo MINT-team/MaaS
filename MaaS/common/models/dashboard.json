@@ -1,0 +1,34 @@
+{
+  "name": "Dashboard",
+  "plural": "Dashboards",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": true
+    },  
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "source": {
+        "type": "Object",
+        "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    }
+  ],
+  "methods": {}
+}

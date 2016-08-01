@@ -43,6 +43,13 @@
       "emailVerificationRequired": true
     }
   },
+  "SuperAdmin": {
+    "dataSource": "maas",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": false
+    }
+  },
   "Company": {
     "dataSource": "maas",
     "public": true
@@ -51,11 +58,8 @@
     "dataSource": "maas",
     "public": true
   },
-  "SuperAdmin": {
+  "Dashboard": {
     "dataSource": "maas",
-    "public": true,
-    "options": {
-      "emailVerificationRequired": false
-    }
+    "public": true
   }
 }
