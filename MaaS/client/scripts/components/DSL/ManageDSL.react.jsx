@@ -18,11 +18,11 @@ var RequestDashboardActionCreator = require('../../actions/Request/RequestDashbo
 var RequestCollectionActionCreator = require('../../actions/Request/RequestCollectionActionCreator.react.jsx');
 var RequestDocumentActionCreator = require('../../actions/Request/RequestDocumentActionCreator.react.jsx');
 var RequestCellActionCreator = require('../../actions/Request/RequestCellActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-var TableRow = ReactBSTable.TableRow;
 
 function getState() {
   return {
@@ -49,16 +49,19 @@ var ManageDSL = React.createClass({
         this.setState(getState());
     },
     
+    buttonFormatter: function(cell, row) {
+        return (
+            <div>
+                <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                <i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+            </div>
+        );
+    },
+    
     render: function() {
         if(!this.state.isLogged || this.state.errors.length > 0) {
-            alert(this.state.isLogged);
-            alert(this.state.errors);
             return (
-                <div className="container">
-                  <p className="container-title">Authorization required</p>
-                  <p className="container-description">You are not authorized to view this page</p>
-                  <Link to="/" className="button">Back to home</Link>
-                </div>
+                <AuthorizationRequired />
             );
         }
     
@@ -104,41 +107,40 @@ var ManageDSL = React.createClass({
             icon: (<i className="material-icons md-24">&#xE3BC;</i>)
         };
         
-        var selectRowProp = {
-            mode: "checkbox",
-            clickToSelect: true,
-            bgColor: "rgba(144, 238, 144, 0.42)",
-        };
-        
         var data = [
-        {
-            name: "Prova",
-            allowed: "true"
-        }
+            {
+                name: "Prova"
+            },
+            {
+                name: "Prova2"
+            }
         ];
         var sidebarData = [all, dashboards, collections, documents, cells];
         var title, content;
         
+        
         title = "Manage your DSL definitions";
         content = (
-            <div className="container sidebar-container">
-                <p className="container-title">{title}</p>
-                <div id="createDSLDefinition">
-                <Link to="/" className="button">Create new DSL definition</Link>
-                <div id="table-dsl">
-                    <BootstrapTable selectRow={selectRowProp} data={data} pagination={true} search={true} striped={true} hover={true}>
-                        <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
-                        <TableHeaderColumn dataField="allowed"></TableHeaderColumn>
-                    </BootstrapTable>
-                </div>
+            <div>
+                <Sidebar title="Filter DSL" data={sidebarData}/>
+                <div className="container sidebar-container">
+                    <p className="container-title">{title}</p>
+                    <div id="createDSLDefinition">
+                        <Link to="/manageDSL/manageDSLSource" className="button">Create new DSL definition</Link>
+                        <div id="table-dsl">
+                            <BootstrapTable data={data} pagination={true} search={true} striped={true} hover={true}>
+                                <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
+                                <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                            </BootstrapTable>
+                        </div>
+                    </div>
                 </div>
             </div>
-          );
+        );
         return (
-          <div id="dsl">
-            <Sidebar title="Filter DSL" data={sidebarData}/>
-            {content}
-          </div>
+            <div id="dsl">
+                {this.props.children || content}
+            </div>
         );
     }
 });

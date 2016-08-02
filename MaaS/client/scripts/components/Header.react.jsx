@@ -48,56 +48,57 @@ var Header = React.createClass({
 	},
 
     render: function() {
-    	var title, headerMenu, headerPanel;
-    	if (this.props.isLogged) {
-    		title = (
-    			<Link to="/company" id="header-title">{this.props.companyName}</Link>
-    		);
-			headerMenu = (
-				<div id="header-menu">
-					<Link to="/company">Company</Link>
-					<Link to="/company/externalDatabases">Database</Link>
-					<Link to="/manageDSL">DSL</Link>
-				</div>
-    		);
-	    	headerPanel = (
-		    	<div id="header-panel">
-					<Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
-					<Link to="" id="settings-button" onClick={this.toggleDropdown}>
-						<i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
-					</Link>
-					<div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
-						<ul>
-							<Link to="/manageDashboard"><li>Active Dashboard</li></Link>
-							<Link to="/editorConfig"><li>Text editor</li></Link>
-							<Link onClick={this.logout} to=""><li>Logout</li></Link>
-						</ul>
-					</div>
-				</div>
-			);
-    	} else {
-    		title = (
-    			<Link to="/" id="header-title">MaaS</Link>
-    		);
-			headerMenu = (
-				<div id="header-menu">
-					<p id="header-description">MongoDB as an Admin Service</p>
-				</div>
-    		);
-    		headerPanel = (
-    			<div id="header-panel">
-			    	<Link to="/login">Login</Link>
-			    	<Link to="/register">Sign Up</Link>
-				</div>
-    		);
-    	}
+        var title, headerMenu, headerPanel;
+        if (this.props.isLogged) {
+            
+            title = (
+                <Link to="/company" id="header-title">{this.props.companyName}</Link>
+            );
+            headerMenu = (
+                <div id="header-menu">
+                    <Link to="/company">Company</Link>
+                    <Link to="/company/externalDatabases">Database</Link>
+                    <Link to="/manageDSL">DSL</Link>
+                </div>
+            );
+            headerPanel = (
+                <div id="header-panel">
+                    <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                    <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                        <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                    </Link>
+                    <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
+                        <ul>
+                            <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+                            <Link to="/editorConfig"><li>Text editor</li></Link>
+                            <Link onClick={this.logout} to=""><li>Logout</li></Link>
+                        </ul>
+                    </div>
+                </div>
+            );
+        } else {
+            title = (
+                <Link to="/" id="header-title">MaaS</Link>
+            );
+            headerMenu = (
+                <div id="header-menu">
+                    <p id="header-description">MongoDB as an Admin Service</p>
+                </div>
+            );
+            headerPanel = (
+                <div id="header-panel">
+                    <Link to="/login">Login</Link>
+                    <Link to="/register">Sign Up</Link>
+                </div>
+            );
+        }
         return (
             <div id="header">
-			    {title}
-			    {headerMenu}
-			    {headerPanel}
-		    </div>
-	    );
+                {title}
+                {headerMenu}
+                {headerPanel}
+            </div>
+        );
     }
 });
 

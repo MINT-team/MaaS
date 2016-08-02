@@ -1032,6 +1032,104 @@ input {
     border: 2px solid lightgrey;
 }
 
+#editor-container {
+    width: 70%;
+    min-height: 35em;
+    margin: auto;
+    padding: 2em;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    background-color: white;
+    text-align: center;
+    box-shadow: lightgray 1px 1px 4px;
+}
+
+#editor-controls {
+    margin-bottom: 1em;
+    min-height: 3em;
+}
+
+#editor-controls #definiton-name {
+    float: left;
+    margin-left: 20%;
+    margin-top: 0.2em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#editor-controls #definiton-name label {
+    margin-right: 1em;
+}
+
+#editor-buttons {
+    float: right;
+    margin-right: 20%;
+}
+
+#editor-controls i {
+    vertical-align: middle;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    padding: 0.2em;
+    cursor: pointer;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#editor-controls i:hover {
+    color: lightgreen;
+    background-color: #333;
+}
+
+#editor-viewer {
+    position: relative;
+    width: 70%;
+    min-height: 30em;
+    margin:auto;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 2px solid lightgrey;
+}
+
+@media (max-width: 1400px) {
+    #editor-container {
+        width: 80%;
+        min-height: 5em;
+        margin: auto;
+        padding: 2em;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        border: 1px solid lightgray;
+        background-color: white;
+        text-align: center;
+        box-shadow: lightgray 1px 1px 4px;
+    }
+    
+    #editor-controls #definiton-name {
+        margin-left: 15%;
+    }
+    
+    #editor-buttons {
+        margin-right: 15%;
+    }
+    
+    #editor-viewer {
+        position: relative;
+        width: 80%;
+        min-height: 25em;
+        margin:auto;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        border: 2px solid lightgrey;
+    }
+}
+ 
 /*------------------------------------------------ PEOPLE --------------------------------------------------------------*/
 #role-explaination {
     list-style: none;

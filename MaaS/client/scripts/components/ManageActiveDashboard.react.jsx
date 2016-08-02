@@ -9,7 +9,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 
-var ManageDashboard = React.createClass({
+var ManageActiveDashboard = React.createClass({
     render(){
         return(
             <div className="dashMan">
@@ -20,4 +20,4 @@ var ManageDashboard = React.createClass({
     }
 });
 
-module.exports = ManageDashboard;
+module.exports = ManageActiveDashboard;

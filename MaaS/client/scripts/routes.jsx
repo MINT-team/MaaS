@@ -28,10 +28,11 @@ var Company = require('./components/Company/Company.react.jsx');
 var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
 var People = require('./components/Company/People.react.jsx');
 var ManageDSL = require('./components/DSL/ManageDSL.react.jsx');
+var ManageDSLSource = require('./components/DSL/ManageDSLSource.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-var ManageDashboard = require('./components/ManageDashboard.react.jsx');
+var ManageActiveDashboard = require('./components/ManageActiveDashboard.react.jsx');
 var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var Collapse = require('./components/Collapse.react.jsx');
@@ -62,12 +63,12 @@ var Routes = React.createClass({
             <Route path="deleteCompany" component={DeleteCompany} />
           </Route>
           <Route path="manageDSL" component={ManageDSL}>
-            
+            <Route path="manageDSLSource" component={ManageDSLSource} />
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />
           <Route path="collapse" component={Collapse} />
-          <Route path="manageDashboard" component={ManageDashboard} />
+          <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} />
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />

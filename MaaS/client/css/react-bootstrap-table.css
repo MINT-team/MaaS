@@ -1,7 +1,7 @@
 /* --------------------------------- BOOTSTRAP ----------------------- */
 
 
-#table-database a {
+#table-database a, #table-dsl a {
   text-decoration: none;
 }
 

@@ -109,20 +109,51 @@ module.exports = {
         })
         .set('Accept', 'application/json')
         .end(function(err, res){
-            if(res){
-                console.log(res);
-                if(res.body.error)
+            if(res)
+            {
+                if(res.body.type == "superAdmin")  //super admin login
                 {
-                    alert("errori");
-                    var errors = _getErrors(res.body.error);
-                    ResponseSessionActionCreator.responseLogin(null, errors);
-                }else
-                {    //successfully logged  (superAdmin or commonUser)
-                    var json = JSON.parse(res.text);
-                    console.log(json);
-                    ResponseSessionActionCreator.responseLogin(json.res, null);
+                    request.post(APIEndpoints.SUPERADMINS + '/login')
+                    .send({
+                        email: email,
+                        password: password
+                    })
+                    .set('Accept', 'application/json')
+                    .end(function(err, SuperAdminRes){
+                        if(SuperAdminRes)  //successfully logged as superAdmin
+                        {
+                            var json = JSON.parse(SuperAdminRes.text);
+                            ResponseSessionActionCreator.responseLogin(json, null);
+                        }
+                        if(SuperAdminRes.body.error) //login errors
+                        {
+                            var errors = _getErrors(SuperAdminRes.body.error);
+                            ResponseSessionActionCreator.responseLogin(null, errors);
+                        }
+                        if(err) console.log("login error");
+                    });
+                }else   //common User login
+                {
+                    request.post(APIEndpoints.USERS + '/login')
+                    .send({
+                        email: email,
+                        password: password
+                    })
+                    .set('Accept', 'application/json')
+                    .end(function(err, UserRes){
+                        if(UserRes) //successfully logged as common user
+                        {
+                            var json = JSON.parse(UserRes.text);
+                            ResponseSessionActionCreator.responseLogin(json, null);
+                        }
+                        if(UserRes.body.error) //login errors
+                        {
+                            var errors = _getErrors(UserRes.body.error);
+                            ResponseSessionActionCreator.responseLogin(null, errors);   
+                        }
+                        if(err) console.log("login error");
+                    });    
                 }
-                
             }
             if(err) console.log(">error");
         });

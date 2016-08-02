@@ -14,18 +14,32 @@ var Header = require('./Header.react.jsx');
 var Footer = require('./Footer.react.jsx');
 
 function getState() {
-    return {
+    var type = SessionStore.whoIam();
+    if(type == "commonUser")
+    {
+       return {
         isLogged: SessionStore.isLogged(),
         company: CompanyStore.getName(),
+        
         user: {
         	name:	UserStore.getName(),
         	surname:	UserStore.getSurname(),
         	dateOfBirth: UserStore.getDateOfBirth(),
             gender: UserStore.getGender(),
             avatar: UserStore.getAvatar(),
-            type: SessionStore.whoIam()   // commonUser or superAdmin
-        }
-    };
+            type: type
+            }
+        }; 
+    }else
+    {
+        return {
+        isLogged: SessionStore.isLogged(),
+        user: {
+            type: type
+            }
+        };
+    }
+    
 }
 
 var MaaSApp = React.createClass({
@@ -52,36 +66,51 @@ var MaaSApp = React.createClass({
     },
 
     render: function() {
-        //     return (
-        //         <div id="app">
-        //             <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
-        //             {this.props.children}
-        //             <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
-        //         </div>
-    	// );
-        var content;
+        
+        if(this.state.user.type == "commonUser")
+        {   
+            return (
+                <div id="app">
+                    <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+                    {this.props.children}
+                    <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
+                </div>
+    	    );    
+        }else{
+            return (
+                <div id="app">
+                    <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
+                        {this.props.children}
+                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
+                </div>
+    	    );    
+        }
+        
+            
+        /*var content;
         if(this.state.user.type == "superAdmin")
         {
             content =( 
                 <div id="app">
-                    <Header isLogged={this.state.isLogged}  type={this.state.type} companyName="Red Babel" />
+                    <Header isLogged={this.state.isLogged}  type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
                         {this.props.children}
-                    <Footer isLogged={this.state.isLogged} type={this.state.type} companyName="Red Babel" />
+                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
                 </div>
-                );
-        }else
+            );
+        }
+        else
         {
             content =( 
                 <div id="app">
                    <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
                         {this.props.children}
                    <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
-               </div>
-               );
+                </div>
+            );
         }
         return (
-           content
-	    );
+            {content}
+	    );*/
     }
 });
 

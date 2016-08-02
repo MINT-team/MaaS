@@ -13,6 +13,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var Invite = require('./Invite.react.jsx');
 var DeleteUser = require('./DeleteUser.react.jsx');
 var ChangeRole = require('./ChangeRole.react.jsx');
@@ -85,11 +86,7 @@ var People = React.createClass({
 
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
         return (
-            <div className="container">
-              <p className="container-title">Authorization required</p>
-              <p className="container-description">You are not authorized to view this page</p>
-              <Link to="/" className="button">Back to home</Link>
-            </div>
+            <AuthorizationRequired />
         );
     }
     

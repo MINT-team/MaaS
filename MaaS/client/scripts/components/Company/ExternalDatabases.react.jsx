@@ -11,6 +11,7 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 //var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -66,11 +67,7 @@ var ExternalDatabases = React.createClass({
   render: function() {
     if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
         return (
-            <div className="container">
-              <p className="container-title">Authorization required</p>
-              <p className="container-description">You are not authorized to view this page</p>
-              <Link to="/" className="button">Back to home</Link>
-            </div>
+            <AuthorizationRequired />
         );
         // <img src="../images/jurassic.gif" alt=""/>
     }

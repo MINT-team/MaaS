@@ -20,37 +20,13 @@ module.exports = function(Superadmin) {
   //remote method for select the type of login (commonUser or SuperAdmin) 
     Superadmin.selectLogin = function(email, password, cb){
         var superAdmin = app.models.SuperAdmin;
-        var user = app.models.user;
         superAdmin.findOne({where: {email: email}, limit: 1}, function(err, results) {
-                if(err){
-                    //return cb(lb, error, res);
+                if(err) //return cb(lb, error, res);
                     return cb(err, null, null);
-                }
                 if(results)  //superAdmin login
-                {
-                    superAdmin.login
-                    ({
-                        email: email,
-                        password: password
-                    },
-                    function (err, res) {
-                        if(err) return cb(null, err, null);
-                        else return cb(null, null, res);
-                    });
-                }
+                    return cb(null, null, "superAdmin");
                 else  //user login
-                {
-                    user.login
-                    ({
-                        email: email,
-                        password: password
-                    },
-                    function (err, res) {
-                        console.log(err.message);
-                        if(err) return cb(null, err, null);
-                        else return cb(null, null, res);
-                    });
-                }
+                    return cb(null, null, "commonUser");
             });
     };
 
@@ -64,7 +40,7 @@ module.exports = function(Superadmin) {
             ],
             returns: [
                 {arg: 'error', type: 'Object'},
-                {arg: 'res', type: 'Object'}
+                {arg: 'type', type: 'string'}
             ],
             http: { verb: 'post', path: '/selectlogin' }
         }
@@ -72,7 +48,6 @@ module.exports = function(Superadmin) {
     
    //remote hook for add the information about the type of user that has just logged 
     Superadmin.afterRemote('login', function(ctx, remoteMethodOutput, next) {
-        console.log(">afterRemote SUPER");
         var ctx_ttl = ctx.result.ttl ;
         var ctx_userId = ctx.result.userId ;
         var ctx_created = ctx.result.created ;
