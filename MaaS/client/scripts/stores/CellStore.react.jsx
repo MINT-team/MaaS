@@ -1,12 +1,12 @@
 /*
-* Name: {DashboardStore.react.jsx}
+* Name: {CellStore.react.jsx}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/stores/}
 * 
 * History:
 * Version         Date            Programmer
 * ===================================================
-* 0.0.1        2016/08/01   Navid Taha, Fabiano Tavallini
+* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
 * ---------------------------------------------------
 * First structure of the file.
 * ===================================================
@@ -21,16 +21,14 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _dashboards = [];
-var _dashboard = {
-                    id: localStorage.getItem('dashboardId'),
-                    name: localStorage.getItem('dashboardName')
+var _cells = [];
+var _cell = {
+                    id: localStorage.getItem('cellId'),
+                    name: localStorage.getItem('cellName')
 };
 var _errors = [];
 
-
-var DashboardStore = assign({}, EventEmitter.prototype, {
-
+var CellStore = assign({}, EventEmitter.prototype, {
     emitChange: function() {
         this.emit(CHANGE_EVENT);
     },
@@ -54,28 +52,12 @@ var DashboardStore = assign({}, EventEmitter.prototype, {
     removeDeleteListener: function(callback) {
         this.removeListener(DELETE_EVENT, callback);
     },
-    
-    getErrors: function() {
-        return _errors;
-    }
-    
 });
 
-DashboardStore.dispatchToken = Dispatcher.register(function(payload) {
+CellStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
-    switch(action.type) {
-        case ActionTypes.GET_DASHBOARDS:
-            if(action.errors) {
-                _errors = action.errors;
-            } else if(action.json) {
-                _errors = []; // empty old errors
-                // set dashboards data
-                _dashboards = action.dashboards;
-            }
-            DashboardStore.emitChange();
-            break;
-    }
+    
 });
 
-module.exports = DashboardStore;
+module.exports = CellStore;

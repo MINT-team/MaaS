@@ -11,6 +11,9 @@ var watchify = require('watchify');
 var reload = browserSync.reload;
 var preprocess = require('gulp-preprocess');
 var localenvify = require('localenvify');
+var uglify = require('gulp-uglify');
+var buffer = require('vinyl-buffer');
+
 var p = {
     jsx: './scripts/app.jsx',
     bundleApp: 'app.js',
@@ -20,9 +23,9 @@ var p = {
 };
 
 gulp.task('env-config', function() {
-  gulp.src(['../.env'])
-    .pipe(preprocess())
-    .pipe(gulp.dest(p.distJs))
+    gulp.src(['../.env'])
+        .pipe(preprocess())
+        .pipe(gulp.dest(p.distJs))
 });
 
 gulp.task('clean',function(cb) {
@@ -50,14 +53,25 @@ gulp.task('watchify', function() {
     }
 
     bundler
-    .transform(babelify, {presets: ["es2015", "react"]})
-    .transform(localenvify, {envfile: "../.env"})
-    .on('update', rebundle);
+        .transform(babelify, {presets: ["es2015", "react"]})
+        .transform(localenvify, {envfile: "../.env"})
+        .on('update', rebundle);
     return rebundle();
 });
 
 gulp.task('watch', function() {
     gulp.start(['browserSync','watchify']);
+});
+
+gulp.task('browserify', function() {
+    browserify(p.jsx)
+        .transform(babelify, {presets: ["es2015", "react"]})
+        .transform(localenvify, {envfile: "../.env"})
+        .bundle()
+        .pipe(source(p.bundleApp))
+        .pipe(buffer())     // convert from streaming to buffered vinyl file object
+        .pipe(uglify())     // now gulp-uglify works 
+        .pipe(gulp.dest(p.distJs));
 });
 
 gulp.task('build', function() {

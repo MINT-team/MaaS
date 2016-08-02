@@ -17,7 +17,11 @@ module.exports = {
     USERS:              APIRoot + "/users",
     COMPANIES:          APIRoot + "/Companies",
     SUPERADMINS:        APIRoot + "/SuperAdmins",
-    DATABASES:          APIRoot + "/ExternalDatabases"
+    DATABASES:          APIRoot + "/ExternalDatabases",
+    DASHBOARDS:         APIRoot + "/Dashboards",
+    COLLECTIONS:        APIRoot + "/Collections",
+    DOCUMENTS:          APIRoot + "/Documents",
+    CELLS:              APIRoot + "/Cells"
   },
 
   PayloadSources: keyMirror({

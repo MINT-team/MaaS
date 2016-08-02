@@ -1,5 +1,5 @@
 /*
-* Name: {DashboardWebAPIUtils.js}
+* Name: {DocumentWebAPIUtils.js}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/utils/}
 * 
@@ -12,7 +12,7 @@
 * ===================================================
 */
 
-var ResponseDashboardActionCreator = require('../actions/Response/ResponseDashboardActionCreator.react.jsx');
+var ResponseDocumentActionCreator = require('../actions/Response/ResponseDocumentActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 

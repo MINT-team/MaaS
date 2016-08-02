@@ -1,12 +1,12 @@
 /*
-* Name: {DashboardStore.react.jsx}
+* Name: {CollectionStore.react.jsx}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/stores/}
 * 
 * History:
 * Version         Date            Programmer
 * ===================================================
-* 0.0.1        2016/08/01   Navid Taha, Fabiano Tavallini
+* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
 * ---------------------------------------------------
 * First structure of the file.
 * ===================================================
@@ -21,15 +21,15 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _dashboards = [];
-var _dashboard = {
-                    id: localStorage.getItem('dashboardId'),
-                    name: localStorage.getItem('dashboardName')
+var _collections = [];
+var _collection = {
+                    id: localStorage.getItem('collectionId'),
+                    name: localStorage.getItem('collectionName')
 };
 var _errors = [];
 
 
-var DashboardStore = assign({}, EventEmitter.prototype, {
+var CollectionStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
         this.emit(CHANGE_EVENT);
@@ -61,7 +61,7 @@ var DashboardStore = assign({}, EventEmitter.prototype, {
     
 });
 
-DashboardStore.dispatchToken = Dispatcher.register(function(payload) {
+CollectionStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
     switch(action.type) {
@@ -71,11 +71,11 @@ DashboardStore.dispatchToken = Dispatcher.register(function(payload) {
             } else if(action.json) {
                 _errors = []; // empty old errors
                 // set dashboards data
-                _dashboards = action.dashboards;
+                _collections = action.dashboards;
             }
-            DashboardStore.emitChange();
+            CollectionStore.emitChange();
             break;
     }
 });
 
-module.exports = DashboardStore;
+module.exports = CollectionStore;

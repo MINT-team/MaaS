@@ -1,18 +1,18 @@
 /*
-* Name: {DashboardWebAPIUtils.js}
+* Name: {CellWebAPIUtils.js}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/utils/}
 * 
 * History:
 * Version         Date            Programmer
 * ===================================================
-* 0.0.1        2016/08/01   Navid Taha, Fabiano Tavallini
+* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
 * ---------------------------------------------------
 * First structure of the file.
 * ===================================================
 */
 
-var ResponseDashboardActionCreator = require('../actions/Response/ResponseDashboardActionCreator.react.jsx');
+var ResponseCellActionCreator = require('../actions/Response/ResponseCellActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
