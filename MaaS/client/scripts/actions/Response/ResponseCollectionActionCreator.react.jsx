@@ -1,6 +1,6 @@
 /*
 * Name: {ResponseCollectionActionCreator.react.jsx}
-* Module: {Front-end}
+* Module: {ActionCreators}
 * Location: {/MaaS/client/scripts/actions/Response}
 * 
 * History:

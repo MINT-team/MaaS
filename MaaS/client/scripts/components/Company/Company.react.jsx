@@ -118,7 +118,7 @@ var Company = React.createClass({
     };
     var dsl = {
       label: "DSL",
-      link: "/editor",
+      link: "/manageDSL",
       icon: (<i className="material-icons md-24">&#xE1B2;</i>)
     };
     var deleteCompany = {

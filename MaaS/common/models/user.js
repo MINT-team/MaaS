@@ -551,13 +551,13 @@ module.exports = function(user) {
         }
     );
     
+    // Add specifications on wich user has logged in
     user.afterRemote('login', function(ctx, remoteMethodOutput, next) {
-        console.log(">afterRemote USER");
         var ctx_ttl = ctx.result.ttl ;
         var ctx_userId = ctx.result.userId ;
         var ctx_created = ctx.result.created ;
         var ctx_id = ctx.result.id ;
-        var ctx_type = "commonUse";
+        var ctx_type = "commonUser";
     
         ctx.result = {
                 ttl: ctx_ttl,

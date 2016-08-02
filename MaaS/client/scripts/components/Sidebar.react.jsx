@@ -14,10 +14,16 @@ var Sidebar = React.createClass({
     render: function() {
         return (
             <div id="sidebar">
-				<p to="/" id="sidebar-title"><Link to={this.props.titleLink}>{this.props.title}</Link></p>
+            	{this.props.titleLink ?
+            		<p to="/" id="sidebar-title"><Link to={this.props.titleLink}>{this.props.title}</Link></p>
+            		: <p to="/" id="sidebar-title"><span>{this.props.title}</span></p>
+            	}
 			    {this.props.data.map((x) =>
 			    	<div className="sidebar-field">
-    					<Link to={x.link}>{x.icon}{x.label}</Link>
+			    		{x.link ?
+    						<Link to={x.link}>{x.icon}{x.label}</Link>
+    						: <a onClick={x.onClick}>{x.icon}{x.label}</a>
+			    		}
     				</div>
 			    )}
 		    </div>

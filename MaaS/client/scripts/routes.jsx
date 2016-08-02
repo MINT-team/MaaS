@@ -27,7 +27,7 @@ var DeleteAccount = require('./components/Profile/DeleteAccount.react.jsx');
 var Company = require('./components/Company/Company.react.jsx');
 var ExternalDatabases = require('./components/Company/ExternalDatabases.react.jsx');
 var People = require('./components/Company/People.react.jsx');
-var ManageDSL = require('./components/Company/ManageDSL.react.jsx');
+var ManageDSL = require('./components/DSL/ManageDSL.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
@@ -36,6 +36,9 @@ var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var Collapse = require('./components/Collapse.react.jsx');
 
+//<Route path="createDSL" component={EditDSL} />
+            //<Route path="editDSL" component={EditDSL} />
+            
 var Routes = React.createClass({
   render: function() {
     return (
@@ -56,8 +59,10 @@ var Routes = React.createClass({
           <Route path="company" component={Company}>
             <Route path="externalDatabases" component={ExternalDatabases} />
             <Route path="people" component={People} />
-            <Route path="manageDSL" component={ManageDSL} />
             <Route path="deleteCompany" component={DeleteCompany} />
+          </Route>
+          <Route path="manageDSL" component={ManageDSL}>
+            
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />

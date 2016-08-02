@@ -80,6 +80,7 @@ module.exports = {
                 console.log(res);
                 if(res.body.error)
                 {
+                    alert(res.body.error);
                     var errors = _getErrors(res.body.error);
                     ResponseSessionActionCreator.responseSignup(null, errors);
                 }
@@ -101,57 +102,29 @@ module.exports = {
     },
 
     login: function(email, password) {
-        request.post(APIEndpoints.USERS + '/login')
+        request.post(APIEndpoints.SUPERADMINS + '/selectLogin')
         .send({
             email: email,
             password: password
         })
         .set('Accept', 'application/json')
-        .end(function(err, UserRes){
-            if(UserRes)
-            {
-                if(UserRes.error)
+        .end(function(err, res){
+            if(res){
+                console.log(res);
+                if(res.body.error)
                 {
-                    // NON FUNZIONA BENE QUI STA ROBA :/ MI OCCULTA IL CODICE SOTTO
-                //   request.post(APIEndpoints.SUPERADMINS + '/login')
-                //   .send({
-                //         email: email,
-                //         password: password
-                //     })
-                //     .set('Accept', 'application/json')
-                //     .end(function(err, SuperAdminRes){
-                //          if(SuperAdminRes)
-                //          {
-                //             if(SuperAdminRes.error)
-                //             {   //incorrect User and SuperAdmin credentials
-                //                 var errors = _getErrors(SuperAdminRes.body.error);
-                //                 ResponseSessionActionCreator.responseLogin(null, errors);
-                //             }
-                //             else
-                //             {
-                //                 var json = JSON.parse(SuperAdminRes.text);
-                //                 ResponseSessionActionCreator.responseLogin(json, null);
-                //             }
-                //          }
-                //     });
-
-                    var errors = _getErrors(UserRes.body.error);
+                    alert("errori");
+                    var errors = _getErrors(res.body.error);
                     ResponseSessionActionCreator.responseLogin(null, errors);
+                }else
+                {    //successfully logged  (superAdmin or commonUser)
+                    var json = JSON.parse(res.text);
+                    console.log(json);
+                    ResponseSessionActionCreator.responseLogin(json.res, null);
                 }
-                else
-                {    //successfully logged in user
-                    var json = JSON.parse(UserRes.text);
-                    ResponseSessionActionCreator.responseLogin(json, null);
-                }
-                //var errorMsgs = _getErrors(res);
-                //ServerActionCreators.recieveLogin(null, errorMsgs);
-                //var json = JSON.parse(res.text);<p>Email: {json.email}</p><p>Password: {json.password}</p>
-                //ReactDOM.render(<div>{res.text}</div>, document.getElementById('content'));
+                
             }
-            if(err)
-            {
-                //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
-            }
+            if(err) console.log(">error");
         });
     },
 
