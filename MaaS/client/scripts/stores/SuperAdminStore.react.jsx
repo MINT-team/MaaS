@@ -15,9 +15,11 @@ var SessionStore = require('./SessionStore.react.jsx');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
+
+
 var _superAdmin = {
-    id: SessionStore.getSuperAdminId,
-    email: SessionStore.getSuperAdminEmail()
+    id: SessionStore.getUserId(),
+    email: SessionStore.getEmail()
 }
 var _errors = [];
 
@@ -33,18 +35,43 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
-    }
+    },
+
+    getId: function() {
+        return _superAdmin.id;
+   },
+
+    getEmail: function() {
+        return _superAdmin.email;
+  }
 
 });
-                //da agiungere man mano che vengono create le azioni
-//     SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
-//         var action = payload.action;
 
-//         switch(action.type) {
+SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
+    var action = payload.action;
+   
+ switch(action.type)
+    {
 
-//         }
+        case ActionTypes.LOGIN_RESPONSE:
+            if(action.errors)
+            {
+                _errors = action.errors;
+            }
+            else if(action.json && action.json.userId)
+            {
+              _superAdmin.id = action.json.userId;
+            }
+            SuperAdminStore.emitChange();
+            break;
 
-//         return true;  // richiesto dal Promise nel Dispatcher
-// });
+        case ActionTypes.LOGOUT:
+            // remove user data
+            _superAdmin.id = null;
+            _superAdmin.email = null;
+            SuperAdminStore.emitChange();
+            break;
+    }
+});
 
 module.exports = SuperAdminStore;

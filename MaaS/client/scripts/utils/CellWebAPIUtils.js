@@ -31,5 +31,45 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
+    saveCellDefinition: function(name, source) {
+      request
+        .post(APIEndpoints.CELLS + '/saveDefinition')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send({
+          name: name,
+          source: source
+        })
+        .end(function(res, err) {
+          if(res)
+          {
+            res = JSON.parse(res.text);
+            if(res.error)
+            {
+              ResponseCellActionCreator.responseSaveCellDefinition(null, res.error.message);
+            }
+            else
+            {
+              ResponseCellActionCreator.responseSaveCellDefinition(res.definiton, null);
+            }
+          }
+          
+          
+        });
+    },
+    overwriteCellDefinition: function(id, source) {
+      request
+        .put(APIEndpoints.CELLS + '/' + id + '/overwriteDefinition')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send({
+          id: id,
+          name: name,
+          source: source
+        })
+        .end(function(res, err) {
+          
+        });
+    }
     
 };

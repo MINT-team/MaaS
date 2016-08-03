@@ -15,6 +15,7 @@ var RequestUserActionCreator = require('../actions/Request/RequestUserActionCrea
 function getState() {
   return {
     isLogged: SessionStore.isLogged(),
+    userType:SessionStore.whoIam(),
     errors: SessionStore.getErrors()
   };
 }
@@ -50,11 +51,13 @@ var Login = React.createClass({
 
     _onChange: function() {
       this.setState(getState());
-      if(this.state.isLogged) {
-        // loads data to the session
-        RequestUserActionCreator.getUser(SessionStore.getUserId());
-        RequestUserActionCreator.getCompany(SessionStore.getUserId());
-        RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+      if(this.state.isLogged) {                                         // loads data to the session
+            RequestUserActionCreator.getUser(SessionStore.getUserId());  
+            if(this.state.userType == "commonUser")
+            {                   
+                RequestUserActionCreator.getCompany(SessionStore.getUserId());
+                RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+            }
       }
       this.handleRedirect();
     },

@@ -13,14 +13,17 @@ var request = require('superagent');
 
 function _getErrors(json) {
   var error, message;
-    if(json.message) {
+    if(json.message) 
+    {
         message = json.message;
         // Email
-        if(JSON.stringify(message).match(/mail/)) {
+        if(JSON.stringify(message).match(/mail/)) 
+        {
           error = "Email not found, insert your registered email";
         }
         // Other cases
-        if(!error) {
+        if(!error) 
+        {
             error = message;
         }
     }
@@ -38,18 +41,19 @@ module.exports = {
       //.set('Authorization', localStorage.getItem('accessToken'))
       .send({ email: email })
       .end(function(err, res){
-        if(res) {
-          if(res.error) {
+        if(res) 
+        {
+          if(res.error) 
+          {
             var errors = _getErrors(res.body.error);
             ResponseUserActionCreator.responseResetPassword(null, errors);
-          } else {
+          } 
+          else 
+          {
             //var json = JSON.parse(res.text);  //res ritorna vuoto!
             var json = { email: email};
             ResponseUserActionCreator.responseResetPassword(json, null);
           }
-        }
-        if(err){
-          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
         }
       });
   },
@@ -67,18 +71,19 @@ module.exports = {
         confirmation: confirmation
       })
       .end(function(err, res){
-        if(res) {
+        if(res) 
+        {
           //console.log(res);
           res = JSON.parse(res.text);
-          if(res.error) {
+          if(res.error) 
+          {
             // res.error.message: errori di loopback e error definito dal remote method
             ResponseUserActionCreator.responseChangePassword(null, res.error.message);
-          } else {
+          }
+          else 
+          {
             ResponseUserActionCreator.responseChangePassword(res.email, null);
           }
-        }
-        if(err){
-          //ServerActionCreators.responseChangePassword(null, err);
         }
       });
   },
@@ -96,7 +101,8 @@ module.exports = {
         gender: gender
       })
       .end(function(err, res) {
-        if(res) {
+        if(res) 
+        {
           res = JSON.parse(res.text);
           if(res.error) 
           {
@@ -138,16 +144,20 @@ module.exports = {
       .send({
         email: email
       })
-      .end(function(error, res){
-        if(res) {
+      .end(function(error, res) {
+        if(res) 
+        {
            res = JSON.parse(res.text);
-          if(res.error) {
+          if(res.error) 
+          {
             // res.error.message: errori di loopback e error definito dal remote method
             ResponseUserActionCreator.responseDeleteUser(res.error.message, null);
-          } else {
+          } 
+          else 
+          {
             ResponseUserActionCreator.responseDeleteUser(null, res.email);
           }
-        } 
+        }
       });
   },
 
@@ -158,7 +168,8 @@ module.exports = {
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
       .end(function(error, res) {
-        if(res) {
+        if(res) 
+        {
           ResponseUserActionCreator.responseGetCompany(res.body);
         }
       });
@@ -170,7 +181,8 @@ module.exports = {
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
       .end(function(error, res) {
-        if(res) {
+        if(res) 
+        {
           var json = JSON.parse(res.text);
           ResponseUserActionCreator.responseGetEditorConfig(json);
         }

@@ -27,7 +27,7 @@
     "editorConfig": {
       "type": "object",
       "default": {
-        "theme": "chaos",
+        "theme": "tomorrow_night",
         "softTabs": "true",
         "tabSize": "4",
         "fontSize": "12"

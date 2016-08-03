@@ -11,8 +11,7 @@
 // ==========================================
 
 var React = require('react');
-var Sidebar = require('../Sidebar.react.jsx');
-var UserStore = require('../../stores/UserStore.react.jsx');
+var Link = require('react-router').Link;
 
 
 var DashboardSuperAdmin = React.createClass({
@@ -20,7 +19,12 @@ var DashboardSuperAdmin = React.createClass({
 
     return (
       <div>
-      ciao
+        <div className="dashCont" >
+          <Link to="/dashboardSuperAdmin/databaseManagement">Internal database management</Link>
+        </div>
+        <div className="dashCont" >
+          <Link to="/dashboardSuperAdmin/impersonateUser">Impersonate other user</Link>
+        </div>
       </div>
 
         );

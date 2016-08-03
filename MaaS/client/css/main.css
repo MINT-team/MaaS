@@ -578,6 +578,7 @@ input {
 
 .dropdown-show {
     display: block;
+    z-index: 10;
     -moz-animation-name: dropDown;
     -moz-animation-iteration-count: 1;
     -moz-animation-timing-function: ease;
@@ -1287,6 +1288,30 @@ input {
     outline: 0;
     -webkit-box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
     box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
+}
+
+
+/*------------------------------------------------ DASHBOARD SUPERADMIN ---------------------------------------------------------*/
+
+.dashCont {
+    position: relative;
+    width: 50%;
+    height: 12em;
+    margin:auto;
+    margin-bottom: 0.5em;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 2px solid lightgrey;
+
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-align: center;
+	font-size:16px;
+	font-weight:700;
+	text-shadow: black 1px 1px 2px;
+    text-decoration: none;
+	color: white;
+	background-color: #333;
+	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
 }
 
 

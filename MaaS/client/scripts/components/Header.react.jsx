@@ -50,33 +50,55 @@ var Header = React.createClass({
     render: function() {
         var title, headerMenu, headerPanel;
         if (this.props.isLogged) {
-            
-            title = (
-                <Link to="/company" id="header-title">{this.props.companyName}</Link>
-            );
-            headerMenu = (
-                <div id="header-menu">
-                    <Link to="/company">Company</Link>
-                    <Link to="/company/externalDatabases">Database</Link>
-                    <Link to="/manageDSL">DSL</Link>
-                </div>
-            );
-            headerPanel = (
-                <div id="header-panel">
-                    <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
-                    <Link to="" id="settings-button" onClick={this.toggleDropdown}>
-                        <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
-                    </Link>
-                    <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
-                        <ul>
-                            <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
-                            <Link to="/editorConfig"><li>Text editor</li></Link>
-                            <Link onClick={this.logout} to=""><li>Logout</li></Link>
-                        </ul>
+            if(this.props.type == "commonUser")
+            {
+                title = (
+                    <Link to="/company" id="header-title">{this.props.companyName}</Link>
+                );
+                headerMenu = (
+                    <div id="header-menu">
+                        <Link to="/company">Company</Link>
+                        <Link to="/company/externalDatabases">Database</Link>
+                        <Link to="/manageDSL">DSL</Link>
                     </div>
-                </div>
-            );
-        } else {
+                );
+                headerPanel = (
+                    <div id="header-panel">
+                        <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                        <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                            <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                        </Link>
+                        <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
+                            <ul>
+                                <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+                                <Link to="/editorConfig"><li>Text editor</li></Link>
+                                <Link onClick={this.logout} to=""><li>Logout</li></Link>
+                            </ul>
+                        </div>
+                    </div>
+                );
+        }
+        else // render superAdmin Component
+        {
+            title = (
+                    <Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
+                );
+               
+                headerPanel = (
+                    <div id="header-panel">
+                        <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                            <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                        </Link>
+                        <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
+                            <ul>
+                                <Link to="/dashboardSuperAdmin"><li>Dashboard</li></Link>
+                                <Link onClick={this.logout} to=""><li>Logout</li></Link>
+                            </ul>
+                        </div>
+                    </div>
+                );
+        }
+        } else {        //user not logged
             title = (
                 <Link to="/" id="header-title">MaaS</Link>
             );

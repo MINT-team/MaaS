@@ -60,6 +60,8 @@ module.exports = {
     // Document
 
     // Cell
+    GET_CELLS: null,
+    SAVE_CELL_RESPONSE: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

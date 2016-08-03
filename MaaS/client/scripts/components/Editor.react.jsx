@@ -12,15 +12,15 @@ var RequestUserActionCreator = require('../actions/Request/RequestUserActionCrea
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
 
-var ace = require('brace');
-require('brace/theme/chaos');
-require('brace/theme/dawn');
-require('brace/theme/twilight');
-require('brace/theme/ambiance');
-require('brace/theme/cobalt');
-require('brace/theme/tomorrow');
-require('brace/theme/tomorrow_night');
-require('brace/theme/tomorrow_night_blue');
+var ace = require('../brace');
+require('../brace/theme/chaos');
+require('../brace/theme/dawn');
+require('../brace/theme/twilight');
+require('../brace/theme/ambiance');
+require('../brace/theme/cobalt');
+require('../brace/theme/tomorrow');
+require('../brace/theme/tomorrow_night');
+require('../brace/theme/tomorrow_night_blue');
 
 function getState() {
     return {

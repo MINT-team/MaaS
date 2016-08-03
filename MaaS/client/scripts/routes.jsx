@@ -35,6 +35,8 @@ var Error404 = require('./components/Error404.react.jsx');
 var ManageActiveDashboard = require('./components/ManageActiveDashboard.react.jsx');
 var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
+var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
+var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
 var Collapse = require('./components/Collapse.react.jsx');
 
 //<Route path="createDSL" component={EditDSL} />
@@ -69,7 +71,10 @@ var Routes = React.createClass({
           <Route path="editorConfig" component={EditorConfig} />
           <Route path="collapse" component={Collapse} />
           <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
-          <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} />
+          <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin}>
+            <Route path="databaseManagement" component={DatabaseManagement} />
+            <Route path="impersonateUser" component={ImpersonateUser} />
+          </Route>
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />
         </Route>

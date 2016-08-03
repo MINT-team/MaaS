@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "async": "^2.0.0",
-    "brace": "^0.8.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "dotenv": "^2.0.0",

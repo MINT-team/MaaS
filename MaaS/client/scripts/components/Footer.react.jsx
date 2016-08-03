@@ -21,7 +21,7 @@ var Footer = React.createClass({
     render: function() {
 		var footerLeft, footerCenter, footerRight;
     	if (this.props.isLogged) {
-    		if(this.props.type == "commonUser")
+    		if(this.props.type == "commonUser")		
     		{
 	    		footerCenter = (
 	    			<div className="footer-centerLooged">
@@ -36,23 +36,16 @@ var Footer = React.createClass({
 						<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 					</div>
 	    		);
-	    	}else{		//if I want to render the footer of the Super Admin
+	    	}else{				//if I want to render the footer of the Super Admin
 	    		footerCenter = (
 	    			<div className="footer-centerLooged">
-						<Link to="/company" id="header-title">{this.props.companyName}</Link>
-						<p className="footer-links">
-							<Link to="/" id="home"> Home </Link>
-							<Link to="/company">Company</Link>
-							<Link to="/company/externalDatabases">Database</Link>
-							<Link to="/manageDSL">DSL</Link>
-							<Link onClick={this.logout} to="">Logout</Link>
-						</p>
+						<Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
 						<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 					</div>
 	    		);
 	    	}
-    }
-    	else{
+    	}
+    	else{		// user not logged
     		footerCenter = (
     			<div className="footer-centerUnLooged">
 					<Link to="/" id="header-title">MaaS</Link>

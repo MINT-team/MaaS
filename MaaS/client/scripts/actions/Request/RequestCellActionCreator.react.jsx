@@ -14,10 +14,17 @@
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
+var WebAPIUtils = require("../../utils/CellWebAPIUtils.js");
 
 var ActionTypes = Constants.ActionTypes;
 
 var RequestCellActionCreator = {
+    saveCellDefinition: function(name, source) {
+        WebAPIUtils.saveCellDefinition(name, source);
+    },
+    overwriteCellDefinition: function(id, source) {
+        WebAPIUtils.overwriteCellDefinition(id, source);
+    }
     
 };
 

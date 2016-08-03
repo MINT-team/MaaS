@@ -24,7 +24,8 @@ var DELETE_EVENT = 'delete';
 var _cells = [];
 var _cell = {
                     id: localStorage.getItem('cellId'),
-                    name: localStorage.getItem('cellName')
+                    name: localStorage.getItem('cellName'),
+                    source: localStorage.getItem('cellSource')
 };
 var _errors = [];
 
@@ -56,8 +57,21 @@ var CellStore = assign({}, EventEmitter.prototype, {
 
 CellStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
-    
-    
+    /*
+    switch (action.type) {
+        case ActionTypes.GET_CELLS:
+            if(action.errors)
+            {
+                _errors = action.json.errors
+            }
+            else if(action.json.cells)
+            {
+                _cells = action.cells;
+            }
+            CellStore.emitChange();
+            break;
+    }
+    */
 });
 
 module.exports = CellStore;

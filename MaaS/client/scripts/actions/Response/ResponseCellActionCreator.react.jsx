@@ -18,7 +18,13 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var ResponseCellActionCreator = {
-    
+    responseSaveCellDefinition: function(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.SAVE_CELL_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    }
 };
 
 module.exports = ResponseCellActionCreator;
