@@ -24,6 +24,9 @@ var RequestDSLActionCreator = {
     },
     overwriteDSLDefinition: function(id, source) {
         WebAPIUtils.overwriteDSLDefinition(id, source);
+    },
+    loadDSL: function(id) {
+        WebAPIUtils.loadDSL(id);
     }
     
 };

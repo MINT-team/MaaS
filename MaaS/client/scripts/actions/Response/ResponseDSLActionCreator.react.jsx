@@ -24,6 +24,15 @@ var ResponseDSLActionCreator = {
             definition: definition,
             errors: errors
         });
+    },
+    
+    responseLoadDSL: function(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_DSL_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+        
     }
 };
 

@@ -21,11 +21,11 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _DSLs = [];
+var _DSL_LIST = [];
 var _DSL = {
-                    id: localStorage.getItem('DSLId'),
-                    name: localStorage.getItem('DSLName'),
-                    source: localStorage.getItem('DSLSource')
+    id: localStorage.getItem('DSLId'),
+    name: localStorage.getItem('DSLName'),
+    source: localStorage.getItem('DSLSource')
 };
 var _errors = [];
 
@@ -53,17 +53,46 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     removeDeleteListener: function(callback) {
         this.removeListener(DELETE_EVENT, callback);
     },
+    
+    getErrors: function() {
+        return _errors;
+    },
+    
+    getId: function() {
+        return _DSL.id;
+    },
+    
+    getName: function() {
+        return _DSL.name;
+    },
+    
+    getSource: function() {
+        return _DSL.source;
+    }
 });
 
 DSLStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
     switch (action.type) {
+        case ActionTypes.LOAD_DSL_RESPONSE:
+            if (action.errors)
+            {
+                _errors = action.json.errors;
+            }
+            else if(action.json.definition)
+            {
+                _errors = [];
+                _DSL.name = action.definition.name;
+                _DSL.source = action.definition.source;
+            }
+            DSLStore.emitChange();
+            break;
         /*
         case ActionTypes.GET_DSLS:
             if(action.errors)
             {
-                _errors = action.json.errors
+                _errors = action.json.errors;
             }
             else if(action.json.DSLs)
             {
@@ -76,15 +105,13 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
         case ActionTypes.SAVE_DSL_RESPONSE:
             if(action.errors)
             {
-                _errors = action.json.errors
+                _errors = action.json.errors;
             }
             else if(action.definition)
             {
                 _errors = [];
                 _DSL.name = action.definition.name;
                 _DSL.source = action.definition.source;
-                alert('aa');
-                
             }
             DSLStore.emitChange();
             break;

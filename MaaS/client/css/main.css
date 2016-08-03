@@ -150,6 +150,10 @@ body {
     color: red;
 }
 
+.error-item {
+    margin-bottom: 0.2em;
+}
+
 .form-container{
     width: 25em;
     margin: auto;
@@ -1051,10 +1055,18 @@ input {
     position: absolute;
     margin-top: -1.5em;
     margin-left: -1em;
-    padding: 0.15;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
+}
+
+#editor-back-button i {
+    /*padding: 0.15;*/
+    /*-moz-border-radius: 5px;*/
+    /*-webkit-border-radius: 5px;*/
+    /*border-radius: 5px;*/
+    color: #333;
+}
+
+#editor-back-button i:hover {
+    color: lightgray;
 }
 
 #editor-controls {
@@ -1094,10 +1106,19 @@ input {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
+    color: #333;
 }
 
-#editor-controls i:hover, #editor-back-button:hover {
-    color: lightgreen;
+#save-button {
+    color: #E93F2C !important;
+}
+
+#editor-controls .saved {
+    color: #333 !important;
+}
+
+#editor-controls i:hover {
+    color: lightgreen !important;
     background-color: #333;
 }
 
@@ -1314,16 +1335,21 @@ input {
 
 /*------------------------------------------------ DASHBOARD SUPERADMIN ---------------------------------------------------------*/
 
-.dashCont {
-    position: relative;
-    width: 50%;
-    height: 12em;
-    margin:auto;
-    margin-bottom: 0.5em;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    border: 2px solid lightgrey;
+.dashCont{
+    width: 100%;
+    text-align:center;
+}
 
+.dashElement {
+    display: inline-block;
+    vertical-align: middle;
+    width: 30%;
+    height: 15em;
+    margin: auto;
+    margin-left:1em;
+    -moz-border-radius: 5px;
+    border-radius: 10px;
+    border: 2px solid lightgrey;
     font-family:'Helvetica Neue',Arial,sans-serif;
     text-align: center;
 	font-size:16px;
@@ -1334,20 +1360,27 @@ input {
 	background-color: #333;
 	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
 }
+.dashElement:hover{
+    border: 2px solid lightgreen;
+}
 
 .material-icons-dashboard{
       font-family: 'Material Icons';
+      clear:both;
       width:100%;
       font-weight: normal;
       font-style: normal;
       font-size: 10em;  /* Preferred icon size */
       display: inline-block;
       line-height: 1;
+      text-align:center;
       text-transform: none;
       letter-spacing: normal;
       word-wrap: normal;
       white-space: nowrap;
       direction: ltr;
 }
-
-
+   
+.dashCont a:hover {
+    color: lightgreen;   
+  }

@@ -8,13 +8,12 @@
 
 var React = require('react');
 var Link = require('react-router').Link;
-var ace = require('../../brace');
+var ace = require('../../../brace');
 var Editor = require('../Editor.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
-
 
 /*
 Visualizzare in sola lettura il codice del DSL
@@ -23,64 +22,98 @@ Creare un nuovo DSL
 Fare una copia di un DSL
 */
 
-
 function getState() {
     return {
-            errors: [], //DashboardStore.getErrors(),
-            isLogged: SessionStore.isLogged()
+            errors: DSLStore.getErrors(),
+            isLogged: SessionStore.isLogged(),
+            id: DSLStore.getId(),
+            name: DSLStore.getName(),
+            source: DSLStore.getSource()
     };
 }
 
 var ManageDSLSource = React.createClass({
-   
+    
     getInitialState: function() {
-        return getState();
+        return {
+                errors: [],
+                isLogged: SessionStore.isLogged(),
+                definitionId: this.props.definitionId,
+                definitionName: DSLStore.getName(),
+                definitionSource: DSLStore.getSource(),
+                saved: this.props.definitionId ? true : false
+        };
     },
 
     componentDidMount: function() {
-        if(this.props.definitionName) 
+        DSLStore.addChangeListener(this._onChange);
+        var id = this.props.definitionId;
+        if(id)
+            RequestDSLActionCreator.loadDSL(id);
+        if(this.state.definitionName)
         {
-            this.refs.definitionName.value = this.props.definitionName;
+            this.refs.definitionName.value = this.state.definitionName;
         }
+        var editor = ace.edit("editor");
+        var editorSession = editor.getSession();
+        editorSession.on("change", this.onEdit);
     },
-
+    
+    
+    onEdit: function(e) {
+        this.setState({ saved: false });
+        if(this.refs.save.classList.contains("saved")) {
+        	this.refs.save.classList.remove("saved");
+    	}
+    },
+    
     componentWillUnmount: function() {
-        
+        DSLStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function() {
         this.setState(getState());
         if(!(this.state.errors.length > 0)) 
         {
-            this.toggleSavePopUp();
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
         }
     },
-
+    
     saveSource: function() {
         var editor = ace.edit("editor");
         var source = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
+        var errors = [];
+        if (!definitionType)
+        {
+            errors.push('Select the definition type before saving');
+        }
         if (!definitionName)
         {
-            var error = 'Fill the definiton name before saving';
-            this.setState({ errors: error });
+            errors.push('Fill the definiton name before saving');  
         }
         else
         {
-            if(definitionName == this.props.definitionName)
-                RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);
-            else
+            if(definitionName == this.state.definitionName)
+            {
+                alert("overWrite");
+                //RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);
+            }
+            else 
+            {
                 RequestDSLActionCreator.saveDSLDefinition(definitionType, definitionName, source);
+            }
+        }
+        if(errors.length > 0)
+        {
+            this.setState({ errors: errors });
         }
     },
     
     toggleErrorPopUp: function() {
 		this.refs.error.classList.toggle("dropdown-show");
-	},
-	
-	toggleSavePopUp: function() {
-	    this.refs.save.classList.toggle("dropdown-show");
 	},
     
     render: function() {
@@ -94,7 +127,7 @@ var ManageDSLSource = React.createClass({
         var content, errors;
         if(this.state.errors.length > 0) 
         {
-            errors = ( <span id="errors">{this.state.errors}</span> );
+            errors = ( <p id="errors">{this.state.errors.map((error) => <p className="error-item">{error}</p>)}</p> );
             this.toggleErrorPopUp();
         }
         content = (
@@ -105,16 +138,17 @@ var ManageDSLSource = React.createClass({
                 <div id="editor-controls">
                     <form id="definiton-name">
                         <label htmlFor="definitionName">Definition name</label>
-                        <input id="definitionName" type="text" ref="definitionName" placeholder="Name" />
+                        <input id="definitionName" type="text" ref="definitionName" placeholder="Name">{this.state.definitionName}</input>
                     </form>
                     <div id="editor-buttons">
-                        <i onClick={this.saveSource} className="material-icons md-36 dropdown-button">&#xE161;</i>
-                        <i onClick="" className="material-icons md-36 dropdown-button">&#xE869;</i>
-                        <i onClick="" className="material-icons md-36 dropdown-button">&#xE037;</i>
+                        <i id="save-button" onClick={this.saveSource} className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
+                        <i onClick="" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
+                        <i onClick="" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
                     </div>
                     <form id="definition-type">
                         <label htmlFor="definitionType">Type</label>
                         <select className="select" onChange={this._onSelectChange} id="definitionType" ref="definitionType" >
+                            <option value=""></option>
                             <option value="Dashboard">Dashboard</option>
                             <option value="Collection">Collection</option>
                             <option value="Document">Document</option>

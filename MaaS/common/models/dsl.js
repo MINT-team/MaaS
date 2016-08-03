@@ -2,7 +2,7 @@ var app = require('../../server/server.js');
 
 module.exports = function(DSL) {
     DSL.saveDefinition = function(type, name, source, cb) {
-        if(!name || !source)
+        if(!type || !name)
         {
             var error = {
                 message: "Missing data for DSL creation"
@@ -12,11 +12,11 @@ module.exports = function(DSL) {
         DSL.create({type: type, name: name, source: source}, function(err, DSL) {
             if (err)
             {
-               DSL.destroyById(DSL.id);
+               //DSL.destroyById(DSL.id);
                console.log('> Failed creating DSL.');
                return cb(err);
             }
-            console.log("> DSL created:", DSL.id);
+            console.log("> Created DSL:", DSL.id);
             return cb(null, null, DSL);
        });
     };

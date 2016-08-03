@@ -1,468 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-
-// Name: {RequestCompanyActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/CompanyWebAPIUtils.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var RequestCompanyActionCreator = {
-    getUsers: function getUsers(id) {
-        WebAPIUtils.getUsers(id);
-    },
-
-    deleteCompany: function deleteCompany(id, email) {
-        WebAPIUtils.deleteCompany(id, email);
-    }
-};
-
-module.exports = RequestCompanyActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/CompanyWebAPIUtils.js":62}],2:[function(require,module,exports){
-"use strict";
-
-/*
-* Name: {RequestDSLActionCreator.react.jsx}
-* Module: {ActionCreators}
-* Location: {/MaaS/client/scripts/actions/Request}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var RequestDSLActionCreator = {
-    saveDSLDefinition: function saveDSLDefinition(type, name, source) {
-        WebAPIUtils.saveDSLDefinition(type, name, source);
-    },
-    overwriteDSLDefinition: function overwriteDSLDefinition(id, source) {
-        WebAPIUtils.overwriteDSLDefinition(id, source);
-    }
-
-};
-
-module.exports = RequestDSLActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/DSLWebAPIUtils.js":63}],3:[function(require,module,exports){
-"use strict";
-
-// Name: {RequestExternalDatabaseActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/ExternalDatabasesWebAPIUtils.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var RequestExternalDatabaseActionCreator = {
-    setExtDb: function setExtDb(companyId, name, password) {
-        WebAPIUtils.setExtDb(companyId, name, password);
-    },
-
-    connectDb: function connectDb() {
-        WebAPIUtils.connectDb();
-    },
-
-    getDbs: function getDbs() {
-        WebAPIUtils.getDbs();
-    }
-};
-
-module.exports = RequestExternalDatabaseActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/ExternalDatabasesWebAPIUtils.js":64}],4:[function(require,module,exports){
-'use strict';
-
-// Name: {RequestSessionActionCreator.react.jsx}
-// Module: {ActionsCreators}
-// Location: {/MaaS/clientscripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require('../../dispatcher/Dispatcher.js');
-var Constants = require('../../constants/Constants.js');
-var WebAPIUtils = require('../../utils/SessionWebAPIUtils.js');
-
-var ActionTypes = Constants.ActionTypes;
-
-var RequestSessionActionCreator = {
-
-  signup: function signup(company, email, password, confirmation) {
-    WebAPIUtils.signup(company, email, password, confirmation);
-  },
-
-  login: function login(email, password) {
-    WebAPIUtils.login(email, password);
-  },
-
-  invite: function invite(sender, company, role, email) {
-    WebAPIUtils.invite(sender, company, role, email);
-  },
-
-  logout: function logout(accessToken) {
-    Dispatcher.handleViewAction({
-      type: ActionTypes.LOGOUT
-    });
-    WebAPIUtils.logout(accessToken);
-  }
-};
-
-module.exports = RequestSessionActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/SessionWebAPIUtils.js":65}],5:[function(require,module,exports){
-"use strict";
-
-// Name: {RequestUserActionCreator.react.jsx}
-// Module: {ActionsCreators}
-// Location: {/MaaS/clientscripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/UserWebAPIUtils.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var RequestUserActionCreator = {
-    resetPassword: function resetPassword(email) {
-        WebAPIUtils.resetPassword(email);
-    },
-
-    changePassword: function changePassword(id, password, confirmation, accessToken) {
-        WebAPIUtils.changePassword(id, password, confirmation, accessToken);
-    },
-
-    changePersonalData: function changePersonalData(id, name, surname, dateOfBirth, gender) {
-        WebAPIUtils.changePersonalData(id, name, surname, dateOfBirth, gender);
-    },
-
-    getUser: function getUser(id) {
-        WebAPIUtils.getUser(id);
-    },
-
-    deleteUser: function deleteUser(email, id) {
-        WebAPIUtils.deleteUser(email, id);
-    },
-
-    getCompany: function getCompany(userId) {
-        WebAPIUtils.getCompany(userId);
-    },
-
-    getEditorConfig: function getEditorConfig(userId) {
-        WebAPIUtils.getEditorConfig(userId);
-    },
-
-    changeEditorConfig: function changeEditorConfig(id, softTabs, theme, tabSize, fontSize) {
-        WebAPIUtils.changeEditorConfig(id, softTabs, theme, tabSize, fontSize);
-    },
-
-    changeRole: function changeRole(email, role, id) {
-        WebAPIUtils.changeRole(email, role, id);
-    }
-};
-
-module.exports = RequestUserActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/UserWebAPIUtils.js":66}],6:[function(require,module,exports){
-"use strict";
-
-// Name: {ResponseCompanyActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var ResponseCompanyActionCreator = {
-    responseCompanyUsers: function responseCompanyUsers(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_USERS,
-            json: json,
-            errors: errors
-        });
-    },
-
-    responseDeleteCompany: function responseDeleteCompany(name, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.DELETE_COMPANY,
-            name: name,
-            errors: errors
-        });
-    }
-};
-
-module.exports = ResponseCompanyActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],7:[function(require,module,exports){
-"use strict";
-
-/*
-* Name: {ResponseDSLActionCreator.react.jsx}
-* Module: {ActionCreators}
-* Location: {/MaaS/client/scripts/actions/Response}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var ResponseDSLActionCreator = {
-    responseSaveDSLDefinition: function responseSaveDSLDefinition(definition, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.SAVE_DSL_RESPONSE,
-            definition: definition,
-            errors: errors
-        });
-    }
-};
-
-module.exports = ResponseDSLActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],8:[function(require,module,exports){
-"use strict";
-
-// Name: {ResponseExternalDatabaseActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var ResponseExternalDatabaseActionCreator = {
-    responseAddExtDb: function responseAddExtDb(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.ADD_EXT_DB_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-
-    responseConnectDb: function responseConnectDb(name, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CONNECT_DBS_RESPONSE,
-            name: name,
-            errors: errors
-        });
-    },
-
-    responseGetDbs: function responseGetDbs(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_DBS,
-            json: json,
-            errors: errors
-        });
-    }
-
-};
-
-module.exports = ResponseExternalDatabaseActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],9:[function(require,module,exports){
-"use strict";
-
-// Name: {ResponseSessionActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var ResponseSessionActionCreator = {
-    responseSignup: function responseSignup(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.SIGNUP_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    responseLogin: function responseLogin(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.LOGIN_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    responseInvite: function responseInvite(errors, email) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.INVITE_RESPONSE,
-            errors: errors,
-            email: email
-        });
-    }
-};
-
-module.exports = ResponseSessionActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],10:[function(require,module,exports){
-"use strict";
-
-// Name: {ResponseUserActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var Constants = require("../../constants/Constants.js");
-
-var ActionTypes = Constants.ActionTypes;
-
-var ResponseUserActionCreator = {
-
-    responseResetPassword: function responseResetPassword(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.RESET_PASSWORD_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    responseChangePassword: function responseChangePassword(email, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_PASSWORD_RESPONSE,
-            email: email,
-            errors: errors
-        });
-    },
-    responseChangePersonalData: function responseChangePersonalData(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_DATA_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    responseGetEditorConfig: function responseGetEditorConfig(json) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_EDITOR_CONFIG_RESPONSE,
-            json: json
-        });
-    },
-    responseGetUser: function responseGetUser(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_USER,
-            json: json,
-            errors: errors
-        });
-    },
-    responseDeleteUser: function responseDeleteUser(errors, email) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.DELETE_USER,
-            errors: errors,
-            email: email
-        });
-    },
-    responseGetCompany: function responseGetCompany(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_COMPANY,
-            json: json,
-            errors: errors
-        });
-    },
-    responseChangeEditorConfig: function responseChangeEditorConfig(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    responseChangeRole: function responseChangeRole(email, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_ROLE_RESPONSE,
-            email: email,
-            errors: errors
-        });
-    }
-};
-
-module.exports = ResponseUserActionCreator;
-
-},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],11:[function(require,module,exports){
-'use strict';
-
-// Name: {app.jsx}
-// Module: {Front-end}
-// Location: {/MaaS/client/scripts}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var React = require('react');
-var ReactDOM = require('react-dom');
-
-window.React = React;
-var Routes = require('./routes.jsx');
-var injectTapEventPlugin = require("react-tap-event-plugin");
-injectTapEventPlugin();
-var App = React.createClass({
-    displayName: 'App',
-
-    render: function render() {
-        return React.createElement(Routes, null);
-    }
-});
-
-ReactDOM.render(React.createElement(App, null), document.getElementById('content'));
-
-},{"./routes.jsx":55,"react":491,"react-dom":211,"react-tap-event-plugin":316}],12:[function(require,module,exports){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};/* ***** BEGIN LICENSE BLOCK *****
  * Distributed under the BSD license:
  *
@@ -1081,7 +617,7 @@ background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZ
 ","");});ace.define("ace/ace",["require","exports","module","ace/lib/fixoldbrowsers","ace/lib/dom","ace/lib/event","ace/editor","ace/edit_session","ace/undomanager","ace/virtual_renderer","ace/worker/worker_client","ace/keyboard/hash_handler","ace/placeholder","ace/multi_select","ace/mode/folding/fold_mode","ace/theme/textmate","ace/ext/error_marker","ace/config"],function(acequire,exports,module){"use strict";acequire("./lib/fixoldbrowsers");var dom=acequire("./lib/dom");var event=acequire("./lib/event");var Editor=acequire("./editor").Editor;var EditSession=acequire("./edit_session").EditSession;var UndoManager=acequire("./undomanager").UndoManager;var Renderer=acequire("./virtual_renderer").VirtualRenderer;acequire("./worker/worker_client");acequire("./keyboard/hash_handler");acequire("./placeholder");acequire("./multi_select");acequire("./mode/folding/fold_mode");acequire("./theme/textmate");acequire("./ext/error_marker");exports.config=acequire("./config");exports.acequire=acequire;exports.edit=function(el){if(typeof el=="string"){var _id=el;el=document.getElementById(_id);if(!el)throw new Error("ace.edit can't find div #"+_id);}if(el&&el.env&&el.env.editor instanceof Editor)return el.env.editor;var value="";if(el&&/input|textarea/i.test(el.tagName)){var oldNode=el;value=oldNode.value;el=dom.createElement("pre");oldNode.parentNode.replaceChild(el,oldNode);}else if(el){value=dom.getInnerText(el);el.innerHTML="";}var doc=exports.createEditSession(value);var editor=new Editor(new Renderer(el));editor.setSession(doc);var env={document:doc,editor:editor,onResize:editor.resize.bind(editor,null)};if(oldNode)env.textarea=oldNode;event.addListener(window,"resize",env.onResize);editor.on("destroy",function(){event.removeListener(window,"resize",env.onResize);env.editor.container.env=null;// prevent memory leak on old ie
 });editor.container.env=editor.env=env;return editor;};exports.createEditSession=function(text,mode){var doc=new EditSession(text,mode);doc.setUndoManager(new UndoManager());return doc;};exports.EditSession=EditSession;exports.UndoManager=UndoManager;exports.version="1.2.3";});(function(){ace.acequire(["ace/ace"],function(a){a&&a.config.init(true);if(!window.ace)window.ace=a;for(var key in a){if(a.hasOwnProperty(key))window.ace[key]=a[key];}});})();module.exports=window.ace.acequire("ace/ace");
 
-},{"w3c-blob":13}],13:[function(require,module,exports){
+},{"w3c-blob":2}],2:[function(require,module,exports){
 (function (global){
 module.exports = get_blob()
 
@@ -1113,7 +649,7 @@ function get_blob() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/ambiance", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1298,7 +834,7 @@ background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZ
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],15:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/chaos", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1457,7 +993,7 @@ color: #000;\
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],16:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/cobalt", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1574,7 +1110,7 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],17:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/dawn", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1686,7 +1222,7 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],18:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/tomorrow", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1798,7 +1334,7 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],19:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/tomorrow_night", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -1910,7 +1446,7 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],20:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/tomorrow_night_blue", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -2020,7 +1556,7 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],21:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 ace.define("ace/theme/twilight", ["require", "exports", "module", "ace/lib/dom"], function (acequire, exports, module) {
@@ -2133,7 +1669,482 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
   dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-},{}],22:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+"use strict";
+
+// Name: {RequestCompanyActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var WebAPIUtils = require("../../utils/CompanyWebAPIUtils.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var RequestCompanyActionCreator = {
+    getUsers: function getUsers(id) {
+        WebAPIUtils.getUsers(id);
+    },
+
+    deleteCompany: function deleteCompany(id, email) {
+        WebAPIUtils.deleteCompany(id, email);
+    }
+};
+
+module.exports = RequestCompanyActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/CompanyWebAPIUtils.js":62}],12:[function(require,module,exports){
+"use strict";
+
+/*
+* Name: {RequestDSLActionCreator.react.jsx}
+* Module: {ActionCreators}
+* Location: {/MaaS/client/scripts/actions/Request}
+* 
+* History:
+* Version         Date            Programmer
+* ===================================================
+* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
+* ---------------------------------------------------
+* First structure of the file.
+* ===================================================
+*/
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var RequestDSLActionCreator = {
+    saveDSLDefinition: function saveDSLDefinition(type, name, source) {
+        WebAPIUtils.saveDSLDefinition(type, name, source);
+    },
+    overwriteDSLDefinition: function overwriteDSLDefinition(id, source) {
+        WebAPIUtils.overwriteDSLDefinition(id, source);
+    },
+    loadDSL: function loadDSL(id) {
+        WebAPIUtils.loadDSL(id);
+    }
+
+};
+
+module.exports = RequestDSLActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/DSLWebAPIUtils.js":63}],13:[function(require,module,exports){
+"use strict";
+
+// Name: {RequestExternalDatabaseActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var WebAPIUtils = require("../../utils/ExternalDatabasesWebAPIUtils.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var RequestExternalDatabaseActionCreator = {
+    setExtDb: function setExtDb(companyId, name, password) {
+        WebAPIUtils.setExtDb(companyId, name, password);
+    },
+
+    connectDb: function connectDb() {
+        WebAPIUtils.connectDb();
+    },
+
+    getDbs: function getDbs() {
+        WebAPIUtils.getDbs();
+    }
+};
+
+module.exports = RequestExternalDatabaseActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/ExternalDatabasesWebAPIUtils.js":64}],14:[function(require,module,exports){
+'use strict';
+
+// Name: {RequestSessionActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require('../../dispatcher/Dispatcher.js');
+var Constants = require('../../constants/Constants.js');
+var WebAPIUtils = require('../../utils/SessionWebAPIUtils.js');
+
+var ActionTypes = Constants.ActionTypes;
+
+var RequestSessionActionCreator = {
+
+  signup: function signup(company, email, password, confirmation) {
+    WebAPIUtils.signup(company, email, password, confirmation);
+  },
+
+  login: function login(email, password) {
+    WebAPIUtils.login(email, password);
+  },
+
+  invite: function invite(sender, company, role, email) {
+    WebAPIUtils.invite(sender, company, role, email);
+  },
+
+  logout: function logout(accessToken) {
+    Dispatcher.handleViewAction({
+      type: ActionTypes.LOGOUT
+    });
+    WebAPIUtils.logout(accessToken);
+  }
+};
+
+module.exports = RequestSessionActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/SessionWebAPIUtils.js":65}],15:[function(require,module,exports){
+"use strict";
+
+// Name: {RequestUserActionCreator.react.jsx}
+// Module: {ActionsCreators}
+// Location: {/MaaS/clientscripts/actions/Request/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var WebAPIUtils = require("../../utils/UserWebAPIUtils.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var RequestUserActionCreator = {
+    resetPassword: function resetPassword(email) {
+        WebAPIUtils.resetPassword(email);
+    },
+
+    changePassword: function changePassword(id, password, confirmation, accessToken) {
+        WebAPIUtils.changePassword(id, password, confirmation, accessToken);
+    },
+
+    changePersonalData: function changePersonalData(id, name, surname, dateOfBirth, gender) {
+        WebAPIUtils.changePersonalData(id, name, surname, dateOfBirth, gender);
+    },
+
+    getUser: function getUser(id) {
+        WebAPIUtils.getUser(id);
+    },
+
+    deleteUser: function deleteUser(email, id) {
+        WebAPIUtils.deleteUser(email, id);
+    },
+
+    getCompany: function getCompany(userId) {
+        WebAPIUtils.getCompany(userId);
+    },
+
+    getEditorConfig: function getEditorConfig(userId) {
+        WebAPIUtils.getEditorConfig(userId);
+    },
+
+    changeEditorConfig: function changeEditorConfig(id, softTabs, theme, tabSize, fontSize) {
+        WebAPIUtils.changeEditorConfig(id, softTabs, theme, tabSize, fontSize);
+    },
+
+    changeRole: function changeRole(email, role, id) {
+        WebAPIUtils.changeRole(email, role, id);
+    }
+};
+
+module.exports = RequestUserActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54,"../../utils/UserWebAPIUtils.js":66}],16:[function(require,module,exports){
+"use strict";
+
+// Name: {ResponseCompanyActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseCompanyActionCreator = {
+    responseCompanyUsers: function responseCompanyUsers(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_USERS,
+            json: json,
+            errors: errors
+        });
+    },
+
+    responseDeleteCompany: function responseDeleteCompany(name, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_COMPANY,
+            name: name,
+            errors: errors
+        });
+    }
+};
+
+module.exports = ResponseCompanyActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],17:[function(require,module,exports){
+"use strict";
+
+/*
+* Name: {ResponseDSLActionCreator.react.jsx}
+* Module: {ActionCreators}
+* Location: {/MaaS/client/scripts/actions/Response}
+* 
+* History:
+* Version         Date            Programmer
+* ===================================================
+* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
+* ---------------------------------------------------
+* First structure of the file.
+* ===================================================
+*/
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseDSLActionCreator = {
+    responseSaveDSLDefinition: function responseSaveDSLDefinition(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.SAVE_DSL_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    },
+
+    responseLoadDSL: function responseLoadDSL(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_DSL_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    }
+};
+
+module.exports = ResponseDSLActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],18:[function(require,module,exports){
+"use strict";
+
+// Name: {ResponseExternalDatabaseActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseExternalDatabaseActionCreator = {
+    responseAddExtDb: function responseAddExtDb(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.ADD_EXT_DB_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+
+    responseConnectDb: function responseConnectDb(name, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CONNECT_DBS_RESPONSE,
+            name: name,
+            errors: errors
+        });
+    },
+
+    responseGetDbs: function responseGetDbs(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_DBS,
+            json: json,
+            errors: errors
+        });
+    }
+
+};
+
+module.exports = ResponseExternalDatabaseActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],19:[function(require,module,exports){
+"use strict";
+
+// Name: {ResponseSessionActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseSessionActionCreator = {
+    responseSignup: function responseSignup(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.SIGNUP_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+    responseLogin: function responseLogin(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOGIN_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+    responseInvite: function responseInvite(errors, email) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.INVITE_RESPONSE,
+            errors: errors,
+            email: email
+        });
+    }
+};
+
+module.exports = ResponseSessionActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],20:[function(require,module,exports){
+"use strict";
+
+// Name: {ResponseUserActionCreator.react.jsx}
+// Module: {ActionCreators}
+// Location: {/MaaS/client/scripts/actions/Response/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseUserActionCreator = {
+
+    responseResetPassword: function responseResetPassword(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.RESET_PASSWORD_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+    responseChangePassword: function responseChangePassword(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_PASSWORD_RESPONSE,
+            email: email,
+            errors: errors
+        });
+    },
+    responseChangePersonalData: function responseChangePersonalData(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DATA_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+    responseGetEditorConfig: function responseGetEditorConfig(json) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_EDITOR_CONFIG_RESPONSE,
+            json: json
+        });
+    },
+    responseGetUser: function responseGetUser(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_USER,
+            json: json,
+            errors: errors
+        });
+    },
+    responseDeleteUser: function responseDeleteUser(errors, email) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_USER,
+            errors: errors,
+            email: email
+        });
+    },
+    responseGetCompany: function responseGetCompany(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_COMPANY,
+            json: json,
+            errors: errors
+        });
+    },
+    responseChangeEditorConfig: function responseChangeEditorConfig(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
+            json: json,
+            errors: errors
+        });
+    },
+    responseChangeRole: function responseChangeRole(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_ROLE_RESPONSE,
+            email: email,
+            errors: errors
+        });
+    }
+};
+
+module.exports = ResponseUserActionCreator;
+
+},{"../../constants/Constants.js":53,"../../dispatcher/Dispatcher.js":54}],21:[function(require,module,exports){
+'use strict';
+
+// Name: {app.jsx}
+// Module: {Front-end}
+// Location: {/MaaS/client/scripts}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+window.React = React;
+var Routes = require('./routes.jsx');
+var injectTapEventPlugin = require("react-tap-event-plugin");
+injectTapEventPlugin();
+var App = React.createClass({
+    displayName: 'App',
+
+    render: function render() {
+        return React.createElement(Routes, null);
+    }
+});
+
+ReactDOM.render(React.createElement(App, null), document.getElementById('content'));
+
+},{"./routes.jsx":55,"react":491,"react-dom":211,"react-tap-event-plugin":316}],22:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -2436,7 +2447,7 @@ var ChangeRole = React.createClass({
 
 module.exports = ChangeRole;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/UserStore.react.jsx":61,"react":491}],25:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":11,"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/UserStore.react.jsx":61,"react":491}],25:[function(require,module,exports){
 'use strict';
 
 // Name: {Company.react.jsx}
@@ -2653,7 +2664,7 @@ var Company = React.createClass({
 
 module.exports = Company;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"../Sidebar.react.jsx":49,"react":491,"react-router":258}],26:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":11,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"../Sidebar.react.jsx":49,"react":491,"react-router":258}],26:[function(require,module,exports){
 'use strict';
 
 // Name: {DeleteAccount.react.jsx}
@@ -2840,7 +2851,7 @@ var DeleteCompany = React.createClass({
 
 module.exports = DeleteCompany;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],27:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":11,"../../actions/Request/RequestSessionActionCreator.react.jsx":14,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],27:[function(require,module,exports){
 'use strict';
 
 // Name: {Delete.react.jsx}
@@ -2983,7 +2994,7 @@ var DeleteUser = React.createClass({
 
 module.exports = DeleteUser;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":56,"../../stores/UserStore.react.jsx":61,"react":491}],28:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/CompanyStore.react.jsx":56,"../../stores/UserStore.react.jsx":61,"react":491}],28:[function(require,module,exports){
 'use strict';
 
 // Name: {ExternalDatabase.react.jsx}
@@ -3165,7 +3176,7 @@ var ExternalDatabases = React.createClass({
 
 module.exports = ExternalDatabases;
 
-},{"../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx":3,"../../stores/ExternalDatabaseStore.react.jsx":58,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"react":491,"react-bootstrap-table":194,"react-collapse":210,"react-height":214,"react-motion":221}],29:[function(require,module,exports){
+},{"../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx":13,"../../stores/ExternalDatabaseStore.react.jsx":58,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"react":491,"react-bootstrap-table":194,"react-collapse":210,"react-height":214,"react-motion":221}],29:[function(require,module,exports){
 'use strict';
 
 // Name: {Invite.react.jsx}
@@ -3341,7 +3352,7 @@ var Invite = React.createClass({
 
 module.exports = Invite;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491}],30:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":11,"../../actions/Request/RequestSessionActionCreator.react.jsx":14,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491}],30:[function(require,module,exports){
 'use strict';
 
 // Name: {People.react.jsx}
@@ -3648,7 +3659,7 @@ var People = React.createClass({
 
 module.exports = People;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"../AuthorizationRequired.react.jsx":22,"./ChangeRole.react.jsx":24,"./DeleteUser.react.jsx":27,"./Invite.react.jsx":29,"react":491,"react-router":258}],31:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":11,"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/CompanyStore.react.jsx":56,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"../AuthorizationRequired.react.jsx":22,"./ChangeRole.react.jsx":24,"./DeleteUser.react.jsx":27,"./Invite.react.jsx":29,"react":491,"react-router":258}],31:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSL.react.jsx}
@@ -3826,7 +3837,7 @@ var ManageDSL = React.createClass({
 
 module.exports = ManageDSL;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":57,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"../Sidebar.react.jsx":49,"react":491,"react-bootstrap-table":194,"react-router":258}],32:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":12,"../../stores/DSLStore.react.jsx":57,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"../Sidebar.react.jsx":49,"react":491,"react-bootstrap-table":194,"react-router":258}],32:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSLSource.react.jsx}
@@ -3839,7 +3850,7 @@ module.exports = ManageDSL;
 
 var React = require('react');
 var Link = require('react-router').Link;
-var ace = require('../../brace');
+var ace = require('../../../brace');
 var Editor = require('../Editor.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
@@ -3855,8 +3866,11 @@ Fare una copia di un DSL
 
 function getState() {
     return {
-        errors: [], //DashboardStore.getErrors(),
-        isLogged: SessionStore.isLogged()
+        errors: DSLStore.getErrors(),
+        isLogged: SessionStore.isLogged(),
+        id: DSLStore.getId(),
+        name: DSLStore.getName(),
+        source: DSLStore.getSource()
     };
 }
 
@@ -3865,21 +3879,44 @@ var ManageDSLSource = React.createClass({
 
 
     getInitialState: function getInitialState() {
-        return getState();
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            definitionId: this.props.definitionId,
+            definitionName: DSLStore.getName(),
+            definitionSource: DSLStore.getSource(),
+            saved: this.props.definitionId ? true : false
+        };
     },
 
     componentDidMount: function componentDidMount() {
-        if (this.props.definitionName) {
-            this.refs.definitionName.value = this.props.definitionName;
+        DSLStore.addChangeListener(this._onChange);
+        var id = this.props.definitionId;
+        if (id) RequestDSLActionCreator.loadDSL(id);
+        if (this.state.definitionName) {
+            this.refs.definitionName.value = this.state.definitionName;
+        }
+        var editor = ace.edit("editor");
+        var editorSession = editor.getSession();
+        editorSession.on("change", this.onEdit);
+    },
+
+    onEdit: function onEdit(e) {
+        this.setState({ saved: false });
+        if (this.refs.save.classList.contains("saved")) {
+            this.refs.save.classList.remove("saved");
         }
     },
 
-    componentWillUnmount: function componentWillUnmount() {},
+    componentWillUnmount: function componentWillUnmount() {
+        DSLStore.removeChangeListener(this._onChange);
+    },
 
     _onChange: function _onChange() {
         this.setState(getState());
         if (!(this.state.errors.length > 0)) {
-            this.toggleSavePopUp();
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
         }
     },
 
@@ -3888,20 +3925,27 @@ var ManageDSLSource = React.createClass({
         var source = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
+        var errors = [];
+        if (!definitionType) {
+            errors.push('Select the definition type before saving');
+        }
         if (!definitionName) {
-            var error = 'Fill the definiton name before saving';
-            this.setState({ errors: error });
+            errors.push('Fill the definiton name before saving');
         } else {
-            if (definitionName == this.props.definitionName) RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);else RequestDSLActionCreator.saveDSLDefinition(definitionType, definitionName, source);
+            if (definitionName == this.state.definitionName) {
+                alert("overWrite");
+                //RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);
+            } else {
+                RequestDSLActionCreator.saveDSLDefinition(definitionType, definitionName, source);
+            }
+        }
+        if (errors.length > 0) {
+            this.setState({ errors: errors });
         }
     },
 
     toggleErrorPopUp: function toggleErrorPopUp() {
         this.refs.error.classList.toggle("dropdown-show");
-    },
-
-    toggleSavePopUp: function toggleSavePopUp() {
-        this.refs.save.classList.toggle("dropdown-show");
     },
 
     render: function render() {
@@ -3912,9 +3956,15 @@ var ManageDSLSource = React.createClass({
         var content, errors;
         if (this.state.errors.length > 0) {
             errors = React.createElement(
-                'span',
+                'p',
                 { id: 'errors' },
-                this.state.errors
+                this.state.errors.map(function (error) {
+                    return React.createElement(
+                        'p',
+                        { className: 'error-item' },
+                        error
+                    );
+                })
             );
             this.toggleErrorPopUp();
         }
@@ -3945,24 +3995,28 @@ var ManageDSLSource = React.createClass({
                         { htmlFor: 'definitionName' },
                         'Definition name'
                     ),
-                    React.createElement('input', { id: 'definitionName', type: 'text', ref: 'definitionName', placeholder: 'Name' })
+                    React.createElement(
+                        'input',
+                        { id: 'definitionName', type: 'text', ref: 'definitionName', placeholder: 'Name' },
+                        this.state.definitionName
+                    )
                 ),
                 React.createElement(
                     'div',
                     { id: 'editor-buttons' },
                     React.createElement(
                         'i',
-                        { onClick: this.saveSource, className: 'material-icons md-36 dropdown-button' },
+                        { id: 'save-button', onClick: this.saveSource, className: 'material-icons md-36 dropdown-button', ref: 'save' },
                         ''
                     ),
                     React.createElement(
                         'i',
-                        { onClick: '', className: 'material-icons md-36 dropdown-button' },
+                        { onClick: '', className: 'material-icons md-36 dropdown-button', ref: 'build' },
                         ''
                     ),
                     React.createElement(
                         'i',
-                        { onClick: '', className: 'material-icons md-36 dropdown-button' },
+                        { onClick: '', className: 'material-icons md-36 dropdown-button', ref: 'run' },
                         ''
                     )
                 ),
@@ -3977,6 +4031,7 @@ var ManageDSLSource = React.createClass({
                     React.createElement(
                         'select',
                         { className: 'select', onChange: this._onSelectChange, id: 'definitionType', ref: 'definitionType' },
+                        React.createElement('option', { value: '' }),
                         React.createElement(
                             'option',
                             { value: 'Dashboard' },
@@ -4040,7 +4095,7 @@ var ManageDSLSource = React.createClass({
 
 module.exports = ManageDSLSource;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../brace":12,"../../stores/DSLStore.react.jsx":57,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"../Editor.react.jsx":33,"react":491,"react-router":258}],33:[function(require,module,exports){
+},{"../../../brace":1,"../../actions/Request/RequestDSLActionCreator.react.jsx":12,"../../stores/DSLStore.react.jsx":57,"../../stores/SessionStore.react.jsx":59,"../AuthorizationRequired.react.jsx":22,"../Editor.react.jsx":33,"react":491,"react-router":258}],33:[function(require,module,exports){
 'use strict';
 
 // Name: {Editor.react.jsx}
@@ -4057,15 +4112,16 @@ var RequestUserActionCreator = require('../actions/Request/RequestUserActionCrea
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
 
-var ace = require('../brace');
-require('../brace/theme/chaos');
-require('../brace/theme/dawn');
-require('../brace/theme/twilight');
-require('../brace/theme/ambiance');
-require('../brace/theme/cobalt');
-require('../brace/theme/tomorrow');
-require('../brace/theme/tomorrow_night');
-require('../brace/theme/tomorrow_night_blue');
+var ace = require('../../brace');
+
+require('../../brace/theme/chaos');
+require('../../brace/theme/dawn');
+require('../../brace/theme/twilight');
+require('../../brace/theme/ambiance');
+require('../../brace/theme/cobalt');
+require('../../brace/theme/tomorrow');
+require('../../brace/theme/tomorrow_night');
+require('../../brace/theme/tomorrow_night_blue');
 
 function getState() {
     return {
@@ -4108,7 +4164,7 @@ var Editor = React.createClass({
 
 module.exports = Editor;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":5,"../brace":12,"../brace/theme/ambiance":14,"../brace/theme/chaos":15,"../brace/theme/cobalt":16,"../brace/theme/dawn":17,"../brace/theme/tomorrow":18,"../brace/theme/tomorrow_night":19,"../brace/theme/tomorrow_night_blue":20,"../brace/theme/twilight":21,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"react":491}],34:[function(require,module,exports){
+},{"../../brace":1,"../../brace/theme/ambiance":3,"../../brace/theme/chaos":4,"../../brace/theme/cobalt":5,"../../brace/theme/dawn":6,"../../brace/theme/tomorrow":7,"../../brace/theme/tomorrow_night":8,"../../brace/theme/tomorrow_night_blue":9,"../../brace/theme/twilight":10,"../actions/Request/RequestUserActionCreator.react.jsx":15,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"react":491}],34:[function(require,module,exports){
 'use strict';
 
 /*
@@ -4384,7 +4440,7 @@ var EditorConfig = React.createClass({
 
 module.exports = EditorConfig;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":5,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"./Editor.react.jsx":33,"react":491,"react-router":258}],35:[function(require,module,exports){
+},{"../actions/Request/RequestUserActionCreator.react.jsx":15,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"./Editor.react.jsx":33,"react":491,"react-router":258}],35:[function(require,module,exports){
 'use strict';
 
 // Name: {Error404.react.jsx}
@@ -4518,8 +4574,27 @@ var Footer = React.createClass({
 					{ className: 'footer-centerLooged' },
 					React.createElement(
 						Link,
-						{ to: '/dashboardSuperAdmin', id: 'header-title' },
+						{ to: '/', id: 'header-title' },
 						this.props.companyName
+					),
+					React.createElement(
+						'p',
+						{ className: 'footer-links' },
+						React.createElement(
+							Link,
+							{ to: '/', id: 'home' },
+							' Home '
+						),
+						React.createElement(
+							Link,
+							{ to: '/dashboardSuperAdmin' },
+							'Dashboard'
+						),
+						React.createElement(
+							Link,
+							{ onClick: this.logout, to: '' },
+							'Logout'
+						)
 					),
 					React.createElement(
 						'p',
@@ -4599,7 +4674,7 @@ var Footer = React.createClass({
 
 module.exports = Footer;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],37:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":14,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],37:[function(require,module,exports){
 'use strict';
 
 // Name: {Header.react.jsx}
@@ -4746,8 +4821,18 @@ var Header = React.createClass({
                 {
                     title = React.createElement(
                         Link,
-                        { to: '/dashboardSuperAdmin', id: 'header-title' },
+                        { to: '/', id: 'header-title' },
                         this.props.companyName
+                    );
+
+                    headerMenu = React.createElement(
+                        'div',
+                        { id: 'header-menu' },
+                        React.createElement(
+                            Link,
+                            { to: '/dashboardSuperAdmin' },
+                            'Dashboard'
+                        )
                     );
 
                     headerPanel = React.createElement(
@@ -4833,7 +4918,7 @@ var Header = React.createClass({
 
 module.exports = Header;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],38:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":14,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],38:[function(require,module,exports){
 'use strict';
 
 // Name: {Home.react.jsx}
@@ -5079,7 +5164,7 @@ var Login = React.createClass({
 
 module.exports = Login;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":5,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],40:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":14,"../actions/Request/RequestUserActionCreator.react.jsx":15,"../stores/SessionStore.react.jsx":59,"react":491,"react-router":258}],40:[function(require,module,exports){
 'use strict';
 
 // Name: {MaaSApp.react.jsx}
@@ -5489,7 +5574,7 @@ var ChangePassword = React.createClass({
 
 module.exports = ChangePassword;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],44:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],44:[function(require,module,exports){
 'use strict';
 
 // Name: {DeleteAccount.react.jsx}
@@ -5670,7 +5755,7 @@ var DeleteAccount = React.createClass({
 
 module.exports = DeleteAccount;
 
-},{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],45:[function(require,module,exports){
+},{"../../actions/Request/RequestSessionActionCreator.react.jsx":14,"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],45:[function(require,module,exports){
 'use strict';
 
 // Name: {PersonalData.react.jsx}
@@ -5886,7 +5971,7 @@ var PersonalData = React.createClass({
 
 module.exports = PersonalData;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":5,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],46:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":15,"../../stores/SessionStore.react.jsx":59,"../../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],46:[function(require,module,exports){
 'use strict';
 
 // Name: {Profile.react.jsx}
@@ -6339,7 +6424,7 @@ var Register = React.createClass({
 
 module.exports = Register;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":5,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],48:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":14,"../actions/Request/RequestUserActionCreator.react.jsx":15,"../stores/SessionStore.react.jsx":59,"../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],48:[function(require,module,exports){
 'use strict';
 
 // Name: {ResetPwd.react.jsx}
@@ -6495,7 +6580,7 @@ var ResetPwd = React.createClass({
 
 module.exports = ResetPwd;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":5,"../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],49:[function(require,module,exports){
+},{"../actions/Request/RequestUserActionCreator.react.jsx":15,"../stores/UserStore.react.jsx":61,"react":491,"react-router":258}],49:[function(require,module,exports){
 'use strict';
 
 // Name: {Sidebar.react.jsx}
@@ -6595,48 +6680,35 @@ var DashboardSuperAdmin = React.createClass({
   displayName: 'DashboardSuperAdmin',
 
   render: function render() {
+    var content = React.createElement(
+      'div',
+      { className: 'dashCont' },
+      React.createElement(
+        Link,
+        { className: 'dashElement', to: '/dashboardSuperAdmin/databaseManagement' },
+        React.createElement(
+          'i',
+          { className: 'material-icons-dashboard' },
+          ''
+        ),
+        ' Internal database management'
+      ),
+      React.createElement(
+        Link,
+        { className: 'dashElement', to: '/dashboardSuperAdmin/impersonateUser' },
+        React.createElement(
+          'i',
+          { className: 'material-icons-dashboard' },
+          ''
+        ),
+        'Impersonate other user'
+      )
+    );
 
     return React.createElement(
       'div',
       null,
-      React.createElement(
-        'div',
-        { className: 'dashCont' },
-        React.createElement(
-          'i',
-          { 'class': 'material-icons md-24' },
-          ''
-        ),
-        React.createElement(
-          'p',
-          null,
-          React.createElement(
-            'i',
-            { className: 'material-icons-dashboard' },
-            ''
-          ),
-          ' '
-        )
-      ),
-      React.createElement(
-        'div',
-        { className: 'dashCont' },
-        React.createElement(
-          Link,
-          { to: '/dashboardSuperAdmin/impersonateUser' },
-          'Impersonate other user'
-        ),
-        React.createElement(
-          'p',
-          null,
-          React.createElement(
-            'i',
-            { className: 'material-icons-dashboard' },
-            ''
-          ),
-          ' '
-        )
-      )
+      this.props.children || content
     );
   }
 });
@@ -6779,6 +6851,7 @@ module.exports = {
     // DSL
     GET_DSL_LIST: null,
     SAVE_DSL_RESPONSE: null,
+    LOAD_DSL_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -7108,7 +7181,7 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _DSLs = [];
+var _DSL_LIST = [];
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
@@ -7139,6 +7212,22 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     removeDeleteListener: function removeDeleteListener(callback) {
         this.removeListener(DELETE_EVENT, callback);
+    },
+
+    getErrors: function getErrors() {
+        return _errors;
+    },
+
+    getId: function getId() {
+        return _DSL.id;
+    },
+
+    getName: function getName() {
+        return _DSL.name;
+    },
+
+    getSource: function getSource() {
+        return _DSL.source;
     }
 });
 
@@ -7146,11 +7235,21 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
     var action = payload.action;
 
     switch (action.type) {
+        case ActionTypes.LOAD_DSL_RESPONSE:
+            if (action.errors) {
+                _errors = action.json.errors;
+            } else if (action.json.definition) {
+                _errors = [];
+                _DSL.name = action.definition.name;
+                _DSL.source = action.definition.source;
+            }
+            DSLStore.emitChange();
+            break;
         /*
         case ActionTypes.GET_DSLS:
             if(action.errors)
             {
-                _errors = action.json.errors
+                _errors = action.json.errors;
             }
             else if(action.json.DSLs)
             {
@@ -7167,7 +7266,6 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
                 _DSL.name = action.definition.name;
                 _DSL.source = action.definition.source;
-                alert('aa');
             }
             DSLStore.emitChange();
             break;
@@ -7895,7 +7993,7 @@ module.exports = {
   }
 };
 
-},{"../actions/Response/ResponseCompanyActionCreator.react.jsx":6,"../constants/Constants.js":53,"superagent":492}],63:[function(require,module,exports){
+},{"../actions/Response/ResponseCompanyActionCreator.react.jsx":16,"../constants/Constants.js":53,"superagent":492}],63:[function(require,module,exports){
 'use strict';
 
 /*
@@ -7936,10 +8034,11 @@ module.exports = {
       type: type,
       name: name,
       source: source
-    }).end(function (res, err) {
+    }).end(function (err, res) {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
+          alert('Errore:  ' + res.error.message);
           ResponseDSLActionCreator.responseSaveDSLDefinition(null, res.error.message);
         } else {
           ResponseDSLActionCreator.responseSaveDSLDefinition(res.definition, null);
@@ -7947,17 +8046,24 @@ module.exports = {
       }
     });
   },
+
   overwriteDSLDefinition: function overwriteDSLDefinition(id, source) {
     request.put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       name: name,
       source: source
-    }).end(function (res, err) {});
+    }).end(function (err, res) {});
+  },
+
+  loadDSL: function loadDSL(id) {
+    request.get(APIEndpoints.DSL + '/' + id).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+      if (res) {}
+    });
   }
 
 };
 
-},{"../actions/Response/ResponseDSLActionCreator.react.jsx":7,"../constants/Constants.js":53,"superagent":492}],64:[function(require,module,exports){
+},{"../actions/Response/ResponseDSLActionCreator.react.jsx":17,"../constants/Constants.js":53,"superagent":492}],64:[function(require,module,exports){
 'use strict';
 
 // Name: {ExternalDatabasesWebAPIUtils.js}
@@ -8050,7 +8156,7 @@ module.exports = {
 
 };
 
-},{"../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx":8,"../constants/Constants.js":53,"superagent":492}],65:[function(require,module,exports){
+},{"../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx":18,"../constants/Constants.js":53,"superagent":492}],65:[function(require,module,exports){
 'use strict';
 
 // Name: {SessionWebAPIUtils.js}
@@ -8217,7 +8323,7 @@ module.exports = {
 
 };
 
-},{"../actions/Response/ResponseSessionActionCreator.react.jsx":9,"../constants/Constants.js":53,"superagent":492}],66:[function(require,module,exports){
+},{"../actions/Response/ResponseSessionActionCreator.react.jsx":19,"../constants/Constants.js":53,"superagent":492}],66:[function(require,module,exports){
 'use strict';
 
 // Name: {UserWebAPIUtils.js}
@@ -8396,7 +8502,7 @@ module.exports = {
   }
 };
 
-},{"../actions/Response/ResponseUserActionCreator.react.jsx":10,"../constants/Constants.js":53,"superagent":492}],67:[function(require,module,exports){
+},{"../actions/Response/ResponseUserActionCreator.react.jsx":20,"../constants/Constants.js":53,"superagent":492}],67:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -95691,4 +95797,4 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}]},{},[11]);
+},{}]},{},[21]);

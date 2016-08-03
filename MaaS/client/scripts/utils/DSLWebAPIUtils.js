@@ -41,12 +41,13 @@ module.exports = {
           name: name,
           source: source
         })
-        .end(function(res, err) {
+        .end(function(err, res) {
           if(res)
           {
             res = JSON.parse(res.text);
             if(res.error)
             {
+              alert('Errore:  '+ res.error.message);
               ResponseDSLActionCreator.responseSaveDSLDefinition(null, res.error.message);
             }
             else
@@ -54,10 +55,9 @@ module.exports = {
               ResponseDSLActionCreator.responseSaveDSLDefinition(res.definition, null);
             }
           }
-          
-          
         });
     },
+    
     overwriteDSLDefinition: function(id, source) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition')
@@ -68,8 +68,21 @@ module.exports = {
           name: name,
           source: source
         })
-        .end(function(res, err) {
+        .end(function(err, res) {
           
+        });
+    },
+    
+    loadDSL: function(id) {
+      request
+        .get(APIEndpoints.DSL + '/' + id)
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if (res)
+          {
+            
+          }
         });
     }
     
