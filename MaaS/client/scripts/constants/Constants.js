@@ -21,7 +21,7 @@ module.exports = {
     DASHBOARDS:         APIRoot + "/Dashboards",
     COLLECTIONS:        APIRoot + "/Collections",
     DOCUMENTS:          APIRoot + "/Documents",
-    CELLS:              APIRoot + "/Cells"
+    DSL:              APIRoot + "/DSL"
   },
 
   PayloadSources: keyMirror({
@@ -59,9 +59,9 @@ module.exports = {
 
     // Document
 
-    // Cell
-    GET_CELLS: null,
-    SAVE_CELL_RESPONSE: null,
+    // DSL
+    GET_DSL_LIST: null,
+    SAVE_DSL_RESPONSE: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

@@ -1,5 +1,5 @@
 /*
-* Name: {CellWebAPIUtils.js}
+* Name: {DSLWebAPIUtils.js}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/utils/}
 * 
@@ -12,7 +12,7 @@
 * ===================================================
 */
 
-var ResponseCellActionCreator = require('../actions/Response/ResponseCellActionCreator.react.jsx');
+var ResponseDSLActionCreator = require('../actions/Response/ResponseDSLActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
@@ -31,12 +31,13 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-    saveCellDefinition: function(name, source) {
+    saveDSLDefinition: function(type, name, source) {
       request
-        .post(APIEndpoints.CELLS + '/saveDefinition')
+        .post(APIEndpoints.DSL + '/saveDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .send({
+          type: type,
           name: name,
           source: source
         })
@@ -46,20 +47,20 @@ module.exports = {
             res = JSON.parse(res.text);
             if(res.error)
             {
-              ResponseCellActionCreator.responseSaveCellDefinition(null, res.error.message);
+              ResponseDSLActionCreator.responseSaveDSLDefinition(null, res.error.message);
             }
             else
             {
-              ResponseCellActionCreator.responseSaveCellDefinition(res.definiton, null);
+              ResponseDSLActionCreator.responseSaveDSLDefinition(res.definition, null);
             }
           }
           
           
         });
     },
-    overwriteCellDefinition: function(id, source) {
+    overwriteDSLDefinition: function(id, source) {
       request
-        .put(APIEndpoints.CELLS + '/' + id + '/overwriteDefinition')
+        .put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .send({

@@ -1,31 +1,32 @@
 var app = require('../../server/server.js');
 
-module.exports = function(Cell) {
-    Cell.saveDefinition = function(name, source, cb) {
+module.exports = function(DSL) {
+    DSL.saveDefinition = function(type, name, source, cb) {
         if(!name || !source)
         {
             var error = {
-                message: "Missing data for Cell creation"
+                message: "Missing data for DSL creation"
             };
             return cb(null, error, null);
         }
-        Cell.create({name: name, source: source}, function(err, cell) {
+        DSL.create({type: type, name: name, source: source}, function(err, DSL) {
             if (err)
             {
-               Cell.destroyById(cell.id);
-               console.log('> Failed creating Cell.');
+               DSL.destroyById(DSL.id);
+               console.log('> Failed creating DSL.');
                return cb(err);
             }
-            console.log("> Cell created:", cell.id);
-            return cb(null, null, cell);
+            console.log("> DSL created:", DSL.id);
+            return cb(null, null, DSL);
        });
     };
     
-    Cell.remoteMethod(
+    DSL.remoteMethod(
         'saveDefinition',
         {
             description: "Change user's editor configuration options",
             accepts: [
+                { arg: 'type', type: 'string', required: true, description: 'Definition type' },
                 { arg: 'name', type: 'string', required: true, description: 'Definition name' },
                 { arg: 'source', type: 'string', required: true, description: 'Definition source' }
             ],
@@ -37,18 +38,18 @@ module.exports = function(Cell) {
         }
     );
     
-    Cell.overwriteDefinition = function(id, source, cb) {
-       Cell.findById(id, function(err, cell) {
+    DSL.overwriteDefinition = function(id, source, cb) {
+       DSL.findById(id, function(err, DSL) {
            if(err) return cb(err, null, null);
-           cell.updateAttribute(source, source, function(err, newCell) {
+           DSL.updateAttribute(source, source, function(err, newDSL) {
                if(err) return cb(err, null, null);
-               console.log("> Updated Cell:", newCell.id);
-               return cb(null, null, newCell);
+               console.log("> Updated DSL:", newDSL.id);
+               return cb(null, null, newDSL);
            });
        });
     };
     
-    Cell.remoteMethod(
+    DSL.remoteMethod(
         'overwriteDefinition',
         {
             description: "Change user's editor configuration options",

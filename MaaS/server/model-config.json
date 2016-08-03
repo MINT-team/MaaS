@@ -58,19 +58,7 @@
     "dataSource": "maas",
     "public": true
   },
-  "Dashboard": {
-    "dataSource": "maas",
-    "public": true
-  },
-  "Collection": {
-    "dataSource": "maas",
-    "public": true
-  },
-  "Document": {
-    "dataSource": "maas",
-    "public": true
-  },
-  "Cell": {
+  "DSL": {
     "dataSource": "maas",
     "public": true
   }

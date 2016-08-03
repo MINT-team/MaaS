@@ -1,5 +1,5 @@
 /*
-* Name: {CollectionStore.react.jsx}
+* Name: {DSLStore.react.jsx}
 * Module: {Front-end}
 * Location: {/MaaS/client/scripts/stores/}
 * 
@@ -21,16 +21,15 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _collections = [];
-var _collection = {
-                    id: localStorage.getItem('collectionId'),
-                    name: localStorage.getItem('collectionName')
+var _DSLs = [];
+var _DSL = {
+                    id: localStorage.getItem('DSLId'),
+                    name: localStorage.getItem('DSLName'),
+                    source: localStorage.getItem('DSLSource')
 };
 var _errors = [];
 
-
-var CollectionStore = assign({}, EventEmitter.prototype, {
-
+var DSLStore = assign({}, EventEmitter.prototype, {
     emitChange: function() {
         this.emit(CHANGE_EVENT);
     },
@@ -54,28 +53,43 @@ var CollectionStore = assign({}, EventEmitter.prototype, {
     removeDeleteListener: function(callback) {
         this.removeListener(DELETE_EVENT, callback);
     },
-    
-    getErrors: function() {
-        return _errors;
-    }
-    
 });
 
-CollectionStore.dispatchToken = Dispatcher.register(function(payload) {
+DSLStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
-    switch(action.type) {
-        case ActionTypes.GET_DASHBOARDS:
-            if(action.errors) {
-                _errors = action.errors;
-            } else if(action.json) {
-                _errors = []; // empty old errors
-                // set dashboards data
-                _collections = action.dashboards;
+    switch (action.type) {
+        /*
+        case ActionTypes.GET_DSLS:
+            if(action.errors)
+            {
+                _errors = action.json.errors
             }
-            CollectionStore.emitChange();
+            else if(action.json.DSLs)
+            {
+                _errors = [];
+                _DSLs = action.DSLs;
+            }
+            DSLStore.emitChange();
+            break;
+        */  
+        case ActionTypes.SAVE_DSL_RESPONSE:
+            if(action.errors)
+            {
+                _errors = action.json.errors
+            }
+            else if(action.definition)
+            {
+                _errors = [];
+                _DSL.name = action.definition.name;
+                _DSL.source = action.definition.source;
+                alert('aa');
+                
+            }
+            DSLStore.emitChange();
             break;
     }
+    
 });
 
-module.exports = CollectionStore;
+module.exports = DSLStore;

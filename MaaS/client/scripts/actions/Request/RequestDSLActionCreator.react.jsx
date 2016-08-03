@@ -1,5 +1,5 @@
 /*
-* Name: {RequestDocumentActionCreator.react.jsx}
+* Name: {RequestDSLActionCreator.react.jsx}
 * Module: {ActionCreators}
 * Location: {/MaaS/client/scripts/actions/Request}
 * 
@@ -14,11 +14,18 @@
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
+var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var RequestDocumentActionCreator = {
+var RequestDSLActionCreator = {
+    saveDSLDefinition: function(type, name, source) {
+        WebAPIUtils.saveDSLDefinition(type, name, source);
+    },
+    overwriteDSLDefinition: function(id, source) {
+        WebAPIUtils.overwriteDSLDefinition(id, source);
+    }
     
 };
 
-module.exports = RequestDocumentActionCreator;
+module.exports = RequestDSLActionCreator;

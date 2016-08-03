@@ -20,10 +20,12 @@ var DashboardSuperAdmin = React.createClass({
     return (
       <div>
         <div className="dashCont" >
-          <Link to="/dashboardSuperAdmin/databaseManagement">Internal database management</Link>
+        <i class="material-icons md-24"></i>
+         <p><i className="material-icons-dashboard">&#xE7EF;</i> </p>
         </div>
         <div className="dashCont" >
-          <Link to="/dashboardSuperAdmin/impersonateUser">Impersonate other user</Link>
+        <Link to="/dashboardSuperAdmin/impersonateUser">Impersonate other user</Link>
+          <p><i className="material-icons-dashboard">&#xE7EF;</i> </p>
         </div>
       </div>
 

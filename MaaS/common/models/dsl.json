@@ -1,12 +1,16 @@
 {
-  "name": "Collection",
-  "plural": "Collections",
+  "name": "DSL",
+  "plural": "DSL",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
+    "type": {
+      "type": "string",
+      "required": true
+    },
     "name": {
       "type": "string",
       "required": true

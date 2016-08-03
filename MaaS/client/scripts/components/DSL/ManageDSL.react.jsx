@@ -10,14 +10,8 @@ var React = require('react');
 var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
-var DashboardStore = require('../../stores/DashboardStore.react.jsx');
-var CollectionStore = require('../../stores/CollectionStore.react.jsx');
-var DocumentStore = require('../../stores/DocumentStore.react.jsx');
-var CellStore = require('../../stores/CellStore.react.jsx');
-var RequestDashboardActionCreator = require('../../actions/Request/RequestDashboardActionCreator.react.jsx');
-var RequestCollectionActionCreator = require('../../actions/Request/RequestCollectionActionCreator.react.jsx');
-var RequestDocumentActionCreator = require('../../actions/Request/RequestDocumentActionCreator.react.jsx');
-var RequestCellActionCreator = require('../../actions/Request/RequestCellActionCreator.react.jsx');
+var DSLStore = require('../../stores/DSLStore.react.jsx');
+var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');  
@@ -26,7 +20,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
   return {
-            errors: DashboardStore.getErrors(),
+            errors: [],//DSLStore.getErrors(),
             isLogged: SessionStore.isLogged()
       };
 }

@@ -1047,42 +1047,63 @@ input {
     box-shadow: lightgray 1px 1px 4px;
 }
 
+#editor-back-button {
+    position: absolute;
+    margin-top: -1.5em;
+    margin-left: -1em;
+    padding: 0.15;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
 #editor-controls {
     margin-bottom: 1em;
     min-height: 3em;
+    
 }
 
-#editor-controls #definiton-name {
-    float: left;
-    margin-left: 20%;
-    margin-top: 0.2em;
+#editor-controls form {
+    margin-top: 0.3em;
     display: inline-block;
     vertical-align: middle;
 }
 
-#editor-controls #definiton-name label {
+#editor-controls form label {
     margin-right: 1em;
 }
 
+#definiton-name {
+    float: left;
+    margin-left: 15%;
+}
+
 #editor-buttons {
-    float: right;
-    margin-right: 20%;
+    text-align: center;
+    width: 25%;
+    margin: auto;
+    display: inline-block;
 }
 
 #editor-controls i {
     vertical-align: middle;
     margin-left: 0.5em;
     margin-right: 0.5em;
-    padding: 0.2em;
+    padding: 0.15em;
     cursor: pointer;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
 }
 
-#editor-controls i:hover {
+#editor-controls i:hover, #editor-back-button:hover {
     color: lightgreen;
     background-color: #333;
+}
+
+#definition-type {
+    float: right;
+    margin-right: 15%;
 }
 
 #editor-viewer {
@@ -1112,11 +1133,11 @@ input {
     }
     
     #editor-controls #definiton-name {
-        margin-left: 15%;
+        margin-left: 10%;
     }
     
-    #editor-buttons {
-        margin-right: 15%;
+    #definition-type {
+        margin-right: 10%;
     }
     
     #editor-viewer {
@@ -1312,6 +1333,21 @@ input {
 	color: white;
 	background-color: #333;
 	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+}
+
+.material-icons-dashboard{
+      font-family: 'Material Icons';
+      width:100%;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 10em;  /* Preferred icon size */
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
 }
 
 
