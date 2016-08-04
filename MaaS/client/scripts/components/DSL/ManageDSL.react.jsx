@@ -20,9 +20,10 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
   return {
-            errors: [],//DSLStore.getErrors(),
+            errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            definitionId: null
+            definitionId: null,
+            DSL_LIST: DSLStore.getDSLList()
       };
 }
 
@@ -33,11 +34,13 @@ var ManageDSL = React.createClass({
     },
 
     componentDidMount: function() {
-        RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        if(!this.props.children)
+            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        DSLStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function() {
-        
+        DSLStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function() {
@@ -48,6 +51,7 @@ var ManageDSL = React.createClass({
         return (
             <div>
                 <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                <i onClick="" className="material-icons md-24 dropdown-button">&#xE32A;</i>
                 <i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i>
             </div>
         );
@@ -56,6 +60,7 @@ var ManageDSL = React.createClass({
     render: function() {
         if(!this.state.isLogged || this.state.errors.length > 0) 
         {
+            alert(this.state.errors);
             return (
                 <AuthorizationRequired />
             );
@@ -103,14 +108,22 @@ var ManageDSL = React.createClass({
             icon: (<i className="material-icons md-24">&#xE3BC;</i>)
         };
         
-        var data = [
-            {
-                name: "Prova"
-            },
-            {
-                name: "Prova2"
-            }
-        ];
+        var data = [];
+        if(this.state.DSL_LIST)
+        {
+            this.state.DSL_LIST.forEach(function(DSL, i) {
+                data[i] = {name: DSL.name};
+            });
+        }
+    
+        // [
+        //     {
+        //         name: "Prova"
+        //     },
+        //     {
+        //         name: "Prova2"
+        //     }
+        // ];
         var sidebarData = [all, dashboards, collections, documents, cells];
         var title, content;
         

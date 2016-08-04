@@ -15,7 +15,6 @@ module.exports = function(DSL) {
                console.log('> Failed creating DSL.');
                return cb(err);
             }
-            console.log(userId);
             // Define relation between user and DSL
             var user = app.models.user;
             user.findById(userId, function(err, userInstance) {
@@ -28,14 +27,45 @@ module.exports = function(DSL) {
                     });
                     return cb(err, null, null);
                 }
-                DSL.users.add(userInstance, function(err) {
-                    if(err)
-                    {
-                        console.log("> Error creating relationship for the DSL");
+                var Company = app.models.Company;
+                Company.findById(userInstance.companyId, function(err, company) {
+                    if(err || !company)
                         return cb(err, null, null);
-                    }
-                    console.log(DSL.users());
+                    //customer.orders([where], function(err, orders) {
+                    company.users({where: {role: "Administrator"}}, function(err, admins) {
+                        if(err || !admins)
+                            return cb(err, null, null);
+                        admins.forEach(function(admin, i) 
+                        {
+                            console.log("admin:", admin.email);
+                            DSL.users.add(admin,function(err) {
+                                if(err)
+                                {
+                                    console.log("> Error creating relationship for the DSL");
+                                    return cb(err, null, null);
+                                }
+                            });
+                        });
+                    });
+                    DSL.users.add(company.owner, function(err) {
+                        if(err)
+                        {
+                            console.log("> Error creating relationship for the DSL");
+                            return cb(err, null, null);
+                        }
+                    });
                 });
+                if(userInstance.role == "Member")
+                {
+                    DSL.users.add(userInstance, function(err) {
+                        if(err)
+                        {
+                            console.log("> Error creating relationship for the DSL");
+                            return cb(err, null, null);
+                        }
+                    });
+                }
+                console.log(DSL.users);
             });
             
             console.log("> Created DSL:", DSL.id);
@@ -61,10 +91,10 @@ module.exports = function(DSL) {
         }
     );
     
-    DSL.overwriteDefinition = function(id, source, cb) {
+    DSL.overwriteDefinition = function(id, type, source, cb) {
        DSL.findById(id, function(err, DSL) {
            if(err) return cb(err, null, null);
-           DSL.updateAttribute(source, source, function(err, newDSL) {
+           DSL.updateAttributes({type: type, source: source}, function(err, newDSL) {
                if(err) return cb(err, null, null);
                console.log("> Updated DSL:", newDSL.id);
                return cb(null, null, newDSL);
@@ -78,6 +108,7 @@ module.exports = function(DSL) {
             description: "Change user's editor configuration options",
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' },
+                { arg: 'type', type: 'string', required: true, description: 'Definition type' },
                 { arg: 'source', type: 'Object', required: true, description: 'Definition source' }
             ],
             returns: [

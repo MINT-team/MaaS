@@ -39,7 +39,6 @@ var Editor = require('./Editor.react.jsx');
 
 function getState() {
     return {
-        submit: false,
         theme: UserStore.getEditorTheme(),
         softTabs: UserStore.getEditorSoftTabs(),
         tabSize: UserStore.getEditorTabSize(),
@@ -50,7 +49,14 @@ function getState() {
 
 var EditorConfig = React.createClass({
     getInitialState: function() {
-        return getState();
+        return {
+            submit: false,
+            theme: UserStore.getEditorTheme(),
+            softTabs: UserStore.getEditorSoftTabs(),
+            tabSize: UserStore.getEditorTabSize(),
+            fontSize: UserStore.getEditorFontSize(),
+            errors: UserStore.getErrors()
+        };
     },
     
     componentDidMount: function() {
@@ -67,7 +73,7 @@ var EditorConfig = React.createClass({
     },
     
     initForm: function() {
-        if (!this.state.submit)
+        if(!this.state.submit)
         {
             if (this.state.softTabs == "true")
             {
@@ -96,7 +102,7 @@ var EditorConfig = React.createClass({
       var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
       var tabSize = this.refs.tabSize.value;
       var fontSize = this.refs.fontSize.value;
-      if (softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize)
+      if(softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize)
       {
           RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme, tabSize, fontSize);
       }

@@ -64,7 +64,10 @@ var Header = React.createClass({
                 );
                 headerPanel = (
                     <div id="header-panel">
-                        <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                        <div className="tooltip tooltip-bottom">
+                            <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                            <p id="profile-tooltip" className="tooltip-text tooltip-text">Your profile</p>
+                        </div>
                         <Link to="" id="settings-button" onClick={this.toggleDropdown}>
                             <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
                         </Link>

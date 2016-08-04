@@ -25,11 +25,15 @@ module.exports = function(app) {
         var user = app.models.user;
         var SuperAdmin = app.models.SuperAdmin;
         SuperAdmin.findOne({where: {email: email_value}, limit: 1}, function(err,results){
-            if (!results) {
+            if (!results) 
+            {
                 user.findOne({where: {email: email_value}, limit: 1}, function(err,results) {
-                    if (results) {
+                    if (results) 
+                    {
                         console.log('> Email already registered as User');
-                    } else {
+                    }
+                    else 
+                    {
                         SuperAdmin.create([
                             { email: email_value, password: '123456789' }
                         ], cb);
@@ -38,7 +42,9 @@ module.exports = function(app) {
                         });
                     }
                 });
-            } else {
+            }
+            else
+            {
                 console.log('> Email already registered as SuperAdmin')
             }
         });

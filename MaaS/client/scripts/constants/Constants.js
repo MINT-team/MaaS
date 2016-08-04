@@ -55,16 +55,15 @@ module.exports = {
     GET_COMPANIES: null,
 
     // Dashboard
-    GET_DASHBOARDS: null,
 
     // Collection
 
     // Document
 
     // DSL
-    GET_DSL_LIST: null,
     SAVE_DSL_RESPONSE: null,
     LOAD_DSL_RESPONSE: null,
+    LOAD_DSL_LIST_RESPONSE: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

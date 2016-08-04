@@ -21,7 +21,7 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _DSL_LIST = [];
+var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
@@ -68,6 +68,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getSource: function() {
         return _DSL.source;
+    },
+    
+    getDSLList: function() {
+        return _DSL_LIST;
     }
 });
 
@@ -78,40 +82,53 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
         case ActionTypes.LOAD_DSL_RESPONSE:
             if (action.errors)
             {
-                _errors = action.json.errors;
+                _errors = action.errors;
             }
             else if(action.json.definition)
             {
                 _errors = [];
+                _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
                 _DSL.source = action.definition.source;
+                
+                localStorage.setItem('DSLId',_DSL.id);
+                localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLSource',_DSL.source);
             }
             DSLStore.emitChange();
             break;
-        /*
-        case ActionTypes.GET_DSLS:
-            if(action.errors)
-            {
-                _errors = action.json.errors;
-            }
-            else if(action.json.DSLs)
+    
+        case ActionTypes.LOAD_DSL_LIST_RESPONSE:
+            if(action.definitionList)
             {
                 _errors = [];
-                _DSLs = action.DSLs;
+                _DSL_LIST = action.definitionList;
+                localStorage.setItem('DSLList', JSON.stringify(_DSL_LIST));
             }
             DSLStore.emitChange();
             break;
-        */  
+        
         case ActionTypes.SAVE_DSL_RESPONSE:
+            _errors = [];
             if(action.errors)
             {
-                _errors = action.json.errors;
+                _errors.push(action.errors);
             }
             else if(action.definition)
             {
-                _errors = [];
+                _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
                 _DSL.source = action.definition.source;
+                
+                var newDSL = {
+                    id: _DSL.id,
+                    name: _DSL.name,
+                    source: _DSL.source
+                };
+                _DSL_LIST.push(newDSL);
+                localStorage.setItem('DSLId',_DSL.id);
+                localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLSource',_DSL.source);
             }
             DSLStore.emitChange();
             break;

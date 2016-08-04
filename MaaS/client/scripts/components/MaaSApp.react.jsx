@@ -70,7 +70,7 @@ var MaaSApp = React.createClass({
         if(this.state.user.type == "commonUser")
         {   
             return (
-                <div id="app">
+                <div id="content">
                     <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
                     {this.props.children}
                     <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company}/>
@@ -78,7 +78,7 @@ var MaaSApp = React.createClass({
     	    );    
         }else{
             return (
-                <div id="app">
+                <div id="content">
                     <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
                         {this.props.children}
                     <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />

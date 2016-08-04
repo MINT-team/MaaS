@@ -25,9 +25,9 @@ function getState() {
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            id: DSLStore.getId(),
-            name: DSLStore.getName(),
-            source: DSLStore.getSource()
+            definitionId: DSLStore.getId(),
+            definitionName: DSLStore.getName(),
+            definitionSource: DSLStore.getSource()
     };
 }
 
@@ -38,7 +38,7 @@ var ManageDSLSource = React.createClass({
                 errors: [],
                 isLogged: SessionStore.isLogged(),
                 definitionId: this.props.definitionId,
-                definitionName: DSLStore.getName(),
+                definitionName: null,
                 definitionSource: DSLStore.getSource(),
                 saved: this.props.definitionId ? true : false
         };
@@ -48,7 +48,10 @@ var ManageDSLSource = React.createClass({
         DSLStore.addChangeListener(this._onChange);
         var id = this.props.definitionId;
         if(id)
+        {
+            alert("Load DSL already existing:  "+id);
             RequestDSLActionCreator.loadDSL(id);
+        }
         if(this.state.definitionName)
         {
             this.refs.definitionName.value = this.state.definitionName;
@@ -85,29 +88,23 @@ var ManageDSLSource = React.createClass({
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
         var errors = [];
-        if (!definitionType)
+        if(!definitionType || !definitionName)
         {
-            errors.push('Select the definition type before saving');
-        }
-        if (!definitionName)
-        {
-            errors.push('Fill the definiton name before saving');  
+            if (!definitionType)
+            {
+                errors.push('Select the definition type before saving');
+            }
+            if(!definitionName)
+            {
+                errors.push('Fill the definiton name before saving');  
+            }
         }
         else
         {
             if(definitionName == this.state.definitionName)
-            {
-                alert("overWrite");
-                //RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);
-            }
-            else 
-            {
-                alert("User id " +SessionStore.getUserId());
-                alert("definitionType  "+definitionType);
-                alert("definitionName  "+definitionName);
-                alert("source:  "+source);
+                RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, type, source);
+            else
                 RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, source);
-            }
         }
         if(errors.length > 0)
         {
@@ -118,6 +115,10 @@ var ManageDSLSource = React.createClass({
     toggleErrorPopUp: function() {
 		this.refs.error.classList.toggle("dropdown-show");
 	},
+	
+	emptyErrors: function() {
+	    this.setState({ errors: [] });
+	},
     
     render: function() {
         if(!this.state.isLogged) 
@@ -127,7 +128,7 @@ var ManageDSLSource = React.createClass({
             );
         }
         
-        var content, errors;
+        var content, errors = [];
         if(this.state.errors.length > 0) 
         {
             errors = ( <p id="errors">{this.state.errors.map((error) => <p className="error-item">{error}</p>)}</p> );
@@ -136,32 +137,32 @@ var ManageDSLSource = React.createClass({
         content = (
             <div id="editor-container">
                 
-                <div className="tooltip" id="editor-back-button">
+                <div className="tooltip tooltip-bottom" id="editor-back-button">
                         <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
-                    <p className="tooltip-text">Back</p>
+                    <p className="tooltip-text tooltip-text-short">Back</p>
                 </div>
                 <div id="editor-controls">
                     <form id="definiton-name">
                         <label htmlFor="definitionName">Definition name</label>
-                        <input id="definitionName" type="text" ref="definitionName" placeholder="Name">{this.state.definitionName}</input>
+                        <input onChange={this.onEdit} id="definitionName" type="text" ref="definitionName" placeholder="Name" />
                     </form>
                     <div id="editor-buttons">
-                        <div className="tooltip">
-                            <i id="save-button" onClick={this.saveSource} accesskey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
-                            <p className="tooltip-text">Save</p>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
+                            <i onClick={this.saveSource} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
                         </div>
-                        <div className="tooltip">
-                            <i onClick="" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
-                            <p className="tooltip-text">Build</p>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
+                            <i onClick="" accessKey="b" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
                         </div>
-                        <div className="tooltip">
-                            <i onClick="" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
-                            <p className="tooltip-text">Build & Run</p>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
+                            <i onClick="" accessKey="r" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
                         </div>
                     </div>
                     <form id="definition-type">
                         <label htmlFor="definitionType">Type</label>
-                        <select className="select" onChange={this._onSelectChange} id="definitionType" ref="definitionType" >
+                        <select className="select" id="definitionType" ref="definitionType" >
                             <option value=""></option>
                             <option value="Dashboard">Dashboard</option>
                             <option value="Collection">Collection</option>
@@ -177,7 +178,7 @@ var ManageDSLSource = React.createClass({
                     <p className="dropdown-title">Error</p>
                     <p className="dropdown-description">{errors}</p>
                     <div className="dropdown-buttons">
-                        <button className="button">Ok</button>
+                        <button onClick={this.emptyErrors} className="button">Ok</button>
                     </div>
                 </div>
             </div>

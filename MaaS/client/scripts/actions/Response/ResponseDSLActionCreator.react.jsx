@@ -32,6 +32,13 @@ var ResponseDSLActionCreator = {
             definition: definition
         });
         
+    },
+    
+    responseLoadDSLList: function(definitionList) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_DSL_LIST_RESPONSE,
+            definitionList: definitionList
+        });
     }
 };
 

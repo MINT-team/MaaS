@@ -32,7 +32,25 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "ALLOW"
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Owner",
+      "permission": "ALLOW",
+      "property": "saveDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "saveDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Member",
+      "permission": "ALLOW",
+      "property": "saveDefinition"
     }
   ],
   "methods": {}

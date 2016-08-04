@@ -420,9 +420,20 @@ input {
 }
 
 #header-dropdown {
-    margin-top: 0.5em;
+    margin-top: 0.7em;
     margin-left: 4em;
     margin-right: 2em;
+}
+
+#header-dropdown::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    right: 3.4em;
+    margin-left: -0.7em;
+    border-width: 0.7em;
+    border-style: solid;
+    border-color: transparent transparent white transparent;
 }
 
 #header-dropdown ul li {
@@ -436,6 +447,11 @@ input {
 
 #header-dropdown ul li:hover {
     color: lightgrey;
+}
+
+#profile-tooltip {
+    margin-top: 0.5em;
+    right: 8em;
 }
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
@@ -572,7 +588,7 @@ input {
     padding: 1em 0.5em 1em 0.5em;
     text-align: left;
     background-color: white;
-    overflow: auto;
+    /*overflow: auto;*/
     box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.2);
     border: lightgray 1px solid;
     -webkit-border-radius: 0.4em;
@@ -1176,7 +1192,7 @@ input {
     }
 }
 
-/*------------------------------------------------ TOOLTIP --------------------------------------------------------------*/
+/*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/
 @-moz-keyframes fadeIn {
     0% { opacity: 0; }
     100% {  opacity: 1; }
@@ -1199,9 +1215,9 @@ input {
     position: absolute;
     width: 6em;
     text-align: center !important;
-    margin-left: -2.2em;
-    /*margin-top: 0.2em;*/
-    padding: 0.1em 0.5em 0.1em 0.5em;
+    font-size: 0.9em;
+    margin-left: -2em;
+    padding: 0.2em 0.5em 0.3em 0.5em;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
@@ -1209,9 +1225,40 @@ input {
     border: darkgray 1px solid;
     background-color: #111;
     color: white;
+    line-height: normal;
 }
 
-.tooltip .tooltip-text::after {
+.tooltip .tooltip-text-short {
+    width: 4em;
+    margin-left: -1em;
+}
+
+.tooltip .tooltip-text-long {
+    width: 8em;
+    margin-left: -3em;
+}
+
+.tooltip .tooltip-text-longest {
+    width: 12em;
+    margin-left: -5em;
+}
+
+.tooltip-top .tooltip-text {
+    margin-top: -2.5em;
+}
+
+.tooltip-top .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -0.5em;
+    border-width: 0.5em;
+    border-style: solid;
+    border-color: #111 transparent transparent transparent;
+}
+
+.tooltip-bottom .tooltip-text::after {
     content: "";
     position: absolute;
     bottom: 100%;
@@ -1224,24 +1271,25 @@ input {
 
 .tooltip:hover .tooltip-text {
     visibility: visible;
+    z-index: 11;
     -moz-animation-name: fadeIn;
     -moz-animation-iteration-count: 1;
     -moz-animation-timing-function: ease-in;
-    -moz-animation-delay: 0.5s;
+    -moz-animation-delay: 0.6s;
     -moz-animation-fill-mode: backwards;
     -moz-animation-duration: 0.3s;
 
     -webkit-animation-name: fadeIn;
     -webkit-animation-iteration-count: 1;
     -webkit-animation-timing-function: ease-in;
-    -webkit-animation-delay: 0.5s;
+    -webkit-animation-delay: 0.6s;
     -webkit-animation-fill-mode: backwards;
     -webkit-animation-duration: 0.3s;
 
     animation-name: fadeIn;
     animation-iteration-count: 1;
     animation-timing-function: ease-in;
-    animation-delay: 0.5s;
+    animation-delay: 0.6s;
     animation-fill-mode: backwards;
     animation-duration: 0.3s;
 }

@@ -18,16 +18,19 @@ module.exports = function(app) {
             });
         }
         // If the target model is not Company or user
-        if(context.modelName !== 'Company' && context.modelName !== 'user') {
+        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'DSL') 
+        {
             return reject();
         }
         // Do not allow anonymous users
         var userId = context.accessToken.userId;
         //console.log("> userId:", userId);
-        if(!userId) {
+        if(!userId) 
+        {
             return reject();
         }
-        if(context.modelName == "user") {
+        if(context.modelName == "user") 
+        {
             context.model.findById(userId, function(err, user) {
                 if(err || !user)
                     return reject();
@@ -36,25 +39,56 @@ module.exports = function(app) {
                     ownerId: userId,
                     id: user.companyId
                 }, function(err, count) {
-                    if(err) {
-                        console.log(err);
-                        return cb(null, false);
-                    }
+                    if(err) 
+                        return reject();
                     cb(null, count > 0); // true = is a company Owner
                 });
             });
         }
-        if(context.modelName == "Company") {
+        if(context.modelName == "Company") 
+        {
             context.model.findById(context.modelId, function(err, company) {
                 if(err || !company)
                     return reject();
                 
-                if(company.ownerId == userId) {
+                if(company.ownerId == userId)
                     cb(null, true); // true = is a company Owner
-                } else {
+                else
                     return reject();
-                }
             });
+        }
+        if(context.modelName == "DSL") 
+        {
+            // Creating a new DSL definition
+            if(context.remotingContext.req.url == '/saveDefinition') 
+            {
+                var user = app.models.user;
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    if(userInstance.role == "Owner")
+                        cb(null, true); // true = user is Owner so he can create DSL definition
+                    else
+                        return reject();    
+                });
+            // Existing DSL definition
+            }
+            else
+            {
+                context.model.findById(context.modelId, function(err, DSL) {
+                    if(err || !DSL)
+                        return reject();
+                    DSL.users.findById(userId, function(err, user) {
+                        if(err || !user)
+                            return reject();
+                        if(user.role == "Owner")
+                            cb(null, true); // true = user is Owner and own this DSL definition
+                        else
+                            return reject();
+                    });
+                    
+                });
+            }
         }
     });
     
@@ -65,7 +99,7 @@ module.exports = function(app) {
             });
         }
         // If the target model is not Company or user
-        if(context.modelName !== 'Company' && context.modelName !== 'user') {
+        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'DSL') {
             return reject();
         }
         // Do not allow anonymous users
@@ -73,25 +107,24 @@ module.exports = function(app) {
         if(!userId) {
             return reject();
         }
-        if(context.modelName == "user") {
+        if(context.modelName == "user") 
+        {
             context.model.findById(userId, function(err, user) {
                 if(err || !user)
                     return reject();
                 var Company = app.models.Company;
                 Company.findOne({where: {id: user.companyId}, limit: 1}, function(err, companyInstance) {
-                    if(err || !companyInstance) {
-                        console.log(err);
-                        return cb(null, false);
-                    }
-                    if(user.role == 'Administrator') {
+                    if(err || !companyInstance)
+                        return reject();
+                    if(user.role == 'Administrator')
                         cb(null, true); // true = is a company Administrator
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });
         }
-        if(context.modelName == "Company") {
+        if(context.modelName == "Company") 
+        {
             context.model.findById(context.modelId, function(err, company) {
                 if(err || !company)
                     return reject();
@@ -99,13 +132,44 @@ module.exports = function(app) {
                 user.findOne({where: {id: userId, companyId: company.id}, limit: 1}, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
-                    if(userInstance.role == 'Administrator') {
+                    if(userInstance.role == 'Administrator')
                         cb(null, true); // true = is a company Administrator
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });   
+        }
+        if(context.modelName == "DSL") {
+            // Creating a new DSL definition
+            if(context.remotingContext.req.url == '/saveDefinition') 
+            {
+                var user = app.models.user;
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    if(userInstance.role == "Administrator")
+                        cb(null, true); // true = user is Administrator so he can create DSL definition
+                    else
+                        return reject();    
+                });
+            // Existing DSL definition
+            }
+            else
+            {
+                context.model.findById(context.modelId, function(err, DSL) {
+                    if(err || !DSL)
+                        return reject();
+                    DSL.users.findById(userId, function(err, user) {
+                        if(err || !user)
+                            return reject();
+                        if(user.role == "Administrator")
+                            cb(null, true); // true = user is Administrator and own this DSL definition
+                        else
+                            return reject();
+                    });
+                    
+                });
+            }
         }
     });
     
@@ -116,33 +180,34 @@ module.exports = function(app) {
             });
         }
         // If the target model is not Company or user
-        if(context.modelName !== 'Company' && context.modelName !== 'user') {
+        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'DSL') 
+        {
             return reject();
         }
         // Do not allow anonymous users
         var userId = context.accessToken.userId;
-        if(!userId) {
+        if(!userId) 
+        {
             return reject();
         }
-        if(context.modelName == "user") {
+        if(context.modelName == "user") 
+        {
             context.model.findById(userId, function(err, user) {
                 if(err || !user)
                     return reject();
                 var Company = app.models.Company;
                 Company.findOne({where: {id: user.companyId}, limit: 1}, function(err, companyInstance) {
-                    if(err || !companyInstance) {
-                        console.log(err);
-                        return cb(null, false);
-                    }
-                    if(user.role == 'Member') {
+                    if(err || !companyInstance)
+                        return reject();
+                    if(user.role == 'Member')
                         cb(null, true); // true = is a company Member
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });
         }
-        if(context.modelName == "Company") {
+        if(context.modelName == "Company") 
+        {
             context.model.findById(context.modelId, function(err, company) {
                 if(err || !company)
                     return reject();
@@ -150,13 +215,44 @@ module.exports = function(app) {
                 user.findOne({where: {id: userId, companyId: company.id}, limit: 1}, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
-                    if(userInstance.role == 'Member') {
+                    if(userInstance.role == 'Member')
                         cb(null, true); // true = is a company Member
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });   
+        }
+        if(context.modelName == "DSL") 
+        {
+            // Creating a new DSL definition
+            if(context.remotingContext.req.url == '/saveDefinition') {
+                var user = app.models.user;
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    if(userInstance.role == "Member")
+                        cb(null, true); // true = user is Member so he can create DSL definition
+                    else
+                        return reject();    
+                });
+            // Existing DSL definition
+            }
+            else
+            {
+                context.model.findById(context.modelId, function(err, DSL) {
+                    if(err || !DSL)
+                        return reject();
+                    DSL.users.findById(userId, function(err, user) {
+                        if(err || !user)
+                            return reject();
+                        if(user.role == "Member")
+                            cb(null, true); // true = user is Member and own this DSL definition
+                        else
+                            return reject();
+                    });
+                    
+                });
+            }
         }
     });
     
@@ -181,15 +277,12 @@ module.exports = function(app) {
                     return reject();
                 var Company = app.models.Company;
                 Company.findOne({where: {id: user.companyId}, limit: 1}, function(err, companyInstance) {
-                    if(err || !companyInstance) {
-                        console.log(err);
-                        return cb(null, false);
-                    }
-                    if(user.role == 'Guest') {
+                    if(err || !companyInstance)
+                        return reject();
+                    if(user.role == 'Guest')
                         cb(null, true); // true = is a company Guest
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });
         }
@@ -201,11 +294,10 @@ module.exports = function(app) {
                 user.findOne({where: {id: userId, companyId: company.id}, limit: 1}, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
-                    if(userInstance.role == 'Guest') {
+                    if(userInstance.role == 'Guest')
                         cb(null, true); // true = is a company Guest
-                    } else {
+                    else
                         cb(null, false);
-                    }
                 });
             });   
         }
@@ -227,14 +319,13 @@ module.exports = function(app) {
             return reject();
         }
         var SuperAdmin = app.models.SuperAdmin;
-        SuperAdmin.findbyId(userId, function(err, superadmin) {
-            if(err || !superadmin)
+        SuperAdmin.findById(userId, function(err, superAdmin) {
+            if(err || !superAdmin)
                 return reject();
-            if(superadmin) {
+            if(superAdmin)
                 cb(null, true); // true = is a super admin
-            } else {
+            else
                 cb(null, false);
-            }
         });
     });
 };
