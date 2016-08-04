@@ -21,7 +21,12 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "users": {
+      "type": "hasAndBelongsToMany",
+      "model": "user"
+    }
+  },
   "acls": [
     {
       "accessType": "*",

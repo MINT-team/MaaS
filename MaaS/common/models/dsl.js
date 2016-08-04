@@ -1,7 +1,7 @@
 var app = require('../../server/server.js');
 
 module.exports = function(DSL) {
-    DSL.saveDefinition = function(type, name, source, cb) {
+    DSL.saveDefinition = function(userId ,type, name, source, cb) {
         if(!type || !name)
         {
             var error = {
@@ -12,10 +12,32 @@ module.exports = function(DSL) {
         DSL.create({type: type, name: name, source: source}, function(err, DSL) {
             if (err)
             {
-               //DSL.destroyById(DSL.id);
                console.log('> Failed creating DSL.');
                return cb(err);
             }
+            console.log(userId);
+            // Define relation between user and DSL
+            var user = app.models.user;
+            user.findById(userId, function(err, userInstance) {
+                if(err)
+                {
+                    console.log("> Failed creating DSL, no user found to relate.");
+                    DSL.destroyById(DSL.id, function(err) {
+                        if(err) 
+                            return cb(err, null, null);
+                    });
+                    return cb(err, null, null);
+                }
+                DSL.users.add(userInstance, function(err) {
+                    if(err)
+                    {
+                        console.log("> Error creating relationship for the DSL");
+                        return cb(err, null, null);
+                    }
+                    console.log(DSL.users());
+                });
+            });
+            
             console.log("> Created DSL:", DSL.id);
             return cb(null, null, DSL);
        });
@@ -26,6 +48,7 @@ module.exports = function(DSL) {
         {
             description: "Change user's editor configuration options",
             accepts: [
+                { arg: 'userId', type: 'string', required: true, description: 'User id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
                 { arg: 'name', type: 'string', required: true, description: 'Definition name' },
                 { arg: 'source', type: 'string', required: true, description: 'Definition source' }

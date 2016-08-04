@@ -40,6 +40,10 @@
       "type": "belongsTo",
       "model": "Company",
       "foreignKey": "companyId"
+    },
+    "DSL": {
+      "type": "hasAndBelongsToMany",
+      "model": "DSL"
     }
   },
   "acls": [

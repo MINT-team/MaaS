@@ -31,12 +31,13 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-    saveDSLDefinition: function(type, name, source) {
+    saveDSLDefinition: function(userId, type, name, source) {
       request
         .post(APIEndpoints.DSL + '/saveDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .send({
+          userId: userId,
           type: type,
           name: name,
           source: source

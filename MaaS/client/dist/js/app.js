@@ -55,8 +55,8 @@ var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
 var ActionTypes = Constants.ActionTypes;
 
 var RequestDSLActionCreator = {
-    saveDSLDefinition: function saveDSLDefinition(type, name, source) {
-        WebAPIUtils.saveDSLDefinition(type, name, source);
+    saveDSLDefinition: function saveDSLDefinition(userId, type, name, source) {
+        WebAPIUtils.saveDSLDefinition(userId, type, name, source);
     },
     overwriteDSLDefinition: function overwriteDSLDefinition(id, source) {
         WebAPIUtils.overwriteDSLDefinition(id, source);
@@ -2290,7 +2290,11 @@ var ManageDSLSource = React.createClass({
                 alert("overWrite");
                 //RequestDSLActionCreator.overwriteDSLDefinition(this.props.definitionId, source);
             } else {
-                RequestDSLActionCreator.saveDSLDefinition(definitionType, definitionName, source);
+                alert("User id " + SessionStore.getUserId());
+                alert("definitionType  " + definitionType);
+                alert("definitionName  " + definitionName);
+                alert("source:  " + source);
+                RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, source);
             }
         }
         if (errors.length > 0) {
@@ -5120,7 +5124,6 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
-    window.alert(CompanyStore.getCompanies().length);
     return {
         errors: [], //DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -5687,6 +5690,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
 
         case ActionTypes.GET_COMPANIES:
+
             if (action.errors) {
                 _errors = action.errors;
             } else if (action.json) {
@@ -6518,8 +6522,9 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-  saveDSLDefinition: function saveDSLDefinition(type, name, source) {
+  saveDSLDefinition: function saveDSLDefinition(userId, type, name, source) {
     request.post(APIEndpoints.DSL + '/saveDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      userId: userId,
       type: type,
       name: name,
       source: source

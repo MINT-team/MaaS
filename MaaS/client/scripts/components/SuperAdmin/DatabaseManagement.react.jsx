@@ -25,7 +25,6 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
-    window.alert(CompanyStore.getCompanies().length);
   return {
             errors: [],//DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),

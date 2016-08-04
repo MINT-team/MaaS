@@ -102,7 +102,11 @@ var ManageDSLSource = React.createClass({
             }
             else 
             {
-                RequestDSLActionCreator.saveDSLDefinition(definitionType, definitionName, source);
+                alert("User id " +SessionStore.getUserId());
+                alert("definitionType  "+definitionType);
+                alert("definitionName  "+definitionName);
+                alert("source:  "+source);
+                RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, source);
             }
         }
         if(errors.length > 0)

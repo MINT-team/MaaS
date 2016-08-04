@@ -130,6 +130,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.GET_COMPANIES:
+            
             if(action.errors) {
                 _errors = action.errors;
             } else if(action.json) {
