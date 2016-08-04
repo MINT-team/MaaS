@@ -12,17 +12,6 @@ var RequestUserActionCreator = require('../actions/Request/RequestUserActionCrea
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
 
-var ace = require('../../brace');
-
-require('../../brace/theme/chaos');
-require('../../brace/theme/dawn');
-require('../../brace/theme/twilight');
-require('../../brace/theme/ambiance');
-require('../../brace/theme/cobalt');
-require('../../brace/theme/tomorrow');
-require('../../brace/theme/tomorrow_night');
-require('../../brace/theme/tomorrow_night_blue');
-
 function getState() {
     return {
         theme: UserStore.getEditorTheme(),
@@ -40,7 +29,7 @@ var Editor = React.createClass({
 
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
-        var editor = ace.edit("editor");
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         editor.setTheme("ace/theme/"+ this.state.theme);
         editor.session.setUseSoftTabs(this.state.softTabs == "true");
         editor.setFontSize(parseInt(this.state.fontSize,10));

@@ -84,16 +84,19 @@ var People = React.createClass({
 
   render: function() {
 
-    if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
+    if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) 
+    {
         return (
             <AuthorizationRequired />
         );
     }
     
     var title, content;
-    if(this.props.users.length > 1) {
+    if(this.props.users.length > 1) 
+    {
         title = "Users of your Company";
-        if(this.state.role == "Owner" || this.state.role == "Administrator") {
+        if(this.state.role == "Owner" || this.state.role == "Administrator") 
+        {
           content = (
             <div className="table-content">
                 <div className="table-header">
@@ -123,7 +126,9 @@ var People = React.createClass({
 			          <Invite companyId={this.state.id}/>
             </div>
           );
-        } else {
+        }
+        else
+        {
           content = (
             <div className="table-content">
                 <div className="table-header">
@@ -150,7 +155,9 @@ var People = React.createClass({
           );
         }
         
-    } else {
+    }
+    else
+    {
         title = "Invite someone to your company";
         content = (
             <div id="successful-operation">

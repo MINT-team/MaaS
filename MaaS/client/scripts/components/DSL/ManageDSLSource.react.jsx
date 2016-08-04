@@ -8,7 +8,6 @@
 
 var React = require('react');
 var Link = require('react-router').Link;
-var ace = require('../../../brace');
 var Editor = require('../Editor.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
@@ -54,7 +53,7 @@ var ManageDSLSource = React.createClass({
         {
             this.refs.definitionName.value = this.state.definitionName;
         }
-        var editor = ace.edit("editor");
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         var editorSession = editor.getSession();
         editorSession.on("change", this.onEdit);
     },
@@ -132,8 +131,10 @@ var ManageDSLSource = React.createClass({
         }
         content = (
             <div id="editor-container">
-                <div id="editor-back-button">
-                    <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                
+                <div className="tooltip" id="editor-back-button">
+                        <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                    <p className="tooltip-text">Back</p>
                 </div>
                 <div id="editor-controls">
                     <form id="definiton-name">
@@ -141,9 +142,18 @@ var ManageDSLSource = React.createClass({
                         <input id="definitionName" type="text" ref="definitionName" placeholder="Name">{this.state.definitionName}</input>
                     </form>
                     <div id="editor-buttons">
-                        <i id="save-button" onClick={this.saveSource} className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
-                        <i onClick="" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
-                        <i onClick="" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
+                        <div className="tooltip">
+                            <i id="save-button" onClick={this.saveSource} accesskey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
+                            <p className="tooltip-text">Save</p>
+                        </div>
+                        <div className="tooltip">
+                            <i onClick="" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
+                            <p className="tooltip-text">Build</p>
+                        </div>
+                        <div className="tooltip">
+                            <i onClick="" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
+                            <p className="tooltip-text">Build & Run</p>
+                        </div>
                     </div>
                     <form id="definition-type">
                         <label htmlFor="definitionType">Type</label>

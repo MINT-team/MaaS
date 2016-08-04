@@ -67,5 +67,29 @@ module.exports = {
           }
         } 
       });
+  },
+  
+  getCompanies: function() {
+    console.log("api utils get company");
+    request
+      .get(APIEndpoints.COMPANIES + '/' + '/Companies')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))  
+      .end(function(err, res){
+        if(res) {
+            if(res.error) {
+                var errors = _getErrors(res.body.error);
+                ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
+            } else {
+                ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
+            }
+        }
+        if(err){
+          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+        }
+      });
   }
+  
+  
+  
 };

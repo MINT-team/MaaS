@@ -206,11 +206,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         break;
 
       case ActionTypes.GET_USER:
-        if(action.errors) 
-        {
-          _errors = action.errors;
-        } 
-        else if(action.json) 
+        if(action.json) 
         {
           _errors = []; // empty old errors
           // set user data

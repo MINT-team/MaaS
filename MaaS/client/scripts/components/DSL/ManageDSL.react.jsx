@@ -21,7 +21,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
   return {
             errors: [],//DSLStore.getErrors(),
-            isLogged: SessionStore.isLogged()
+            isLogged: SessionStore.isLogged(),
+            definitionId: null
       };
 }
 
@@ -32,7 +33,7 @@ var ManageDSL = React.createClass({
     },
 
     componentDidMount: function() {
-        
+        RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
     },
 
     componentWillUnmount: function() {
@@ -62,7 +63,7 @@ var ManageDSL = React.createClass({
     
         // SideBar initialization
         var onAllClick = function() {
-            alert("ALL");
+            
         }
         var onDashboardsClick = function() {
             
@@ -113,28 +114,39 @@ var ManageDSL = React.createClass({
         var sidebarData = [all, dashboards, collections, documents, cells];
         var title, content;
         
-        
-        title = "Manage your DSL definitions";
-        content = (
-            <div>
-                <Sidebar title="Filter DSL" data={sidebarData}/>
-                <div className="container sidebar-container">
-                    <p className="container-title">{title}</p>
-                    <div id="createDSLDefinition">
-                        <Link to="/manageDSL/manageDSLSource" className="button">Create new DSL definition</Link>
-                        <div id="table-dsl">
-                            <BootstrapTable data={data} pagination={true} search={true} striped={true} hover={true}>
-                                <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
-                                <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
-                            </BootstrapTable>
+        if(this.props.children) 
+        {
+            const childrenWithDefinitionId = React.Children.map(this.props.children,
+                (child) => React.cloneElement(child, {
+                    definitionId: this.state.definitionId
+                })
+            );
+            content = childrenWithDefinitionId;
+        } 
+        else
+        {
+            title = "Manage your DSL definitions";
+            content = (
+                <div>
+                    <Sidebar title="Filter DSL" data={sidebarData}/>
+                    <div className="container sidebar-container">
+                        <p className="container-title">{title}</p>
+                        <div id="createDSLDefinition">
+                            <Link to="/manageDSL/manageDSLSource" className="button">Create new DSL definition</Link>
+                            <div id="table-dsl">
+                                <BootstrapTable data={data} pagination={true} search={true} striped={true} hover={true}>
+                                    <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
+                                    <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                                </BootstrapTable>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        }
         return (
             <div id="dsl">
-                {this.props.children || content}
+                {content}
             </div>
         );
     }

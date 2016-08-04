@@ -27,6 +27,9 @@ var RequestDSLActionCreator = {
     },
     loadDSL: function(id) {
         WebAPIUtils.loadDSL(id);
+    },
+    loadDSLList: function(userId) {
+        WebAPIUtils.loadDSLList(userId);
     }
     
 };

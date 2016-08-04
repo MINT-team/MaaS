@@ -22,6 +22,7 @@ var _company = {
                 name: localStorage.getItem('companyName'),
             };
 var _users = [];    // users of the company
+var _companies = [] //all company in the system
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -60,6 +61,10 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
 
     getUsers: function() {
         return _users;
+    },
+    
+    getCompanies: function(){
+        return _companies;
     },
 
     getErrors: function() {
@@ -122,6 +127,17 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 _company.name = action.name;
             }
             CompanyStore.emitDelete();
+            break;
+            
+        case ActionTypes.GET_COMPANIES:
+            if(action.errors) {
+                _errors = action.errors;
+            } else if(action.json) {
+                _errors = []; // empty old errors
+                // set users of the company
+                _companies = action.json;
+            }
+            CompanyStore.emitChange();
             break;
     }
 

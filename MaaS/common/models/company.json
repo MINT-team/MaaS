@@ -35,6 +35,12 @@
     {
       "accessType": "*",
       "principalType": "ROLE",
+      "principalId": "SuperAdmin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
       "principalId": "Owner",
       "permission": "ALLOW"
     },

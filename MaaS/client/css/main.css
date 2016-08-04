@@ -1055,6 +1055,7 @@ input {
     position: absolute;
     margin-top: -1.5em;
     margin-left: -1em;
+    display: block;
 }
 
 #editor-back-button i {
@@ -1070,9 +1071,8 @@ input {
 }
 
 #editor-controls {
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
     min-height: 3em;
-    
 }
 
 #editor-controls form {
@@ -1091,16 +1091,19 @@ input {
 }
 
 #editor-buttons {
-    text-align: center;
-    width: 25%;
+    min-width: 15em;
     margin: auto;
     display: inline-block;
+    text-align: center;
+}
+
+#editor-buttons div {
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 #editor-controls i {
     vertical-align: middle;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
     padding: 0.15em;
     cursor: pointer;
     -moz-border-radius: 5px;
@@ -1171,6 +1174,76 @@ input {
         border-radius: 5px;
         border: 2px solid lightgrey;
     }
+}
+
+/*------------------------------------------------ TOOLTIP --------------------------------------------------------------*/
+@-moz-keyframes fadeIn {
+    0% { opacity: 0; }
+    100% {  opacity: 1; }
+}
+@-webkit-keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.tooltip {
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    width: 6em;
+    text-align: center !important;
+    margin-left: -2.2em;
+    /*margin-top: 0.2em;*/
+    padding: 0.1em 0.5em 0.1em 0.5em;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.2);
+    border: darkgray 1px solid;
+    background-color: #111;
+    color: white;
+}
+
+.tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -0.5em;
+    border-width: 0.5em;
+    border-style: solid;
+    border-color: transparent transparent #111 transparent;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    -moz-animation-name: fadeIn;
+    -moz-animation-iteration-count: 1;
+    -moz-animation-timing-function: ease-in;
+    -moz-animation-delay: 0.5s;
+    -moz-animation-fill-mode: backwards;
+    -moz-animation-duration: 0.3s;
+
+    -webkit-animation-name: fadeIn;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease-in;
+    -webkit-animation-delay: 0.5s;
+    -webkit-animation-fill-mode: backwards;
+    -webkit-animation-duration: 0.3s;
+
+    animation-name: fadeIn;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-delay: 0.5s;
+    animation-fill-mode: backwards;
+    animation-duration: 0.3s;
 }
  
 /*------------------------------------------------ PEOPLE --------------------------------------------------------------*/

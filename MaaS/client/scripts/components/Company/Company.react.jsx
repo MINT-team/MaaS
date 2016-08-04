@@ -65,7 +65,8 @@ var Company = React.createClass({
     }
 
     var content;
-    if(this.props.children) {
+    if(this.props.children) 
+    {
       // users prop to children
       const childrenWithUsers = React.Children.map(this.props.children,
         (child) => React.cloneElement(child, {
@@ -73,7 +74,9 @@ var Company = React.createClass({
         })
       );
       content = childrenWithUsers;
-    } else {
+    } 
+    else
+    {
       var name = this.state.name;
       var numberOfUsers = this.state.users.length;
       var numberOfDatabases;

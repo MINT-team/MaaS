@@ -26,11 +26,10 @@ var ResponseDSLActionCreator = {
         });
     },
     
-    responseLoadDSL: function(definition, errors) {
+    responseLoadDSL: function(definition) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_RESPONSE,
-            definition: definition,
-            errors: errors
+            definition: definition
         });
         
     }

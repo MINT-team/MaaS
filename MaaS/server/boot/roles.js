@@ -210,4 +210,31 @@ module.exports = function(app) {
             });   
         }
     });
+    
+    Role.registerResolver('SuperAdmin', function(role, context, cb) {
+        function reject() {
+            process.nextTick(function() {
+                cb(null, false);
+            });
+        }
+        // If the target model is not Company or user
+        if(context.modelName !== 'Company' && context.modelName !== 'user') {
+            return reject();
+        }
+        // Do not allow anonymous users
+        var userId = context.accessToken.userId;
+        if(!userId) {
+            return reject();
+        }
+        var SuperAdmin = app.models.SuperAdmin;
+        SuperAdmin.findbyId(userId, function(err, superadmin) {
+            if(err || !superadmin)
+                return reject();
+            if(superadmin) {
+                cb(null, true); // true = is a super admin
+            } else {
+                cb(null, false);
+            }
+        });
+    });
 };

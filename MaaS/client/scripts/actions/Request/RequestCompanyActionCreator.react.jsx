@@ -18,7 +18,11 @@ var RequestCompanyActionCreator = {
     },
 
     deleteCompany: function(id, email) {
-        WebAPIUtils.deleteCompany(id, email);
+       WebAPIUtils.deleteCompany(id, email);
+    },
+    
+    geCompanies: function() {
+        WebAPIUtils.geCompanies();
     }
 };
 

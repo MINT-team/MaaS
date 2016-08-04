@@ -16,6 +16,7 @@ module.exports = {
   APIEndpoints: {
     USERS:              APIRoot + "/users",
     COMPANIES:          APIRoot + "/Companies",
+    GET_COMPANIES:      APIRoot + "/Companies",
     SUPERADMINS:        APIRoot + "/SuperAdmins",
     DATABASES:          APIRoot + "/ExternalDatabases",
     DASHBOARDS:         APIRoot + "/Dashboards",
@@ -51,6 +52,7 @@ module.exports = {
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
+    GET_COMPANIES: null,
 
     // Dashboard
     GET_DASHBOARDS: null,

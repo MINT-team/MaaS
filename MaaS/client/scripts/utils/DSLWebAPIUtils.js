@@ -81,9 +81,24 @@ module.exports = {
         .end(function(error, res) {
           if (res)
           {
-            
+            ResponseDSLActionCreator.responseLoadDSL(res);
           }
         });
+    },
+    
+    loadDSLList: function(userId) {
+      request
+        .get(APIEndpoints.DSL + '/')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if (res)
+          {
+            
+          }
+          
+        });
+        
     }
     
 };

@@ -26,7 +26,16 @@ var ResponseCompanyActionCreator = {
           name: name,
           errors: errors
         });
+    },
+    
+    responseCompanyCompanies: function(json, errors) {
+        Dispatcher.handleServerAction({
+          type: ActionTypes.GET_COMPANIES,
+          json: json,
+          errors: errors
+        });
     }
+    
 };
 
 module.exports = ResponseCompanyActionCreator;

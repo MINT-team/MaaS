@@ -40,11 +40,10 @@ var ResponseUserActionCreator = {
             json: json
         });
     },
-    responseGetUser: function(json, errors) {
+    responseGetUser: function(json) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_USER,
-            json: json,
-            errors: errors
+            json: json
         });
     },
     responseDeleteUser: function(errors, email){
