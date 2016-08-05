@@ -111,6 +111,19 @@ module.exports = {
           
         });
         
+    },
+    
+    deleteDSLDefinition(id) {
+      request
+        .del(APIEndpoints.DSL + '/' + id)
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if (res)
+          {
+            
+          }
+        });
     }
     
 };

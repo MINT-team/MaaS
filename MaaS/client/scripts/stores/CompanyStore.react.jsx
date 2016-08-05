@@ -17,12 +17,13 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
+
 var _company = {
                 id: localStorage.getItem('companyId'),
                 name: localStorage.getItem('companyName'),
             };
 var _users = [];    // users of the company
-var _companies = [] //all company in the system
+var _companies = []; //all company in the system
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -130,7 +131,6 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.GET_COMPANIES:
-            
             if(action.errors) {
                 _errors = action.errors;
             } else if(action.json) {

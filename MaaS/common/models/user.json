@@ -43,7 +43,8 @@
     },
     "DSL": {
       "type": "hasAndBelongsToMany",
-      "model": "DSL"
+      "model": "DSL",
+      "foreignKey": "userId"
     }
   },
   "acls": [

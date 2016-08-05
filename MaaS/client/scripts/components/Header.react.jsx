@@ -75,7 +75,7 @@ var Header = React.createClass({
                             <ul>
                                 <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
-                                <Link onClick={this.logout} to=""><li>Logout</li></Link>
+                                <Link onClick={this.logout} to=""><li><i className="material-icons md-18">&#xE879;</i>Logout</li></Link>
                             </ul>
                         </div>
                     </div>

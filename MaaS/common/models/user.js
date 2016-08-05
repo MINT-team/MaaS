@@ -21,31 +21,38 @@ module.exports = function(user) {
 
     // Registrazione proprietario - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
-        if(!password || !confirmation) {
+        if(!password || !confirmation) 
+        {
             var error = { message: 'Insert the password and its confirmation' };
             return cb(null, error);   // callback di insuccesso
         }
-        if(password != confirmation) {
+        if(password != confirmation) 
+        {
             error = { message: 'Password confirmation doesn\'t match' };
             return cb(null, error);   // callback di insuccesso
         }
-        if(password.length < MIN_PASSWORD_LENGTH) {
+        if(password.length < MIN_PASSWORD_LENGTH) 
+        {
             error = { message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters' };
             return cb(null, error);   // callback di insuccesso
         }
         // Search for an already existing company
         var Company = app.models.Company;
         Company.findOne({where: {name: company}, limit: 1}, function(err, existingCompany) {
-            if(err) return cb(null, err);
-            if(!err && existingCompany) {
+            if(err) 
+                return cb(null, err);
+            if(!err && existingCompany) 
+            {
                 console.log('> company already exists:', existingCompany);
                 error = { message: 'A company with this name already exists' };
                 return cb(null, error);   // callback di insuccesso
             }
             // If company does not exists search for an already existing user
             user.findOne({where: {email: email}, limit: 1}, function(err, existingUser) {
-                if(err) return cb(null, err);
-                if(!err && existingUser) {
+                if(err) 
+                    return cb(null, err);
+                if(!err && existingUser) 
+                {
                     console.log('> user already exists:', existingUser);
                     error = {
                         message: 'A user with this email already exists'
@@ -54,13 +61,16 @@ module.exports = function(user) {
                 }
                 // Create the company
                 Company.create({name: company}, function(err, companyInstance) {
-                    if(err) return cb(null, err);
+                    if(err) 
+                        return cb(null, err);
                     console.log('> company created:', companyInstance);
                     // Create the user and set the company has him
                     user.create({companyId: companyInstance.id, email: email, password: password, role: "Owner"}, function(err, userInstance) {
-                        if(err) {
+                        if(err) 
+                        {
                             Company.destroyById(companyInstance.id, function(err) {
-                                if(err) {
+                                if(err) 
+                                {
                                     console.log("> error destroying the company after an error occurred creating the user. Please clean your database, company id:", companyInstance.id);
                                     return cb(null, err);
                                 }
@@ -87,7 +97,8 @@ module.exports = function(user) {
                             user: userInstance
                         };
                         userInstance.verify(options, function(err, response) {
-                            if(err) {
+                            if(err) 
+                            {
                                 //return next(err);
                                 return cb(null, err);
                             }
@@ -127,7 +138,6 @@ module.exports = function(user) {
         var options = {
             resetHref: '' + url + '#/recoverpwd?uid=' + info.user.id + '&access_token=' + info.accessToken.id + ''
         };
-        //var html = 'Click <a href="' + url + '?access_token=' + info.accessToken.id + '">here</a> to reset your password';
         var html = template(options);
 
         user.app.models.Email.send({
@@ -136,7 +146,8 @@ module.exports = function(user) {
             subject: 'Password reset',
             html: html
         }, function(err) {
-            if (err) {
+            if (err)
+            {
                 return console.log('> error sending password reset email');
             }
             console.log('> sending password reset email to:', info.email);
@@ -147,16 +158,24 @@ module.exports = function(user) {
     user.invite = function(info, cb) {
         // Check if company exists
         app.models.Company.findOne({where: {name: info.company}, limit: 1}, function(err, companyInstance) {
-            if(err) return cb(err);
+            if(err)
+                return cb(err);
             // Initialize user account
             user.create({email: info.email, password: ' ', role: info.role, companyId: companyInstance.id}, function(err, userInstance) {
-                if(err) return cb(err);
+                if(err)
+                    return cb(err);
                 // Create a verification token to confirm the user
                 user.generateVerificationToken(userInstance, function(err, token) {
-                    if (err) { return cb(err); }
+                    if (err) 
+                    {
+                        return cb(err);
+                    }
                     userInstance.verificationToken = token;
                     userInstance.save(function(err) {
-                        if(err) { return cb(err); }
+                        if(err)
+                        { 
+                            return cb(err); 
+                        }
                     });
                     // Create another token to set a new password after confirmation
                     userInstance.accessTokens.create({ ttl: INVITATION_TTL }, function(err, accessToken) {
@@ -179,7 +198,8 @@ module.exports = function(user) {
                             subject: 'Invitation to MaaS',
                             html: html
                         }, function(err) {
-                            if (err) {
+                            if (err)
+                            {
                                 console.log('> error sending invitation email');
                                 return cb(null, "error sending invitation email", null);
                             }
@@ -188,6 +208,33 @@ module.exports = function(user) {
                         });
                     });
                 });
+                // Change DSL list of the user
+                if(userInstance.role == "Administrator")
+                {
+                    var DSL = app.models.DSL;
+                    //userToChange.DSL.remove();
+                    user.findOne({where: {role: "Owner", companyId: userInstance.companyId},limit: 1}, function(err, owner) {
+                        if(err || !owner)
+                        {
+                            return cb(err);
+                        }
+                        owner.DSL({ where: {} }, function(err, DSLList) {
+                            if(err || !DSLList)
+                            {
+                                return cb(err);
+                            }
+                            DSLList.forEach(function(DSLInstance, i) {
+                                DSLInstance.users.add(userInstance, function(err) {
+                                    if(err)
+                                    {
+                                        console.log("> Error creating relationship for the DSL");
+                                        return cb(err, null, null);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                }
             });
         });
     };
@@ -382,7 +429,8 @@ module.exports = function(user) {
                 if(err || !userToDelete)
                     return cb(err);
                 // user trying to delete another user
-                if(userInstance.email != userToDelete.email) {
+                if(userInstance.email != userToDelete.email) 
+                {
                     var error = {
                         message: 'You haven\'t the rights to delete this user'
                     };
@@ -396,8 +444,11 @@ module.exports = function(user) {
                         }
                     }
                 // user trying to delete his own account
-                } else {
-                    if(userToDelete.role == "Owner") {
+                }
+                else
+                {
+                    if(userToDelete.role == "Owner") 
+                    {
                         error = {
                             message: 'You are the Owner of this company, you can\'t simply delete your account. Delete your company first.'
                         };
@@ -406,8 +457,9 @@ module.exports = function(user) {
                 }
                 // successful request
                 user.deleteById(userToDelete.id, function(err) {
-                    if(err) console.log("> error deleting user:", userToDelete.email);
-                    console.log("> user deleted:", userToDelete.email);
+                    if(err) 
+                        console.log("> Error deleting user:", userToDelete.email);
+                    console.log("> User deleted:", userToDelete.email);
                     return cb(null, null, userToDelete.email);
                 });
             });
@@ -436,8 +488,13 @@ module.exports = function(user) {
             if(err || !userInstance)
                 return cb(err, null, null);
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToChange) {
-                if(err) {console.log(err);}
-                if(!userToChange) {
+                if(err) 
+                {
+                    console.log(err);
+                    
+                }
+                if(!userToChange) 
+                {
                     console.log("non trovato");
                     var error = {
                         message: 'User to change role not found'
@@ -445,31 +502,103 @@ module.exports = function(user) {
                     return cb(null, error, null);
                 }
                 // user trying to change role of another user, only this case is allowed
-                if(userInstance.email != userToChange.email) {
+                if(userInstance.email != userToChange.email) 
+                {
                     error = {
                         message: 'You haven\'t the rights to change this user'
                     };
-                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") {
+                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") 
+                    {
                         return cb(null, error);
                     }
                     // if userInstance.role == "Owner" then he's allowed to
-                    if(userInstance.role == "Administrator") {
-                        if(userToChange.role == "Owner" || userToChange.role == "Administrator") {
+                    if(userInstance.role == "Administrator") 
+                    {
+                        if(userToChange.role == "Owner" || userToChange.role == "Administrator") 
+                        {
                             return cb(null, error);
                         }
                     }
                     // successful request
-                    userToChange.updateAttributes({ role: role }, function() {
-                        if(err) 
+                    userToChange.updateAttributes({ role: role }, function(err, updatedUser) {
+                        if(err)
                         {
                             var error = {
                                 message: 'Failed changing role for: '+userToChange.email
                             };
                             console.log('> failed changing role for: ', userToChange.email);
                             return cb(null, error);
-                        } else {
-                            console.log("> role changed for:", userToChange.email);
-                            return cb(null, null, userToChange.email);
+                        }
+                        else
+                        {
+                            // Change DSL list
+                            var DSL = app.models.DSL;
+                            if(updatedUser.role == "Administrator")
+                            {
+                                user.findOne({where: {role: "Owner", companyId: updatedUser.companyId},limit: 1}, function(err, owner) {
+                                    if(err || !owner)
+                                    {
+                                        return cb(err);
+                                    }
+                                    owner.DSL({ where: {} }, function(err, DSLList) {
+                                        if(err || !DSLList)
+                                        {
+                                            return cb(err);
+                                        }
+                                        DSLList.forEach(function(DSLInstance, i) {
+                                            DSLInstance.users.add(updatedUser, function(err) {
+                                                if(err)
+                                                {
+                                                    console.log("> Error creating relationship for the DSL");
+                                                    return cb(err, null, null);
+                                                }
+                                            });
+                                        });
+                                    });
+                                });
+                            }
+                            if(updatedUser.role == "Member")
+                            {
+                                updatedUser.DSL({ where: {} }, function(err, DSLList) {
+                                    if(err || !DSLList)
+                                    {
+                                        return cb(err);
+                                    }
+                                    DSLList.forEach(function(DSLInstance, i) {
+                                        if(DSLInstance.createdBy != updatedUser.id)
+                                        {
+                                            updatedUser.DSL.remove(DSLInstance, function(err) {
+                                                if(err)
+                                                {
+                                                    console.log("> Error removing DSL from user while changing his role");
+                                                    return cb(err);
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            }
+                            if(updatedUser.role == "Guest")
+                            {
+                                updatedUser.DSL({ where: {} }, function(err, DSLList) {
+                                    if(err || !DSLList)
+                                    {
+                                        return cb(err);
+                                    }
+                                    DSLList.forEach(function(DSLInstance, i) {
+                                        updatedUser.DSL.remove(DSLInstance, function(err) {
+                                            if(err)
+                                            {
+                                                console.log("> Error removing DSL from user while changing his role");
+                                                return cb(err);
+                                            }
+                                        });
+                                    });
+                                });
+                            }
+                            // Response
+                            console.log("> Role changed for:", updatedUser.email);
+                            return cb(null, null, updatedUser.email);
                         }
                     });
                 }

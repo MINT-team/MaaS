@@ -18,13 +18,18 @@
     "source": {
         "type": "string",
         "required": false
+    },
+    "createdBy": {
+        "type": "string",
+        "required": true
     }
   },
   "validations": [],
   "relations": {
     "users": {
       "type": "hasAndBelongsToMany",
-      "model": "user"
+      "model": "user",
+      "foreignKey": "dslId"
     }
   },
   "acls": [

@@ -9,8 +9,8 @@ module.exports = function(DSL) {
             };
             return cb(null, error, null);
         }
-        DSL.create({type: type, name: name, source: source}, function(err, DSL) {
-            if (err)
+        DSL.create({type: type, name: name, source: source, createdBy: userId}, function(err, DSLInstance) {
+            if(err || !DSLInstance)
             {
                console.log('> Failed creating DSL.');
                return cb(err);
@@ -21,7 +21,7 @@ module.exports = function(DSL) {
                 if(err)
                 {
                     console.log("> Failed creating DSL, no user found to relate.");
-                    DSL.destroyById(DSL.id, function(err) {
+                    DSL.destroyById(DSLInstance.id, function(err) {
                         if(err) 
                             return cb(err, null, null);
                     });
@@ -31,14 +31,14 @@ module.exports = function(DSL) {
                 Company.findById(userInstance.companyId, function(err, company) {
                     if(err || !company)
                         return cb(err, null, null);
-                    //customer.orders([where], function(err, orders) {
+                    // Add DSL to the Admins of the company
                     company.users({where: {role: "Administrator"}}, function(err, admins) {
                         if(err || !admins)
                             return cb(err, null, null);
                         admins.forEach(function(admin, i) 
                         {
                             console.log("admin:", admin.email);
-                            DSL.users.add(admin,function(err) {
+                            DSLInstance.users.add(admin,function(err) {
                                 if(err)
                                 {
                                     console.log("> Error creating relationship for the DSL");
@@ -47,29 +47,38 @@ module.exports = function(DSL) {
                             });
                         });
                     });
-                    DSL.users.add(company.owner, function(err) {
-                        if(err)
-                        {
-                            console.log("> Error creating relationship for the DSL");
-                            return cb(err, null, null);
-                        }
+                    // Add DSL to the Owner of the company
+                    company.owner(function(err, owner) {
+                        console.log("\nOwner:", owner);
+                        DSLInstance.users.add(owner, function(err) {
+                            if(err)
+                            {
+                                console.log("> Error creating relationship for the DSL");
+                                return cb(err, null, null);
+                            }
+                        });
+                    });
+                    // If user creating the DSL is not Owner or Admin add DSL to him
+                    if(userInstance.role == "Member")
+                    {
+                        DSLInstance.users.add(userInstance, function(err) {
+                            if(err)
+                            {
+                                console.log("> Error creating relationship for the DSL");
+                                return cb(err, null, null);
+                            }
+                        });
+                    }
+                    
+                    // log utenti
+                    DSLInstance.users({ where: {}}, function(err, users){
+                        console.log("\nUtenti: ", users);
                     });
                 });
-                if(userInstance.role == "Member")
-                {
-                    DSL.users.add(userInstance, function(err) {
-                        if(err)
-                        {
-                            console.log("> Error creating relationship for the DSL");
-                            return cb(err, null, null);
-                        }
-                    });
-                }
-                console.log(DSL.users);
             });
             
-            console.log("> Created DSL:", DSL.id);
-            return cb(null, null, DSL);
+            console.log("> Created DSL:", DSLInstance.id);
+            return cb(null, null, DSLInstance);
        });
     };
     
@@ -118,4 +127,6 @@ module.exports = function(DSL) {
             http: { verb: 'put', path: '/:id/overwriteDefinition' }
         }
     );
+    
+    
 };

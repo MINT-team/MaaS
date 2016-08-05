@@ -21,8 +21,8 @@ var RequestCompanyActionCreator = {
        WebAPIUtils.deleteCompany(id, email);
     },
     
-    geCompanies: function() {
-        WebAPIUtils.geCompanies();
+    getCompanies: function() {
+        WebAPIUtils.getCompanies();
     }
 };
 

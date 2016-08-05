@@ -13,6 +13,7 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var DeleteDSL = require('./DeleteDSL.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -47,12 +48,13 @@ var ManageDSL = React.createClass({
         this.setState(getState());
     },
     
-    buttonFormatter: function(cell, row) {
+    buttonFormatter: function(cell,row) {
         return (
             <div>
                 <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
                 <i onClick="" className="material-icons md-24 dropdown-button">&#xE32A;</i>
                 <i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+                <DeleteDSL id={row.id} name={row.name} />
             </div>
         );
     },
@@ -109,13 +111,15 @@ var ManageDSL = React.createClass({
         };
         
         var data = [];
+        var selectRowProp = {
+            clickToSelect: true
+        };
         if(this.state.DSL_LIST)
         {
             this.state.DSL_LIST.forEach(function(DSL, i) {
-                data[i] = {name: DSL.name};
+                data[i] = {id: DSL.id,name: DSL.name};
             });
         }
-    
         // [
         //     {
         //         name: "Prova"
@@ -135,7 +139,7 @@ var ManageDSL = React.createClass({
                 })
             );
             content = childrenWithDefinitionId;
-        } 
+        }
         else
         {
             title = "Manage your DSL definitions";
@@ -147,8 +151,8 @@ var ManageDSL = React.createClass({
                         <div id="createDSLDefinition">
                             <Link to="/manageDSL/manageDSLSource" className="button">Create new DSL definition</Link>
                             <div id="table-dsl">
-                                <BootstrapTable data={data} pagination={true} search={true} striped={true} hover={true}>
-                                    <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
+                                <BootstrapTable ref="table" data={data} pagination={true} search={true} striped={true} hover={true} selectRow={selectRowProp}>
+                                    <TableHeaderColumn isKey={true} dataField="name">Name</TableHeaderColumn>
                                     <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
                                 </BootstrapTable>
                             </div>

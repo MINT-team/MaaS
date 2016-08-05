@@ -30,6 +30,9 @@ var RequestDSLActionCreator = {
     },
     loadDSLList: function(userId) {
         WebAPIUtils.loadDSLList(userId);
+    },
+    deleteDSLDefinition: function(id) {
+        WebAPIUtils.deleteDSLDefinition(id);
     }
     
 };
