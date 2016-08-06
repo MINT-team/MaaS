@@ -135,7 +135,6 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = action.errors;
             } else if(action.json) {
                 _errors = []; // empty old errors
-                // set users of the company
                 _companies = action.json;
                 localStorage.setItem('companies', JSON.stringify(_companies));
             }

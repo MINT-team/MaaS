@@ -13,6 +13,33 @@ var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var DSLStore = require('../../stores/DSLStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
+var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
+
+var ManageDSLPermissions = React.createClass({
+    render: function() {
+        if(!this.state.isLogged) 
+        {
+            return (
+                <AuthorizationRequired />
+            );
+        }
+        var content, errors = [];
+        return (
+            <div id="dsl-definition-permissions">
+                {content}
+            </div>
+            
+        );
+    }
+    
+});
+
+module.exports = ManageDSLPermissions;
+
 /*
 Guest: esecuzione
 Member: Permesso di scrittura (sui propri)

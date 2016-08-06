@@ -107,6 +107,29 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             DSLStore.emitChange();
             break;
+            
+        case ActionTypes.LOAD_DSL_ACCESS_RESPONSE:
+            if (action.errors)
+            {
+                _errors = action.errors;
+            }
+            else if(action.json)
+            {
+                _errors = [];
+                _DSL.id = action.json[0].dsl.id;
+                _DSL.name = action.json[0].dsl.name;
+                _DSL.type = action.json[0].dsl.type;
+                _DSL.source = action.json[0].dsl.source;
+                
+                _DSL_LIST.push(action.json[0]);
+                
+                localStorage.setItem('DSLId', _DSL.id);
+                localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource', _DSL.source);
+            }
+            DSLStore.emitChange();
+            break;
     
         case ActionTypes.LOAD_DSL_LIST_RESPONSE:
             if(action.definitionList)
@@ -130,13 +153,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 
-                var newDSL = {
-                    id: _DSL.id,
-                    name: _DSL.name,
-                    type: _DSL.type,
-                    source: _DSL.source
-                };
-                _DSL_LIST.push(newDSL);
                 localStorage.setItem('DSLId',_DSL.id);
                 localStorage.setItem('DSLName',_DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
@@ -177,7 +193,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 var index;
                 _DSL_LIST.forEach(function(DSL, i) 
                 {
-                    if(DSL.id == action.id) 
+                    if(DSL.dsl.id == action.id) 
                     {
                         index = i;
                     }

@@ -57,6 +57,9 @@ var ManageDSLSource = React.createClass({
         editorSession.on("change", this.onEdit);
     },
     
+    componentWillUnmount: function() {
+        DSLStore.removeChangeListener(this._onChange);
+    },
     
     onEdit: function(e) {
         this.setState({ saved: false });
@@ -64,70 +67,80 @@ var ManageDSLSource = React.createClass({
         	this.refs.save.classList.remove("saved");
     	}
     },
-    
-    componentWillUnmount: function() {
-        DSLStore.removeChangeListener(this._onChange);
-    },
 
     _onChange: function() {
         this.setState(getState());
-        if(!(this.state.errors.length > 0)) 
+        if(!(this.state.errors.length > 0))
         {
+            // Successful saving
+            if(this.state.saved == false)
+            {
+                var dslId = this.state.definitionId;
+                var userId = SessionStore.getUserId();
+                RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the table
+                this.setState({ saved: true });
+                this.refs.save.classList.toggle("saved");
+            }
+        }
+        // On DSL load
+        var id = this.props.params.definitionId;
+        if(id)
+        {
+            if(this.state.definitionName)
+            {
+                this.refs.definitionName.value = this.state.definitionName;
+            }
+            if(this.state.definitionType)
+            {
+                if(this.state.definitionType == "Dashboard")
+                    this.refs.definitionType.selectedIndex = 1;
+                if(this.state.definitionType == "Collection")
+                    this.refs.definitionType.selectedIndex = 2;
+                if(this.state.definitionType == "Document")
+                    this.refs.definitionType.selectedIndex = 3;
+                if(this.state.definitionType == "Cell")
+                    this.refs.definitionType.selectedIndex = 4;
+            }
+            if(this.state.definitionSource)
+            {
+                var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+                editor.setValue(this.state.definitionSource);
+            }
             this.setState({ saved: true });
             this.refs.save.classList.toggle("saved");
         }
-        if(this.state.definitionName)
-        {
-            this.refs.definitionName.value = this.state.definitionName;
-        }
-        if(this.state.definitionType)
-        {
-            if(this.state.definitionType == "Dashboard")
-                this.refs.definitionType.selectedIndex = 1;
-            if(this.state.definitionType == "Collection")
-                this.refs.definitionType.selectedIndex = 2;
-            if(this.state.definitionType == "Document")
-                this.refs.definitionType.selectedIndex = 3;
-            if(this.state.definitionType == "Cell")
-                this.refs.definitionType.selectedIndex = 4;
-        }
-        if(this.state.definitionSource)
-        {
-            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
-            editor.setValue(this.state.definitionSource);
-            this.setState({ saved: true });
-            this.refs.save.classList.toggle("saved");
-        }
-        
     },
     
-    saveSource: function() {
-        var editor = ace.edit("editor");
-        var definitionSource = editor.getValue();
-        var definitionName = this.refs.definitionName.value;
-        var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
-        var errors = [];
-        if(!definitionType || !definitionName)
+    onSave: function() {
+        if(this.state.saved == false)
         {
-            if (!definitionType)
+            var editor = ace.edit("editor");
+            var definitionSource = editor.getValue();
+            var definitionName = this.refs.definitionName.value;
+            var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
+            var errors = [];
+            if(!definitionType || !definitionName)
             {
-                errors.push('Select the definition type before saving');
+                if (!definitionType)
+                {
+                    errors.push('Select the definition type before saving');
+                }
+                if(!definitionName)
+                {
+                    errors.push('Fill the definiton name before saving');  
+                }
             }
-            if(!definitionName)
-            {
-                errors.push('Fill the definiton name before saving');  
-            }
-        }
-        else
-        {
-            if(definitionName == this.state.definitionName)
-                RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);
             else
-                RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
-        }
-        if(errors.length > 0)
-        {
-            this.setState({ errors: errors });
+            {
+                if(definitionName == this.state.definitionName)
+                    RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);
+                else
+                    RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+            }
+            if(errors.length > 0)
+            {
+                this.setState({ errors: errors });
+            }
         }
     },
     
@@ -156,7 +169,7 @@ var ManageDSLSource = React.createClass({
             <div id="editor-container">
                 
                 <div className="tooltip tooltip-bottom" id="editor-back-button">
-                        <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                    <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
                     <p className="tooltip-text tooltip-text-short">Back</p>
                 </div>
                 <div id="editor-controls">
@@ -167,7 +180,7 @@ var ManageDSLSource = React.createClass({
                     <div id="editor-buttons">
                         <div className="tooltip tooltip-top">
                             <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
-                            <i onClick={this.saveSource} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
+                            <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
                         </div>
                         <div className="tooltip tooltip-top">
                             <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
@@ -203,7 +216,7 @@ var ManageDSLSource = React.createClass({
         );
         
         return (
-            <div id="dsl-definiton">
+            <div id="dsl-definition">
                 {content}
             </div>
         );

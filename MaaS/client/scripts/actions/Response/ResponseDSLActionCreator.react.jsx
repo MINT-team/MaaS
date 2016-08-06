@@ -42,6 +42,13 @@ var ResponseDSLActionCreator = {
         
     },
     
+    responseLoadDSLAccess: function(json) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_DSL_ACCESS_RESPONSE,
+            json: json
+        });
+    },
+    
     responseLoadDSLList: function(definitionList) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_LIST_RESPONSE,

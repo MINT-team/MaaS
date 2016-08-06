@@ -74,12 +74,10 @@ module.exports = {
             res = JSON.parse(res.text);
             if(res.error)
             {
-              alert('Errore:  '+ res.error.message);
               ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
             }
             else
             {
-              alert(res.definition.name);
               ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
             }
           }
@@ -113,13 +111,31 @@ module.exports = {
         .end(function(error, res) {
           if(res)
           {
-            console.log(res.body);
             ResponseDSLActionCreator.responseLoadDSLList(res.body);
           }
-          else 
-            alert("error");
         });
-        
+    },
+    
+    loadDSLAccess: function(id, userId) {
+      request
+        .get(APIEndpoints.DSL_ACCESSES)
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .query({
+              filter: { 
+                    include:["dsl"], 
+                    where: { 
+                            "userId": userId,
+                            "dslId": id
+                    }
+              }
+        })
+        .end(function(error, res) {
+          if(res)
+          {
+            ResponseDSLActionCreator.responseLoadDSLAccess(res.body);
+          }
+        });
     },
     
     deleteDSLDefinition: function(id) {

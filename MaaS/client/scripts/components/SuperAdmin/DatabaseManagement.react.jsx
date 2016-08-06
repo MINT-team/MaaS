@@ -1,30 +1,3 @@
-// Name: {DatabaseManagement.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
- 
-/*var React = require('react');
-var Link = require('react-router').Link;
-var Sidebar = require('../Sidebar.react.jsx');
-var SessionStore = require('../../stores/SessionStore.react.jsx');
-var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-var DSLStore = require('../../stores/DSLStore.react.jsx');
-var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
-var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
-var ReactBSTable = require('react-bootstrap-table');  
-var BootstrapTable = ReactBSTable.BootstrapTable;
-var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-*/
-
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
@@ -33,8 +6,7 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
-
-
+var Sidebar = require('../Sidebar.react.jsx');
 
 function getState() {
     
@@ -44,6 +16,7 @@ function getState() {
             companies:  localStorage.getItem('companies')  //JSON that contains the companies in the system 
       };
 }
+
 
 var DatabaseManagement = React.createClass({
     
@@ -55,9 +28,9 @@ var DatabaseManagement = React.createClass({
  componentDidMount: function() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-          
+        RequestCompanyActionCreator.getCompanies();  
   },
-
+  
   componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
       CompanyStore.removeChangeListener(this._onChange);
@@ -66,12 +39,62 @@ var DatabaseManagement = React.createClass({
   _onChange: function() {
       this.setState(getState());
   },
+  
+    
     render: function() {
-        window.alert("render");
-        window.alert(this.state.companies);
-       return(
-           <div> in questo sistema ci sono  aziende </div>
-           );
+        if(!this.state.isLogged || this.state.errors.length > 0) 
+        {
+            alert(this.state.errors);
+            return (
+                <AuthorizationRequired />
+            );
+        }
+        var title, content;
+        if(this.props.children)
+        {
+            content = this.props.children;
+        }
+        else
+        {
+            // SideBar initialization
+            var companies = {
+                label: "Companies",
+                //onClick: onCompaniesClick,
+                link: "dashboardSuperAdmin/companiesManagement",
+                icon: (<i className="material-icons md-24">&#xE873;</i>)
+            };
+            var users = {
+                label: "Users",
+                //onClick: onUsersClick,
+                link: "dashboardSuperAdmin/usersManagement",
+                icon: (<i className="material-icons md-24">&#xE7EF;</i>)
+            };
+            
+            var sidebarData = [companies, users];
+            var numberOfCompanies;
+            if(this.state.companies){
+                numberOfCompanies = (JSON.parse(this.state.companies)).length;
+            }
+            else{
+                numberOfCompanies = "please, wait ...";
+            }
+            content = (
+                <div>
+                    <Sidebar title="Database Management" data={sidebarData}/>
+                    <div className="container sidebar-container">
+                        <p className="container-title">In the system there are</p>
+                        <p className="container-title">  {numberOfCompanies} </p>           
+                        <p className="container-title">companies</p>
+                        <i className="material-icons-dashboard">&#xE0AF;</i>
+                    </div>
+                </div>
+            );
+        }
+        return (
+            <div>
+                {content}
+            </div>
+        );
     }
 });
 

@@ -29,7 +29,6 @@ var ResponseCompanyActionCreator = {
     },
     
     responseCompanyCompanies: function(json, errors) {
-      window.alert("response get companies");
         Dispatcher.handleServerAction({
           type: ActionTypes.COMPANIES,
           json: json,

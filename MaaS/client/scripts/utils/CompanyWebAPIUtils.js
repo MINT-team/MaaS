@@ -79,11 +79,9 @@ module.exports = {
           console.log(res);
             if(res.error) {
               window.alert("errore");
-              console.log(res.body.error);
                 var errors = _getErrors(res.body.error);
                 ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
             } else {
-                window.alert("riposta");
                 ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
             }
         }

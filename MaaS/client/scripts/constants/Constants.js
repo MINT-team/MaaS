@@ -65,6 +65,7 @@ module.exports = {
     OVERWRITE_DSL_RESPONSE: null,
     LOAD_DSL_RESPONSE: null,
     LOAD_DSL_LIST_RESPONSE: null,
+    LOAD_DSL_ACCESS_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
     
     // Databases

@@ -29,6 +29,7 @@ var ExternalDatabases = require('./components/Company/ExternalDatabases.react.js
 var People = require('./components/Company/People.react.jsx');
 var ManageDSL = require('./components/DSL/ManageDSL.react.jsx');
 var ManageDSLSource = require('./components/DSL/ManageDSLSource.react.jsx');
+var ManageDSLPermissions = require('./components/DSL/ManageDSLPermissions.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
@@ -36,9 +37,10 @@ var ManageActiveDashboard = require('./components/ManageActiveDashboard.react.js
 var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
+var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
+var UsersManagement = require('./components/SuperAdmin/UsersManagement.react.jsx');
 var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
 var Collapse = require('./components/Collapse.react.jsx');
-
 //<Route path="createDSL" component={EditDSL} />
             //<Route path="editDSL" component={EditDSL} />
             
@@ -75,6 +77,8 @@ var Routes = React.createClass({
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin}>
             <Route path="databaseManagement" component={DatabaseManagement} />
             <Route path="impersonateUser" component={ImpersonateUser} />
+            <Route path="companiesManagement" component={CompaniesManagement} />
+            <Route path="usersManagement" component={UsersManagement} />
           </Route>
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />

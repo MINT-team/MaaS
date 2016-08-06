@@ -1143,11 +1143,17 @@ input {
 }
 
 #save-button {
-    color: #E93F2C !important;
+    color: #333 !important;
 }
 
 #editor-controls .saved {
-    color: #333 !important;
+    color: lightgray !important;
+}
+
+#editor-controls .saved:hover {
+    color: lightgray !important;
+    background-color: inherit;
+    cursor: default;
 }
 
 #editor-controls i:hover {
@@ -1207,6 +1213,45 @@ input {
 }
 
 /*------------------------------------------- MANAGE DSL DEFINITION --------------------------------------------------------------*/
+#dsl-table-top {
+    margin-left: 5em;
+    margin-right: 5em;
+}
+
+#dsl-table .form-control {    /* Search bar*/
+    width: 20em;
+    margin-bottom: 1em;
+}
+
+#dsl-type {
+    float: left;
+    font-size: 1.5em;
+    width: 6em;
+    text-align: left;
+}
+
+#dsl-buttons {
+    float: right;
+}
+
+#dsl-buttons i {
+    color: #333;
+    vertical-align: middle;
+    margin-top: -0.2em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    cursor: pointer;
+}
+
+#dsl-buttons i:hover {
+    color: lightgrey;
+}
+
+#dsl-buttons .tooltip-text {
+    margin-left: -1.2em;
+    margin-top: 0.5em;
+}
+
 .dsl-buttons {
     text-align: center;
 }
@@ -1542,3 +1587,4 @@ input {
 .dashCont a:hover {
     color: lightgreen;   
   }
+
