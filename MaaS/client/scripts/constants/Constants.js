@@ -21,7 +21,8 @@ module.exports = {
     DASHBOARDS:         APIRoot + "/Dashboards",
     COLLECTIONS:        APIRoot + "/Collections",
     DOCUMENTS:          APIRoot + "/Documents",
-    DSL:              APIRoot + "/DSL"
+    DSL:                APIRoot + "/DSL",
+    DSL_ACCESSES:       APIRoot + "/DSLAccesses"
   },
 
   PayloadSources: keyMirror({

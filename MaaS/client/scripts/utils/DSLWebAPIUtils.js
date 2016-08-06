@@ -101,14 +101,23 @@ module.exports = {
     
     loadDSLList: function(userId) {
       request
-        .get(APIEndpoints.USERS + '/' + userId + '/dsl')
+        .get(APIEndpoints.DSL_ACCESSES)
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
+        .query({
+              filter: { 
+                    include:["dsl"], 
+                    where: { "userId": userId }
+              }
+        })
         .end(function(error, res) {
           if(res)
           {
+            console.log(res.body);
             ResponseDSLActionCreator.responseLoadDSLList(res.body);
           }
+          else 
+            alert("error");
         });
         
     },
@@ -137,7 +146,7 @@ module.exports = {
     
     changeDSLDefinitionPermissions(id, userId) {
       request
-        .put(APIEndpoints.DSL + '/' + id + '/changePermissions')
+        .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res) {

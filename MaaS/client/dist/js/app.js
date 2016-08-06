@@ -2220,7 +2220,10 @@ var ManageDSL = React.createClass({
     },
 
     componentDidMount: function componentDidMount() {
-        if (!this.props.children) RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        if (!this.props.children) {
+            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+            //RequestDSLActionCreator.loadDSLPermissionList();
+        }
         DSLStore.addChangeListener(this._onChange);
     },
 
@@ -2231,51 +2234,64 @@ var ManageDSL = React.createClass({
     _onChange: function _onChange() {
         this.setState(getState());
     },
-
+    /*
+    Permesso = 'esecuzione', 'scrittura', 'lettura'
+    1) Permesso di scrittura: modifica + cancellazione + lettura + esecuzione
+    2) Permesso di lettura: lettura + esecuzione
+    3) Permesso di esecuzione: esecuzione
+    */
     buttonFormatter: function buttonFormatter(cell, row) {
         var buttons;
-        if (this.state.role != "Guest" /*this.state.role == "Owner" || this.state.role == "Admin"*/) {
+        if (this.state.role == "Owner" || this.state.role == "Admin") {
+            buttons = React.createElement(
+                'div',
+                null,
+                React.createElement(
+                    Link,
+                    { to: "/manageDSL/manageDSLSource/" + row.id },
+                    React.createElement(
+                        'i',
+                        { id: 'dsl-modify', className: 'material-icons md-24' },
+                        ''
+                    )
+                ),
+                React.createElement(
+                    Link,
+                    { to: "/manageDSL/manageDSLPermission/" + row.id },
+                    React.createElement(
+                        'i',
+                        { id: 'dsl-change-permission', className: 'material-icons md-24 dropdown-button' },
+                        ''
+                    )
+                ),
+                React.createElement(DeleteDSL, { id: row.id, name: row.name })
+            );
+        } else {
+            if (this.state.role == "Member" && row.permission == "execute") {
                 buttons = React.createElement(
                     'div',
                     null,
                     React.createElement(
-                        Link,
-                        { to: "/manageDSL/manageDSLSource/" + row.id },
-                        React.createElement(
-                            'i',
-                            { className: 'material-icons md-24' },
-                            ''
-                        )
-                    ),
-                    React.createElement(
                         'i',
                         { onClick: '', className: 'material-icons md-24 dropdown-button' },
-                        ''
+                        ''
                     ),
                     React.createElement(DeleteDSL, { id: row.id, name: row.name })
                 );
-            } else {
-            /*
-            if(this.state.role == "Member" && row.createdBy == this.state.userId)
-            {
-                buttons = (
-                    <div>
-                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
-                        <DeleteDSL id={row.id} name={row.name} />
-                    </div>
+            }
+
+            if (this.state.role == "Member" && row.createdBy != this.state.userId) {
+                buttons = React.createElement(
+                    'div',
+                    null,
+                    React.createElement(
+                        'i',
+                        { onClick: '', className: 'material-icons md-24 dropdown-button' },
+                        ''
+                    ),
+                    React.createElement(DeleteDSL, { id: row.id, name: row.name })
                 );
             }
-            
-            if(this.state.role == "Member" && row.createdBy != this.state.userId)
-            {
-                buttons = (
-                    <div>
-                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
-                        <DeleteDSL id={row.id} name={row.name} />
-                    </div>
-                );
-            }
-            */
         }
         return React.createElement(
             'div',
@@ -2352,7 +2368,11 @@ var ManageDSL = React.createClass({
         };
         if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
             this.state.DSL_LIST.forEach(function (DSL, i) {
-                data[i] = { id: DSL.id, name: DSL.name };
+                data[i] = {
+                    id: DSL.dsl.id,
+                    name: DSL.dsl.name,
+                    permission: DSL.permission
+                };
             });
         }
         // [
@@ -5416,10 +5436,11 @@ var RequestUserActionCreator = require('../../actions/Request/RequestUserActionC
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 function getState() {
+
     return {
         errors: [], //DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
-        companies: JSON.parse(localStorage.getItem('companies')) //JSON that contains the companies in the system 
+        companies: localStorage.getItem('companies') //JSON that contains the companies in the system 
     };
 }
 
@@ -5434,7 +5455,6 @@ var DatabaseManagement = React.createClass({
     componentDidMount: function componentDidMount() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestCompanyActionCreator.getCompanies();
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -5446,12 +5466,12 @@ var DatabaseManagement = React.createClass({
         this.setState(getState());
     },
     render: function render() {
+        window.alert("render");
+        window.alert(this.state.companies);
         return React.createElement(
             'div',
             null,
-            ' in questo sistema ci sono ',
-            this.state.companies.length,
-            ' aziende '
+            ' in questo sistema ci sono  aziende '
         );
     }
 });
@@ -5518,7 +5538,8 @@ module.exports = {
     DASHBOARDS: APIRoot + "/Dashboards",
     COLLECTIONS: APIRoot + "/Collections",
     DOCUMENTS: APIRoot + "/Documents",
-    DSL: APIRoot + "/DSL"
+    DSL: APIRoot + "/DSL",
+    DSL_ACCESSES: APIRoot + "/DSLAccesses"
   },
 
   PayloadSources: keyMirror({
@@ -5909,7 +5930,8 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));
+var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION
+
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
@@ -5998,7 +6020,6 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLList', JSON.stringify(_DSL_LIST));
             }
             DSLStore.emitChange();
-            break;
 
         case ActionTypes.SAVE_DSL_RESPONSE:
             _errors = [];
@@ -6812,10 +6833,16 @@ module.exports = {
   },
 
   loadDSLList: function loadDSLList(userId) {
-    request.get(APIEndpoints.USERS + '/' + userId + '/dsl').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
-      if (res) {
-        ResponseDSLActionCreator.responseLoadDSLList(res.body);
+    request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
+      filter: {
+        include: ["dsl"],
+        where: { "userId": userId }
       }
+    }).end(function (error, res) {
+      if (res) {
+        console.log(res.body);
+        ResponseDSLActionCreator.responseLoadDSLList(res.body);
+      } else alert("error");
     });
   },
 
@@ -6834,7 +6861,7 @@ module.exports = {
   },
 
   changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId) {
-    request.put(APIEndpoints.DSL + '/' + id + '/changePermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+    request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
         alert("Ritorno web api");
       }

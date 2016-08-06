@@ -1221,6 +1221,14 @@ input {
     margin-right: 1em;
 }
 
+#dsl-modify:hover {
+    color: orange;
+}
+
+#dsl-change-permission:hover {
+    color: #60D42E;
+}
+
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/
 @-moz-keyframes fadeIn {
     0% { opacity: 0; }

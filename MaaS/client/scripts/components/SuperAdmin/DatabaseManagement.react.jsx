@@ -37,14 +37,16 @@ var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 
 function getState() {
+    
   return {
             errors: [],//DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            companies:  JSON.parse(localStorage.getItem('companies'))  //JSON that contains the companies in the system 
+            companies:  localStorage.getItem('companies')  //JSON that contains the companies in the system 
       };
 }
 
 var DatabaseManagement = React.createClass({
+    
     
  getInitialState: function() {
       return getState();
@@ -53,7 +55,7 @@ var DatabaseManagement = React.createClass({
  componentDidMount: function() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestCompanyActionCreator.getCompanies();   
+          
   },
 
   componentWillUnmount: function() {
@@ -65,8 +67,10 @@ var DatabaseManagement = React.createClass({
       this.setState(getState());
   },
     render: function() {
+        window.alert("render");
+        window.alert(this.state.companies);
        return(
-           <div> in questo sistema ci sono {(this.state.companies).length} aziende </div>
+           <div> in questo sistema ci sono  aziende </div>
            );
     }
 });

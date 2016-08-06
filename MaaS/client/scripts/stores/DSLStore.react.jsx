@@ -21,7 +21,9 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));
+ 
+var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));       // DSL LIST WITH PERMISSION
+
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
@@ -114,7 +116,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLList', JSON.stringify(_DSL_LIST));
             }
             DSLStore.emitChange();
-            break;
         
         case ActionTypes.SAVE_DSL_RESPONSE:
             _errors = [];

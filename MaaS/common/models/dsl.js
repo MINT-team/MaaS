@@ -175,4 +175,26 @@ module.exports = function(DSL) {
         }
         
     );
+    
+    DSL.changeDefinitionPermissions = function(id, userId, permission, cb) {
+        
+        
+        
+    };
+    
+    DSL.remoteMethod(
+        'changeDefinitionPermissions',
+        {
+            description: "Change the permissions for one specific DSL definition",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' },
+                { arg: 'userId', type: 'string', required: true, description: 'User id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'put', path: '/:id/changeDefinitionPermissions' }
+        }
+        
+    );
 };

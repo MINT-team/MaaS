@@ -39,7 +39,10 @@ var ManageDSL = React.createClass({
 
     componentDidMount: function() {
         if(!this.props.children)
+        {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+            //RequestDSLActionCreator.loadDSLPermissionList();
+        }
         DSLStore.addChangeListener(this._onChange);
     },
 
@@ -50,23 +53,27 @@ var ManageDSL = React.createClass({
     _onChange: function() {
         this.setState(getState());
     },
-    
+    /*
+    Permesso = 'esecuzione', 'scrittura', 'lettura'
+1) Permesso di scrittura: modifica + cancellazione + lettura + esecuzione
+2) Permesso di lettura: lettura + esecuzione
+3) Permesso di esecuzione: esecuzione
+    */
     buttonFormatter: function(cell, row) {
         var buttons;
-        if(this.state.role != "Guest"/*this.state.role == "Owner" || this.state.role == "Admin"*/)
+        if(this.state.role == "Owner" || this.state.role == "Admin")
         {
             buttons = (
                 <div>
-                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i className="material-icons md-24">&#xE254;</i></Link>
-                    <i onClick="" className="material-icons md-24 dropdown-button">&#xE32A;</i>
+                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
+                    <Link to={"/manageDSL/manageDSLPermission/" + row.id }><i id="dsl-change-permission" className="material-icons md-24 dropdown-button">&#xE32A;</i></Link>
                     <DeleteDSL id={row.id} name={row.name} />
                 </div>
             );
         }
         else
         {
-            /*
-            if(this.state.role == "Member" && row.createdBy == this.state.userId)
+            if(this.state.role == "Member" && row.permission == "execute")
             {
                 buttons = (
                     <div>
@@ -85,7 +92,6 @@ var ManageDSL = React.createClass({
                     </div>
                 );
             }
-            */
         }
         return (
             <div className="dsl-buttons">
@@ -152,7 +158,11 @@ var ManageDSL = React.createClass({
         if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
         {
             this.state.DSL_LIST.forEach(function(DSL, i) {
-                data[i] = {id: DSL.id,name: DSL.name};
+                data[i] = {
+                            id: DSL.dsl.id,
+                            name: DSL.dsl.name,
+                            permission: DSL.permission
+                };
             });
         }
         // [
