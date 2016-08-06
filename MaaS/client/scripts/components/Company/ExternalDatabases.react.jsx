@@ -8,9 +8,9 @@
 
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
-//var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
-var RequestActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
+var RequestExternalDatabasesActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');  
@@ -21,9 +21,7 @@ var Collapse = require('react-collapse');
 var ReactHeight = require('react-height');
 
 function getState() {
-  RequestActionCreator.getDbs();
   return {
-          //errors: CompanyStore.getErrors(),
           errors: ExternalDatabaseStore.getErrors(),
           isOpened: false,
           _isOpened: true,
@@ -48,29 +46,31 @@ var ExternalDatabases = React.createClass({
     }
  },
  
-  handleChange: function(event) {
+  /*handleChange: function(event) {
     this.setState({value: event.target.value});
   },
-  
+  */
   componentDidMount: function() {
-      Collapse.addChangeListener(this._onChange);    
-      SessionStore.addChangeListener(this._onChange);
-      ExternalDatabaseStore.addChangeListener(this._onChange());
+      //Collapse.addChangeListener(this._onChange);
+      //SessionStore.addChangeListener(this._onChange);
+      ExternalDatabaseStore.addChangeListener(this._onChange);
+      alert(CompanyStore.getId());
+      RequestExternalDatabasesActionCreator.getDbs(CompanyStore.getId());
   },
 
   componentWillUnmount: function() {
-      Collapse.removeChangeListener(this._onChange);
-      SessionStore.removeChangeListener(this._onChange);
-      ExternalDatabaseStore.removeChangeListener(this._onChange());
+      //Collapse.removeChangeListener(this._onChange);
+      //SessionStore.removeChangeListener(this._onChange);
+      ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
   
   render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
-        return (
-            <AuthorizationRequired />
-        );
-        // <img src="../images/jurassic.gif" alt=""/>
-    }
+    if(!this.state.isLogged || this.state.errors.length > 0) 
+        {
+            return (
+                <AuthorizationRequired />
+            );
+        }
   
     var selectRowProp = {
         mode: "checkbox",
@@ -80,13 +80,18 @@ var ExternalDatabases = React.createClass({
   
     var data = [
       {
+        id: null,
         name: "Prova",
         allowed: "true"
       }
     ];
+    
+    var options = {
+      noDataText: "There are no DSL definitions to display"
+    };
   
-    RequestActionCreator.getDbs();
-    var databases = ExternalDatabaseStore.getDbNames();
+    
+    //var databases = ExternalDatabaseStore.getDbNames();
     var title, content;
     title = "Manage Database";
     content = (
@@ -110,12 +115,10 @@ var ExternalDatabases = React.createClass({
               </Collapse>  
             </div>
             <div id="table-database">
-            <Collapse ref="table"  _onChange={this.handleChange} isOpened={this.state._isOpened} >
-              <BootstrapTable selectRow={selectRowProp} pagination={true} data={databases} search={true} striped={true} hover={true}>
-                <TableHeaderColumn isKey={true}  dataField="name">Name</TableHeaderColumn>
+              <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
+                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
                 <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
               </BootstrapTable>
-              </Collapse>
             </div>
             </div>
           );
@@ -128,5 +131,15 @@ var ExternalDatabases = React.createClass({
     );
   }
 });
+
+/*
+
+<Collapse _onChange={this.handleChange} isOpened={this.state._isOpened} >
+              <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
+                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
+              </BootstrapTable>
+              </Collapse>
+*/
 
 module.exports = ExternalDatabases;

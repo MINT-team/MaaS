@@ -112,8 +112,8 @@ var RequestExternalDatabaseActionCreator = {
         WebAPIUtils.connectDb();
     },
 
-    getDbs: function getDbs() {
-        WebAPIUtils.getDbs();
+    getDbs: function getDbs(id) {
+        WebAPIUtils.getDbs(id);
     }
 };
 
@@ -1394,9 +1394,9 @@ module.exports = DeleteUser;
 
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
-//var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
-var RequestActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
+var RequestExternalDatabasesActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -1407,9 +1407,7 @@ var Collapse = require('react-collapse');
 var ReactHeight = require('react-height');
 
 function getState() {
-  RequestActionCreator.getDbs();
   return {
-    //errors: CompanyStore.getErrors(),
     errors: ExternalDatabaseStore.getErrors(),
     isOpened: false,
     _isOpened: true,
@@ -1436,26 +1434,27 @@ var ExternalDatabases = React.createClass({
     }
   },
 
-  handleChange: function handleChange(event) {
-    this.setState({ value: event.target.value });
+  /*handleChange: function(event) {
+    this.setState({value: event.target.value});
   },
-
+  */
   componentDidMount: function componentDidMount() {
-    Collapse.addChangeListener(this._onChange);
-    SessionStore.addChangeListener(this._onChange);
-    ExternalDatabaseStore.addChangeListener(this._onChange());
+    //Collapse.addChangeListener(this._onChange);
+    //SessionStore.addChangeListener(this._onChange);
+    ExternalDatabaseStore.addChangeListener(this._onChange);
+    alert(CompanyStore.getId());
+    RequestExternalDatabasesActionCreator.getDbs(CompanyStore.getId());
   },
 
   componentWillUnmount: function componentWillUnmount() {
-    Collapse.removeChangeListener(this._onChange);
-    SessionStore.removeChangeListener(this._onChange);
-    ExternalDatabaseStore.removeChangeListener(this._onChange());
+    //Collapse.removeChangeListener(this._onChange);
+    //SessionStore.removeChangeListener(this._onChange);
+    ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
 
   render: function render() {
-    if (!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
+    if (!this.state.isLogged || this.state.errors.length > 0) {
       return React.createElement(AuthorizationRequired, null);
-      // <img src="../images/jurassic.gif" alt=""/>
     }
 
     var selectRowProp = {
@@ -1465,12 +1464,16 @@ var ExternalDatabases = React.createClass({
     };
 
     var data = [{
+      id: null,
       name: "Prova",
       allowed: "true"
     }];
 
-    RequestActionCreator.getDbs();
-    var databases = ExternalDatabaseStore.getDbNames();
+    var options = {
+      noDataText: "There are no DSL definitions to display"
+    };
+
+    //var databases = ExternalDatabaseStore.getDbNames();
     var title, content;
     title = "Manage Database";
     content = React.createElement(
@@ -1528,21 +1531,17 @@ var ExternalDatabases = React.createClass({
         'div',
         { id: 'table-database' },
         React.createElement(
-          Collapse,
-          { ref: 'table', _onChange: this.handleChange, isOpened: this.state._isOpened },
+          BootstrapTable,
+          { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data, search: true, striped: true, hover: true },
           React.createElement(
-            BootstrapTable,
-            { selectRow: selectRowProp, pagination: true, data: databases, search: true, striped: true, hover: true },
-            React.createElement(
-              TableHeaderColumn,
-              { isKey: true, dataField: 'name' },
-              'Name'
-            ),
-            React.createElement(
-              TableHeaderColumn,
-              { dataField: 'allowed' },
-              'Status'
-            )
+            TableHeaderColumn,
+            { dataField: 'name', dataSort: true },
+            'Name'
+          ),
+          React.createElement(
+            TableHeaderColumn,
+            { dataField: 'allowed' },
+            'Status'
           )
         )
       )
@@ -1561,9 +1560,19 @@ var ExternalDatabases = React.createClass({
   }
 });
 
+/*
+
+<Collapse _onChange={this.handleChange} isOpened={this.state._isOpened} >
+              <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
+                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
+              </BootstrapTable>
+              </Collapse>
+*/
+
 module.exports = ExternalDatabases;
 
-},{"../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx":3,"../../stores/ExternalDatabaseStore.react.jsx":52,"../../stores/SessionStore.react.jsx":53,"../AuthorizationRequired.react.jsx":12,"react":484,"react-bootstrap-table":187,"react-collapse":203,"react-height":207,"react-motion":214}],19:[function(require,module,exports){
+},{"../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":50,"../../stores/ExternalDatabaseStore.react.jsx":52,"../../stores/SessionStore.react.jsx":53,"../AuthorizationRequired.react.jsx":12,"react":484,"react-bootstrap-table":187,"react-collapse":203,"react-height":207,"react-motion":214}],19:[function(require,module,exports){
 'use strict';
 
 // Name: {Invite.react.jsx}
@@ -2356,7 +2365,6 @@ var ManageDSL = React.createClass({
 
     render: function render() {
         if (!this.state.isLogged || this.state.errors.length > 0) {
-            alert(this.state.errors);
             return React.createElement(AuthorizationRequired, null);
         }
         var title, content;
@@ -5809,7 +5817,7 @@ module.exports = {
     USERS: APIRoot + "/users",
     COMPANIES: APIRoot + "/Companies",
     SUPERADMINS: APIRoot + "/SuperAdmins",
-    DATABASES: APIRoot + "/ExternalDatabases",
+    EXTERNAL_DATABASES: APIRoot + "/ExternalDatabases",
     DASHBOARDS: APIRoot + "/Dashboards",
     COLLECTIONS: APIRoot + "/Collections",
     DOCUMENTS: APIRoot + "/Documents",
@@ -6395,19 +6403,24 @@ var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-var SessionStore = require('./SessionStore.react.jsx');
+
 var mongoose = require('mongoose');
 var ActionTypes = Constants.ActionTypes;
+
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _databases = [];
 var _connections = [];
 var _errors = [];
 
 var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
-
     emitChange: function emitChange() {
         this.emit(CHANGE_EVENT);
+    },
+
+    emitDelete: function emitDelete() {
+        this.emit(DELETE_EVENT);
     },
 
     addChangeListener: function addChangeListener(callback) {
@@ -6416,6 +6429,14 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    addDeleteListener: function addDeleteListener(callback) {
+        this.on(DELETE_EVENT, callback);
+    },
+
+    removeDeleteListener: function removeDeleteListener(callback) {
+        this.removeListener(DELETE_EVENT, callback);
     },
 
     getId: function getId(i) {
@@ -6494,41 +6515,6 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
 
 });
 
-// CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
-//     var action = payload.action;
-
-//     switch(action.type) {
-
-//         case ActionTypes.GET_COMPANY:
-//             if(action.errors) {
-//                 _errors = action.errors;
-//             } else if(action.json) {
-//                 _errors = []; // empty old errors
-//                 // set company data
-//                 _company.id = action.json.id;
-//                 _company.name = action.json.name;
-//                 localStorage.setItem('companyId', _company.id);
-//                 localStorage.setItem('companyName', _company.name);
-//             }
-//             CompanyStore.emitChange();
-//             break;
-
-//         case ActionTypes.GET_USERS:
-//             if(action.errors) {
-//                 _errors = action.errors;
-//             } else if(action.json) {
-//                 _errors = []; // empty old errors
-//                 // set users of the company
-//                 _users = action.json;
-//             }
-//             CompanyStore.emitChange();
-//             break;
-
-//     }
-
-//     return true;  // richiesto dal Promise nel Dispatcher
-// });
-
 ExternalDatabaseStore.dispatchToken = Dispatcher.register(function (payload) {
     var action = payload.action;
 
@@ -6568,7 +6554,7 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function (payload) {
 
 module.exports = ExternalDatabaseStore;
 
-},{"../constants/Constants.js":47,"../dispatcher/Dispatcher.js":48,"./SessionStore.react.jsx":53,"events":65,"mongoose":76,"object-assign":166}],53:[function(require,module,exports){
+},{"../constants/Constants.js":47,"../dispatcher/Dispatcher.js":48,"events":65,"mongoose":76,"object-assign":166}],53:[function(require,module,exports){
 'use strict';
 
 // Name: {SessionStore.react.jsx}
@@ -7204,7 +7190,7 @@ var APIEndpoints = Constants.APIEndpoints;
 module.exports = {
 
   setExtDb: function setExtDb(id, name, password) {
-    request.get(APIEndpoints.DATABASES + '/' + id + '/databases').set('Authorization', localStorage.getItem('accessToken')).send({
+    request.get(APIEndpoints.EXTERNAL_DATABASES + '/' + id + '/databases').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       name: name,
       password: password }).set('Accept', 'application/json').end(function (err, res) {
@@ -7231,7 +7217,7 @@ module.exports = {
 
   // connect db dovrebbe essere POST e passare dei dati al server per effettuare la connessione del db no?
   connectDb: function connectDb() {
-    request.get(APIEndpoints.DATABASES).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
+    request.get(APIEndpoints.EXTERNAL_DATABASES).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
       if (res) {
         console.log(res);
         if (res.error) {
@@ -7248,17 +7234,16 @@ module.exports = {
     });
   },
 
-  getDbs: function getDbs() {
-    request.get(APIEndpoints.DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D').set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
+  getDbs: function getDbs(id) {
+    request.get(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
+    //.get(APIEndpoints.EXTERNAL_DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D')
+    .set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
       if (res) {
         console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
           ResponseExternalDatabasesActionCreator.responseGetDbs(null, errors);
         } else ResponseExternalDatabasesActionCreator.responseGetDbs(res.body, null);
-      }
-      if (err) {
-        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
       }
     });
   }

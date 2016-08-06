@@ -139,7 +139,6 @@ var ManageDSL = React.createClass({
     render: function() {
         if(!this.state.isLogged || this.state.errors.length > 0) 
         {
-            alert(this.state.errors);
             return (
                 <AuthorizationRequired />
             );

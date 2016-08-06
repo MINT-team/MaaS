@@ -28,7 +28,7 @@ module.exports = {
 
 setExtDb: function(id, name, password) {
     request
-      .get(APIEndpoints.DATABASES + '/' + id + '/databases')
+      .get(APIEndpoints.EXTERNAL_DATABASES + '/' + id + '/databases')
       .set('Authorization', localStorage.getItem('accessToken'))
       .send({
         id: id,
@@ -60,7 +60,7 @@ setExtDb: function(id, name, password) {
 // connect db dovrebbe essere POST e passare dei dati al server per effettuare la connessione del db no?
 connectDb: function() {
   request
-    .get(APIEndpoints.DATABASES)
+    .get(APIEndpoints.EXTERNAL_DATABASES)
     .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){
@@ -81,9 +81,10 @@ connectDb: function() {
     });
 },
 
-getDbs: function() {
+getDbs: function(id) {
   request
-    .get(APIEndpoints.DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D')
+    .get(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
+    //.get(APIEndpoints.EXTERNAL_DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D')
     .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){
@@ -95,9 +96,6 @@ getDbs: function() {
           }
           else
               ResponseExternalDatabasesActionCreator.responseGetDbs(res.body, null);
-      }
-      if(err){
-        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
       }
     });
 }

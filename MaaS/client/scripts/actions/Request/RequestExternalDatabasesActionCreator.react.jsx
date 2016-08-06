@@ -22,8 +22,8 @@ var RequestExternalDatabaseActionCreator = {
         WebAPIUtils.connectDb();
     },
     
-    getDbs: function() {
-        WebAPIUtils.getDbs();
+    getDbs: function(id) {
+        WebAPIUtils.getDbs(id);
     }
 };
 

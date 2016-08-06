@@ -10,19 +10,24 @@ var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-var SessionStore = require('./SessionStore.react.jsx');
+
 var mongoose = require('mongoose');
 var ActionTypes = Constants.ActionTypes;
+
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _databases = [];
 var _connections = [];
 var _errors = [];
 
 var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
-
     emitChange: function() {
         this.emit(CHANGE_EVENT);
+    },
+    
+    emitDelete: function() {
+        this.emit(DELETE_EVENT);
     },
 
     addChangeListener: function(callback) {
@@ -31,6 +36,14 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+    
+    addDeleteListener: function(callback) {
+        this.on(DELETE_EVENT, callback);
+    },
+
+    removeDeleteListener: function(callback) {
+        this.removeListener(DELETE_EVENT, callback);
     },
 
     getId: function(i) {
@@ -115,49 +128,17 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
 
 });
 
-// CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
-//     var action = payload.action;
-
-//     switch(action.type) {
-
-//         case ActionTypes.GET_COMPANY:
-//             if(action.errors) {
-//                 _errors = action.errors;
-//             } else if(action.json) {
-//                 _errors = []; // empty old errors
-//                 // set company data
-//                 _company.id = action.json.id;
-//                 _company.name = action.json.name;
-//                 localStorage.setItem('companyId', _company.id);
-//                 localStorage.setItem('companyName', _company.name);
-//             }
-//             CompanyStore.emitChange();
-//             break;
-
-//         case ActionTypes.GET_USERS:
-//             if(action.errors) {
-//                 _errors = action.errors;
-//             } else if(action.json) {
-//                 _errors = []; // empty old errors
-//                 // set users of the company
-//                 _users = action.json;
-//             }
-//             CompanyStore.emitChange();
-//             break;
-
-//     }
-
-//     return true;  // richiesto dal Promise nel Dispatcher
-// });
-
 ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
     
     switch(action.type) {
         case ActionTypes.GET_DBS:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else if(action.json) {
+            }
+            else if(action.json)
+            {
                 _errors = []; // empty old errors
                 // set databases of the company
                 _databases = action.json;
@@ -168,9 +149,12 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
         
         case ActionTypes.CONNECT_DBS_RESPONSE:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else if(action.name && action.name == localStorage.getItem('companyName')) {
+            }
+            else if(action.name && action.name == localStorage.getItem('companyName'))
+            {
                 _errors = []; // empty old errors
                 // connect databases of the company
                 var length = _databases.length;
@@ -186,6 +170,6 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
             ExternalDatabaseStore.emitChange();
             break;
     }
-})
+});
 
 module.exports = ExternalDatabaseStore;
