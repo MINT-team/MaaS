@@ -488,12 +488,12 @@ module.exports = function(user) {
             if(err || !userInstance)
                 return cb(err, null, null);
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToChange) {
-                if(err) 
+                if(err)
                 {
                     console.log(err);
                     
                 }
-                if(!userToChange) 
+                if(!userToChange)
                 {
                     console.log("non trovato");
                     var error = {
@@ -507,14 +507,14 @@ module.exports = function(user) {
                     error = {
                         message: 'You haven\'t the rights to change this user'
                     };
-                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") 
+                    if(userInstance.role != "Owner" && userInstance.role != "Administrator")
                     {
                         return cb(null, error);
                     }
                     // if userInstance.role == "Owner" then he's allowed to
                     if(userInstance.role == "Administrator") 
                     {
-                        if(userToChange.role == "Owner" || userToChange.role == "Administrator") 
+                        if(userToChange.role == "Owner" || userToChange.role == "Administrator")
                         {
                             return cb(null, error);
                         }

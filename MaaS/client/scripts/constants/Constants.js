@@ -15,9 +15,8 @@ module.exports = {
 
   APIEndpoints: {
     USERS:              APIRoot + "/users",
-    COMPANIES:          APIRoot + "/Companies",
-    GET_COMPANIES:      APIRoot + "/Companies",
-    SUPERADMINS:        APIRoot + "/SuperAdmins",
+    COMPANIES:          APIRoot + "/Companies", 
+    SUPERADMINS:        APIRoot + "/SuperAdmins", 
     DATABASES:          APIRoot + "/ExternalDatabases",
     DASHBOARDS:         APIRoot + "/Dashboards",
     COLLECTIONS:        APIRoot + "/Collections",
@@ -62,8 +61,10 @@ module.exports = {
 
     // DSL
     SAVE_DSL_RESPONSE: null,
+    OVERWRITE_DSL_RESPONSE: null,
     LOAD_DSL_RESPONSE: null,
     LOAD_DSL_LIST_RESPONSE: null,
+    DELETE_DSL_RESPONSE: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

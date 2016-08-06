@@ -25,8 +25,10 @@ var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
-    source: localStorage.getItem('DSLSource')
+    source: localStorage.getItem('DSLSource'),
+    type: localStorage.getItem('DSLType')
 };
+
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
@@ -66,6 +68,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         return _DSL.name;
     },
     
+    getType: function() {
+        return _DSL.type;  
+    },
+    
     getSource: function() {
         return _DSL.source;
     },
@@ -84,16 +90,18 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _errors = action.errors;
             }
-            else if(action.json.definition)
+            else if(action.definition)
             {
                 _errors = [];
                 _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 
-                localStorage.setItem('DSLId',_DSL.id);
-                localStorage.setItem('DSLName',_DSL.name);
-                localStorage.setItem('DSLSource',_DSL.source);
+                localStorage.setItem('DSLId', _DSL.id);
+                localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource', _DSL.source);
             }
             DSLStore.emitChange();
             break;
@@ -118,17 +126,66 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 
                 var newDSL = {
                     id: _DSL.id,
                     name: _DSL.name,
+                    type: _DSL.type,
                     source: _DSL.source
                 };
                 _DSL_LIST.push(newDSL);
                 localStorage.setItem('DSLId',_DSL.id);
                 localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource',_DSL.source);
+            }
+            DSLStore.emitChange();
+            break;
+        
+        case ActionTypes.OVERWRITE_DSL_RESPONSE:
+            _errors = [];
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.definition)
+            {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+                
+                localStorage.setItem('DSLId',_DSL.id);
+                localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLType',_DSL.type);
+                localStorage.setItem('DSLSource',_DSL.source);
+            }
+            DSLStore.emitChange();
+            break;
+            
+        case ActionTypes.DELETE_DSL_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.id)
+            {
+                _errors = [];
+                var index;
+                _DSL_LIST.forEach(function(DSL, i) 
+                {
+                    if(DSL.id == action.id) 
+                    {
+                        index = i;
+                    }
+                });
+                _DSL_LIST.splice(index, 1);
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
             }
             DSLStore.emitChange();
             break;

@@ -71,11 +71,12 @@ module.exports = {
   
   getCompanies: function() {
     request
-      .get(APIEndpoints.COMPANIES + '/' + 'Companies')
+      .get(APIEndpoints.COMPANIES)
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))  
       .end(function(err, res){
         if(res) {
+          console.log(res);
             if(res.error) {
               window.alert("errore");
               console.log(res.body.error);

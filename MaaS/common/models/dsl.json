@@ -27,9 +27,11 @@
   "validations": [],
   "relations": {
     "users": {
-      "type": "hasAndBelongsToMany",
+      "type": "hasMany",
       "model": "user",
-      "foreignKey": "dslId"
+      "foreignKey": "dslId",
+      "through": "DSLAccess",
+      "keyThrough": "userId"
     }
   },
   "acls": [
@@ -37,7 +39,7 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "DENY"
+      "permission": "ALLOW"
     },
     {
       "principalType": "ROLE",

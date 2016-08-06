@@ -53,7 +53,10 @@ var Header = React.createClass({
             if(this.props.type == "commonUser")
             {
                 title = (
-                    <Link to="/company" id="header-title">{this.props.companyName}</Link>
+                    <div className="tooltip tooltip-bottom">
+                        <Link to="/company" id="header-title">{this.props.companyName}</Link>
+                        <p id="company-tooltip" className="tooltip-text tooltip-text-long">Your company</p>
+                    </div>
                 );
                 headerMenu = (
                     <div id="header-menu">
@@ -66,28 +69,31 @@ var Header = React.createClass({
                     <div id="header-panel">
                         <div className="tooltip tooltip-bottom">
                             <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
-                            <p id="profile-tooltip" className="tooltip-text tooltip-text">Your profile</p>
+                            <p id="profile-tooltip" className="tooltip-text">Your profile</p>
                         </div>
-                        <Link to="" id="settings-button" onClick={this.toggleDropdown}>
-                            <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
-                        </Link>
+                        <div className="tooltip tooltip-bottom">
+                            <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                                <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                            </Link>
+                            <p id="settings-tooltip" className="tooltip-text">Settings</p>
+                        </div>
                         <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
                             <ul>
                                 <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
-                                <Link onClick={this.logout} to=""><li><i className="material-icons md-18">&#xE879;</i>Logout</li></Link>
+                                <Link onClick={this.logout} to=""><li><i className="material-icons md-24">&#xE879;</i>Logout</li></Link>
                             </ul>
                         </div>
                     </div>
                 );
-        }
-        else // render superAdmin Component
-        {
-            title = (
-                    <Link to="/" id="header-title">{this.props.companyName}</Link>
-                );
-            
-            headerMenu = (
+            }
+            else // render superAdmin Component
+            {
+                title = (
+                        <Link to="/" id="header-title">{this.props.companyName}</Link>
+                    );
+                
+                headerMenu = (
                     <div id="header-menu">
                         <Link to="/dashboardSuperAdmin">Dashboard</Link>
                     </div>
@@ -106,7 +112,7 @@ var Header = React.createClass({
                         </div>
                     </div>
                 );
-        }
+            }
         } else {        //user not logged
             title = (
                 <Link to="/" id="header-title">MaaS</Link>

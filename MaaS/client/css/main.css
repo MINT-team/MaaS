@@ -393,11 +393,11 @@ input {
 
 }
 
-#header #header-menu {
+#header-menu {
     display: inline;
 }
 
-#header #header-panel {
+#header-panel {
     float: right;
     margin-right: 4em;
     min-width: 15em;
@@ -406,11 +406,11 @@ input {
     line-height: 2.5em;
 }
 
-#header #header-panel ul {
+#header-panel ul {
     list-style-type: none;
 }
 
-#header #header-panel i, a {
+#header-panel i, a {
     display: inline-block;
     vertical-align: middle;
 }
@@ -429,7 +429,7 @@ input {
     content: "";
     position: absolute;
     bottom: 100%;
-    right: 3.4em;
+    right: 3.5em;
     margin-left: -0.7em;
     border-width: 0.7em;
     border-style: solid;
@@ -449,9 +449,23 @@ input {
     color: lightgrey;
 }
 
+#header-dropdown i {
+    margin-right: 0.5em;
+}
+
+#company-tooltip {
+    margin-top: 0.5em;
+    left: 5em;
+}
+
 #profile-tooltip {
     margin-top: 0.5em;
     right: 8em;
+}
+
+#settings-tooltip {
+    margin-top: 0.5em;
+    right: 3.3em;
 }
 
 /*----------------------------------------------- FOOTER --------------------------------------------*/
@@ -1190,6 +1204,21 @@ input {
         border-radius: 5px;
         border: 2px solid lightgrey;
     }
+}
+
+/*------------------------------------------- MANAGE DSL DEFINITION --------------------------------------------------------------*/
+.dsl-buttons {
+    text-align: center;
+}
+
+.dsl-buttons a {
+    color: black;
+}
+
+.dsl-buttons i {
+    vertical-align: middle;
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/

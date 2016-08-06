@@ -41,13 +41,21 @@
       "model": "Company",
       "foreignKey": "companyId"
     },
-    "DSL": {
-      "type": "hasAndBelongsToMany",
+    "dsl": {
+      "type": "hasMany",
       "model": "DSL",
-      "foreignKey": "userId"
+      "foreignKey": "userId",
+      "through": "DSLAccess",
+      "keyThrough": "dslId"
     }
   },
   "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "SuperAdmin",
+      "permission": "ALLOW"
+    },
     {
       "accessType": "EXECUTE",
       "principalType": "ROLE",
@@ -95,7 +103,7 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "__get__DSL"
+      "property": "__get__dsl"
     },
     {
       "principalType": "ROLE",

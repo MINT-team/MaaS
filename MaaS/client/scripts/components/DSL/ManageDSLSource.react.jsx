@@ -27,6 +27,7 @@ function getState() {
             isLogged: SessionStore.isLogged(),
             definitionId: DSLStore.getId(),
             definitionName: DSLStore.getName(),
+            definitionType: DSLStore.getType(),
             definitionSource: DSLStore.getSource()
     };
 }
@@ -40,21 +41,16 @@ var ManageDSLSource = React.createClass({
                 definitionId: this.props.definitionId,
                 definitionName: null,
                 definitionSource: DSLStore.getSource(),
-                saved: this.props.definitionId ? true : false
+                saved: this.props.params.definitionId ? true : false
         };
     },
 
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
-        var id = this.props.definitionId;
+        var id = this.props.params.definitionId;
         if(id)
         {
-            alert("Load DSL already existing:  "+id);
             RequestDSLActionCreator.loadDSL(id);
-        }
-        if(this.state.definitionName)
-        {
-            this.refs.definitionName.value = this.state.definitionName;
         }
         var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         var editorSession = editor.getSession();
@@ -80,11 +76,34 @@ var ManageDSLSource = React.createClass({
             this.setState({ saved: true });
             this.refs.save.classList.toggle("saved");
         }
+        if(this.state.definitionName)
+        {
+            this.refs.definitionName.value = this.state.definitionName;
+        }
+        if(this.state.definitionType)
+        {
+            if(this.state.definitionType == "Dashboard")
+                this.refs.definitionType.selectedIndex = 1;
+            if(this.state.definitionType == "Collection")
+                this.refs.definitionType.selectedIndex = 2;
+            if(this.state.definitionType == "Document")
+                this.refs.definitionType.selectedIndex = 3;
+            if(this.state.definitionType == "Cell")
+                this.refs.definitionType.selectedIndex = 4;
+        }
+        if(this.state.definitionSource)
+        {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            editor.setValue(this.state.definitionSource);
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
+        }
+        
     },
     
     saveSource: function() {
         var editor = ace.edit("editor");
-        var source = editor.getValue();
+        var definitionSource = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
         var errors = [];
@@ -102,9 +121,9 @@ var ManageDSLSource = React.createClass({
         else
         {
             if(definitionName == this.state.definitionName)
-                RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, type, source);
+                RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);
             else
-                RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, source);
+                RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
         }
         if(errors.length > 0)
         {
@@ -127,7 +146,6 @@ var ManageDSLSource = React.createClass({
                 <AuthorizationRequired />
             );
         }
-        
         var content, errors = [];
         if(this.state.errors.length > 0) 
         {

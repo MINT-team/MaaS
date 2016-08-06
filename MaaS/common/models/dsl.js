@@ -1,7 +1,20 @@
 var app = require('../../server/server.js');
 
 module.exports = function(DSL) {
+
+    // Create a DSL definition
     DSL.saveDefinition = function(userId ,type, name, source, cb) {
+        
+        // Clear and returns the error
+        function relationError(DSLInstance, err) {
+            DSL.destroyById(DSLInstance.id, function(err) {
+                if(err) 
+                    return cb(err, null, null);
+            })
+            console.log("> Error creating relationship for the DSL");
+            return cb(err, null, null);
+        }
+        
         if(!type || !name)
         {
             var error = {
@@ -16,16 +29,12 @@ module.exports = function(DSL) {
                return cb(err);
             }
             // Define relation between user and DSL
+            var DSLAccess = app.models.DSLAccess;
             var user = app.models.user;
             user.findById(userId, function(err, userInstance) {
                 if(err)
                 {
-                    console.log("> Failed creating DSL, no user found to relate.");
-                    DSL.destroyById(DSLInstance.id, function(err) {
-                        if(err) 
-                            return cb(err, null, null);
-                    });
-                    return cb(err, null, null);
+                    relationError(DSLInstance, err);
                 }
                 var Company = app.models.Company;
                 Company.findById(userInstance.companyId, function(err, company) {
@@ -37,48 +46,35 @@ module.exports = function(DSL) {
                             return cb(err, null, null);
                         admins.forEach(function(admin, i) 
                         {
-                            console.log("admin:", admin.email);
-                            DSLInstance.users.add(admin,function(err) {
+                            DSLAccess.create({userId: admin.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
                                 if(err)
-                                {
-                                    console.log("> Error creating relationship for the DSL");
-                                    return cb(err, null, null);
-                                }
+                                    return relationError(DSLInstance, err);
                             });
                         });
                     });
                     // Add DSL to the Owner of the company
                     company.owner(function(err, owner) {
-                        console.log("\nOwner:", owner);
-                        DSLInstance.users.add(owner, function(err) {
+                        if(err)
+                        {
+                            return relationError(DSLInstance, err);
+                        }
+                        DSLAccess.create({userId: owner.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
                             if(err)
-                            {
-                                console.log("> Error creating relationship for the DSL");
-                                return cb(err, null, null);
-                            }
+                                return relationError(DSLInstance, err);
                         });
                     });
                     // If user creating the DSL is not Owner or Admin add DSL to him
                     if(userInstance.role == "Member")
                     {
-                        DSLInstance.users.add(userInstance, function(err) {
+                        DSLAccess.create({userId: userInstance.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
                             if(err)
-                            {
-                                console.log("> Error creating relationship for the DSL");
-                                return cb(err, null, null);
-                            }
+                                return relationError(DSLInstance, err);
                         });
                     }
-                    
-                    // log utenti
-                    DSLInstance.users({ where: {}}, function(err, users){
-                        console.log("\nUtenti: ", users);
-                    });
+                    console.log("> Created DSL:", DSLInstance.id);
+                    return cb(null, null, DSLInstance);
                 });
             });
-            
-            console.log("> Created DSL:", DSLInstance.id);
-            return cb(null, null, DSLInstance);
        });
     };
     
@@ -101,14 +97,16 @@ module.exports = function(DSL) {
     );
     
     DSL.overwriteDefinition = function(id, type, source, cb) {
-       DSL.findById(id, function(err, DSL) {
-           if(err) return cb(err, null, null);
-           DSL.updateAttributes({type: type, source: source}, function(err, newDSL) {
-               if(err) return cb(err, null, null);
-               console.log("> Updated DSL:", newDSL.id);
-               return cb(null, null, newDSL);
-           });
-       });
+        DSL.findById(id, function(err, DSL) {
+            if(err)
+                return cb(err, null, null);
+            DSL.updateAttributes({type: type, source: source}, function(err, newDSL) {
+                if(err)
+                    return cb(err, null, null);
+                console.log("> Updated DSL:", newDSL.id);
+                return cb(null, null, newDSL);
+            });
+        });
     };
     
     DSL.remoteMethod(
@@ -118,7 +116,7 @@ module.exports = function(DSL) {
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
-                { arg: 'source', type: 'Object', required: true, description: 'Definition source' }
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -128,5 +126,53 @@ module.exports = function(DSL) {
         }
     );
     
+    DSL.deleteDefinition = function(id, cb) {
+        DSL.findById(id, function(err, DSLInstance) {
+            if (err)
+            {
+                return cb(err, null);
+            }
+            DSLInstance.users({ where: {} }, function(err, users) {
+                if(err)
+                {
+                    return cb(err, null);
+                }
+                users.forEach(function(user, i) {
+                    DSLInstance.users.remove(user, function(err) {
+                        if(err)
+                        {
+                            console.log("> Error deleting DSL definition");
+                            return cb(err, null);
+                        }
+                    });
+                });
+                // Success
+                DSL.destroyById(DSLInstance.id, function(err) {
+                    if(err) 
+                    {
+                        return cb(err, null);
+                    }
+                    console.log("> DSL definition deleted:", id);
+                    return cb(null, null);
+                });
+                
+            });
+                
+        });
+    };
     
+    DSL.remoteMethod(
+        'deleteDefinition',
+        {
+            description: "Delete one DSL definition and its relationships",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'delete', path: '/:id/deleteDefinition' }
+        }
+        
+    );
 };

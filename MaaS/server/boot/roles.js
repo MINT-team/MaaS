@@ -321,11 +321,11 @@ module.exports = function(app) {
         var SuperAdmin = app.models.SuperAdmin;
         SuperAdmin.findById(userId, function(err, superAdmin) {
             if(err || !superAdmin)
-                return reject();
+              return reject();
             if(superAdmin)
-                cb(null, true); // true = is a super admin
+              cb(null, true); // true = is a super admin
             else
-                cb(null, false);
+               cb(null, false);
         });
     });
 };

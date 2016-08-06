@@ -22,19 +22,26 @@ var RequestDSLActionCreator = {
     saveDSLDefinition: function(userId, type, name, source) {
         WebAPIUtils.saveDSLDefinition(userId, type, name, source);
     },
+    
     overwriteDSLDefinition: function(id, type, source) {
         WebAPIUtils.overwriteDSLDefinition(id, type, source);
     },
+    
     loadDSL: function(id) {
         WebAPIUtils.loadDSL(id);
     },
+    
     loadDSLList: function(userId) {
         WebAPIUtils.loadDSLList(userId);
     },
+    
     deleteDSLDefinition: function(id) {
         WebAPIUtils.deleteDSLDefinition(id);
-    }
+    },
     
+    changeDSLDefinitionPermissions: function(id, userId) {
+        WebAPIUtils.changeDSLDefinitionPermissions(id, userId);
+    }
 };
 
 module.exports = RequestDSLActionCreator;

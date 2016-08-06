@@ -66,6 +66,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="manageDSL" component={ManageDSL}>
             <Route path="manageDSLSource" component={ManageDSLSource} />
+            <Route path="manageDSLSource/:definitionId" component={ManageDSLSource} />
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />

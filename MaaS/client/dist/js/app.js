@@ -58,19 +58,26 @@ var RequestDSLActionCreator = {
     saveDSLDefinition: function saveDSLDefinition(userId, type, name, source) {
         WebAPIUtils.saveDSLDefinition(userId, type, name, source);
     },
+
     overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source) {
         WebAPIUtils.overwriteDSLDefinition(id, type, source);
     },
+
     loadDSL: function loadDSL(id) {
         WebAPIUtils.loadDSL(id);
     },
+
     loadDSLList: function loadDSLList(userId) {
         WebAPIUtils.loadDSLList(userId);
     },
+
     deleteDSLDefinition: function deleteDSLDefinition(id) {
         WebAPIUtils.deleteDSLDefinition(id);
-    }
+    },
 
+    changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId) {
+        WebAPIUtils.changeDSLDefinitionPermissions(id, userId);
+    }
 };
 
 module.exports = RequestDSLActionCreator;
@@ -223,29 +230,30 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var ResponseCompanyActionCreator = {
-    responseCompanyUsers: function responseCompanyUsers(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_USERS,
-            json: json,
-            errors: errors
-        });
-    },
+  responseCompanyUsers: function responseCompanyUsers(json, errors) {
+    Dispatcher.handleServerAction({
+      type: ActionTypes.GET_USERS,
+      json: json,
+      errors: errors
+    });
+  },
 
-    responseDeleteCompany: function responseDeleteCompany(name, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.DELETE_COMPANY,
-            name: name,
-            errors: errors
-        });
-    },
+  responseDeleteCompany: function responseDeleteCompany(name, errors) {
+    Dispatcher.handleServerAction({
+      type: ActionTypes.DELETE_COMPANY,
+      name: name,
+      errors: errors
+    });
+  },
 
-    responseCompanyCompanies: function responseCompanyCompanies(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.GET_COMPANIES,
-            json: json,
-            errors: errors
-        });
-    }
+  responseCompanyCompanies: function responseCompanyCompanies(json, errors) {
+    window.alert("response get companies");
+    Dispatcher.handleServerAction({
+      type: ActionTypes.COMPANIES,
+      json: json,
+      errors: errors
+    });
+  }
 
 };
 
@@ -282,6 +290,14 @@ var ResponseDSLActionCreator = {
         });
     },
 
+    responseOverwriteDSLDefinition: function responseOverwriteDSLDefinition(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.OVERWRITE_DSL_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    },
+
     responseLoadDSL: function responseLoadDSL(definition) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_RESPONSE,
@@ -293,6 +309,14 @@ var ResponseDSLActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_LIST_RESPONSE,
             definitionList: definitionList
+        });
+    },
+
+    responseDeleteDSLDefinition: function responseDeleteDSLDefinition(errors, id) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_DSL_RESPONSE,
+            errors: errors,
+            id: id
         });
     }
 };
@@ -2166,6 +2190,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -2180,7 +2205,9 @@ function getState() {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         definitionId: null,
-        DSL_LIST: DSLStore.getDSLList()
+        DSL_LIST: DSLStore.getDSLList(),
+        role: UserStore.getRole(),
+        userId: UserStore.getId()
     };
 }
 
@@ -2206,25 +2233,54 @@ var ManageDSL = React.createClass({
     },
 
     buttonFormatter: function buttonFormatter(cell, row) {
+        var buttons;
+        if (this.state.role != "Guest" /*this.state.role == "Owner" || this.state.role == "Admin"*/) {
+                buttons = React.createElement(
+                    'div',
+                    null,
+                    React.createElement(
+                        Link,
+                        { to: "/manageDSL/manageDSLSource/" + row.id },
+                        React.createElement(
+                            'i',
+                            { className: 'material-icons md-24' },
+                            ''
+                        )
+                    ),
+                    React.createElement(
+                        'i',
+                        { onClick: '', className: 'material-icons md-24 dropdown-button' },
+                        ''
+                    ),
+                    React.createElement(DeleteDSL, { id: row.id, name: row.name })
+                );
+            } else {
+            /*
+            if(this.state.role == "Member" && row.createdBy == this.state.userId)
+            {
+                buttons = (
+                    <div>
+                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                        <DeleteDSL id={row.id} name={row.name} />
+                    </div>
+                );
+            }
+            
+            if(this.state.role == "Member" && row.createdBy != this.state.userId)
+            {
+                buttons = (
+                    <div>
+                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                        <DeleteDSL id={row.id} name={row.name} />
+                    </div>
+                );
+            }
+            */
+        }
         return React.createElement(
             'div',
-            null,
-            React.createElement(
-                'i',
-                { onClick: '', className: 'material-icons md-24 dropdown-button' },
-                ''
-            ),
-            React.createElement(
-                'i',
-                { onClick: '', className: 'material-icons md-24 dropdown-button' },
-                ''
-            ),
-            React.createElement(
-                'i',
-                { onClick: '', className: 'material-icons md-24 dropdown-button' },
-                ''
-            ),
-            React.createElement(DeleteDSL, { id: row.id, name: row.name })
+            { className: 'dsl-buttons' },
+            buttons
         );
     },
 
@@ -2237,7 +2293,9 @@ var ManageDSL = React.createClass({
         }
 
         // SideBar initialization
-        var onAllClick = function onAllClick() {};
+        var onAllClick = function onAllClick() {
+            alert("all");
+        };
         var onDashboardsClick = function onDashboardsClick() {};
         var onCollectionsClick = function onCollectionsClick() {};
         var onDocumentsClick = function onDocumentsClick() {};
@@ -2292,7 +2350,7 @@ var ManageDSL = React.createClass({
         var selectRowProp = {
             clickToSelect: true
         };
-        if (this.state.DSL_LIST) {
+        if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
             this.state.DSL_LIST.forEach(function (DSL, i) {
                 data[i] = { id: DSL.id, name: DSL.name };
             });
@@ -2333,6 +2391,11 @@ var ManageDSL = React.createClass({
                         'div',
                         { id: 'createDSLDefinition' },
                         React.createElement(
+                            'i',
+                            { className: 'material-icons md-36' },
+                            ''
+                        ),
+                        React.createElement(
                             Link,
                             { to: '/manageDSL/manageDSLSource', className: 'button' },
                             'Create new DSL definition'
@@ -2365,7 +2428,7 @@ var ManageDSL = React.createClass({
 
 module.exports = ManageDSL;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":48,"../../stores/SessionStore.react.jsx":50,"../AuthorizationRequired.react.jsx":12,"../Sidebar.react.jsx":40,"./DeleteDSL.react.jsx":21,"react":481,"react-bootstrap-table":184,"react-router":248}],23:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":48,"../../stores/SessionStore.react.jsx":50,"../../stores/UserStore.react.jsx":51,"../AuthorizationRequired.react.jsx":12,"../Sidebar.react.jsx":40,"./DeleteDSL.react.jsx":21,"react":481,"react-bootstrap-table":184,"react-router":248}],23:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSLSource.react.jsx}
@@ -2397,6 +2460,7 @@ function getState() {
         isLogged: SessionStore.isLogged(),
         definitionId: DSLStore.getId(),
         definitionName: DSLStore.getName(),
+        definitionType: DSLStore.getType(),
         definitionSource: DSLStore.getSource()
     };
 }
@@ -2412,19 +2476,15 @@ var ManageDSLSource = React.createClass({
             definitionId: this.props.definitionId,
             definitionName: null,
             definitionSource: DSLStore.getSource(),
-            saved: this.props.definitionId ? true : false
+            saved: this.props.params.definitionId ? true : false
         };
     },
 
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
-        var id = this.props.definitionId;
+        var id = this.props.params.definitionId;
         if (id) {
-            alert("Load DSL already existing:  " + id);
             RequestDSLActionCreator.loadDSL(id);
-        }
-        if (this.state.definitionName) {
-            this.refs.definitionName.value = this.state.definitionName;
         }
         var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         var editorSession = editor.getSession();
@@ -2448,11 +2508,26 @@ var ManageDSLSource = React.createClass({
             this.setState({ saved: true });
             this.refs.save.classList.toggle("saved");
         }
+        if (this.state.definitionName) {
+            this.refs.definitionName.value = this.state.definitionName;
+        }
+        if (this.state.definitionType) {
+            if (this.state.definitionType == "Dashboard") this.refs.definitionType.selectedIndex = 1;
+            if (this.state.definitionType == "Collection") this.refs.definitionType.selectedIndex = 2;
+            if (this.state.definitionType == "Document") this.refs.definitionType.selectedIndex = 3;
+            if (this.state.definitionType == "Cell") this.refs.definitionType.selectedIndex = 4;
+        }
+        if (this.state.definitionSource) {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            editor.setValue(this.state.definitionSource);
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
+        }
     },
 
     saveSource: function saveSource() {
         var editor = ace.edit("editor");
-        var source = editor.getValue();
+        var definitionSource = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
         var errors = [];
@@ -2464,7 +2539,7 @@ var ManageDSLSource = React.createClass({
                 errors.push('Fill the definiton name before saving');
             }
         } else {
-            if (definitionName == this.state.definitionName) RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, type, source);else RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, source);
+            if (definitionName == this.state.definitionName) RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);else RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
         }
         if (errors.length > 0) {
             this.setState({ errors: errors });
@@ -2483,7 +2558,6 @@ var ManageDSLSource = React.createClass({
         if (!this.state.isLogged) {
             return React.createElement(AuthorizationRequired, null);
         }
-
         var content,
             errors = [];
         if (this.state.errors.length > 0) {
@@ -3287,9 +3361,18 @@ var Header = React.createClass({
         if (this.props.isLogged) {
             if (this.props.type == "commonUser") {
                 title = React.createElement(
-                    Link,
-                    { to: '/company', id: 'header-title' },
-                    this.props.companyName
+                    'div',
+                    { className: 'tooltip tooltip-bottom' },
+                    React.createElement(
+                        Link,
+                        { to: '/company', id: 'header-title' },
+                        this.props.companyName
+                    ),
+                    React.createElement(
+                        'p',
+                        { id: 'company-tooltip', className: 'tooltip-text tooltip-text-long' },
+                        'Your company'
+                    )
                 );
                 headerMenu = React.createElement(
                     'div',
@@ -3332,17 +3415,26 @@ var Header = React.createClass({
                         ),
                         React.createElement(
                             'p',
-                            { id: 'profile-tooltip', className: 'tooltip-text tooltip-text' },
+                            { id: 'profile-tooltip', className: 'tooltip-text' },
                             'Your profile'
                         )
                     ),
                     React.createElement(
-                        Link,
-                        { to: '', id: 'settings-button', onClick: this.toggleDropdown },
+                        'div',
+                        { className: 'tooltip tooltip-bottom' },
                         React.createElement(
-                            'i',
-                            { className: 'material-icons md-36 dropdown-button' },
-                            ''
+                            Link,
+                            { to: '', id: 'settings-button', onClick: this.toggleDropdown },
+                            React.createElement(
+                                'i',
+                                { className: 'material-icons md-36 dropdown-button' },
+                                ''
+                            )
+                        ),
+                        React.createElement(
+                            'p',
+                            { id: 'settings-tooltip', className: 'tooltip-text' },
+                            'Settings'
                         )
                     ),
                     React.createElement(
@@ -3377,7 +3469,7 @@ var Header = React.createClass({
                                     null,
                                     React.createElement(
                                         'i',
-                                        { className: 'material-icons md-18' },
+                                        { className: 'material-icons md-24' },
                                         ''
                                     ),
                                     'Logout'
@@ -5324,11 +5416,10 @@ var RequestUserActionCreator = require('../../actions/Request/RequestUserActionC
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 function getState() {
-
     return {
         errors: [], //DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
-        companies: CompanyStore.getCompanies()
+        companies: JSON.parse(localStorage.getItem('companies')) //JSON that contains the companies in the system 
     };
 }
 
@@ -5343,28 +5434,24 @@ var DatabaseManagement = React.createClass({
     componentDidMount: function componentDidMount() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        UserStore.addChangeListener(this._onChange);
-        // Update user list
-        RequestCompanyActionCreator.getCompanies(this.state.id);
-        // Needed if role has been changed for example
-        RequestUserActionCreator.getUser(SessionStore.getUserId());
+        RequestCompanyActionCreator.getCompanies();
     },
 
     componentWillUnmount: function componentWillUnmount() {
         SessionStore.removeChangeListener(this._onChange);
         CompanyStore.removeChangeListener(this._onChange);
-        UserStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function _onChange() {
         this.setState(getState());
     },
     render: function render() {
-
         return React.createElement(
             'div',
             null,
-            ' ciaodddd '
+            ' in questo sistema ci sono ',
+            this.state.companies.length,
+            ' aziende '
         );
     }
 });
@@ -5426,7 +5513,6 @@ module.exports = {
   APIEndpoints: {
     USERS: APIRoot + "/users",
     COMPANIES: APIRoot + "/Companies",
-    GET_COMPANIES: APIRoot + "/Companies",
     SUPERADMINS: APIRoot + "/SuperAdmins",
     DATABASES: APIRoot + "/ExternalDatabases",
     DASHBOARDS: APIRoot + "/Dashboards",
@@ -5472,8 +5558,10 @@ module.exports = {
 
     // DSL
     SAVE_DSL_RESPONSE: null,
+    OVERWRITE_DSL_RESPONSE: null,
     LOAD_DSL_RESPONSE: null,
     LOAD_DSL_LIST_RESPONSE: null,
+    DELETE_DSL_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -5621,7 +5709,8 @@ var Routes = React.createClass({
         React.createElement(
           Route,
           { path: 'manageDSL', component: ManageDSL },
-          React.createElement(Route, { path: 'manageDSLSource', component: ManageDSLSource })
+          React.createElement(Route, { path: 'manageDSLSource', component: ManageDSLSource }),
+          React.createElement(Route, { path: 'manageDSLSource/:definitionId', component: ManageDSLSource })
         ),
         React.createElement(Route, { path: 'editor', component: Editor }),
         React.createElement(Route, { path: 'editorConfig', component: EditorConfig }),
@@ -5669,7 +5758,7 @@ var _company = {
     name: localStorage.getItem('companyName')
 };
 var _users = []; // users of the company
-var _companies = []; //all company in the system
+var _companies = localStorage.getItem('companies'); //all company in the system
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -5776,13 +5865,14 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             CompanyStore.emitDelete();
             break;
 
-        case ActionTypes.GET_COMPANIES:
+        case ActionTypes.COMPANIES:
             if (action.errors) {
                 _errors = action.errors;
             } else if (action.json) {
                 _errors = []; // empty old errors
                 // set users of the company
                 _companies = action.json;
+                localStorage.setItem('companies', JSON.stringify(_companies));
             }
             CompanyStore.emitChange();
             break;
@@ -5823,8 +5913,10 @@ var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));
 var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
-    source: localStorage.getItem('DSLSource')
+    source: localStorage.getItem('DSLSource'),
+    type: localStorage.getItem('DSLType')
 };
+
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
@@ -5864,6 +5956,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         return _DSL.name;
     },
 
+    getType: function getType() {
+        return _DSL.type;
+    },
+
     getSource: function getSource() {
         return _DSL.source;
     },
@@ -5880,14 +5976,16 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
         case ActionTypes.LOAD_DSL_RESPONSE:
             if (action.errors) {
                 _errors = action.errors;
-            } else if (action.json.definition) {
+            } else if (action.definition) {
                 _errors = [];
                 _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
             }
             DSLStore.emitChange();
@@ -5909,17 +6007,58 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             } else if (action.definition) {
                 _DSL.id = action.definition.id;
                 _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
 
                 var newDSL = {
                     id: _DSL.id,
                     name: _DSL.name,
+                    type: _DSL.type,
                     source: _DSL.source
                 };
                 _DSL_LIST.push(newDSL);
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+            }
+            DSLStore.emitChange();
+            break;
+
+        case ActionTypes.OVERWRITE_DSL_RESPONSE:
+            _errors = [];
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else if (action.definition) {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+
+                localStorage.setItem('DSLId', _DSL.id);
+                localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource', _DSL.source);
+            }
+            DSLStore.emitChange();
+            break;
+
+        case ActionTypes.DELETE_DSL_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else if (action.id) {
+                _errors = [];
+                var index;
+                _DSL_LIST.forEach(function (DSL, i) {
+                    if (DSL.id == action.id) {
+                        index = i;
+                    }
+                });
+                _DSL_LIST.splice(index, 1);
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
             }
             DSLStore.emitChange();
             break;
@@ -6570,8 +6709,9 @@ module.exports = {
   },
 
   getCompanies: function getCompanies() {
-    request.get(APIEndpoints.COMPANIES + '/' + 'Companies').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
+    request.get(APIEndpoints.COMPANIES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
       if (res) {
+        console.log(res);
         if (res.error) {
           window.alert("errore");
           console.log(res.body.error);
@@ -6654,9 +6794,10 @@ module.exports = {
         res = JSON.parse(res.text);
         if (res.error) {
           alert('Errore:  ' + res.error.message);
-          ResponseDSLActionCreator.responseSaveDSLDefinition(null, res.error.message);
+          ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
         } else {
-          ResponseDSLActionCreator.responseSaveDSLDefinition(res.definition, null);
+          alert(res.definition.name);
+          ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
         }
       }
     });
@@ -6665,13 +6806,13 @@ module.exports = {
   loadDSL: function loadDSL(id) {
     request.get(APIEndpoints.DSL + '/' + id).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
-        ResponseDSLActionCreator.responseLoadDSL(res);
+        ResponseDSLActionCreator.responseLoadDSL(res.body);
       }
     });
   },
 
   loadDSLList: function loadDSLList(userId) {
-    request.get(APIEndpoints.USERS + '/' + userId + '/DSL').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+    request.get(APIEndpoints.USERS + '/' + userId + '/dsl').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
         ResponseDSLActionCreator.responseLoadDSLList(res.body);
       }
@@ -6679,8 +6820,24 @@ module.exports = {
   },
 
   deleteDSLDefinition: function deleteDSLDefinition(id) {
-    request.del(APIEndpoints.DSL + '/' + id).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
-      if (res) {}
+    request.del(APIEndpoints.DSL + '/' + id + '/deleteDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          // res.error.message: errori di loopback e error definito dal remote method
+          ResponseDSLActionCreator.responseDeleteDSLDefinition(res.error.message, null);
+        } else {
+          ResponseDSLActionCreator.responseDeleteDSLDefinition(null, id);
+        }
+      }
+    });
+  },
+
+  changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId) {
+    request.put(APIEndpoints.DSL + '/' + id + '/changePermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+      if (res) {
+        alert("Ritorno web api");
+      }
     });
   }
 };

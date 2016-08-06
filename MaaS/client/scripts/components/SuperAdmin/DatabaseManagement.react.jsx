@@ -37,11 +37,10 @@ var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 
 function getState() {
-
   return {
             errors: [],//DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            companies: CompanyStore.getCompanies(),
+            companies:  JSON.parse(localStorage.getItem('companies'))  //JSON that contains the companies in the system 
       };
 }
 
@@ -51,30 +50,24 @@ var DatabaseManagement = React.createClass({
       return getState();
   },
 
-  componentDidMount: function() {
-      SessionStore.addChangeListener(this._onChange);
-      CompanyStore.addChangeListener(this._onChange);
-      UserStore.addChangeListener(this._onChange);
-      // Update user list
-      RequestCompanyActionCreator.getCompanies(this.state.id);
-      // Needed if role has been changed for example
-      RequestUserActionCreator.getUser(SessionStore.getUserId());
+ componentDidMount: function() {
+        SessionStore.addChangeListener(this._onChange);
+        CompanyStore.addChangeListener(this._onChange);
+        RequestCompanyActionCreator.getCompanies();   
   },
 
   componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
       CompanyStore.removeChangeListener(this._onChange);
-      UserStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function() {
       this.setState(getState());
   },
     render: function() {
-       
-            return (
-                <div> ciaodddd </div>
-        );
+       return(
+           <div> in questo sistema ci sono {(this.state.companies).length} aziende </div>
+           );
     }
 });
 

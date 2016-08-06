@@ -26,6 +26,14 @@ var ResponseDSLActionCreator = {
         });
     },
     
+    responseOverwriteDSLDefinition: function(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.OVERWRITE_DSL_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    },
+    
     responseLoadDSL: function(definition) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_RESPONSE,
@@ -38,6 +46,14 @@ var ResponseDSLActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_DSL_LIST_RESPONSE,
             definitionList: definitionList
+        });
+    },
+    
+    responseDeleteDSLDefinition: function(errors, id) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_DSL_RESPONSE,
+            errors: errors,
+            id: id
         });
     }
 };

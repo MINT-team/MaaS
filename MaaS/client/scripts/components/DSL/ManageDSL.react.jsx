@@ -10,6 +10,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -24,7 +25,9 @@ function getState() {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
             definitionId: null,
-            DSL_LIST: DSLStore.getDSLList()
+            DSL_LIST: DSLStore.getDSLList(),
+            role: UserStore.getRole(),
+            userId: UserStore.getId()
       };
 }
 
@@ -48,13 +51,45 @@ var ManageDSL = React.createClass({
         this.setState(getState());
     },
     
-    buttonFormatter: function(cell,row) {
+    buttonFormatter: function(cell, row) {
+        var buttons;
+        if(this.state.role != "Guest"/*this.state.role == "Owner" || this.state.role == "Admin"*/)
+        {
+            buttons = (
+                <div>
+                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i className="material-icons md-24">&#xE254;</i></Link>
+                    <i onClick="" className="material-icons md-24 dropdown-button">&#xE32A;</i>
+                    <DeleteDSL id={row.id} name={row.name} />
+                </div>
+            );
+        }
+        else
+        {
+            /*
+            if(this.state.role == "Member" && row.createdBy == this.state.userId)
+            {
+                buttons = (
+                    <div>
+                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                        <DeleteDSL id={row.id} name={row.name} />
+                    </div>
+                );
+            }
+            
+            if(this.state.role == "Member" && row.createdBy != this.state.userId)
+            {
+                buttons = (
+                    <div>
+                        <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
+                        <DeleteDSL id={row.id} name={row.name} />
+                    </div>
+                );
+            }
+            */
+        }
         return (
-            <div>
-                <i onClick="" className="material-icons md-24 dropdown-button">&#xE254;</i>
-                <i onClick="" className="material-icons md-24 dropdown-button">&#xE32A;</i>
-                <i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i>
-                <DeleteDSL id={row.id} name={row.name} />
+            <div className="dsl-buttons">
+                {buttons}
             </div>
         );
     },
@@ -70,7 +105,7 @@ var ManageDSL = React.createClass({
     
         // SideBar initialization
         var onAllClick = function() {
-            
+            alert("all");
         }
         var onDashboardsClick = function() {
             
@@ -114,7 +149,7 @@ var ManageDSL = React.createClass({
         var selectRowProp = {
             clickToSelect: true
         };
-        if(this.state.DSL_LIST)
+        if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
         {
             this.state.DSL_LIST.forEach(function(DSL, i) {
                 data[i] = {id: DSL.id,name: DSL.name};
@@ -131,7 +166,7 @@ var ManageDSL = React.createClass({
         var sidebarData = [all, dashboards, collections, documents, cells];
         var title, content;
         
-        if(this.props.children) 
+        if(this.props.children)
         {
             const childrenWithDefinitionId = React.Children.map(this.props.children,
                 (child) => React.cloneElement(child, {
@@ -149,6 +184,7 @@ var ManageDSL = React.createClass({
                     <div className="container sidebar-container">
                         <p className="container-title">{title}</p>
                         <div id="createDSLDefinition">
+                        <i className="material-icons md-36">&#xE147;</i>
                             <Link to="/manageDSL/manageDSLSource" className="button">Create new DSL definition</Link>
                             <div id="table-dsl">
                                 <BootstrapTable ref="table" data={data} pagination={true} search={true} striped={true} hover={true} selectRow={selectRowProp}>

@@ -58,7 +58,7 @@ module.exports = {
         });
     },
     
-    overwriteDSLDefinition: function(id,type, source) {
+    overwriteDSLDefinition: function(id, type, source) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition')
         .set('Accept', 'application/json')
@@ -75,11 +75,12 @@ module.exports = {
             if(res.error)
             {
               alert('Errore:  '+ res.error.message);
-              ResponseDSLActionCreator.responseSaveDSLDefinition(null, res.error.message);
+              ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
             }
             else
             {
-              ResponseDSLActionCreator.responseSaveDSLDefinition(res.definition, null);
+              alert(res.definition.name);
+              ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
             }
           }
         });
@@ -91,37 +92,58 @@ module.exports = {
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res) {
-          if (res)
+          if(res)
           {
-            ResponseDSLActionCreator.responseLoadDSL(res);
+            ResponseDSLActionCreator.responseLoadDSL(res.body);
           }
         });
     },
     
     loadDSLList: function(userId) {
       request
-        .get(APIEndpoints.USERS + '/' + userId + '/DSL')
+        .get(APIEndpoints.USERS + '/' + userId + '/dsl')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res) {
-          if (res)
+          if(res)
           {
             ResponseDSLActionCreator.responseLoadDSLList(res.body);
           }
-          
         });
         
     },
     
-    deleteDSLDefinition(id) {
+    deleteDSLDefinition: function(id) {
       request
-        .del(APIEndpoints.DSL + '/' + id)
+        .del(APIEndpoints.DSL + '/' + id + '/deleteDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res) {
           if (res)
           {
-            
+            res = JSON.parse(res.text);
+            if(res.error) 
+            {
+              // res.error.message: errori di loopback e error definito dal remote method
+              ResponseDSLActionCreator.responseDeleteDSLDefinition(res.error.message, null);
+            } 
+            else 
+            {
+              ResponseDSLActionCreator.responseDeleteDSLDefinition(null, id);
+            }
+          }
+        });
+    },
+    
+    changeDSLDefinitionPermissions(id, userId) {
+      request
+        .put(APIEndpoints.DSL + '/' + id + '/changePermissions')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if(res)
+          {
+            alert("Ritorno web api");
           }
         });
     }
