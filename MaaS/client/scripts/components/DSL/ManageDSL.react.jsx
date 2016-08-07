@@ -64,7 +64,7 @@ var ManageDSL = React.createClass({
         {
             buttons = (
                 <div>
-                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
+                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
                     <Link to={"/manageDSL/manageDSLPermission/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
                     <DeleteDSL id={row.id} name={row.name} />
                 </div>
@@ -93,7 +93,7 @@ var ManageDSL = React.createClass({
             }
         }
         return (
-            <div className="dsl-buttons">
+            <div className="table-buttons">
                 {buttons}
             </div>
         );
@@ -208,20 +208,20 @@ var ManageDSL = React.createClass({
                     <Sidebar title="Filter DSL" data={sidebarData}/>
                     <div className="container sidebar-container">
                         <p className="container-title">{title}</p>
-                        <div id="dsl-table-top">
-                            <p id="dsl-type">{this.state.type}</p>
-                            <div id="dsl-buttons">
-                                <div className="tooltip tooltip-bottom" id="add-dsl-button">
+                        <div id="table-top">
+                            <p id="filter-type">{this.state.type}</p>
+                            <div id="top-buttons">
+                                <div className="tooltip tooltip-bottom" id="add-button">
                                     <Link to="/manageDSL/manageDSLSource"><i className="material-icons md-48">&#xE147;</i></Link>
                                     <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                 </div>
-                                <div className="tooltip tooltip-bottom" id="add-dsl-button">
+                                <div className="tooltip tooltip-bottom" id="deleteAll-button">
                                     <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                     <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>
                                 </div>
                             </div>
                         </div>
-                        <div id="dsl-table">
+                        <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
                                 <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>

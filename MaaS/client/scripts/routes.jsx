@@ -40,9 +40,6 @@ var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.rea
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
 var UsersManagement = require('./components/SuperAdmin/UsersManagement.react.jsx');
 var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
-var Collapse = require('./components/Collapse.react.jsx');
-//<Route path="createDSL" component={EditDSL} />
-            //<Route path="editDSL" component={EditDSL} />
             
 var Routes = React.createClass({
   render: function() {
@@ -62,17 +59,16 @@ var Routes = React.createClass({
             <Redirect from="*" to="404" />
           </Route>
           <Route path="company" component={Company}>
-            <Route path="externalDatabases" component={ExternalDatabases} />
             <Route path="people" component={People} />
             <Route path="deleteCompany" component={DeleteCompany} />
           </Route>
+          <Route path="externalDatabases" component={ExternalDatabases} />
           <Route path="manageDSL" component={ManageDSL}>
             <Route path="manageDSLSource" component={ManageDSLSource} />
             <Route path="manageDSLSource/:definitionId" component={ManageDSLSource} />
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />
-          <Route path="collapse" component={Collapse} />
           <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin}>
             <Route path="databaseManagement" component={DatabaseManagement} />

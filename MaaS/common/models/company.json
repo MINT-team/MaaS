@@ -66,6 +66,12 @@
       "principalId": "Guest",
       "permission": "ALLOW",
       "property": "__get__users"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "__get__externalDatabases"
     }
   ],
   "methods": {}

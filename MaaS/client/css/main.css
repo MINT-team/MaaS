@@ -1213,28 +1213,28 @@ input {
 }
 
 /*------------------------------------------- MANAGE DSL DEFINITION --------------------------------------------------------------*/
-#dsl-table-top {
+#table-top {
     margin-left: 5em;
     margin-right: 5em;
 }
 
-#dsl-table .form-control {    /* Search bar*/
+#table .form-control {    /* Search bar*/
     width: 20em;
     margin-bottom: 1em;
 }
 
-#dsl-type {
+#filter-type {
     float: left;
     font-size: 1.5em;
     width: 6em;
     text-align: left;
 }
 
-#dsl-buttons {
+#top-buttons {
     float: right;
 }
 
-#dsl-buttons i {
+#top-buttons i {
     color: #333;
     vertical-align: middle;
     margin-top: -0.2em;
@@ -1243,30 +1243,30 @@ input {
     cursor: pointer;
 }
 
-#dsl-buttons i:hover {
+#top-buttons i:hover {
     color: lightgrey;
 }
 
-#dsl-buttons .tooltip-text {
+#top-buttons .tooltip-text {
     margin-left: -1.2em;
     margin-top: 0.5em;
 }
 
-.dsl-buttons {
+.table-buttons {
     text-align: center;
 }
 
-.dsl-buttons a {
+.table-buttons a {
     color: black;
 }
 
-.dsl-buttons i {
+.table-buttons i {
     vertical-align: middle;
     margin-left: 1em;
     margin-right: 1em;
 }
 
-#dsl-modify:hover {
+#modify-button:hover {
     color: orange;
 }
 
@@ -1533,6 +1533,21 @@ input {
     outline: 0;
     -webkit-box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
     box-shadow: inset 1px 1px 2px rgba(200,200,200,0.2);
+}
+
+.led-box {
+  height: 30px;
+  width: 25%;
+  margin: 10px 0;
+}
+
+.led-green {
+  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+  background-color: #ABFF00;
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
 }
 
 

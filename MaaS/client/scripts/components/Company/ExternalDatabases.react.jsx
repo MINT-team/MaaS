@@ -9,6 +9,7 @@
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var Sidebar = require('../Sidebar.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestExternalDatabasesActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -25,7 +26,8 @@ function getState() {
           errors: ExternalDatabaseStore.getErrors(),
           isOpened: false,
           _isOpened: true,
-          isLogged: SessionStore.isLogged()
+          isLogged: SessionStore.isLogged(),
+          type: "All"
       };
 }
 
@@ -54,7 +56,6 @@ var ExternalDatabases = React.createClass({
       //Collapse.addChangeListener(this._onChange);
       //SessionStore.addChangeListener(this._onChange);
       ExternalDatabaseStore.addChangeListener(this._onChange);
-      alert(CompanyStore.getId());
       RequestExternalDatabasesActionCreator.getDbs(CompanyStore.getId());
   },
 
@@ -64,14 +65,70 @@ var ExternalDatabases = React.createClass({
       ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
   
+  buttonFormatter: function(cell, row) {
+    return (
+      <div className="externalDatabases-buttons">
+        <div>Bottone disconnessione</div>
+        <div>Bottone eliminazione</div>
+      </div>
+    );
+  },
+  statusFormatter: function(cell,row) {
+    return (
+    <div className="led-box">
+      <div className="led-green"></div>
+    </div>
+    );
+  },
+  
+  onAllClick: function() {
+      this.refs.table.handleFilterData({ });
+      this.setState({type: "All"});
+  },
+    
+  onConnectedClick: function() {
+      /*this.refs.table.handleFilterData({
+          type: 'Connected'
+      });*/
+      this.setState({type: "Connected"})
+  },
+  
+  onDisconnectedClick: function() {
+      /*this.refs.table.handleFilterData({
+          type: 'Disconnected'
+      });*/
+      this.setState({type: "Disconnected"});
+  },
+  
+  deleteAllSelected: function() {
+    alert(this.refs.table.state.selectedRowKeys);
+  },
+  
   render: function() {
     if(!this.state.isLogged || this.state.errors.length > 0) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
-  
+    {
+      return (
+        <AuthorizationRequired />
+      );
+    }
+    
+    var all = {
+      label: "All",
+      onClick: this.onAllClick,
+      icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+    };
+    var connected = {
+        label: "Connected",
+        onClick: this.onConnectedClick,
+        icon: (<i className="material-icons md-24">&#xE871;</i>)
+    };
+    var disconnected = {
+        label: "Disconnected",
+        onClick: this.onDisconnectedClick,
+        icon: (<i className="material-icons md-24">list</i>)
+    };
+    
+    var sidebarData = [all, connected, disconnected];
     var selectRowProp = {
         mode: "checkbox",
         clickToSelect: true,
@@ -81,23 +138,63 @@ var ExternalDatabases = React.createClass({
     var data = [
       {
         id: null,
-        name: "Prova",
-        allowed: "true"
+        name: "Prova"
       }
     ];
     
     var options = {
-      noDataText: "There are no DSL definitions to display"
+      onRowClick: function(row){
+        //Show information page of ExternalDatabase
+      },
+      noDataText: "There are no external databases to display"
     };
   
     
     //var databases = ExternalDatabaseStore.getDbNames();
     var title, content;
-    title = "Manage Database";
+    title = "Manage external databases";
     content = (
-          <div id="content">
-            <div id="successful-operation">
-                <p>Manage your external database, add new or disable existing ones.</p>
+          <div id="manage-externalDatabases">
+            <Sidebar title="Filter external databases" data={sidebarData}/>
+            <div className="container sidebar-container">
+              <p className="container-title">{title}</p>
+              <div id="table-top">
+                <p id="filter-type">{this.state.type}</p>
+                <div id="top-buttons">
+                  <div className="tooltip tooltip-bottom" id="add-button">
+                    <i className="material-icons md-48">&#xE147;</i>
+                    <p className="tooltip-text tooltip-text-long">Add new external database</p>
+                  </div>
+                  <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                    <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                    <p className="tooltip-text tooltip-text-long">Delete all selected external databases</p>
+                  </div>
+                </div>
+              </div>
+              <div id="table">
+                <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} 
+                search={true} striped={true} hover={true} options={options}>
+                  <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                  <TableHeaderColumn dataField="status" dataFormat={this.statusFormatter}>Status</TableHeaderColumn>
+                  <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                </BootstrapTable>
+              </div>
+            </div>
+          </div>
+          );
+        
+    return (
+      <div id="externalDatabases">
+        {content}
+      </div>
+    );
+  }
+});
+
+/*
+
+<div id="successful-operation">
+                <p>Manage your external databases, add new or disable existing ones.</p>
             </div>
             <div id="add-database">
             <button onClick={this.openForm} className="inline-button">Add Database</button>
@@ -114,25 +211,7 @@ var ExternalDatabases = React.createClass({
                 </form>
               </Collapse>  
             </div>
-            <div id="table-database">
-              <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
-                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
-                <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
-              </BootstrapTable>
-            </div>
-            </div>
-          );
-        
-    return (
-      <div className="container sidebar-container">
-        <p className="container-title">{title}</p>
-        {content}
-      </div>
-    );
-  }
-});
 
-/*
 
 <Collapse _onChange={this.handleChange} isOpened={this.state._isOpened} >
               <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
