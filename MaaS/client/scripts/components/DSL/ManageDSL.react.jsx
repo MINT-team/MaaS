@@ -16,7 +16,7 @@ var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCre
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var DeleteDSL = require('./DeleteDSL.react.jsx');
 
-var ReactBSTable = require('react-bootstrap-table');  
+var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 

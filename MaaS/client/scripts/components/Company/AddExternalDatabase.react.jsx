@@ -1,4 +1,4 @@
-// Name: {Delete.react.jsx}
+// Name: {AddExternalDatabase.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/Company/}
 
@@ -8,29 +8,27 @@
 // ==========================================
 
 var React = require('react');
-var DSLStore = require('../../stores/DSLStore.react.jsx');
-var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
+var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
+var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 
-var DeleteDSL = React.createClass({
-
+var AddExternalDatabase = React.createClass({
+    
     getInitialState: function() {
         return {
-            id: this.props.id,
-            name: this.props.name,
             errors: []
         };
     },
-
+    
     componentDidMount: function() {
-        DSLStore.addChangeListener(this._onChange);
+        ExternalDatabaseStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function() {
-        DSLStore.removeChangeListener(this._onChange);
+        ExternalDatabaseStore.removeChangeListener(this._onChange);
     },
-
+    
     _onChange: function() {
-        this.setState({errors: DSLStore.getErrors() });
+        this.setState({errors: ExternalDatabaseStore.getErrors() });
     },
     
     toggleDropdown: function(event) {
@@ -41,11 +39,12 @@ var DeleteDSL = React.createClass({
 		}
 		else
 		{
-		    this.refs.deleteDropdown.classList.toggle("dropdown-show");
+		    this.refs.addDropdown.classList.toggle("dropdown-show");
 		}
 	},
-
-    confirmDelete: function(event) {
+	
+	confirmAdd: function(event) {
+	    /*
         event.preventDefault();
         var id = this.state.id;
         if(id != "")
@@ -56,8 +55,9 @@ var DeleteDSL = React.createClass({
         {
             this.setState({ errors: "Error retrieving DSL id" });
         }
+        */
     },
-
+    
     render: function() {
         var errors;
         if(this.state.errors.length > 0) {
@@ -66,8 +66,8 @@ var DeleteDSL = React.createClass({
             );
         }
         return (
-            <div id="delete-user">
-                <i onClick={this.toggleDropdown} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+            <div id="add-externalDatabase">
+                <i onClick={this.toggleDropdown} className="material-icons md-48">&#xE147;</i>
                 <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>
                     <p className="dropdown-description">{errors}</p>
@@ -75,12 +75,16 @@ var DeleteDSL = React.createClass({
                         <button className="button">Ok</button>
                     </div>
                 </div>
-                <div className="dropdown-content dropdown-popup" ref="deleteDropdown">
-                    <p className="dropdown-title">Delete DSL definition</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{this.state.name}</span> DSL definition?</p>
+                <div className="dropdown-content dropdown-popup" ref="addDropdown">
+                    <p className="dropdown-title">Add new external database</p>
+                    <form>
+                        <input id="name" name="name" placeholder="Database name" type="text" />
+                        <input id="password" name="password" placeholder="Database password" type="password" />    
+                        <input id="string" name="string" placeholder="Connection string" type="text" />
+                    </form>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
-                        <button id="delete-button" className="inline-button" onClick={this.confirmDelete}>Delete</button>
+                        <button id="confirm-button" className="inline-button" onClick={this.confirmAdd}>Add</button>
                     </div>
                 </div>
             </div>
@@ -88,4 +92,4 @@ var DeleteDSL = React.createClass({
     }
 });
 
-module.exports = DeleteDSL;
+module.exports = AddExternalDatabase;

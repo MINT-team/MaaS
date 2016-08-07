@@ -45,6 +45,10 @@ var RequestDSLActionCreator = {
     
     changeDSLDefinitionPermissions: function(id, userId) {
         WebAPIUtils.changeDSLDefinitionPermissions(id, userId);
+    },
+    
+    loadUserList: function(companyId) {
+        WebAPIUtils.loadUserList(companyId);
     }
 };
 

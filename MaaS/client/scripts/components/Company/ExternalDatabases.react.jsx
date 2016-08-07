@@ -13,6 +13,7 @@ var Sidebar = require('../Sidebar.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var AddExternalDatabase = require('./AddExternalDatabase.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -161,7 +162,7 @@ var ExternalDatabases = React.createClass({
                 <p id="filter-type">{this.state.type}</p>
                 <div id="top-buttons">
                   <div className="tooltip tooltip-bottom" id="add-button">
-                    <i className="material-icons md-48">&#xE147;</i>
+                    <AddExternalDatabase />
                     <p className="tooltip-text tooltip-text-long">Add new external database</p>
                   </div>
                   <div className="tooltip tooltip-bottom" id="deleteAll-button">

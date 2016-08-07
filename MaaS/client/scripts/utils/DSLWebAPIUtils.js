@@ -160,9 +160,23 @@ module.exports = {
         });
     },
     
-    changeDSLDefinitionPermissions(id, userId) {
+    changeDSLDefinitionPermissions: function(id, userId) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if(res)
+          {
+            alert("Ritorno web api");
+          }
+        });
+    },
+    
+    loadUserList: function(companyId) {
+      request
+        .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
+        //.query({ where: { or: [role: 'guest', role: '' ]}})
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .end(function(error, res) {
