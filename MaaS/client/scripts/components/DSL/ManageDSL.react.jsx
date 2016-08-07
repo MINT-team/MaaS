@@ -38,11 +38,11 @@ var ManageDSL = React.createClass({
     },
 
     componentDidMount: function() {
+        DSLStore.addChangeListener(this._onChange);
         if(!this.props.children)
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
-        DSLStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function() {

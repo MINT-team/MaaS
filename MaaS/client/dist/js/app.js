@@ -98,7 +98,7 @@ module.exports = RequestDSLActionCreator;
 // ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
-var WebAPIUtils = require("../../utils/ExternalDatabasesWebAPIUtils.js");
+var WebAPIUtils = require("../../utils/ExternalDatabaseWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
@@ -119,7 +119,7 @@ var RequestExternalDatabaseActionCreator = {
 
 module.exports = RequestExternalDatabaseActionCreator;
 
-},{"../../constants/Constants.js":46,"../../dispatcher/Dispatcher.js":47,"../../utils/ExternalDatabasesWebAPIUtils.js":56}],4:[function(require,module,exports){
+},{"../../constants/Constants.js":46,"../../dispatcher/Dispatcher.js":47,"../../utils/ExternalDatabaseWebAPIUtils.js":56}],4:[function(require,module,exports){
 'use strict';
 
 // Name: {RequestSessionActionCreator.react.jsx}
@@ -1301,7 +1301,7 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
-var RequestExternalDatabasesActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
+var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -1348,7 +1348,7 @@ var ExternalDatabases = React.createClass({
     //Collapse.addChangeListener(this._onChange);
     //SessionStore.addChangeListener(this._onChange);
     ExternalDatabaseStore.addChangeListener(this._onChange);
-    RequestExternalDatabasesActionCreator.getDbs(CompanyStore.getId());
+    RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
 
   componentWillUnmount: function componentWillUnmount() {
@@ -1575,7 +1575,7 @@ var ExternalDatabases = React.createClass({
 
 module.exports = ExternalDatabases;
 
-},{"../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":49,"../../stores/ExternalDatabaseStore.react.jsx":51,"../../stores/SessionStore.react.jsx":52,"../AuthorizationRequired.react.jsx":12,"../Sidebar.react.jsx":40,"react":483,"react-bootstrap-table":186,"react-collapse":202,"react-height":206,"react-motion":213}],18:[function(require,module,exports){
+},{"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":49,"../../stores/ExternalDatabaseStore.react.jsx":51,"../../stores/SessionStore.react.jsx":52,"../AuthorizationRequired.react.jsx":12,"../Sidebar.react.jsx":40,"react":483,"react-bootstrap-table":186,"react-collapse":202,"react-height":206,"react-motion":213}],18:[function(require,module,exports){
 'use strict';
 
 // Name: {Invite.react.jsx}
@@ -2242,10 +2242,10 @@ var ManageDSL = React.createClass({
     },
 
     componentDidMount: function componentDidMount() {
+        DSLStore.addChangeListener(this._onChange);
         if (!this.props.children) {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
-        DSLStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -7168,7 +7168,7 @@ module.exports = {
 // Version         Date            Programmer
 // ==========================================
 
-var ResponseExternalDatabasesActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
+var ResponseExternalDatabaseActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
@@ -7197,7 +7197,7 @@ module.exports = {
         console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
-          ResponseExternalDatabasesActionCreator.responseSetExtDb(null, errors);
+          ResponseExternalDatabaseActionCreator.responseSetExtDb(null, errors);
         } else {
           var json = {
             id: res.body.email,
@@ -7205,7 +7205,7 @@ module.exports = {
             password: res.body.password
 
           };
-          ResponseExternalDatabasesActionCreator.responseSetExtDb(json, null);
+          ResponseExternalDatabaseActionCreator.responseSetExtDb(json, null);
         }
       }
       if (err) {
@@ -7221,10 +7221,10 @@ module.exports = {
         console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
-          ResponseExternalDatabasesActionCreator.responseConnectDbs(null, errors);
+          ResponseExternalDatabaseActionCreator.responseConnectDbs(null, errors);
         } else {
           //var company = localStorage.getItem('companyName'); // qua ci va una variabile ricevuta dal server!! (es. res.companyName)
-          ResponseExternalDatabasesActionCreator.responseConnectDb(company, null);
+          ResponseExternalDatabaseActionCreator.responseConnectDb(company, null);
         }
       }
       if (err) {
@@ -7241,8 +7241,8 @@ module.exports = {
         console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
-          ResponseExternalDatabasesActionCreator.responseGetDbs(null, errors);
-        } else ResponseExternalDatabasesActionCreator.responseGetDbs(res.body, null);
+          ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);
+        } else ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
       }
     });
   }

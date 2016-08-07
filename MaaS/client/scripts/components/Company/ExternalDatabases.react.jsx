@@ -11,10 +11,10 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
-var RequestExternalDatabasesActionCreator = require('../../actions/Request/RequestExternalDatabasesActionCreator.react.jsx');
+var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
-var ReactBSTable = require('react-bootstrap-table');  
+var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 var ReactMotion = require('react-motion');
@@ -56,7 +56,7 @@ var ExternalDatabases = React.createClass({
       //Collapse.addChangeListener(this._onChange);
       //SessionStore.addChangeListener(this._onChange);
       ExternalDatabaseStore.addChangeListener(this._onChange);
-      RequestExternalDatabasesActionCreator.getDbs(CompanyStore.getId());
+      RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
 
   componentWillUnmount: function() {
@@ -90,7 +90,7 @@ var ExternalDatabases = React.createClass({
       /*this.refs.table.handleFilterData({
           type: 'Connected'
       });*/
-      this.setState({type: "Connected"})
+      this.setState({type: "Connected"});
   },
   
   onDisconnectedClick: function() {

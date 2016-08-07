@@ -6,7 +6,7 @@
 // Version         Date            Programmer
 // ==========================================
 
-var ResponseExternalDatabasesActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
+var ResponseExternalDatabaseActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
@@ -40,7 +40,7 @@ setExtDb: function(id, name, password) {
           console.log(res);
             if(res.error) {
                 var errors = _getErrors(res.body.error);
-                ResponseExternalDatabasesActionCreator.responseSetExtDb(null, errors);
+                ResponseExternalDatabaseActionCreator.responseSetExtDb(null, errors);
             } else {
                 var json = {
                         id: res.body.email,
@@ -48,7 +48,7 @@ setExtDb: function(id, name, password) {
                         password: res.body.password
 
                     };
-                ResponseExternalDatabasesActionCreator.responseSetExtDb(json, null);
+                ResponseExternalDatabaseActionCreator.responseSetExtDb(json, null);
             }
         }
         if(err){
@@ -68,11 +68,11 @@ connectDb: function() {
         console.log(res);
           if(res.error) {
               var errors = _getErrors(res.body.error);
-              ResponseExternalDatabasesActionCreator.responseConnectDbs(null, errors);
+              ResponseExternalDatabaseActionCreator.responseConnectDbs(null, errors);
           }
           else{
               //var company = localStorage.getItem('companyName'); // qua ci va una variabile ricevuta dal server!! (es. res.companyName)
-              ResponseExternalDatabasesActionCreator.responseConnectDb(company, null);
+              ResponseExternalDatabaseActionCreator.responseConnectDb(company, null);
           }
       }
       if(err){
@@ -92,10 +92,10 @@ getDbs: function(id) {
         console.log(res);
           if(res.error) {
               var errors = _getErrors(res.body.error);
-              ResponseExternalDatabasesActionCreator.responseGetDbs(null, errors);
+              ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);
           }
           else
-              ResponseExternalDatabasesActionCreator.responseGetDbs(res.body, null);
+              ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
       }
     });
 }
