@@ -19,7 +19,7 @@ var Sidebar = React.createClass({
             		: <p to="/" id="sidebar-title"><span>{this.props.title}</span></p>
             	}
 			    {this.props.data.map((x) =>
-			    	<div className="sidebar-field">
+			    	<div key={x.label} className="sidebar-field">
 			    		{x.link ?
     						<Link to={x.link}>{x.icon}{x.label}</Link>
     						: <a onClick={x.onClick}>{x.icon}{x.label}</a>

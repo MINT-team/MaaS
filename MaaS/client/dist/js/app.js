@@ -5468,7 +5468,7 @@ var Sidebar = React.createClass({
       this.props.data.map(function (x) {
         return React.createElement(
           'div',
-          { className: 'sidebar-field' },
+          { key: x.label, className: 'sidebar-field' },
           x.link ? React.createElement(
             Link,
             { to: x.link },
