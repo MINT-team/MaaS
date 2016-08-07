@@ -90,14 +90,8 @@ var Header = React.createClass({
             else // render superAdmin Component
             {
                 title = (
-                        <Link to="/" id="header-title">{this.props.companyName}</Link>
+                        <Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
                     );
-                
-                headerMenu = (
-                    <div id="header-menu">
-                        <Link to="/dashboardSuperAdmin">Dashboard</Link>
-                    </div>
-                );
                
                 headerPanel = (
                     <div id="header-panel">

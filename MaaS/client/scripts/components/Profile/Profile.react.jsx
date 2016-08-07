@@ -40,33 +40,52 @@ var Profile = React.createClass({
 
   render: function() {
     var content;
-    if(this.props.children) {
+    if(this.props.children) 
+    {
       // render user settings once sidebar is clicked
       content = this.props.children;
-    } else {
+    }
+    else
+    {
       var name, dateOfBirth, gender, avatar = this.state.avatar;
-      if((!this.state.name && !this.state.surname)) {
+      if((!this.state.name && !this.state.surname))
+      {
         name = "Complete your account here";
-      } else {
+      }
+      else
+      {
         name = this.state.name + ' ' + this.state.surname;
       }
-      if(!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/)) {
+      if(!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/))
+      {
         dateOfBirth = "Not set";
-      } else {
+      }
+      else
+      {
         dateOfBirth = this.state.dateOfBirth.toDateString();
       }
-      if(!this.state.gender || this.state.gender=="undefined") {
+      if(!this.state.gender || this.state.gender=="undefined")
+      {
         gender = "Not set";
-      } else if(this.state.gender == "male"){
+      }
+      else if(this.state.gender == "male")
+      {
         gender = "Male";
-      } else if(this.state.gender == "female"){
+      }
+      else if(this.state.gender == "female")
+      {
         gender = "Female";
-      } else {
+      } 
+      else
+      {
         gender = this.state.gender;
       }
-      if(!this.state.avatar || this.state.avatar=="undefined") {
+      if(!this.state.avatar || this.state.avatar=="undefined")
+      {
         avatar = (<i id="avatar-i" className="material-icons">&#xE851;</i>);
-      } else {
+      }
+      else
+      {
         avatar = (<img id="avatar" src={"../../../images/"+this.state.avatar} />);  // da cambiare col servizio esterno
       }
       content = (

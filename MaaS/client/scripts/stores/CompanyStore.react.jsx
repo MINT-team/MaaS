@@ -19,11 +19,11 @@ var DELETE_EVENT = 'delete';
 
 
 var _company = {
-                id: localStorage.getItem('companyId'),
-                name: localStorage.getItem('companyName'),
-            };
+    id: localStorage.getItem('companyId'),
+    name: localStorage.getItem('companyName'),
+};
 var _users = [];    // users of the company
-var _companies = localStorage.getItem('companies'); //all company in the system
+var _companies = JSON.parse(localStorage.getItem('companies')); //all company in the system
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {

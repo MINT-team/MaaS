@@ -5,3 +5,22 @@
 // History:
 // Version         Date            Programmer
 // ==========================================
+
+var Dispatcher = require("../../dispatcher/Dispatcher.js");
+var Constants = require("../../constants/Constants.js");
+
+var ActionTypes = Constants.ActionTypes;
+
+var ResponseSuperAdminActionCreator = {
+    
+    responseCompanyCompanies: function(json, errors) {
+        Dispatcher.handleServerAction({
+          type: ActionTypes.COMPANIES,
+          json: json,
+          errors: errors
+        });
+    }
+    
+};
+
+module.exports = ResponseSuperAdminActionCreator;

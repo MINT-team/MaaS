@@ -1,0 +1,51 @@
+// Name: {SuperAdminWebAPIUtils.js}
+// Module: {Front-end::WebAPIUtils}
+// Location: {/MaaS/client/scripts/utils/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var ResponseSuperAdminActionCreator = require('../actions/Response/ResponseSuperAdminActionCreator.react.jsx');
+var Constants = require('../constants/Constants.js');
+var request = require('superagent');
+
+function _getErrors(json) {
+  var error, message;
+    if(json.message) {
+        message = json.message;
+        // Other cases
+        if(!error) {
+            error = message;
+        }
+    }
+    return error;
+}
+
+var APIEndpoints = Constants.APIEndpoints;
+
+module.exports = {
+    getCompanies: function() {
+    request
+      .get(APIEndpoints.COMPANIES)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .query({
+              filter: { 
+                    include:["owner"]
+              }
+        })
+      .end(function(err, res){
+        if(res) {
+          console.log(res);
+            if(res.error) {
+              window.alert("errore");
+                var errors = _getErrors(res.body.error);
+                ResponseSuperAdminActionCreator.responseCompanyCompanies(null, errors);
+            } else {
+                ResponseSuperAdminActionCreator.responseCompanyCompanies(res.body, null);
+            }
+        }
+      });
+  }
+};

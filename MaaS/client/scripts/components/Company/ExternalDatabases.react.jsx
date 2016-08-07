@@ -131,7 +131,6 @@ var ExternalDatabases = React.createClass({
     var sidebarData = [all, connected, disconnected];
     var selectRowProp = {
         mode: "checkbox",
-        clickToSelect: true,
         bgColor: "rgba(144, 238, 144, 0.42)",
     };
   

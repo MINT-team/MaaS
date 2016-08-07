@@ -25,7 +25,7 @@ var UsersManagement = React.createClass({
       
     return (
       <div>
-        {this.props.children || content}
+        {content}
       </div>
     );
   }

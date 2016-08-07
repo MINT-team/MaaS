@@ -2,9 +2,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-var UserStore = require('../../stores/UserStore.react.jsx');
-var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
-var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 
@@ -28,7 +26,7 @@ var DatabaseManagement = React.createClass({
  componentDidMount: function() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestCompanyActionCreator.getCompanies();  
+        RequestSuperAdminActionCreator.getCompanies();  
   },
   
   componentWillUnmount: function() {
@@ -40,7 +38,6 @@ var DatabaseManagement = React.createClass({
       this.setState(getState());
   },
   
-    
     render: function() {
         if(!this.state.isLogged || this.state.errors.length > 0) 
         {
@@ -50,27 +47,28 @@ var DatabaseManagement = React.createClass({
             );
         }
         var title, content;
+        // SideBar initialization
+        var companies = {
+            label: "Companies",
+            //onClick: onCompaniesClick,
+            link: "/dashboardSuperAdmin/databaseManagement/companiesManagement",
+            icon: (<i className="material-icons md-24">&#xE873;</i>)
+        };
+        var users = {
+            label: "Users",
+            //onClick: onUsersClick,
+            link: "/dashboardSuperAdmin/databaseManagement/usersManagement",
+            icon: (<i className="material-icons md-24">&#xE7EF;</i>)
+        };
+        
+        var sidebarData = [companies, users];
+        
         if(this.props.children)
         {
             content = this.props.children;
         }
         else
         {
-            // SideBar initialization
-            var companies = {
-                label: "Companies",
-                //onClick: onCompaniesClick,
-                link: "dashboardSuperAdmin/companiesManagement",
-                icon: (<i className="material-icons md-24">&#xE873;</i>)
-            };
-            var users = {
-                label: "Users",
-                //onClick: onUsersClick,
-                link: "dashboardSuperAdmin/usersManagement",
-                icon: (<i className="material-icons md-24">&#xE7EF;</i>)
-            };
-            
-            var sidebarData = [companies, users];
             var numberOfCompanies;
             if(this.state.companies){
                 numberOfCompanies = (JSON.parse(this.state.companies)).length;
@@ -80,10 +78,10 @@ var DatabaseManagement = React.createClass({
             }
             content = (
                 <div>
-                    <Sidebar title="Database Management" data={sidebarData}/>
+                    
                     <div className="container sidebar-container">
                         <p className="container-title">In the system there are</p>
-                        <p className="container-title">  {numberOfCompanies} </p>           
+                        <p className="container-title">{numberOfCompanies}</p>           
                         <p className="container-title">companies</p>
                         <i className="material-icons-dashboard">&#xE0AF;</i>
                     </div>
@@ -92,6 +90,7 @@ var DatabaseManagement = React.createClass({
         }
         return (
             <div>
+                <Sidebar title="Database Management" titleLink="/dashboardSuperAdmin/databaseManagement" data={sidebarData}/>
                 {content}
             </div>
         );

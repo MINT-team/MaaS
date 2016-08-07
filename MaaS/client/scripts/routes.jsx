@@ -70,11 +70,12 @@ var Routes = React.createClass({
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />
           <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
-          <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin}>
-            <Route path="databaseManagement" component={DatabaseManagement} />
+          <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} >
+            <Route path="databaseManagement" component={DatabaseManagement} >
+              <Route path="companiesManagement" component={CompaniesManagement} />
+              <Route path="usersManagement" component={UsersManagement} />
+            </Route>
             <Route path="impersonateUser" component={ImpersonateUser} />
-            <Route path="companiesManagement" component={CompaniesManagement} />
-            <Route path="usersManagement" component={UsersManagement} />
           </Route>
           <Route path="404" component={Error404} />
           <Redirect from="*" to="404" />

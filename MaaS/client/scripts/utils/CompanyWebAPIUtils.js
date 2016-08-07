@@ -67,30 +67,6 @@ module.exports = {
           }
         } 
       });
-  },
-  
-  getCompanies: function() {
-    request
-      .get(APIEndpoints.COMPANIES)
-      .set('Accept', 'application/json')
-      .set('Authorization', localStorage.getItem('accessToken'))  
-      .end(function(err, res){
-        if(res) {
-          console.log(res);
-            if(res.error) {
-              window.alert("errore");
-                var errors = _getErrors(res.body.error);
-                ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
-            } else {
-                ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
-            }
-        }
-        if(err){
-          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
-        }
-      });
   }
-  
-  
   
 };

@@ -39,7 +39,7 @@ var Footer = React.createClass({
 	    	}else{				//if I want to render the footer of the Super Admin
 	    		footerCenter = (
 	    			<div className="footer-centerLooged">
-						<Link to="/" id="header-title">{this.props.companyName}</Link>
+						<Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
 						<p className="footer-links">
 							<Link to="/" id="home"> Home </Link>
 							<Link to="/dashboardSuperAdmin">Dashboard</Link>
