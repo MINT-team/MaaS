@@ -12,11 +12,12 @@ var Link = require('react-router').Link;
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-
+var Sidebar = require('../Sidebar.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 
 
@@ -37,6 +38,7 @@ var ManageDSLPermissions = React.createClass({
     
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
+        RequestDSLActionCreator.loadUserList(CompanyStore.getId());
     },
     
     componentWillUnmount: function() {

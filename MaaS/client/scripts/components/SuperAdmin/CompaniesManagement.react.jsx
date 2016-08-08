@@ -20,7 +20,7 @@ var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuper
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-
+var DeleteCompany = require('./DeleteCompany.react.jsx');
 
 
 function getState() {
@@ -58,12 +58,18 @@ var CompaniesManagement = React.createClass({
   },
   
   buttonFormatter: function(cell, row) {
-    return (
+    
+    return(
+      <div>
+        <DeleteCompany id={row.id} name={row.name} email={row.owner}/>
+      </div>
+      );
+    /*return (
       <div className="companiesManagement-buttons">
         <div>Bottone modifica</div>
         <div>Bottone eliminazione</div>
       </div>
-    );
+    );*/
   },
   
   render: function() {

@@ -1,58 +1,61 @@
-// Name: {Delete.react.jsx}
+// Name: {DeleteCompany.react.jsx}
 // Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
+// Location: {/MaaS/client/script/components/SuperAdmin/}
 
 // History:
 // Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
+// 1.0.0        08/08/2016        Thomas Fuser
 // ==========================================
 
 var React = require('react');
-var UserStore = require('../../stores/UserStore.react.jsx');
-var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-//var SessionStore = require('../../stores/SessionStore.react.jsx');
-var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
+var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 
-var DeleteUser = React.createClass({
+var DeleteCompany = React.createClass({
 
     getInitialState: function() {
         return {
-            id: UserStore.getId(),
+            id: this.props.id,
+            name: this.props.name,
+            email: this.props.email,
             errors: []
         };
     },
 
     componentDidMount: function() {
-        CompanyStore.addChangeListener(this._onChange);
-        UserStore.addChangeListener(this._onChange);
+        SuperAdminStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function() {
-        CompanyStore.removeChangeListener(this._onChange);
-        UserStore.removeChangeListener(this._onChange);
+        SuperAdminStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function() {
-        this.setState({errors: CompanyStore.getErrors() || UserStore.getErrors()});
+        this.setState({errors: SuperAdminStore.getErrors() });
     },
     
     toggleDropdown: function(event) {
 		event.preventDefault();
-		if(this.state.errors.length > 0) {
+		if(this.state.errors.length > 0)
+		{
 		    this.refs.errorDropdown.classList.toggle("dropdown-show");
-		} else {
+		}
+		else
+		{
 		    this.refs.deleteDropdown.classList.toggle("dropdown-show");
 		}
 	},
 
     confirmDelete: function(event) {
         event.preventDefault();
-        var email = this.props.email;
         var id = this.state.id;
-        if(email != "" || id != "") {
-            RequestUserActionCreator.deleteUser(email, id);
-        } else {
-            this.setState({ errors: "Error retrieving user id" });
+        if(id != "")
+        {
+            RequestSuperAdminActionCreator.DeleteCompanyDefinition(id);
+        }
+        else
+        {
+            this.setState({ errors: "Error retrieving Company id" });
         }
     },
 
@@ -74,8 +77,10 @@ var DeleteUser = React.createClass({
                     </div>
                 </div>
                 <div className="dropdown-content dropdown-popup" ref="deleteDropdown">
-                    <p className="dropdown-title">Delete user</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{this.props.email}</span>'s account?</p>
+                    <p className="dropdown-title">Delete Company</p>
+                    <p className="dropdown-description">Are you sure you want to delete </p> 
+                        <p className="dropdown-description"><span id="successful-email">{this.state.name}</span>  </p>
+                    <p className="dropdown-description">company?</p>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={this.confirmDelete}>Delete</button>
@@ -86,4 +91,4 @@ var DeleteUser = React.createClass({
     }
 });
 
-module.exports = DeleteUser;
+module.exports = DeleteCompany;

@@ -66,7 +66,7 @@ var AddExternalDatabase = React.createClass({
             );
         }
         return (
-            <div id="add-externalDatabase">
+            <div id="add-externalDatabase" className="pop-up">
                 <i onClick={this.toggleDropdown} className="material-icons md-48">&#xE147;</i>
                 <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>
@@ -76,7 +76,7 @@ var AddExternalDatabase = React.createClass({
                     </div>
                 </div>
                 <div className="dropdown-content dropdown-popup" ref="addDropdown">
-                    <p className="dropdown-title">Add new external database</p>
+                    <p className="dropdown-title">Add new database</p>
                     <form>
                         <input id="name" name="name" placeholder="Database name" type="text" />
                         <input id="password" name="password" placeholder="Database password" type="password" />    

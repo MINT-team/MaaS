@@ -1404,11 +1404,11 @@ input {
 }
 
 /*------------------------------------------------ DELETE USER, DELETE COMPANY, CHANGE ROLE --------------------------------------------------------------*/
-#delete-user, #change-role {
+.pop-up {
     display: inline;
 }
 
-#delete-user i, #change-role i {
+.pop-up i {
     cursor: pointer;
     vertical-align: middle;
     padding: 0.1em;

@@ -176,13 +176,22 @@ module.exports = {
     loadUserList: function(companyId) {
       request
         .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
-        //.query({ where: { or: [role: 'guest', role: '' ]}})
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
+        .query({ 
+          // {where: {and: [{title: 'My Post'}, {content: 'Hello'}]}}
+          // ?filter[where][and][0][title]=My%20Post&filter[where][and][1][content]=Hello
+          
+          //Corretta su explorer: { "where": {"or": [{"role": "Guest"},{ "role": "Administrator"}] } }
+          // https://maas-navid94.c9users.io/api/DSLAccesses?filter%5Binclude%5D=dsl&filter%5Bwhere%5D%5BuserId%5D=57a44d89dd5889111d555649
+          // https://maas-navid94.c9users.io/api/Companies/579f6c08ee187d2fe6009666/users?filter=%7B%20%22where%22%3A%20%7B%22or%22%3A%20%5B%7B%22role%22%3A%20%22Guest%22%7D%2C%7B%20%22role%22%3A%20%22Administrator%22%7D%5D%20%7D%20%7D&access_token=1bjLglEfXd4bcW7oEF9eKEC8Q4NsPAQ5I4dAjwxMpiVbChEdlmweafdn9azlAbIL
+     // err: https://maas-navid94.c9users.io/api/Companies/579f6c08ee187d2fe6009666/users?filter%5Bwhere%5D%5Bor%5D%5Brole%5D=Guest&filter%5Bwhere%5D%5Bor%5D%5Brole%5D=Administrator
+          filter: { where: { or: [ { role: "Guest"},{ role: "Administrator"}]}}
+          })
         .end(function(error, res) {
           if(res)
           {
-            alert("Ritorno web api");
+            console.log(res.body);
           }
         });
     }

@@ -135,7 +135,8 @@ var ExternalDatabases = React.createClass({
         bgColor: "rgba(144, 238, 144, 0.42)",
     };
   
-    var data = [
+    var data = [];  
+    data = [
       {
         id: null,
         name: "Prova"
@@ -146,16 +147,15 @@ var ExternalDatabases = React.createClass({
       onRowClick: function(row){
         //Show information page of ExternalDatabase
       },
-      noDataText: "There are no external databases to display"
+      noDataText: "There are no databases to display"
     };
   
     
-    //var databases = ExternalDatabaseStore.getDbNames();
     var title, content;
-    title = "Manage external databases";
+    title = "Manage databases";
     content = (
           <div id="manage-externalDatabases">
-            <Sidebar title="Filter external databases" data={sidebarData}/>
+            <Sidebar title="Filter databases" data={sidebarData}/>
             <div className="container sidebar-container">
               <p className="container-title">{title}</p>
               <div id="table-top">
@@ -163,11 +163,11 @@ var ExternalDatabases = React.createClass({
                 <div id="top-buttons">
                   <div className="tooltip tooltip-bottom" id="add-button">
                     <AddExternalDatabase />
-                    <p className="tooltip-text tooltip-text-long">Add new external database</p>
+                    <p className="tooltip-text tooltip-text-long">Add new database</p>
                   </div>
                   <div className="tooltip tooltip-bottom" id="deleteAll-button">
                     <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
-                    <p className="tooltip-text tooltip-text-long">Delete all selected external databases</p>
+                    <p className="tooltip-text tooltip-text-long">Delete all selected databases</p>
                   </div>
                 </div>
               </div>

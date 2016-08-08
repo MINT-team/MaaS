@@ -81,7 +81,7 @@ var ChangeRole = React.createClass({
             );
         }
         return (
-            <div id="change-role">
+            <div id="change-role" className="pop-up">
                 <i onClick={this.toggleChangeRoleDropdown} className="material-icons md-24 dropdown-button">&#xE254;</i>
                 <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>

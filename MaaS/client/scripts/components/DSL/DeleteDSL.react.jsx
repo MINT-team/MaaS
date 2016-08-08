@@ -66,7 +66,7 @@ var DeleteDSL = React.createClass({
             );
         }
         return (
-            <div id="delete-user">
+            <div id="delete-user" className="pop-up">
                 <i onClick={this.toggleDropdown} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
                 <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>

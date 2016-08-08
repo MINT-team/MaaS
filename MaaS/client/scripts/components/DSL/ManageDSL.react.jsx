@@ -60,12 +60,13 @@ var ManageDSL = React.createClass({
     */
     buttonFormatter: function(cell, row) {
         var buttons;
+        
         if(this.state.role == "Owner" || this.state.role == "Administrator")
         {
             buttons = (
                 <div>
                     <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
-                    <Link to={"/manageDSL/manageDSLPermission/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
+                    <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
                     <DeleteDSL id={row.id} name={row.name} />
                 </div>
             );
@@ -92,6 +93,7 @@ var ManageDSL = React.createClass({
                 );
             }
         }
+        
         return (
             <div className="table-buttons">
                 {buttons}
