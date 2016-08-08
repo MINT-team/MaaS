@@ -27,7 +27,8 @@ function getState() {
             isLogged: SessionStore.isLogged(),
             role: UserStore.getRole(),
             userId: UserStore.getId(),
-            roleFilter: "All"
+            roleFilter: "All",
+            USER_LIST: DSLStore.getUserList()
       };
 }
 
@@ -63,16 +64,16 @@ var ManageDSLPermissions = React.createClass({
     },
     
     onMembersClick: function() {
-        /*this.refs.table.handleFilterData({
-            type: ''
-        });*/
+        this.refs.table.handleFilterData({
+            role: 'Member'
+        });
         this.setState({roleFilter: "Members"});
     },
     
     onGuestsClick: function() {
-        /*this.refs.table.handleFilterData({
-            type: 'Guests'
-        });*/
+        this.refs.table.handleFilterData({
+            role: 'Guest'
+        });
         this.setState({roleFilter: "Guests"});
     },
     
@@ -95,12 +96,12 @@ var ManageDSLPermissions = React.createClass({
         var members = {
             label: "Members",
             onClick: this.onMembersClick,
-            icon: (<i className="material-icons md-24">&#xE871;</i>)
+            icon: (<i className="material-icons md-24">&#xE7FD;</i>)
         };
         var guests = {
             label: "Guests",
             onClick: this.onGuestsClick,
-            icon: (<i className="material-icons md-24">list</i>)
+            icon: (<i className="material-icons md-24">&#xE7FF;</i>)
         };
         
         var data = [];
@@ -111,12 +112,16 @@ var ManageDSLPermissions = React.createClass({
         
         var sidebarData = [all, members, guests];
         
-        data = [
-            {
-                id: null,
-                email: "Prova"
-            }
-        ];
+        if(this.state.USER_LIST && this.state.USER_LIST.length > 0)
+        {
+            this.state.USER_LIST.forEach(function(user, i) {
+                data[i] = {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                };
+            });
+        }
         
         var options = {
             onRowClick: function(row){

@@ -49,9 +49,10 @@ var DeleteCompany = React.createClass({
     confirmDelete: function(event) {
         event.preventDefault();
         var id = this.state.id;
+        var email = this.state.email;
         if(id != "")
         {
-            RequestSuperAdminActionCreator.DeleteCompanyDefinition(id);
+            RequestSuperAdminActionCreator.deleteCompany(id, email);
         }
         else
         {

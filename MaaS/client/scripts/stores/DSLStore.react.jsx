@@ -31,6 +31,8 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
+var _USER_LIST = [];    // Member and Guest list
+
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
@@ -80,6 +82,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getDSLList: function() {
         return _DSL_LIST;
+    },
+    
+    getUserList: function() {
+        return _USER_LIST;
     }
 });
 
@@ -203,6 +209,14 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');
                 localStorage.removeItem('DSLSource');
+            }
+            DSLStore.emitChange();
+            break;
+            
+        case ActionTypes.LOAD_USER_LIST_RESPONSE:
+            if(action.userList)
+            {
+                _USER_LIST = action.userList;
             }
             DSLStore.emitChange();
             break;

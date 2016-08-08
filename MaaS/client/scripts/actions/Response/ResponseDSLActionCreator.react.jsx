@@ -62,6 +62,13 @@ var ResponseDSLActionCreator = {
             errors: errors,
             id: id
         });
+    },
+    
+    responseLoadUserList: function(userList) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_USER_LIST_RESPONSE,
+            userList: userList
+        });
     }
 };
 

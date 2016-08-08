@@ -10,6 +10,7 @@ var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
+var Link = require('react-router').Link;
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -67,10 +68,27 @@ var ExternalDatabases = React.createClass({
   },
   
   buttonFormatter: function(cell, row) {
+    var buttons;
+    if(true)
+    {
+      buttons = (
+        <div>
+          <Link to=""><i className="material-icons md-24">&#xE157;</i></Link>
+          <Link to=""><i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i></Link>
+        </div>
+      );
+    }
+    else
+    {
+      buttons = (
+        <div>
+          <Link to=""><i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i></Link>
+        </div>
+      );
+    }
     return (
-      <div className="externalDatabases-buttons">
-        <div>Bottone disconnessione</div>
-        <div>Bottone eliminazione</div>
+      <div className="table-buttons">
+        {buttons}
       </div>
     );
   },
@@ -106,7 +124,7 @@ var ExternalDatabases = React.createClass({
   },
   
   render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0) 
+    if(!this.state.isLogged || this.state.errors.length > 0)
     {
       return (
         <AuthorizationRequired />
@@ -121,12 +139,12 @@ var ExternalDatabases = React.createClass({
     var connected = {
         label: "Connected",
         onClick: this.onConnectedClick,
-        icon: (<i className="material-icons md-24">&#xE871;</i>)
+        icon: (<i className="material-icons md-24">&#xE8C0;</i>)
     };
     var disconnected = {
         label: "Disconnected",
         onClick: this.onDisconnectedClick,
-        icon: (<i className="material-icons md-24">list</i>)
+        icon: (<i className="material-icons md-24">&#xE033;</i>)
     };
     
     var sidebarData = [all, connected, disconnected];

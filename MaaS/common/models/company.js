@@ -12,7 +12,9 @@ module.exports = function(Company) {
     
     // Elimino l'azienda e i relativi utenti
     Company.deleteCompany = function(id, email, cb) {
+        console.log("> delete company");
         Company.findById(id, function(err, company) {
+            console.log(">if findID");
             if(err || !company)
                 return cb(err);
             var user = app.models.user;
@@ -20,11 +22,50 @@ module.exports = function(Company) {
                 if(err || !userInstance)
                     return cb(err);
                 if(userInstance.role != "Owner" && company.owner == userInstance) {
+                    console.log(">non sono un superAdmin");
                     var error = {
                         message: 'You haven\'t the rights to delete this company'
                     };
                     return cb(null, error);
-                }
+                } 
+                console.log(">sono un superAdmin");
+                // Remove DSL of the company
+                var DSL = app.models.DSL;
+                userInstance.dsl({ where: {} }, function(err, DSLList) {
+                    if(err || !DSLList)
+                    {
+                        return cb(err);
+                    }
+                    // Remove DSL accesses
+                    DSLList.forEach(function(DSLInstance, i) {
+                        console.log(">cancellazione DSL definition");
+                        DSLInstance.users({ where: {} }, function(err, users) {
+                            if(err)
+                            {
+                                return cb(err, null);
+                            }
+                            users.forEach(function(user, i) {
+                                DSLInstance.users.remove(user, function(err) {
+                                    if(err)
+                                    {
+                                        console.log("> Error deleting DSL definition");
+                                        return cb(err, null);
+                                    }
+                                });
+                            });
+                            // Success
+                            DSL.destroyById(DSLInstance.id, function(err) {
+                                if(err) 
+                                {
+                                    return cb(err, null);
+                                }
+                                console.log("> DSL definition deleted:", id);
+                                return cb(null, null);
+                            });
+                        });
+                    });
+                });
+                // Remove Users of the company
                 company.users.destroyAll(function(err) {
                     if(err)
                         return cb(err);

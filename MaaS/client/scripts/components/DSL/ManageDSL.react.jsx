@@ -14,7 +14,6 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
-var DeleteDSL = require('./DeleteDSL.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -58,8 +57,54 @@ var ManageDSL = React.createClass({
 2) Permesso di lettura: lettura + esecuzione
 3) Permesso di esecuzione: esecuzione
     */
+    
     buttonFormatter: function(cell, row) {
         var buttons;
+        var errors;
+        var errorId ="errorDropdown"+row.id;
+        var deleteId ="deleteDropdown"+row.id;
+        if(this.state.errors.length > 0) {
+            errors = (
+              <span id="errors">{this.state.errors}</span>
+            );
+        }
+        var instance = this;
+        var onClick = function() {
+            if(instance.state.errors.length > 0)
+    		{
+    		    document.getElementById(errorId).classList.toggle("dropdown-show");
+    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
+    		}
+    		else
+    		{
+    		    document.getElementById(deleteId).classList.toggle("dropdown-show");
+    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
+    		}
+        };
+        
+        var confirmDelete = function() {
+            RequestDSLActionCreator.deleteDSLDefinition(row.id);
+        };
+        var deleteDSL = (
+            <div id="delete-user" className="pop-up">
+                <i onClick={onClick} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+                <div className="dropdown-content dropdown-popup" id={errorId}>
+                    <p className="dropdown-title">Error</p>
+                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-buttons">
+                        <button className="button">Ok</button>
+                    </div>
+                </div>
+                <div className="dropdown-content dropdown-popup" id={deleteId}>
+                    <p className="dropdown-title">Delete DSL definition</p>
+                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> DSL definition?</p>
+                    <div className="dropdown-buttons">
+                        <button className="inline-button">Cancel</button>
+                        <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>
+                    </div>
+                </div>
+            </div>
+        );
         
         if(this.state.role == "Owner" || this.state.role == "Administrator")
         {
@@ -67,7 +112,7 @@ var ManageDSL = React.createClass({
                 <div>
                     <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
                     <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
-                    <DeleteDSL id={row.id} name={row.name} />
+                    {deleteDSL}
                 </div>
             );
         }
@@ -78,7 +123,6 @@ var ManageDSL = React.createClass({
                 buttons = (
                     <div>
                         <Link to={"/manageDSL/viewDSLSource/" + row.id }><i id="dsl-read" className="material-icons md-24">&#xE86F;</i></Link>
-                        <DeleteDSL id={row.id} name={row.name} />
                     </div>
                 );
             }
@@ -88,7 +132,7 @@ var ManageDSL = React.createClass({
                 buttons = (
                     <div>
                         <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
-                        <DeleteDSL id={row.id} name={row.name} />
+                        {deleteDSL}
                     </div>
                 );
             }

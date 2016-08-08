@@ -19,6 +19,15 @@ var ResponseSuperAdminActionCreator = {
           json: json,
           errors: errors
         });
+    },
+    
+    responseDeleteCompany: function(name, errors) {
+        window.alert("ho eliminato la company");
+        Dispatcher.handleServerAction({
+          type: ActionTypes.DELETE_COMPANY,
+          name: name,
+          errors: errors
+        });
     }
     
 };

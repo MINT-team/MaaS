@@ -25,6 +25,7 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
+  
     getCompanies: function() {
     request
       .get(APIEndpoints.COMPANIES)
@@ -47,5 +48,28 @@ module.exports = {
             }
         }
       });
+  },
+  
+  //delete the select company, all the users all the DSL definitions and theire Relations
+  deleteCompany: function(id, email){
+       request
+      .del(APIEndpoints.COMPANIES + '/deleteCompany/' + id)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        email: email
+      })
+      .end(function(error, res){
+        if(res) {
+           res = JSON.parse(res.text);
+          if(res.error) {
+            // res.error.message: errori di loopback e error definito dal remote method
+            ResponseSuperAdminActionCreator.responseDeleteCompany(null, res.error.message);
+          } else {
+            ResponseSuperAdminActionCreator.responseDeleteCompany(res.name, null);
+          }
+        } 
+      });
   }
+  
 };

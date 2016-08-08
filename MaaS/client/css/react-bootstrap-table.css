@@ -1,10 +1,4 @@
 /* --------------------------------- BOOTSTRAP ----------------------- */
-
-
-#table-database a, #table-dsl a {
-  text-decoration: none;
-}
-
 #table-database input{
   width:98.4%;
   display: block;
@@ -397,6 +391,7 @@ fieldset[disabled] .btn-default.focus {
   line-height: 1.42857143;
   color: #333;
   white-space: nowrap;
+  text-decoration: none;
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
