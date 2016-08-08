@@ -123,7 +123,7 @@ module.exports = {
         .set('Authorization', localStorage.getItem('accessToken'))
         .query({
               filter: { 
-                    include:["dsl"], 
+                    include:["dsl"],
                     where: { 
                             "userId": userId,
                             "dslId": id
@@ -175,13 +175,13 @@ module.exports = {
     
     loadUserList: function(companyId) {
       var filter = {
-              where: {
-                or: [
-                  { role: 'Member'},
-                  { role: 'Guest'}
-                ]
-              }
-            };
+        where: {
+          or: [
+            { role: 'Member'},
+            { role: 'Guest'}
+          ]
+        }
+      };
       filter = JSON.stringify(filter);
       request
         .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
@@ -194,6 +194,26 @@ module.exports = {
             ResponseDSLActionCreator.responseLoadUserList(res.body);
           }
         });
-    }
+    },
     
+    loadUsersPermissions: function(id) {
+      request
+        .get(APIEndpoints.DSL_ACCESSES)
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .query({
+          filter: { 
+            where: { 
+              "dslId": id
+            },
+            fields: ['permission','userId']
+          }
+        })
+        .end(function(error, res) {
+          if(res)
+          {
+            console.log(res.body);
+          }
+        });
+    }
 };

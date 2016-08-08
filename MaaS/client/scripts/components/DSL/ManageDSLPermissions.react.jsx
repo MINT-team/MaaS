@@ -40,6 +40,7 @@ var ManageDSLPermissions = React.createClass({
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
         RequestDSLActionCreator.loadUserList(CompanyStore.getId());
+        RequestDSLActionCreator.loadUsersPermissions(this.props.params.definitionId);
     },
     
     componentWillUnmount: function() {
@@ -53,9 +54,19 @@ var ManageDSLPermissions = React.createClass({
     buttonFormatter: function(cell, row) {
         return (
             <div className="table-buttons">
-                bottoni
+                <select onChange={this.changePermission} className="select">
+                    <option>None</option>
+                    <option>Write</option>
+                    <option>Read</option>
+                    <option>Execute</option>
+                </select>
             </div>
         );
+    },
+    
+    changePermission: function() {
+        alert("change select");
+        //action...
     },
     
     onAllClick: function() {
@@ -75,6 +86,10 @@ var ManageDSLPermissions = React.createClass({
             role: 'Guest'
         });
         this.setState({roleFilter: "Guests"});
+    },
+    
+    changeAllSelected: function() {
+        alert(this.refs.table.state.selectedRowKeys);
     },
     
     render: function() {
@@ -122,7 +137,7 @@ var ManageDSLPermissions = React.createClass({
                 };
             });
         }
-        
+        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
         var options = {
             onRowClick: function(row){
                 //Show user profile
@@ -138,7 +153,7 @@ var ManageDSLPermissions = React.createClass({
                     <div id="table-top">
                         <p id="filter-type">{this.state.roleFilter}</p>
                         <div id="top-buttons">
-                        
+                            <i onClick={this.changeAllSelected} className="material-icons md-48">&#xE32A;</i>
                         </div>
                     </div>
                     <div id="table">
@@ -146,7 +161,7 @@ var ManageDSLPermissions = React.createClass({
                         search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
                             <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
                             <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
-                            <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                            <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}>Access</TableHeaderColumn>
                         </BootstrapTable>
                     </div>
                 </div>

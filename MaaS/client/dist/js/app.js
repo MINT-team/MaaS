@@ -82,6 +82,10 @@ var RequestDSLActionCreator = {
 
     loadUserList: function loadUserList(companyId) {
         WebAPIUtils.loadUserList(companyId);
+    },
+
+    loadUsersPermissions: function loadUsersPermissions(id) {
+        WebAPIUtils.loadUsersPermissions(id);
     }
 };
 
@@ -2571,7 +2575,6 @@ var ManageDSL = React.createClass({
             content = this.props.children;
         } else {
             // SideBar initialization
-
             var all = {
                 label: "All",
                 onClick: this.onAllClick,
@@ -2773,6 +2776,7 @@ var ManageDSLPermissions = React.createClass({
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
         RequestDSLActionCreator.loadUserList(CompanyStore.getId());
+        RequestDSLActionCreator.loadUsersPermissions(this.props.params.definitionId);
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -2787,8 +2791,36 @@ var ManageDSLPermissions = React.createClass({
         return React.createElement(
             'div',
             { className: 'table-buttons' },
-            'bottoni'
+            React.createElement(
+                'select',
+                { onChange: this.changePermission, className: 'select' },
+                React.createElement(
+                    'option',
+                    null,
+                    'None'
+                ),
+                React.createElement(
+                    'option',
+                    null,
+                    'Write'
+                ),
+                React.createElement(
+                    'option',
+                    null,
+                    'Read'
+                ),
+                React.createElement(
+                    'option',
+                    null,
+                    'Execute'
+                )
+            )
         );
+    },
+
+    changePermission: function changePermission() {
+        alert("change select");
+        //action...
     },
 
     onAllClick: function onAllClick() {
@@ -2808,6 +2840,10 @@ var ManageDSLPermissions = React.createClass({
             role: 'Guest'
         });
         this.setState({ roleFilter: "Guests" });
+    },
+
+    changeAllSelected: function changeAllSelected() {
+        alert(this.refs.table.state.selectedRowKeys);
     },
 
     render: function render() {
@@ -2865,7 +2901,7 @@ var ManageDSLPermissions = React.createClass({
                 };
             });
         }
-
+        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
         var options = {
             onRowClick: function onRowClick(row) {
                 //Show user profile
@@ -2893,7 +2929,15 @@ var ManageDSLPermissions = React.createClass({
                         { id: 'filter-type' },
                         this.state.roleFilter
                     ),
-                    React.createElement('div', { id: 'top-buttons' })
+                    React.createElement(
+                        'div',
+                        { id: 'top-buttons' },
+                        React.createElement(
+                            'i',
+                            { onClick: this.changeAllSelected, className: 'material-icons md-48' },
+                            ''
+                        )
+                    )
                 ),
                 React.createElement(
                     'div',
@@ -2912,7 +2956,11 @@ var ManageDSLPermissions = React.createClass({
                             { dataField: 'role', dataSort: true },
                             'Role'
                         ),
-                        React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+                        React.createElement(
+                            TableHeaderColumn,
+                            { dataField: 'buttons', dataFormat: this.buttonFormatter },
+                            'Access'
+                        )
                     )
                 )
             )
@@ -7861,8 +7909,22 @@ module.exports = {
         ResponseDSLActionCreator.responseLoadUserList(res.body);
       }
     });
-  }
+  },
 
+  loadUsersPermissions: function loadUsersPermissions(id) {
+    request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
+      filter: {
+        where: {
+          "dslId": id
+        },
+        fields: ['permission', 'userId']
+      }
+    }).end(function (error, res) {
+      if (res) {
+        console.log(res.body);
+      }
+    });
+  }
 };
 
 },{"../actions/Response/ResponseDSLActionCreator.react.jsx":8,"../constants/Constants.js":49,"superagent":489}],60:[function(require,module,exports){

@@ -197,7 +197,6 @@ var ManageDSL = React.createClass({
         else
         {
             // SideBar initialization
-            
             var all = {
                 label: "All",
                 onClick: this.onAllClick,
