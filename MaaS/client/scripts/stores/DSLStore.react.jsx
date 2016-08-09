@@ -19,6 +19,7 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var USERS_EVENT = 'users';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -30,9 +31,7 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
-
-var _USERS_PERMISSIONS = JSON.parse(localStorage.getItem('usersPermissions')); // Member and Guest permissions for one specific definitionId
+var _USER_LIST = [];    //JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
 
 var _errors = [];
 
@@ -48,7 +47,19 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
+    /*
+    emitUsers: function() {
+        this.emit(USERS_EVENT);
+    },
     
+    addUsersListener: function(callback) {
+        this.on(USERS_EVENT, callback);
+    },
+    
+    removeUsersListener: function(callback) {
+        this.removeListener(USERS_EVENT, callback);
+    },
+    */
     getErrors: function() {
         return _errors;
     },
@@ -75,15 +86,13 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getUserList: function() {
         return _USER_LIST;
-    },
-    
-    getUsersPermissions: function() {
-        return _USERS_PERMISSIONS;
     }
 });
 
 DSLStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
+    var user_list_loaded = false;
+    var permissions_list_loaded = false;
     
     switch (action.type) {
         case ActionTypes.LOAD_DSL_RESPONSE:
@@ -207,21 +216,97 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.LOAD_USER_LIST_RESPONSE:
+            if(action.userList && action.permissionList)
+            {
+                var USER_LIST = action.userList;
+                var PERMISSION_LIST = action.permissionList;
+                var i = 0, j = 0;
+                // Add permission field to users
+                while(j < USER_LIST.length && i < PERMISSION_LIST.length)
+                {
+                    if(PERMISSION_LIST[i].userId == USER_LIST[j].id)
+                    {
+                        USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                        j++;
+                    }
+                    i++;
+                }
+                _USER_LIST = USER_LIST;
+                //localStorage.setItem('userList', JSON.stringify(action.userList));
+            }
+            DSLStore.emitChange();
+            break;
+        /*    
+        case ActionTypes.LOAD_USER_LIST_RESPONSE:
             if(action.userList)
             {
                 _USER_LIST = action.userList;
-                localStorage.setItem('userList', JSON.stringify(action.userList));
+                //localStorage.setItem('userList', JSON.stringify(action.userList));
             }
-            DSLStore.emitChange();
             break;
             
         case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
             if(action.usersPermissions)
             {
                 _USERS_PERMISSIONS = action.usersPermissions;
-                localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            break;
+        */    
+        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.operation && action.DSLAccess)
+            {    
+                if (action.operation == "create")
+                {
+                    /*
+                    var newPermission = {
+                        id: action.DSLAccess.id,
+                        userId: action.DSLAccess.userId,
+                        permission: action.DSLAccess.permission
+                    };
+                    */
+                    _USERS_PERMISSIONS.push(action.DSLAccess);
+                }
+                else if(action.operation == "update")
+                {
+                    _USERS_PERMISSIONS.forEach(function(permission, i) {
+                        if(permission.id == action.DSLAccess.id)
+                        {
+                            permission.permission = action.DSLAccess.permission;
+                        }
+                    });
+                }
+                else if(action.operation == "delete")
+                {
+                    _USERS_PERMISSIONS.forEach(function(permission, i) {
+                        if(permission.id == action.DSLAccess.id)
+                        {
+                            _USERS_PERMISSIONS.splice(i, 1);
+                        }
+                    });
+                }
+                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
+            }
+            //DSLStore.emitChange();
+            break;
+            /*
+        
+        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
+            if(action.usersPermissions)
+            {
+                _USERS_PERMISSIONS = action.usersPermissions;
+                permissions_list_loaded = true;
+                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+            }
+            //if(user_list_loaded)
+                DSLStore.emitUsers();
+            //alert("load permission");
+            //DSLStore.emitChange();
             break;
             
         case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
@@ -229,7 +314,46 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _errors.push(action.errors);
             }
-            DSLStore.emitChange();
+            else if(action.operation && action.DSLAccess)
+            {    
+                if (action.operation == "create")
+                {
+                    var newPermission = {
+                        id: action.DSLAccess.id,
+                        userId: action.DSLAccess.userId,
+                        permission: action.DSLAccess.permission
+                    };
+                    _USERS_PERMISSIONS.push(newPermission);
+                }
+                else if(action.operation == "update")
+                {
+                    _USERS_PERMISSIONS.forEach(function(permission, i) {
+                        if(permission.id == action.DSLAccess.id)
+                        {
+                            permission.permission = action.DSLAccess.permission;
+                        }
+                    });
+                }
+                else if(action.operation == "delete")
+                {
+                    _USERS_PERMISSIONS.forEach(function(permission, i) {
+                        if(permission.id == action.DSLAccess.id)
+                        {
+                            _USERS_PERMISSIONS.splice(i, 1);
+                        }
+                    });
+                }
+                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
+            }
+            //DSLStore.emitChange();
+            break;
+            */
+        case ActionTypes.FLUSH_USER_LIST:
+            _USER_LIST = [];
+            //_USERS_PERMISSIONS = [];
+            //localStorage.removeItem('userList');
+            //localStorage.removeItem('usersPermissions');
+            //DSLStore.emitChange();
             break;
     }
     

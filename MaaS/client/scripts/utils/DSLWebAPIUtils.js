@@ -179,13 +179,53 @@ module.exports = {
             }
             else
             {
-              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null);
+              res=JSON.parse(res.text);
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.DSLAccess);
             }
           }
         });
     },
     
-    loadUserList: function(companyId) {
+    loadUserList: function(id ,companyId) {
+      var userFilter = {
+              where: {
+                or: [
+                  { role: 'Member'},
+                  { role: 'Guest'}
+                ]
+              }
+            };
+      userFilter = JSON.stringify(userFilter);
+      request
+        .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .query({ filter: userFilter })
+        .end(function(error, userRes) {
+          if(userRes)
+          {
+            var DSLAccessFilter = {
+              where: {
+                dslId: id
+              }
+            };
+            DSLAccessFilter = JSON.stringify(DSLAccessFilter);
+            request
+              .get(APIEndpoints.DSL_ACCESSES)
+              .set('Accept', 'application/json')
+              .set('Authorization', localStorage.getItem('accessToken'))
+              .query({ filter: DSLAccessFilter })
+              .end(function(error, DSLAccessRes) {
+                if (DSLAccessRes)
+                {
+                  ResponseDSLActionCreator.responseLoadUserList(userRes.body, DSLAccessRes.body);
+                }
+              });
+          }
+        });
+    }
+    
+    /*loadUserList: function(companyId) {
       var filter = {
               where: {
                 or: [
@@ -211,9 +251,9 @@ module.exports = {
     loadUsersPermissions: function(id) {
       var filter = {
         where: {
-          "dslId": id
+          dslId: id
         },
-        fields: ['permission','userId']
+        fields: ['permission','userId','id']
       };
       filter = JSON.stringify(filter);
       request
@@ -228,5 +268,5 @@ module.exports = {
           }
         });
     }
-    
+    */
 };

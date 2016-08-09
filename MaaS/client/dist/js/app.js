@@ -80,12 +80,18 @@ var RequestDSLActionCreator = {
         WebAPIUtils.changeDSLDefinitionPermissions(id, userId, permission);
     },
 
-    loadUserList: function loadUserList(dslId) {
-        WebAPIUtils.loadUserList(dslId);
+    loadUserList: function loadUserList(id, companyId) {
+        WebAPIUtils.loadUserList(id, companyId);
     },
 
     loadUsersPermissions: function loadUsersPermissions(id) {
         WebAPIUtils.loadUsersPermissions(id);
+    },
+
+    flushUserList: function flushUserList() {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.FLUSH_USER_LIST
+        });
     }
 };
 
@@ -367,24 +373,34 @@ var ResponseDSLActionCreator = {
         });
     },
 
-    responseLoadUserList: function responseLoadUserList(userList) {
+    responseLoadUserList: function responseLoadUserList(userList, permissionList) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_USER_LIST_RESPONSE,
+            userList: userList,
+            permissionList: permissionList
+        });
+    },
+    /*
+    responseLoadUserList: function(userList) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,
             userList: userList
         });
     },
-
-    responseLoadUsersPermissions: function responseLoadUsersPermissions(usersPermissions) {
+    
+    responseLoadUsersPermissions: function(usersPermissions) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE,
             usersPermissions: usersPermissions
         });
     },
-
-    responseChangeDSLDefinitionPermissions: function responseChangeDSLDefinitionPermissions(errors) {
+    */
+    responseChangeDSLDefinitionPermissions: function responseChangeDSLDefinitionPermissions(errors, operation, DSLAccess) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
-            errors: errors
+            errors: errors,
+            operation: operation,
+            DSLAccess: DSLAccess
         });
     }
 };
@@ -2769,31 +2785,14 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 
-function getState(id) {
-    var USER_LIST = DSLStore.getUserList();
-    var PERMISSION_LIST = DSLStore.getUsersPermissions();
-    var i = 0,
-        j = 0;
-
-    if (USER_LIST && PERMISSION_LIST) {
-        // Add permission field to users
-        while (j < USER_LIST.length && i < PERMISSION_LIST.length) {
-            if (PERMISSION_LIST[i].userId == USER_LIST[j].id) {
-                USER_LIST[j].permission = PERMISSION_LIST[i].permission;
-                j++;
-            }
-            i++;
-        }
-    }
-
+function getState() {
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         role: UserStore.getRole(),
         userId: UserStore.getId(),
         roleFilter: "All",
-        USER_LIST: USER_LIST,
-        init: false
+        USER_LIST: DSLStore.getUserList()
     };
 }
 
@@ -2801,14 +2800,12 @@ var ManageDSLPermissions = React.createClass({
     displayName: 'ManageDSLPermissions',
 
     getInitialState: function getInitialState() {
-        var id = this.props.params.definitionId;
-        return getState(id);
+        return getState();
     },
 
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
-        RequestDSLActionCreator.loadUserList(CompanyStore.getId());
-        RequestDSLActionCreator.loadUsersPermissions(this.props.params.definitionId);
+        RequestDSLActionCreator.loadUserList(this.props.params.definitionId, CompanyStore.getId());
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -2817,16 +2814,6 @@ var ManageDSLPermissions = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
-        if (!this.state.init && this.state.USER_LIST) {
-            this.state.USER_LIST.forEach(function (user, i) {
-                if (user.permission == "None") {
-                    document.getElementById(user.id).value = "none";
-                } else if (user.permission == "write" || user.permission == "read" || user.permission == "execute") {
-                    document.getElementById(user.id).value = user.permission;
-                }
-            });
-            this.setState({ init: true });
-        }
     },
 
     buttonFormatter: function buttonFormatter(cell, row) {
@@ -2843,7 +2830,7 @@ var ManageDSLPermissions = React.createClass({
             { className: 'table-buttons' },
             React.createElement(
                 'select',
-                { id: selectId, onChange: changePermission, className: 'select' },
+                { id: selectId, onChange: changePermission, className: 'select', defaultValue: row.permission },
                 React.createElement(
                     'option',
                     { value: 'none' },
@@ -2900,7 +2887,6 @@ var ManageDSLPermissions = React.createClass({
             errors = [];
 
         // SideBar initialization
-
         var all = {
             label: "All",
             onClick: this.onAllClick,
@@ -2943,7 +2929,7 @@ var ManageDSLPermissions = React.createClass({
                     id: user.id,
                     email: user.email,
                     role: user.role,
-                    permission: user.permission ? user.permission : "None"
+                    permission: user.permission ? user.permission : "none"
                 };
             });
         }
@@ -2962,6 +2948,24 @@ var ManageDSLPermissions = React.createClass({
             React.createElement(
                 'div',
                 { className: 'container sidebar-container' },
+                React.createElement(
+                    'div',
+                    { className: 'tooltip tooltip-bottom', id: 'editor-back-button' },
+                    React.createElement(
+                        Link,
+                        { to: 'manageDSL' },
+                        React.createElement(
+                            'i',
+                            { className: 'material-icons md-48' },
+                            ''
+                        )
+                    ),
+                    React.createElement(
+                        'p',
+                        { className: 'tooltip-text tooltip-text-short' },
+                        'Back'
+                    )
+                ),
                 React.createElement(
                     'p',
                     { className: 'container-title' },
@@ -3022,6 +3026,207 @@ var ManageDSLPermissions = React.createClass({
 
 module.exports = ManageDSLPermissions;
 
+/*
+function getUserList() {
+    var USER_LIST = DSLStore.getUserList();
+    var PERMISSION_LIST = DSLStore.getUsersPermissions();
+    var i = 0, j = 0;
+    
+    if(USER_LIST && PERMISSION_LIST)
+    {
+        // Add permission field to users
+        while(j < USER_LIST.length && i < PERMISSION_LIST.length)
+        {
+            if(PERMISSION_LIST[i].userId == USER_LIST[j].id)
+            {
+                USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                j++;
+            }
+            i++;
+        }
+    }
+    return { USER_LIST: USER_LIST };
+}
+
+function getState() {
+    return {
+            errors: DSLStore.getErrors(),
+            isLogged: SessionStore.isLogged(),
+            role: UserStore.getRole(),
+            userId: UserStore.getId(),
+            roleFilter: "All"
+    };
+}
+
+var ManageDSLPermissions = React.createClass({
+    getInitialState: function() {
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            role: UserStore.getRole(),
+            userId: UserStore.getId(),
+            roleFilter: "All",
+            USER_LIST: []
+        };
+    },
+    
+    componentWillMount: function() {
+        RequestDSLActionCreator.loadUsersPermissions(this.props.params.definitionId);
+        RequestDSLActionCreator.loadUserList(CompanyStore.getId());  
+    },
+    
+    componentDidMount: function() {
+        DSLStore.addChangeListener(this._onChange);
+        DSLStore.addUsersListener(this._onLoadUserList);
+    },
+    
+    componentWillUnmount: function() {
+        DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeUsersListener(this._onLoadUserList);
+        RequestDSLActionCreator.flushUserList();
+    },
+
+    _onChange: function() {
+        this.setState(getState());
+    },
+    
+    _onLoadUserList: function() {
+        this.setState(getUserList());
+    },
+    
+    buttonFormatter: function(cell, row) {
+        var selectId = row.id, instance = this;
+        
+        var changePermission = function() {
+            var permission = document.getElementById(selectId).value;
+            RequestDSLActionCreator.changeDSLDefinitionPermissions(instance.props.params.definitionId, row.id, permission);
+        };
+        
+        return (
+            <div className="table-buttons">
+                <select id={selectId} onChange={changePermission} className="select" defaultValue={row.permission}>
+                    <option value="none">None</option>
+                    <option value="write">Write</option>
+                    <option value="read">Read</option>
+                    <option value="execute">Execute</option>
+                </select>
+            </div>
+        );
+    },
+    
+    onAllClick: function() {
+        this.refs.table.handleFilterData({ });
+        this.setState({roleFilter: "All"});
+    },
+    
+    onMembersClick: function() {
+        this.refs.table.handleFilterData({
+            role: 'Member'
+        });
+        this.setState({roleFilter: "Members"});
+    },
+    
+    onGuestsClick: function() {
+        this.refs.table.handleFilterData({
+            role: 'Guest'
+        });
+        this.setState({roleFilter: "Guests"});
+    },
+    
+    changeAllSelected: function() {
+        alert(this.refs.table.state.selectedRowKeys);
+    },
+    
+    render: function() {
+        if(!this.state.isLogged) 
+        {
+            return (
+                <AuthorizationRequired />
+            );
+        }
+        var title,content, errors = [];
+        
+        // SideBar initialization
+        var all = {
+            label: "All",
+            onClick: this.onAllClick,
+            icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+        };
+        var members = {
+            label: "Members",
+            onClick: this.onMembersClick,
+            icon: (<i className="material-icons md-24">&#xE7FD;</i>)
+        };
+        var guests = {
+            label: "Guests",
+            onClick: this.onGuestsClick,
+            icon: (<i className="material-icons md-24">&#xE7FF;</i>)
+        };
+        
+        var data = [];
+        var selectRowProp = {
+            mode: "checkbox",
+            bgColor: "rgba(144, 238, 144, 0.42)"
+        };
+        
+        var sidebarData = [all, members, guests];
+        
+        if(this.state.USER_LIST && this.state.USER_LIST.length > 0)
+        {
+            this.state.USER_LIST.forEach(function(user, i) {
+                data[i] = {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    permission: user.permission ? user.permission : "none"
+                };
+            });
+        }
+        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
+        var options = {
+            onRowClick: function(row){
+                //Show user profile
+            },
+            noDataText: "There are no users to display"
+        };
+        title = "Manage DSL definition permissions";
+        content = (
+            <div id="manage-dsl">
+                <Sidebar title="Filter users" data={sidebarData}/>
+                <div className="container sidebar-container">
+                    <div className="tooltip tooltip-bottom" id="editor-back-button">
+                        <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                        <p className="tooltip-text tooltip-text-short">Back</p>
+                    </div>
+                    <p className="container-title">{title}</p>
+                    <div id="table-top">
+                        <p id="filter-type">{this.state.roleFilter}</p>
+                        <div id="top-buttons">
+                            <i onClick={this.changeAllSelected} className="material-icons md-48">&#xE32A;</i>
+                        </div>
+                    </div>
+                    <div id="table">
+                        <BootstrapTable ref="table" data={data} pagination={true} 
+                        search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                            <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
+                            <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
+                            <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}>Access</TableHeaderColumn>
+                        </BootstrapTable>
+                    </div>
+                </div>
+            </div>
+            );
+        return (
+            <div id="dsl-definition-permissions">
+                {content}
+            </div>
+        );
+    }
+    
+});
+
+module.exports = ManageDSLPermissions;
+*/
 /*
 Guest: esecuzione
 Member: Permesso di scrittura (sui propri)
@@ -5969,141 +6174,329 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 var DeleteCompany = require('./DeleteCompany.react.jsx');
 
 function getState() {
-  return {
-    errors: [], //DSLStore.getErrors(),
-    isLogged: SessionStore.isLogged(),
-    companies: CompanyStore.getCompanies() //JSON that contains the companies in the system 
-  };
+    return {
+        errors: [], //DSLStore.getErrors(),
+        isLogged: SessionStore.isLogged(),
+        companies: CompanyStore.getCompanies() //JSON that contains the companies in the system 
+    };
 }
 
 var CompaniesManagement = React.createClass({
-  displayName: 'CompaniesManagement',
+    displayName: 'CompaniesManagement',
 
 
-  getInitialState: function getInitialState() {
-    return getState();
-  },
+    getInitialState: function getInitialState() {
+        return getState();
+    },
 
-  componentDidMount: function componentDidMount() {
-    SessionStore.addChangeListener(this._onChange);
-    CompanyStore.addChangeListener(this._onChange);
-    RequestSuperAdminActionCreator.getCompanies();
-  },
+    componentDidMount: function componentDidMount() {
+        SessionStore.addChangeListener(this._onChange);
+        CompanyStore.addChangeListener(this._onChange);
+        RequestSuperAdminActionCreator.getCompanies();
+    },
 
-  componentWillUnmount: function componentWillUnmount() {
-    SessionStore.removeChangeListener(this._onChange);
-    CompanyStore.removeChangeListener(this._onChange);
-  },
+    componentWillUnmount: function componentWillUnmount() {
+        SessionStore.removeChangeListener(this._onChange);
+        CompanyStore.removeChangeListener(this._onChange);
+    },
 
-  _onChange: function _onChange() {
-    this.setState(getState());
-  },
+    _onChange: function _onChange() {
+        this.setState(getState());
+    },
 
-  deleteAllSelected: function deleteAllSelected() {
-    alert(this.refs.table.state.selectedRowKeys);
-  },
+    deleteAllSelected: function deleteAllSelected() {
+        alert(this.refs.table.state.selectedRowKeys);
+    },
 
-  buttonFormatter: function buttonFormatter(cell, row) {
-
-    return React.createElement(
-      'div',
-      null,
-      React.createElement(DeleteCompany, { id: row.id, name: row.name, email: row.owner })
-    );
-    /*return (
-      <div className="companiesManagement-buttons">
-        <div>Bottone modifica</div>
-        <div>Bottone eliminazione</div>
-      </div>
-    );*/
-  },
-
-  render: function render() {
-    if (!this.state.isLogged || this.state.errors.length > 0) {
-      return React.createElement(AuthorizationRequired, null);
-    }
-
-    var selectRowProp = {
-      mode: "checkbox",
-      clickToSelect: true,
-      bgColor: "rgba(144, 238, 144, 0.42)"
-    };
-
-    var options = {
-      noDataText: "There are no companies to display"
-    };
-
-    var data = [];
-    if (this.state.companies && this.state.companies.length > 0) {
-      this.state.companies.forEach(function (company, i) {
-        data[i] = {
-          id: company.id,
-          name: company.name,
-          owner: company.owner.email
+    buttonFormatter: function buttonFormatter(cell, row) {
+        var buttons;
+        var errors;
+        var errorId = "errorDropdown" + row.id;
+        var deleteId = "deleteDropdown" + row.id;
+        if (this.state.errors.length > 0) {
+            errors = React.createElement(
+                'span',
+                { id: 'errors' },
+                this.state.errors
+            );
+        }
+        // funzioni utili all'eliminazione di una company
+        var instance = this;
+        var onClickDelete = function onClickDelete() {
+            if (instance.state.errors.length > 0) {
+                document.getElementById(errorId).classList.toggle("dropdown-show");
+                //this.refs.errorRefName.classList.toggle("dropdown-show");
+            } else {
+                document.getElementById(deleteId).classList.toggle("dropdown-show");
+                //this.refs.deleteRefName.classList.toggle("dropdown-show");
+            }
         };
-      });
-    }
 
-    var title, content;
-    title = "Manage companies";
-    content = React.createElement(
-      'div',
-      { id: 'manage-companies' },
-      React.createElement(
-        'p',
-        { className: 'container-title' },
-        title
-      ),
-      React.createElement(
-        'div',
-        { id: 'table-top' },
-        React.createElement(
-          'div',
-          { id: 'top-buttons' },
-          React.createElement(
+        var confirmDelete = function confirmDelete() {
+            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+            window.alert("funzione di eliminazione");
+        };
+
+        var deleteCompany = React.createElement(
             'div',
-            { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+            { id: 'delete-user', className: 'pop-up' },
             React.createElement(
-              'i',
-              { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
-              ''
+                'i',
+                { onClick: onClickDelete, className: 'material-icons md-24 dropdown-button' },
+                ''
             ),
             React.createElement(
-              'p',
-              { className: 'tooltip-text tooltip-text-long' },
-              'Delete all selected companies'
+                'div',
+                { className: 'dropdown-content dropdown-popup', id: errorId },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    errors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', id: deleteId },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Delete company'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    'Are you sure you want to delete ',
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        row.name
+                    ),
+                    ' company?'
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'inline-button' },
+                        'Cancel'
+                    ),
+                    React.createElement(
+                        'button',
+                        { id: 'delete-button', className: 'inline-button', onClick: confirmDelete },
+                        'Delete'
+                    )
+                )
             )
-          )
-        )
-      ),
-      React.createElement(
-        'div',
-        { id: 'table' },
-        React.createElement(
-          BootstrapTable,
-          { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
-            search: true, striped: true, hover: true, options: options },
-          React.createElement(
-            TableHeaderColumn,
-            { dataField: 'name', dataSort: true },
-            'Name'
-          ),
-          React.createElement(
-            TableHeaderColumn,
-            { dataField: 'owner', dataSort: true },
-            'Owner'
-          ),
-          React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
-        )
-      )
-    );
+        );
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        var modifyId = "modifyDropdown" + row.id;
+        var onClickModify = function onClickModify() {
 
-    return React.createElement(
-      'div',
-      { className: 'container sidebar-container' },
-      content
-    );
-  }
+            if (instance.state.errors.length > 0) {
+                document.getElementById(errorId).classList.toggle("dropdown-show");
+                //this.refs.errorRefName.classList.toggle("dropdown-show");
+            } else {
+                document.getElementById(deleteId).classList.toggle("dropdown-show");
+                //this.refs.deleteRefName.classList.toggle("dropdown-show");
+            }
+        };
+
+        var confirmModify = function confirmModify() {
+            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+        };
+
+        var modifyCompany = React.createElement(
+            'div',
+            { id: 'delete-user', className: 'pop-up' },
+            React.createElement(
+                'i',
+                { onClick: onClickModify, id: 'dsl-modify', className: 'material-icons md-24' },
+                ''
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', id: errorId },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    errors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'button' },
+                        'Ok'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', id: modifyId },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Modify company'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    ' modifica della company '
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { className: 'inline-button' },
+                        'annulla'
+                    ),
+                    React.createElement(
+                        'button',
+                        { id: 'delete-button', className: 'inline-button', onClick: confirmModify },
+                        'cancella'
+                    )
+                )
+            )
+        );
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        buttons = React.createElement(
+            'div',
+            null,
+            deleteCompany,
+            modifyCompany
+        );
+
+        return React.createElement(
+            'div',
+            { className: 'table-buttons' },
+            buttons
+        );
+
+        /* return(
+           <div>
+             <DeleteCompany id={row.id} name={row.name} email={row.owner}/>
+             <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
+           </div>
+           );*/
+        /*return (
+          <div className="companiesManagement-buttons">
+            <div>Bottone modifica</div>
+            <div>Bottone eliminazione</div>
+          </div>
+        );*/
+    },
+
+    render: function render() {
+        if (!this.state.isLogged || this.state.errors.length > 0) {
+            return React.createElement(AuthorizationRequired, null);
+        }
+
+        var selectRowProp = {
+            mode: "checkbox",
+            clickToSelect: true,
+            bgColor: "rgba(144, 238, 144, 0.42)"
+        };
+
+        var options = {
+            noDataText: "There are no companies to display"
+        };
+
+        var data = [];
+        if (this.state.companies && this.state.companies.length > 0) {
+            this.state.companies.forEach(function (company, i) {
+                data[i] = {
+                    id: company.id,
+                    name: company.name,
+                    owner: company.owner.email
+                };
+            });
+        }
+
+        var title, content;
+        title = "Manage companies";
+        content = React.createElement(
+            'div',
+            { id: 'manage-companies' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                title
+            ),
+            React.createElement(
+                'div',
+                { id: 'table-top' },
+                React.createElement(
+                    'div',
+                    { id: 'top-buttons' },
+                    React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+                        React.createElement(
+                            'i',
+                            { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
+                            ''
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-long' },
+                            'Delete all selected companies'
+                        )
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { id: 'table' },
+                React.createElement(
+                    BootstrapTable,
+                    { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
+                        search: true, striped: true, hover: true, options: options },
+                    React.createElement(
+                        TableHeaderColumn,
+                        { dataField: 'name', dataSort: true },
+                        'Name'
+                    ),
+                    React.createElement(
+                        TableHeaderColumn,
+                        { dataField: 'owner', dataSort: true },
+                        'Owner'
+                    ),
+                    React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+                )
+            )
+        );
+
+        return React.createElement(
+            'div',
+            { className: 'container sidebar-container' },
+            content
+        );
+    }
 });
 
 module.exports = CompaniesManagement;
@@ -6585,6 +6978,7 @@ module.exports = {
     LOAD_USERS_PERMISSIONS_LIST_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
     CHANGE_DSL_PERMISSION_RESPONSE: null,
+    FLUSH_USER_LIST: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -6933,6 +7327,7 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var USERS_EVENT = 'users';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -6943,9 +7338,7 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = JSON.parse(localStorage.getItem('userList')); // Member and Guest list
-
-var _USERS_PERMISSIONS = JSON.parse(localStorage.getItem('usersPermissions')); // Member and Guest permissions for one specific definitionId
+var _USER_LIST = []; //JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
 
 var _errors = [];
 
@@ -6961,7 +7354,19 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
-
+    /*
+    emitUsers: function() {
+        this.emit(USERS_EVENT);
+    },
+    
+    addUsersListener: function(callback) {
+        this.on(USERS_EVENT, callback);
+    },
+    
+    removeUsersListener: function(callback) {
+        this.removeListener(USERS_EVENT, callback);
+    },
+    */
     getErrors: function getErrors() {
         return _errors;
     },
@@ -6988,15 +7393,13 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getUserList: function getUserList() {
         return _USER_LIST;
-    },
-
-    getUsersPermissions: function getUsersPermissions() {
-        return _USERS_PERMISSIONS;
     }
 });
 
 DSLStore.dispatchToken = Dispatcher.register(function (payload) {
     var action = payload.action;
+    var user_list_loaded = false;
+    var permissions_list_loaded = false;
 
     switch (action.type) {
         case ActionTypes.LOAD_DSL_RESPONSE:
@@ -7102,26 +7505,131 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
 
         case ActionTypes.LOAD_USER_LIST_RESPONSE:
-            if (action.userList) {
+            if (action.userList && action.permissionList) {
+                var USER_LIST = action.userList;
+                var PERMISSION_LIST = action.permissionList;
+                var i = 0,
+                    j = 0;
+                // Add permission field to users
+                while (j < USER_LIST.length && i < PERMISSION_LIST.length) {
+                    if (PERMISSION_LIST[i].userId == USER_LIST[j].id) {
+                        USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                        j++;
+                    }
+                    i++;
+                }
+                _USER_LIST = USER_LIST;
+                //localStorage.setItem('userList', JSON.stringify(action.userList));
+            }
+            DSLStore.emitChange();
+            break;
+        /*    
+        case ActionTypes.LOAD_USER_LIST_RESPONSE:
+            if(action.userList)
+            {
                 _USER_LIST = action.userList;
-                localStorage.setItem('userList', JSON.stringify(action.userList));
+                //localStorage.setItem('userList', JSON.stringify(action.userList));
             }
-            DSLStore.emitChange();
             break;
-
+            
         case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
-            if (action.usersPermissions) {
+            if(action.usersPermissions)
+            {
                 _USERS_PERMISSIONS = action.usersPermissions;
-                localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
             break;
-
+        */
         case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
             if (action.errors) {
                 _errors.push(action.errors);
+            } else if (action.operation && action.DSLAccess) {
+                if (action.operation == "create") {
+                    /*
+                    var newPermission = {
+                        id: action.DSLAccess.id,
+                        userId: action.DSLAccess.userId,
+                        permission: action.DSLAccess.permission
+                    };
+                    */
+                    _USERS_PERMISSIONS.push(action.DSLAccess);
+                } else if (action.operation == "update") {
+                    _USERS_PERMISSIONS.forEach(function (permission, i) {
+                        if (permission.id == action.DSLAccess.id) {
+                            permission.permission = action.DSLAccess.permission;
+                        }
+                    });
+                } else if (action.operation == "delete") {
+                    _USERS_PERMISSIONS.forEach(function (permission, i) {
+                        if (permission.id == action.DSLAccess.id) {
+                            _USERS_PERMISSIONS.splice(i, 1);
+                        }
+                    });
+                }
+                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            break;
+        /*
+             case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
+        if(action.usersPermissions)
+        {
+            _USERS_PERMISSIONS = action.usersPermissions;
+            permissions_list_loaded = true;
+            //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+        }
+        //if(user_list_loaded)
+            DSLStore.emitUsers();
+        //alert("load permission");
+        //DSLStore.emitChange();
+        break;
+        
+        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
+        if(action.errors)
+        {
+            _errors.push(action.errors);
+        }
+        else if(action.operation && action.DSLAccess)
+        {    
+            if (action.operation == "create")
+            {
+                var newPermission = {
+                    id: action.DSLAccess.id,
+                    userId: action.DSLAccess.userId,
+                    permission: action.DSLAccess.permission
+                };
+                _USERS_PERMISSIONS.push(newPermission);
+            }
+            else if(action.operation == "update")
+            {
+                _USERS_PERMISSIONS.forEach(function(permission, i) {
+                    if(permission.id == action.DSLAccess.id)
+                    {
+                        permission.permission = action.DSLAccess.permission;
+                    }
+                });
+            }
+            else if(action.operation == "delete")
+            {
+                _USERS_PERMISSIONS.forEach(function(permission, i) {
+                    if(permission.id == action.DSLAccess.id)
+                    {
+                        _USERS_PERMISSIONS.splice(i, 1);
+                    }
+                });
+            }
+            //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
+        }
+        //DSLStore.emitChange();
+        break;
+        */
+        case ActionTypes.FLUSH_USER_LIST:
+            _USER_LIST = [];
+            //_USERS_PERMISSIONS = [];
+            //localStorage.removeItem('userList');
+            //localStorage.removeItem('usersPermissions');
+            //DSLStore.emitChange();
             break;
     }
 });
@@ -7956,41 +8464,81 @@ module.exports = {
         if (res.error) {
           ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
         } else {
-          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null);
+          res = JSON.parse(res.text);
+          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.DSLAccess);
         }
       }
     });
   },
 
-  loadUserList: function loadUserList(companyId) {
-    var filter = {
+  loadUserList: function loadUserList(id, companyId) {
+    var userFilter = {
       where: {
         or: [{ role: 'Member' }, { role: 'Guest' }]
       }
     };
-    filter = JSON.stringify(filter);
-    request.get(APIEndpoints.COMPANIES + '/' + companyId + '/users').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({ filter: filter }).end(function (error, res) {
-      if (res) {
-        ResponseDSLActionCreator.responseLoadUserList(res.body);
-      }
-    });
-  },
-
-  loadUsersPermissions: function loadUsersPermissions(id) {
-    var filter = {
-      where: {
-        "dslId": id
-      },
-      fields: ['permission', 'userId']
-    };
-    filter = JSON.stringify(filter);
-    request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({ filter: filter }).end(function (error, res) {
-      if (res) {
-        ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
+    userFilter = JSON.stringify(userFilter);
+    request.get(APIEndpoints.COMPANIES + '/' + companyId + '/users').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({ filter: userFilter }).end(function (error, userRes) {
+      if (userRes) {
+        var DSLAccessFilter = {
+          where: {
+            dslId: id
+          }
+        };
+        DSLAccessFilter = JSON.stringify(DSLAccessFilter);
+        request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({ filter: DSLAccessFilter }).end(function (error, DSLAccessRes) {
+          if (DSLAccessRes) {
+            ResponseDSLActionCreator.responseLoadUserList(userRes.body, DSLAccessRes.body);
+          }
+        });
       }
     });
   }
 
+  /*loadUserList: function(companyId) {
+    var filter = {
+            where: {
+              or: [
+                { role: 'Member'},
+                { role: 'Guest'}
+              ]
+            }
+          };
+    filter = JSON.stringify(filter);
+    request
+      .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .query({ filter: filter })
+      .end(function(error, res) {
+        if(res)
+        {
+          ResponseDSLActionCreator.responseLoadUserList(res.body);
+        }
+      });
+  },
+  
+  loadUsersPermissions: function(id) {
+    var filter = {
+      where: {
+        dslId: id
+      },
+      fields: ['permission','userId','id']
+    };
+    filter = JSON.stringify(filter);
+    request
+      .get(APIEndpoints.DSL_ACCESSES)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .query({ filter: filter})
+      .end(function(error, res) {
+        if(res)
+        {
+          ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
+        }
+      });
+  }
+  */
 };
 
 },{"../actions/Response/ResponseDSLActionCreator.react.jsx":8,"../constants/Constants.js":49,"superagent":489}],60:[function(require,module,exports){

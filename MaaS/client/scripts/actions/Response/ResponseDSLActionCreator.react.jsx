@@ -64,6 +64,14 @@ var ResponseDSLActionCreator = {
         });
     },
     
+    responseLoadUserList: function(userList, permissionList) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_USER_LIST_RESPONSE,
+            userList: userList,
+            permissionList: permissionList
+        });
+    },
+    /*
     responseLoadUserList: function(userList) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,
@@ -77,11 +85,13 @@ var ResponseDSLActionCreator = {
             usersPermissions: usersPermissions
         });
     },
-    
-    responseChangeDSLDefinitionPermissions: function(errors) {
+    */
+    responseChangeDSLDefinitionPermissions: function(errors, operation, DSLAccess) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
-            errors: errors
+            errors: errors,
+            operation: operation,
+            DSLAccess: DSLAccess
         });
     }
 };

@@ -177,7 +177,6 @@ module.exports = function(DSL) {
     );
     
     DSL.changeDefinitionPermissions = function(id, userId, permission, cb) {
-        
         var DSLAccess = app.models.DSLAccess;
         DSLAccess.findOne({where: {userId: userId, dslId: id}, limit: 1}, function(err, accessInstance) {
             if(err)
@@ -189,13 +188,14 @@ module.exports = function(DSL) {
             {
                 if(permission == "none")
                 {
+                    var aux = accessInstance;
                     DSLAccess.destroyById(accessInstance.id, function(err) {
                         if(err)
                         {
                             return cb(err);
                         }
                         console.log("> Permission removed for DSL:", id);
-                        return cb(null);
+                        return cb(null,null,'delete', aux);
                     });
                 }
                 else
@@ -203,7 +203,7 @@ module.exports = function(DSL) {
                     accessInstance.permission = permission;
                     accessInstance.save();
                     console.log("> Permission changed for DSL:", id);
-                    return cb(null);
+                    return cb(null, null, 'update', accessInstance);
                 }
             }
             else // User don't have access to dsl
@@ -214,7 +214,7 @@ module.exports = function(DSL) {
                         return cb(err);
                     }
                     console.log("> Permission changed for DSL:", id);
-                    return cb(null);
+                    return cb(null,null,'create',newAccessInstance);
                 });
             }
         });
@@ -230,7 +230,10 @@ module.exports = function(DSL) {
                 { arg: 'permission', type: 'string', required: true, description: 'Definition permission' }
             ],
             returns: [
-                { arg: 'error', type: 'Object' }
+                { arg: 'error', type: 'Object' },
+                { arg: 'operation', type: 'string' },
+                { arg: 'DSLAccess', type: 'Object' }
+                
             ],
             http: { verb: 'put', path: '/:id/changeDefinitionPermissions' }
         }

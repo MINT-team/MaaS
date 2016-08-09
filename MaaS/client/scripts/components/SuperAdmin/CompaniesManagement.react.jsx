@@ -58,12 +58,123 @@ var CompaniesManagement = React.createClass({
   },
   
   buttonFormatter: function(cell, row) {
+        var buttons;
+        var errors;
+        var errorId ="errorDropdown"+row.id;
+        var deleteId ="deleteDropdown"+row.id;
+        if(this.state.errors.length > 0) {
+            errors = (
+              <span id="errors">{this.state.errors}</span>
+            );
+        }
+        // funzioni utili all'eliminazione di una company
+        var instance = this;
+        var onClickDelete = function() {
+            if(instance.state.errors.length > 0)
+    		{
+    		    document.getElementById(errorId).classList.toggle("dropdown-show");
+    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
+    		}
+    		else
+    		{
+    		    document.getElementById(deleteId).classList.toggle("dropdown-show");
+    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
+    		}
+        };
+        
+        var confirmDelete = function() {
+            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+            window.alert("funzione di eliminazione");
+        };
+        
+        var deleteCompany = (
+            <div id="delete-user" className="pop-up">
+                <i onClick={onClickDelete} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+                <div className="dropdown-content dropdown-popup" id={errorId}>
+                    <p className="dropdown-title">Error</p>
+                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-buttons">
+                        <button className="button">Ok</button>
+                    </div>
+                </div>
+                <div className="dropdown-content dropdown-popup" id={deleteId}>
+                    <p className="dropdown-title">Delete company</p>
+                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> company?</p>
+                    <div className="dropdown-buttons">
+                        <button className="inline-button">Cancel</button>
+                        <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>
+                    </div>
+                </div>
+            </div>
+        );
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        var modifyId ="modifyDropdown"+row.id;
+        var onClickModify = function() {
+          
+            if(instance.state.errors.length > 0)
+    		{
+    		    document.getElementById(errorId).classList.toggle("dropdown-show");
+    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
+    		}
+    		else
+    		{
+    		    document.getElementById(deleteId).classList.toggle("dropdown-show");
+    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
+    		}
+        };
+        
+        var confirmModify = function() {
+            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+        };
+        
+        var modifyCompany = (
+            <div id="delete-user" className="pop-up">
+                <i onClick={onClickModify} id="dsl-modify" className="material-icons md-24">&#xE254;</i>
+                <div className="dropdown-content dropdown-popup" id={errorId}>
+                    <p className="dropdown-title">Error</p>
+                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-buttons">
+                        <button className="button">Ok</button>
+                    </div>
+                </div>
+                <div className="dropdown-content dropdown-popup" id={modifyId}>
+                    <p className="dropdown-title">Modify company</p>
+                    <p className="dropdown-description"> modifica della company </p>
+                    <div className="dropdown-buttons">
+                        <button className="inline-button">annulla</button>
+                        <button id="delete-button" className="inline-button" onClick={confirmModify}>cancella</button>
+                    </div>
+                </div>
+            </div>
+        );
+        
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
+       
+       
+            buttons = (
+                <div>
+                    {deleteCompany}
+                    {modifyCompany}
+                </div>
+            );
+        
+        
+        return (
+            <div className="table-buttons">
+                {buttons}
+            </div>
+        );
     
-    return(
+    
+    
+   /* return(
       <div>
         <DeleteCompany id={row.id} name={row.name} email={row.owner}/>
+        <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
       </div>
-      );
+      );*/
     /*return (
       <div className="companiesManagement-buttons">
         <div>Bottone modifica</div>

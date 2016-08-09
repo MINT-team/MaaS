@@ -167,7 +167,6 @@ var ManageDSLSource = React.createClass({
         }
         content = (
             <div id="editor-container">
-                
                 <div className="tooltip tooltip-bottom" id="editor-back-button">
                     <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
                     <p className="tooltip-text tooltip-text-short">Back</p>
