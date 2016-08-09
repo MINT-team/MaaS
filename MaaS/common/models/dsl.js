@@ -178,8 +178,46 @@ module.exports = function(DSL) {
     
     DSL.changeDefinitionPermissions = function(id, userId, permission, cb) {
         
-        
-        
+        var DSLAccess = app.models.DSLAccess;
+        DSLAccess.findOne({where: {userId: userId, dslId: id}, limit: 1}, function(err, accessInstance) {
+            if(err)
+            {
+                return cb(err);
+            }
+            // User has access to dsl
+            if(accessInstance) 
+            {
+                if(permission == "none")
+                {
+                    DSLAccess.destroyById(accessInstance.id, function(err) {
+                        if(err)
+                        {
+                            return cb(err);
+                        }
+                        console.log("> Permission removed for DSL:", id);
+                        return cb(null);
+                    });
+                }
+                else
+                {
+                    accessInstance.permission = permission;
+                    accessInstance.save();
+                    console.log("> Permission changed for DSL:", id);
+                    return cb(null);
+                }
+            }
+            else // User don't have access to dsl
+            {
+                DSLAccess.create({userId: userId, dslId: id, permission: permission}, function(err, newAccessInstance) {
+                    if(err)
+                    {
+                        return cb(err);
+                    }
+                    console.log("> Permission changed for DSL:", id);
+                    return cb(null);
+                });
+            }
+        });
     };
     
     DSL.remoteMethod(
@@ -188,7 +226,8 @@ module.exports = function(DSL) {
             description: "Change the permissions for one specific DSL definition",
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' },
-                { arg: 'userId', type: 'string', required: true, description: 'User id' }
+                { arg: 'userId', type: 'string', required: true, description: 'User id' },
+                { arg: 'permission', type: 'string', required: true, description: 'Definition permission' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' }

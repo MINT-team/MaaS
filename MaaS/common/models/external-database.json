@@ -18,9 +18,13 @@
       "type": "string",
       "required": true
     },
-    "allowed": {
+    "connected": {
       "type": "boolean",
       "required": true
+    },
+    "connection": {
+      "type": "object",
+      "required": false
     }
   },
   "validations": [],

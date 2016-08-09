@@ -76,12 +76,12 @@ var RequestDSLActionCreator = {
         WebAPIUtils.deleteDSLDefinition(id);
     },
 
-    changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId) {
-        WebAPIUtils.changeDSLDefinitionPermissions(id, userId);
+    changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId, permission) {
+        WebAPIUtils.changeDSLDefinitionPermissions(id, userId, permission);
     },
 
-    loadUserList: function loadUserList(companyId) {
-        WebAPIUtils.loadUserList(companyId);
+    loadUserList: function loadUserList(dslId) {
+        WebAPIUtils.loadUserList(dslId);
     },
 
     loadUsersPermissions: function loadUsersPermissions(id) {
@@ -371,6 +371,20 @@ var ResponseDSLActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,
             userList: userList
+        });
+    },
+
+    responseLoadUsersPermissions: function responseLoadUsersPermissions(usersPermissions) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE,
+            usersPermissions: usersPermissions
+        });
+    },
+
+    responseChangeDSLDefinitionPermissions: function responseChangeDSLDefinitionPermissions(errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
+            errors: errors
         });
     }
 };
@@ -2755,14 +2769,31 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 
-function getState() {
+function getState(id) {
+    var USER_LIST = DSLStore.getUserList();
+    var PERMISSION_LIST = DSLStore.getUsersPermissions();
+    var i = 0,
+        j = 0;
+
+    if (USER_LIST && PERMISSION_LIST) {
+        // Add permission field to users
+        while (j < USER_LIST.length && i < PERMISSION_LIST.length) {
+            if (PERMISSION_LIST[i].userId == USER_LIST[j].id) {
+                USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                j++;
+            }
+            i++;
+        }
+    }
+
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         role: UserStore.getRole(),
         userId: UserStore.getId(),
         roleFilter: "All",
-        USER_LIST: DSLStore.getUserList()
+        USER_LIST: USER_LIST,
+        init: false
     };
 }
 
@@ -2770,7 +2801,8 @@ var ManageDSLPermissions = React.createClass({
     displayName: 'ManageDSLPermissions',
 
     getInitialState: function getInitialState() {
-        return getState();
+        var id = this.props.params.definitionId;
+        return getState(id);
     },
 
     componentDidMount: function componentDidMount() {
@@ -2785,42 +2817,55 @@ var ManageDSLPermissions = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
+        if (!this.state.init && this.state.USER_LIST) {
+            this.state.USER_LIST.forEach(function (user, i) {
+                if (user.permission == "None") {
+                    document.getElementById(user.id).value = "none";
+                } else if (user.permission == "write" || user.permission == "read" || user.permission == "execute") {
+                    document.getElementById(user.id).value = user.permission;
+                }
+            });
+            this.setState({ init: true });
+        }
     },
 
     buttonFormatter: function buttonFormatter(cell, row) {
+        var selectId = row.id,
+            instance = this;
+
+        var changePermission = function changePermission() {
+            var permission = document.getElementById(selectId).value;
+            RequestDSLActionCreator.changeDSLDefinitionPermissions(instance.props.params.definitionId, row.id, permission);
+        };
+
         return React.createElement(
             'div',
             { className: 'table-buttons' },
             React.createElement(
                 'select',
-                { onChange: this.changePermission, className: 'select' },
+                { id: selectId, onChange: changePermission, className: 'select' },
                 React.createElement(
                     'option',
-                    null,
+                    { value: 'none' },
                     'None'
                 ),
                 React.createElement(
                     'option',
-                    null,
+                    { value: 'write' },
                     'Write'
                 ),
                 React.createElement(
                     'option',
-                    null,
+                    { value: 'read' },
                     'Read'
                 ),
                 React.createElement(
                     'option',
-                    null,
+                    { value: 'execute' },
                     'Execute'
                 )
             )
         );
-    },
-
-    changePermission: function changePermission() {
-        alert("change select");
-        //action...
     },
 
     onAllClick: function onAllClick() {
@@ -2897,7 +2942,8 @@ var ManageDSLPermissions = React.createClass({
                 data[i] = {
                     id: user.id,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
+                    permission: user.permission ? user.permission : "None"
                 };
             });
         }
@@ -6535,8 +6581,10 @@ module.exports = {
     LOAD_DSL_RESPONSE: null,
     LOAD_DSL_LIST_RESPONSE: null,
     LOAD_DSL_ACCESS_RESPONSE: null,
-    DELETE_DSL_RESPONSE: null,
     LOAD_USER_LIST_RESPONSE: null,
+    LOAD_USERS_PERMISSIONS_LIST_RESPONSE: null,
+    DELETE_DSL_RESPONSE: null,
+    CHANGE_DSL_PERMISSION_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -6885,9 +6933,8 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
-var DELETE_EVENT = 'delete';
 
-var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION
+var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
 var _DSL = {
     id: localStorage.getItem('DSLId'),
@@ -6896,7 +6943,9 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = []; // Member and Guest list
+var _USER_LIST = JSON.parse(localStorage.getItem('userList')); // Member and Guest list
+
+var _USERS_PERMISSIONS = JSON.parse(localStorage.getItem('usersPermissions')); // Member and Guest permissions for one specific definitionId
 
 var _errors = [];
 
@@ -6905,24 +6954,12 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.emit(CHANGE_EVENT);
     },
 
-    emitDelete: function emitDelete() {
-        this.emit(DELETE_EVENT);
-    },
-
     addChangeListener: function addChangeListener(callback) {
         this.on(CHANGE_EVENT, callback);
     },
 
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
-    },
-
-    addDeleteListener: function addDeleteListener(callback) {
-        this.on(DELETE_EVENT, callback);
-    },
-
-    removeDeleteListener: function removeDeleteListener(callback) {
-        this.removeListener(DELETE_EVENT, callback);
     },
 
     getErrors: function getErrors() {
@@ -6951,6 +6988,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getUserList: function getUserList() {
         return _USER_LIST;
+    },
+
+    getUsersPermissions: function getUsersPermissions() {
+        return _USERS_PERMISSIONS;
     }
 });
 
@@ -7063,6 +7104,22 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
         case ActionTypes.LOAD_USER_LIST_RESPONSE:
             if (action.userList) {
                 _USER_LIST = action.userList;
+                localStorage.setItem('userList', JSON.stringify(action.userList));
+            }
+            DSLStore.emitChange();
+            break;
+
+        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
+            if (action.usersPermissions) {
+                _USERS_PERMISSIONS = action.usersPermissions;
+                localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+            }
+            DSLStore.emitChange();
+            break;
+
+        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
             }
             DSLStore.emitChange();
             break;
@@ -7889,10 +7946,18 @@ module.exports = {
     });
   },
 
-  changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId) {
-    request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
+  changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId, permission) {
+    request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: id,
+      userId: userId,
+      permission: permission
+    }).end(function (error, res) {
       if (res) {
-        alert("Ritorno web api");
+        if (res.error) {
+          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
+        } else {
+          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null);
+        }
       }
     });
   },
@@ -7912,19 +7977,20 @@ module.exports = {
   },
 
   loadUsersPermissions: function loadUsersPermissions(id) {
-    request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
-      filter: {
-        where: {
-          "dslId": id
-        },
-        fields: ['permission', 'userId']
-      }
-    }).end(function (error, res) {
+    var filter = {
+      where: {
+        "dslId": id
+      },
+      fields: ['permission', 'userId']
+    };
+    filter = JSON.stringify(filter);
+    request.get(APIEndpoints.DSL_ACCESSES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({ filter: filter }).end(function (error, res) {
       if (res) {
-        console.log(res.body);
+        ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
       }
     });
   }
+
 };
 
 },{"../actions/Response/ResponseDSLActionCreator.react.jsx":8,"../constants/Constants.js":49,"superagent":489}],60:[function(require,module,exports){

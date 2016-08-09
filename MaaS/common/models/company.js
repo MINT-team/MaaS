@@ -46,7 +46,7 @@ module.exports = function(Company) {
                             }
                             users.forEach(function(user, i) {
                                 DSLInstance.users.remove(user, function(err) {
-                                    if(err)
+                                    if(err) 
                                     {
                                         console.log("> Error deleting DSL definition");
                                         return cb(err, null);

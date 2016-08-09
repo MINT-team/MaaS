@@ -22,14 +22,19 @@ var app = require('../../server/server.js');
 //var path = require('path');
 //var host = 'maas-navid94.c9users.io';
 //var port = '8080';
+var Databases = app.models.ExternalDatabase;
+// var user = loopback.getCurrentContext().get('currentUser');
+// var company = user.companyId;
+//var company = localStorage.getItem('companyName');
+//var connections = [];
 
 module.exports = function(ExternalDatabase) {
     ExternalDatabase.connectDb = function(cb) {
-        var Databases = app.models.ExternalDatabase;
+        //var Databases = app.models.ExternalDatabase;
         // var user = loopback.getCurrentContext().get('currentUser');
         // var company = user.companyId;
         var company = localStorage.getItem('companyName');
-        var connections = []; //da discuterne l'inserimento in user per mantenere le connessioni nell'utente
+        //var connections = []; //da discuterne l'inserimento in user per mantenere le connessioni nell'utente
         // var Databases = request.get(user/ExternalDatabases/id/company);
         if(company)
         {
@@ -45,7 +50,8 @@ module.exports = function(ExternalDatabase) {
                         // var connString = 'mongodb://' + company + ':' + Databases[i].password + '%40' + host + ':' + port + '/' + Databases[i].name;
                         var connString = Databases[i].connString;
                         var conn = mongoose.createConnection(connString);
-                        connections.push(conn);
+                        Databases[i].connection = conn;
+                        //connections.push(conn);
                     }
                     //ExternalDatabaseStore.setDbs(Databases, function(err){}); //da cambiare
                     //ExternalDatabaseStore.setConnections(connections, function(err){}); //da cambiare

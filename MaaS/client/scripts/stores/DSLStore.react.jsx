@@ -19,10 +19,9 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
-var DELETE_EVENT = 'delete';
 
  
-var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));       // DSL LIST WITH PERMISSION
+var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
 
 var _DSL = {
     id: localStorage.getItem('DSLId'),
@@ -31,17 +30,15 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = [];    // Member and Guest list
+var _USER_LIST = JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
+
+var _USERS_PERMISSIONS = JSON.parse(localStorage.getItem('usersPermissions')); // Member and Guest permissions for one specific definitionId
 
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
     emitChange: function() {
         this.emit(CHANGE_EVENT);
-    },
-    
-    emitDelete: function() {
-        this.emit(DELETE_EVENT);
     },
 
     addChangeListener: function(callback) {
@@ -50,14 +47,6 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
-    },
-    
-    addDeleteListener: function(callback) {
-        this.on(DELETE_EVENT, callback);
-    },
-
-    removeDeleteListener: function(callback) {
-        this.removeListener(DELETE_EVENT, callback);
     },
     
     getErrors: function() {
@@ -86,6 +75,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getUserList: function() {
         return _USER_LIST;
+    },
+    
+    getUsersPermissions: function() {
+        return _USERS_PERMISSIONS;
     }
 });
 
@@ -217,6 +210,24 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             if(action.userList)
             {
                 _USER_LIST = action.userList;
+                localStorage.setItem('userList', JSON.stringify(action.userList));
+            }
+            DSLStore.emitChange();
+            break;
+            
+        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
+            if(action.usersPermissions)
+            {
+                _USERS_PERMISSIONS = action.usersPermissions;
+                localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
+            }
+            DSLStore.emitChange();
+            break;
+            
+        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
             }
             DSLStore.emitChange();
             break;

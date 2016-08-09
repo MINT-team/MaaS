@@ -69,6 +69,20 @@ var ResponseDSLActionCreator = {
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,
             userList: userList
         });
+    },
+    
+    responseLoadUsersPermissions: function(usersPermissions) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE,
+            usersPermissions: usersPermissions
+        });
+    },
+    
+    responseChangeDSLDefinitionPermissions: function(errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
+            errors: errors
+        });
     }
 };
 

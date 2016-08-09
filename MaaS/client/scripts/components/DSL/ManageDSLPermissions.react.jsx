@@ -21,20 +21,40 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 
 
-function getState() {
-  return {
+function getState(id) {
+    var USER_LIST = DSLStore.getUserList();
+    var PERMISSION_LIST = DSLStore.getUsersPermissions();
+    var i = 0, j = 0;
+    
+    if(USER_LIST && PERMISSION_LIST)
+    {
+        // Add permission field to users
+        while(j < USER_LIST.length && i < PERMISSION_LIST.length)
+        {
+            if(PERMISSION_LIST[i].userId == USER_LIST[j].id)
+            {
+                USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                j++;
+            }
+            i++;
+        }
+    }
+    
+    return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
             role: UserStore.getRole(),
             userId: UserStore.getId(),
             roleFilter: "All",
-            USER_LIST: DSLStore.getUserList()
-      };
+            USER_LIST: USER_LIST,
+            init: false
+    };
 }
 
 var ManageDSLPermissions = React.createClass({
     getInitialState: function() {
-        return getState();
+        var id = this.props.params.definitionId;
+        return getState(id);
     },
     
     componentDidMount: function() {
@@ -49,24 +69,40 @@ var ManageDSLPermissions = React.createClass({
 
     _onChange: function() {
         this.setState(getState());
+        if(!this.state.init && this.state.USER_LIST)
+        {
+            this.state.USER_LIST.forEach(function(user, i) {
+                if (user.permission == "None")
+                {
+                    document.getElementById(user.id).value = "none";
+                }
+                else if(user.permission == "write" || user.permission == "read" || user.permission == "execute")
+                {
+                    document.getElementById(user.id).value = user.permission;
+                }
+            });
+            this.setState({init: true});
+        }
     },
     
     buttonFormatter: function(cell, row) {
+        var selectId = row.id, instance = this;
+        
+        var changePermission = function() {
+            var permission = document.getElementById(selectId).value;
+            RequestDSLActionCreator.changeDSLDefinitionPermissions(instance.props.params.definitionId, row.id, permission);
+        };
+        
         return (
             <div className="table-buttons">
-                <select onChange={this.changePermission} className="select">
-                    <option>None</option>
-                    <option>Write</option>
-                    <option>Read</option>
-                    <option>Execute</option>
+                <select id={selectId} onChange={changePermission} className="select">
+                    <option value="none">None</option>
+                    <option value="write">Write</option>
+                    <option value="read">Read</option>
+                    <option value="execute">Execute</option>
                 </select>
             </div>
         );
-    },
-    
-    changePermission: function() {
-        alert("change select");
-        //action...
     },
     
     onAllClick: function() {
@@ -133,7 +169,8 @@ var ManageDSLPermissions = React.createClass({
                 data[i] = {
                     id: user.id,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
+                    permission: user.permission ? user.permission : "None"
                 };
             });
         }
@@ -171,7 +208,6 @@ var ManageDSLPermissions = React.createClass({
             <div id="dsl-definition-permissions">
                 {content}
             </div>
-            
         );
     }
     

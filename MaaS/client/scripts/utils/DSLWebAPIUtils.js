@@ -160,28 +160,40 @@ module.exports = {
         });
     },
     
-    changeDSLDefinitionPermissions: function(id, userId) {
+    changeDSLDefinitionPermissions: function(id, userId, permission) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
+        .send({
+          id: id,
+          userId: userId,
+          permission: permission
+        })
         .end(function(error, res) {
           if(res)
           {
-            alert("Ritorno web api");
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null);
+            }
           }
         });
     },
     
     loadUserList: function(companyId) {
       var filter = {
-        where: {
-          or: [
-            { role: 'Member'},
-            { role: 'Guest'}
-          ]
-        }
-      };
+              where: {
+                or: [
+                  { role: 'Member'},
+                  { role: 'Guest'}
+                ]
+              }
+            };
       filter = JSON.stringify(filter);
       request
         .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
@@ -197,23 +209,24 @@ module.exports = {
     },
     
     loadUsersPermissions: function(id) {
+      var filter = {
+        where: {
+          "dslId": id
+        },
+        fields: ['permission','userId']
+      };
+      filter = JSON.stringify(filter);
       request
         .get(APIEndpoints.DSL_ACCESSES)
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
-        .query({
-          filter: { 
-            where: { 
-              "dslId": id
-            },
-            fields: ['permission','userId']
-          }
-        })
+        .query({ filter: filter})
         .end(function(error, res) {
           if(res)
           {
-            console.log(res.body);
+            ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
           }
         });
     }
+    
 };
