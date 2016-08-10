@@ -178,45 +178,55 @@ module.exports = function(DSL) {
     
     DSL.changeDefinitionPermissions = function(id, userId, permission, cb) {
         var DSLAccess = app.models.DSLAccess;
+        var user = app.models.user;
         DSLAccess.findOne({where: {userId: userId, dslId: id}, limit: 1}, function(err, accessInstance) {
             if(err)
             {
                 return cb(err);
             }
-            // User has access to dsl
-            if(accessInstance) 
-            {
-                if(permission == "none")
+            user.findById(userId, function(err, userInstance) {
+               if(err)
+               {
+                   return cb(err);
+               }
+               // User has access to dsl
+                if(accessInstance) 
                 {
-                    var aux = accessInstance;
-                    DSLAccess.destroyById(accessInstance.id, function(err) {
+                    if(permission == "none")
+                    {
+                        userInstance.permission = accessInstance.permission;
+                        DSLAccess.destroyById(accessInstance.id, function(err) {
+                            if(err)
+                            {
+                                return cb(err);
+                            }
+                            console.log("> Permission removed for DSL:", id);
+                            return cb(null, null, 'delete', userInstance);
+                        });
+                    }
+                    else
+                    {
+                        accessInstance.permission = permission;
+                        userInstance.permission = accessInstance.permission;
+                        accessInstance.save();
+                        console.log("> Permission changed for DSL:", id);
+                        return cb(null, null, 'update', userInstance);
+                    }
+                }
+                else // User don't have access to dsl
+                {
+                    DSLAccess.create({userId: userId, dslId: id, permission: permission}, function(err, newAccessInstance) {
                         if(err)
                         {
                             return cb(err);
                         }
-                        console.log("> Permission removed for DSL:", id);
-                        return cb(null,null,'delete', aux);
+                        userInstance.permission = newAccessInstance.permission;
+                        console.log("> Permission changed for DSL:", id);
+                        return cb(null, null,'create', userInstance);
                     });
                 }
-                else
-                {
-                    accessInstance.permission = permission;
-                    accessInstance.save();
-                    console.log("> Permission changed for DSL:", id);
-                    return cb(null, null, 'update', accessInstance);
-                }
-            }
-            else // User don't have access to dsl
-            {
-                DSLAccess.create({userId: userId, dslId: id, permission: permission}, function(err, newAccessInstance) {
-                    if(err)
-                    {
-                        return cb(err);
-                    }
-                    console.log("> Permission changed for DSL:", id);
-                    return cb(null,null,'create',newAccessInstance);
-                });
-            }
+            });
+            
         });
     };
     
@@ -232,7 +242,7 @@ module.exports = function(DSL) {
             returns: [
                 { arg: 'error', type: 'Object' },
                 { arg: 'operation', type: 'string' },
-                { arg: 'DSLAccess', type: 'Object' }
+                { arg: 'userPermission', type: 'Object' }
                 
             ],
             http: { verb: 'put', path: '/:id/changeDefinitionPermissions' }

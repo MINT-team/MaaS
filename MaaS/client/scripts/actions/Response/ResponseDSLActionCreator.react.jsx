@@ -71,27 +71,13 @@ var ResponseDSLActionCreator = {
             permissionList: permissionList
         });
     },
-    /*
-    responseLoadUserList: function(userList) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.LOAD_USER_LIST_RESPONSE,
-            userList: userList
-        });
-    },
     
-    responseLoadUsersPermissions: function(usersPermissions) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE,
-            usersPermissions: usersPermissions
-        });
-    },
-    */
-    responseChangeDSLDefinitionPermissions: function(errors, operation, DSLAccess) {
+    responseChangeDSLDefinitionPermissions: function(errors, operation, userPermission) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
             errors: errors,
             operation: operation,
-            DSLAccess: DSLAccess
+            userPermission: userPermission
         });
     }
 };

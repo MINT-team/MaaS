@@ -67,10 +67,8 @@ module.exports = {
     LOAD_DSL_LIST_RESPONSE: null,
     LOAD_DSL_ACCESS_RESPONSE: null,
     LOAD_USER_LIST_RESPONSE: null,
-    LOAD_USERS_PERMISSIONS_LIST_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
     CHANGE_DSL_PERMISSION_RESPONSE: null,
-    FLUSH_USER_LIST: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

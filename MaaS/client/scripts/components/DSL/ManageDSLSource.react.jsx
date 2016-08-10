@@ -14,12 +14,6 @@ var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
-/*
-Visualizzare in sola lettura il codice del DSL
-Modificare il codice del DSL
-Creare un nuovo DSL
-Fare una copia di un DSL
-*/
 
 function getState() {
     return {
@@ -52,9 +46,12 @@ var ManageDSLSource = React.createClass({
         {
             RequestDSLActionCreator.loadDSL(id);
         }
-        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
-        var editorSession = editor.getSession();
-        editorSession.on("change", this.onEdit);
+        if (this.props.params.mode != "view")
+        {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            var editorSession = editor.getSession();
+            editorSession.on("change", this.onEdit);
+        }
     },
     
     componentWillUnmount: function() {
@@ -63,7 +60,7 @@ var ManageDSLSource = React.createClass({
     
     onEdit: function(e) {
         this.setState({ saved: false });
-        if(this.refs.save.classList.contains("saved")) {
+        if(this.refs.save && this.refs.save.classList.contains("saved")) {
         	this.refs.save.classList.remove("saved");
     	}
     },
@@ -101,13 +98,22 @@ var ManageDSLSource = React.createClass({
                 if(this.state.definitionType == "Cell")
                     this.refs.definitionType.selectedIndex = 4;
             }
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
             if(this.state.definitionSource)
             {
-                var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
                 editor.setValue(this.state.definitionSource);
             }
-            this.setState({ saved: true });
-            this.refs.save.classList.toggle("saved");
+            if (this.props.params.mode == "view")
+            {
+                this.refs.definitionName.disabled = true;
+                this.refs.definitionType.disabled = true;
+                editor.setReadOnly(true);
+            }
+            if(this.props.params.mode != "view")
+            {
+                this.setState({ saved: true });
+                this.refs.save.classList.toggle("saved");
+            }
         }
     },
     
@@ -144,6 +150,14 @@ var ManageDSLSource = React.createClass({
         }
     },
     
+    onBuild: function() {
+        
+    },
+    
+    onRun: function() {
+        
+    },
+    
     toggleErrorPopUp: function() {
 		this.refs.error.classList.toggle("dropdown-show");
 	},
@@ -176,20 +190,23 @@ var ManageDSLSource = React.createClass({
                         <label htmlFor="definitionName">Definition name</label>
                         <input onChange={this.onEdit} id="definitionName" type="text" ref="definitionName" placeholder="Name" />
                     </form>
-                    <div id="editor-buttons">
-                        <div className="tooltip tooltip-top">
-                            <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
-                            <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
+                    {this.props.params.mode != "view" ?
+                        <div id="editor-buttons">
+                            <div className="tooltip tooltip-top">
+                                <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
+                                <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
+                            </div>
+                            <div className="tooltip tooltip-top">
+                                <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
+                                <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
+                            </div>
+                            <div className="tooltip tooltip-top">
+                                <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
+                                <i onClick={this.onRun} accessKey="r" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
+                            </div>
                         </div>
-                        <div className="tooltip tooltip-top">
-                            <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
-                            <i onClick="" accessKey="b" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
-                        </div>
-                        <div className="tooltip tooltip-top">
-                            <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
-                            <i onClick="" accessKey="r" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
-                        </div>
-                    </div>
+                        : ""
+                    }
                     <form id="definition-type">
                         <label htmlFor="definitionType">Type</label>
                         <select className="select" id="definitionType" ref="definitionType" >

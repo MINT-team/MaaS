@@ -113,13 +113,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "Owner",
-      "permission": "ALLOW",
-      "property": "invite"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "Administrator",
+      "principalId": ["Owner", "Administrator"],
       "permission": "ALLOW",
       "property": "invite"
     },

@@ -20,7 +20,6 @@ var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuper
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-var DeleteCompany = require('./DeleteCompany.react.jsx');
 
 
 function getState() {
@@ -83,7 +82,7 @@ var CompaniesManagement = React.createClass({
         };
         
         var confirmDelete = function() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+            //RequestSuperAdminActionCreator.deleteCompany(row.id); // + mail proprietario
             window.alert("funzione di eliminazione");
         };
         
@@ -107,56 +106,11 @@ var CompaniesManagement = React.createClass({
                 </div>
             </div>
         );
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        var modifyId ="modifyDropdown"+row.id;
-        var onClickModify = function() {
-          
-            if(instance.state.errors.length > 0)
-    		{
-    		    document.getElementById(errorId).classList.toggle("dropdown-show");
-    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
-    		}
-    		else
-    		{
-    		    document.getElementById(deleteId).classList.toggle("dropdown-show");
-    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
-    		}
-        };
         
-        var confirmModify = function() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id);
-        };
-        
-        var modifyCompany = (
-            <div id="delete-user" className="pop-up">
-                <i onClick={onClickModify} id="dsl-modify" className="material-icons md-24">&#xE254;</i>
-                <div className="dropdown-content dropdown-popup" id={errorId}>
-                    <p className="dropdown-title">Error</p>
-                    <p className="dropdown-description">{errors}</p>
-                    <div className="dropdown-buttons">
-                        <button className="button">Ok</button>
-                    </div>
-                </div>
-                <div className="dropdown-content dropdown-popup" id={modifyId}>
-                    <p className="dropdown-title">Modify company</p>
-                    <p className="dropdown-description"> modifica della company </p>
-                    <div className="dropdown-buttons">
-                        <button className="inline-button">annulla</button>
-                        <button id="delete-button" className="inline-button" onClick={confirmModify}>cancella</button>
-                    </div>
-                </div>
-            </div>
-        );
-        
-        
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      
-       
-       
             buttons = (
                 <div>
                     {deleteCompany}
-                    {modifyCompany}
+                    
                 </div>
             );
         
@@ -164,6 +118,7 @@ var CompaniesManagement = React.createClass({
         return (
             <div className="table-buttons">
                 {buttons}
+                <Link to={"/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/"+ row.name +"/"+ row.id}><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
         );
     
@@ -190,7 +145,11 @@ var CompaniesManagement = React.createClass({
         <AuthorizationRequired />
       );
     }
-    
+    if(this.props.children)
+        {
+            content = this.props.children;
+        }
+    else{
     var selectRowProp = {
         mode: "checkbox",
         clickToSelect: true,
@@ -237,7 +196,7 @@ var CompaniesManagement = React.createClass({
         </div>
         
     );
-    
+  }
     return (
       <div className="container sidebar-container">
         {content}

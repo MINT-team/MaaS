@@ -13,6 +13,7 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -20,14 +21,14 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
-  return {
+    return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
             DSL_LIST: DSLStore.getDSLList(),
             role: UserStore.getRole(),
             userId: UserStore.getId(),
             type: "All"
-      };
+    };
 }
 
 var ManageDSL = React.createClass({
@@ -38,6 +39,8 @@ var ManageDSL = React.createClass({
 
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onUserChange);
+        RequestUserActionCreator.getUser(this.state.userId);
         if(!this.props.children)
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
@@ -46,17 +49,21 @@ var ManageDSL = React.createClass({
 
     componentWillUnmount: function() {
         DSLStore.removeChangeListener(this._onChange);
+        UserStore.removeChangeListener(this._onUserChange);
     },
 
     _onChange: function() {
         this.setState(getState());
     },
-    /*
-    Permesso = 'esecuzione', 'scrittura', 'lettura'
-1) Permesso di scrittura: modifica + cancellazione + lettura + esecuzione
-2) Permesso di lettura: lettura + esecuzione
-3) Permesso di esecuzione: esecuzione
-    */
+    
+    _onUserChange: function() {
+        if(this.state.role != UserStore.getRole())
+            alert("Your role has been changed!");
+        this.setState({
+            role: UserStore.getRole(),
+            userId: UserStore.getId(),
+        });
+    },
     
     buttonFormatter: function(cell, row) {
         var buttons;
@@ -71,15 +78,9 @@ var ManageDSL = React.createClass({
         var instance = this;
         var onClick = function() {
             if(instance.state.errors.length > 0)
-    		{
-    		    document.getElementById(errorId).classList.toggle("dropdown-show");
-    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
-    		}
+                document.getElementById(errorId).classList.toggle("dropdown-show");
     		else
-    		{
     		    document.getElementById(deleteId).classList.toggle("dropdown-show");
-    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
-    		}
         };
         
         var confirmDelete = function() {
@@ -110,7 +111,7 @@ var ManageDSL = React.createClass({
         {
             buttons = (
                 <div>
-                    <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
+                    <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
                     <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
                     {deleteDSL}
                 </div>
@@ -122,7 +123,7 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
-                        <Link to={"/manageDSL/viewDSLSource/" + row.id }><i id="dsl-read" className="material-icons md-24">&#xE86F;</i></Link>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i id="dsl-read" className="material-icons md-24">&#xE86F;</i></Link>
                     </div>
                 );
             }
@@ -131,8 +132,16 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
-                        <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
                         {deleteDSL}
+                    </div>
+                );
+            }
+            if(this.state.role == "Guest" && row.permission == "read")
+            {
+                buttons = (
+                    <div>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i id="dsl-modify" className="material-icons md-24">&#xE86F;</i></Link>
                     </div>
                 );
             }
@@ -255,16 +264,18 @@ var ManageDSL = React.createClass({
                         <p className="container-title">{title}</p>
                         <div id="table-top">
                             <p id="filter-type">{this.state.type}</p>
-                            <div id="top-buttons">
-                                <div className="tooltip tooltip-bottom" id="add-button">
-                                    <Link to="/manageDSL/manageDSLSource"><i className="material-icons md-48">&#xE147;</i></Link>
-                                    <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
+                            {this.state.role != "Guest" ?
+                                <div id="top-buttons">
+                                    <div className="tooltip tooltip-bottom" id="add-button">
+                                        <Link to="/manageDSL/manageDSLSource"><i className="material-icons md-48">&#xE147;</i></Link>
+                                        <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
+                                    </div>
+                                    <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                                        <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                                        <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>
+                                    </div>
                                 </div>
-                                <div className="tooltip tooltip-bottom" id="deleteAll-button">
-                                    <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
-                                    <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>
-                                </div>
-                            </div>
+                            : "" }
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 

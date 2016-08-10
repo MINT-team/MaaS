@@ -38,6 +38,7 @@ var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
+var ChangeCompanyName = require('./components/SuperAdmin/ChangeCompanyName.react.jsx');
 var UsersManagement = require('./components/SuperAdmin/UsersManagement.react.jsx');
 var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
             
@@ -65,7 +66,7 @@ var Routes = React.createClass({
           <Route path="externalDatabases" component={ExternalDatabases} />
           <Route path="manageDSL" component={ManageDSL}>
             <Route path="manageDSLSource" component={ManageDSLSource} />
-            <Route path="manageDSLSource/:definitionId" component={ManageDSLSource} />
+            <Route path="manageDSLSource/:definitionId/:mode" component={ManageDSLSource} />
             <Route path="manageDSLPermissions/:definitionId" component={ManageDSLPermissions} />
           </Route>
           <Route path="editor" component={Editor} />
@@ -73,7 +74,9 @@ var Routes = React.createClass({
           <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} >
             <Route path="databaseManagement" component={DatabaseManagement} >
-              <Route path="companiesManagement" component={CompaniesManagement} />
+              <Route path="companiesManagement" component={CompaniesManagement} >
+                <Route path="changeCompanyName/:companyName/:companyId" component={ChangeCompanyName} />
+              </Route>
               <Route path="usersManagement" component={UsersManagement} />
             </Route>
             <Route path="impersonateUser" component={ImpersonateUser} />

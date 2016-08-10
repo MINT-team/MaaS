@@ -180,7 +180,8 @@ module.exports = {
             else
             {
               res=JSON.parse(res.text);
-              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.DSLAccess);
+              console.log(res.userPermission);
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
             }
           }
         });
@@ -224,49 +225,4 @@ module.exports = {
           }
         });
     }
-    
-    /*loadUserList: function(companyId) {
-      var filter = {
-              where: {
-                or: [
-                  { role: 'Member'},
-                  { role: 'Guest'}
-                ]
-              }
-            };
-      filter = JSON.stringify(filter);
-      request
-        .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', localStorage.getItem('accessToken'))
-        .query({ filter: filter })
-        .end(function(error, res) {
-          if(res)
-          {
-            ResponseDSLActionCreator.responseLoadUserList(res.body);
-          }
-        });
-    },
-    
-    loadUsersPermissions: function(id) {
-      var filter = {
-        where: {
-          dslId: id
-        },
-        fields: ['permission','userId','id']
-      };
-      filter = JSON.stringify(filter);
-      request
-        .get(APIEndpoints.DSL_ACCESSES)
-        .set('Accept', 'application/json')
-        .set('Authorization', localStorage.getItem('accessToken'))
-        .query({ filter: filter})
-        .end(function(error, res) {
-          if(res)
-          {
-            ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
-          }
-        });
-    }
-    */
 };

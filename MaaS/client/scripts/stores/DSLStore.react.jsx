@@ -31,7 +31,7 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = [];    //JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
+var _USER_LIST = []; // Member and Guest list
 
 var _errors = [];
 
@@ -47,19 +47,7 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
-    /*
-    emitUsers: function() {
-        this.emit(USERS_EVENT);
-    },
     
-    addUsersListener: function(callback) {
-        this.on(USERS_EVENT, callback);
-    },
-    
-    removeUsersListener: function(callback) {
-        this.removeListener(USERS_EVENT, callback);
-    },
-    */
     getErrors: function() {
         return _errors;
     },
@@ -232,128 +220,40 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                     i++;
                 }
                 _USER_LIST = USER_LIST;
-                //localStorage.setItem('userList', JSON.stringify(action.userList));
             }
             DSLStore.emitChange();
             break;
-        /*    
-        case ActionTypes.LOAD_USER_LIST_RESPONSE:
-            if(action.userList)
-            {
-                _USER_LIST = action.userList;
-                //localStorage.setItem('userList', JSON.stringify(action.userList));
-            }
-            break;
-            
-        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
-            if(action.usersPermissions)
-            {
-                _USERS_PERMISSIONS = action.usersPermissions;
-                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
-            }
-            //DSLStore.emitChange();
-            break;
-        */    
-        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
-            if(action.errors)
-            {
-                _errors.push(action.errors);
-            }
-            else if(action.operation && action.DSLAccess)
-            {    
-                if (action.operation == "create")
-                {
-                    /*
-                    var newPermission = {
-                        id: action.DSLAccess.id,
-                        userId: action.DSLAccess.userId,
-                        permission: action.DSLAccess.permission
-                    };
-                    */
-                    _USERS_PERMISSIONS.push(action.DSLAccess);
-                }
-                else if(action.operation == "update")
-                {
-                    _USERS_PERMISSIONS.forEach(function(permission, i) {
-                        if(permission.id == action.DSLAccess.id)
-                        {
-                            permission.permission = action.DSLAccess.permission;
-                        }
-                    });
-                }
-                else if(action.operation == "delete")
-                {
-                    _USERS_PERMISSIONS.forEach(function(permission, i) {
-                        if(permission.id == action.DSLAccess.id)
-                        {
-                            _USERS_PERMISSIONS.splice(i, 1);
-                        }
-                    });
-                }
-                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
-            }
-            //DSLStore.emitChange();
-            break;
-            /*
         
-        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
-            if(action.usersPermissions)
-            {
-                _USERS_PERMISSIONS = action.usersPermissions;
-                permissions_list_loaded = true;
-                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
-            }
-            //if(user_list_loaded)
-                DSLStore.emitUsers();
-            //alert("load permission");
-            //DSLStore.emitChange();
-            break;
-            
         case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
             if(action.errors)
             {
                 _errors.push(action.errors);
             }
-            else if(action.operation && action.DSLAccess)
+            else if(action.operation && action.userPermission)
             {    
                 if (action.operation == "create")
                 {
-                    var newPermission = {
-                        id: action.DSLAccess.id,
-                        userId: action.DSLAccess.userId,
-                        permission: action.DSLAccess.permission
-                    };
-                    _USERS_PERMISSIONS.push(newPermission);
+                    _USER_LIST.push(action.userPermission);
                 }
                 else if(action.operation == "update")
                 {
-                    _USERS_PERMISSIONS.forEach(function(permission, i) {
-                        if(permission.id == action.DSLAccess.id)
+                    _USER_LIST.forEach(function(permission, i) {
+                        if(permission.id == action.userPermission.id)
                         {
-                            permission.permission = action.DSLAccess.permission;
+                            permission.permission = action.userPermission.permission;
                         }
                     });
                 }
                 else if(action.operation == "delete")
                 {
-                    _USERS_PERMISSIONS.forEach(function(permission, i) {
-                        if(permission.id == action.DSLAccess.id)
+                    _USER_LIST.forEach(function(permission, i) {
+                        if(permission.id == action.userPermission.id)
                         {
-                            _USERS_PERMISSIONS.splice(i, 1);
+                            _USER_LIST.splice(i, 1);
                         }
                     });
                 }
-                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
             }
-            //DSLStore.emitChange();
-            break;
-            */
-        case ActionTypes.FLUSH_USER_LIST:
-            _USER_LIST = [];
-            //_USERS_PERMISSIONS = [];
-            //localStorage.removeItem('userList');
-            //localStorage.removeItem('usersPermissions');
-            //DSLStore.emitChange();
             break;
     }
     

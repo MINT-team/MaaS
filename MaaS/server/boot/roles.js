@@ -167,7 +167,6 @@ module.exports = function(app) {
                         else
                             return reject();
                     });
-                    
                 });
             }
         }
@@ -250,7 +249,6 @@ module.exports = function(app) {
                         else
                             return reject();
                     });
-                    
                 });
             }
         }
@@ -328,4 +326,5 @@ module.exports = function(app) {
                cb(null, false);
         });
     });
+
 };

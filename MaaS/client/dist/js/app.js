@@ -82,16 +82,6 @@ var RequestDSLActionCreator = {
 
     loadUserList: function loadUserList(id, companyId) {
         WebAPIUtils.loadUserList(id, companyId);
-    },
-
-    loadUsersPermissions: function loadUsersPermissions(id) {
-        WebAPIUtils.loadUsersPermissions(id);
-    },
-
-    flushUserList: function flushUserList() {
-        Dispatcher.handleViewAction({
-            type: ActionTypes.FLUSH_USER_LIST
-        });
     }
 };
 
@@ -197,6 +187,10 @@ var RequestSuperAdminActionCreator = {
 
     deleteCompany: function deleteCompany(id, email) {
         WebAPIUtils.deleteCompany(id, email);
+    },
+
+    changeCompanyName: function changeCompanyName() {
+        //WebAPIUtils.changeCompanyName(...);
     }
 
 };
@@ -380,27 +374,13 @@ var ResponseDSLActionCreator = {
             permissionList: permissionList
         });
     },
-    /*
-    responseLoadUserList: function(userList) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.LOAD_USER_LIST_RESPONSE,
-            userList: userList
-        });
-    },
-    
-    responseLoadUsersPermissions: function(usersPermissions) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE,
-            usersPermissions: usersPermissions
-        });
-    },
-    */
-    responseChangeDSLDefinitionPermissions: function responseChangeDSLDefinitionPermissions(errors, operation, DSLAccess) {
+
+    responseChangeDSLDefinitionPermissions: function responseChangeDSLDefinitionPermissions(errors, operation, userPermission) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE,
             errors: errors,
             operation: operation,
-            DSLAccess: DSLAccess
+            userPermission: userPermission
         });
     }
 };
@@ -2354,6 +2334,7 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -2381,6 +2362,8 @@ var ManageDSL = React.createClass({
 
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onUserChange);
+        RequestUserActionCreator.getUser(this.state.userId);
         if (!this.props.children) {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
@@ -2388,17 +2371,20 @@ var ManageDSL = React.createClass({
 
     componentWillUnmount: function componentWillUnmount() {
         DSLStore.removeChangeListener(this._onChange);
+        UserStore.removeChangeListener(this._onUserChange);
     },
 
     _onChange: function _onChange() {
         this.setState(getState());
     },
-    /*
-    Permesso = 'esecuzione', 'scrittura', 'lettura'
-    1) Permesso di scrittura: modifica + cancellazione + lettura + esecuzione
-    2) Permesso di lettura: lettura + esecuzione
-    3) Permesso di esecuzione: esecuzione
-    */
+
+    _onUserChange: function _onUserChange() {
+        if (this.state.role != UserStore.getRole()) alert("Your role has been changed!");
+        this.setState({
+            role: UserStore.getRole(),
+            userId: UserStore.getId()
+        });
+    },
 
     buttonFormatter: function buttonFormatter(cell, row) {
         var buttons;
@@ -2414,13 +2400,7 @@ var ManageDSL = React.createClass({
         }
         var instance = this;
         var onClick = function onClick() {
-            if (instance.state.errors.length > 0) {
-                document.getElementById(errorId).classList.toggle("dropdown-show");
-                //this.refs.errorRefName.classList.toggle("dropdown-show");
-            } else {
-                document.getElementById(deleteId).classList.toggle("dropdown-show");
-                //this.refs.deleteRefName.classList.toggle("dropdown-show");
-            }
+            if (instance.state.errors.length > 0) document.getElementById(errorId).classList.toggle("dropdown-show");else document.getElementById(deleteId).classList.toggle("dropdown-show");
         };
 
         var confirmDelete = function confirmDelete() {
@@ -2499,7 +2479,7 @@ var ManageDSL = React.createClass({
                 null,
                 React.createElement(
                     Link,
-                    { to: "/manageDSL/manageDSLSource/" + row.id },
+                    { to: "/manageDSL/manageDSLSource/" + row.id + '/edit' },
                     React.createElement(
                         'i',
                         { id: 'modify-button', className: 'material-icons md-24' },
@@ -2524,7 +2504,7 @@ var ManageDSL = React.createClass({
                     null,
                     React.createElement(
                         Link,
-                        { to: "/manageDSL/viewDSLSource/" + row.id },
+                        { to: "/manageDSL/manageDSLSource/" + row.id + '/view' },
                         React.createElement(
                             'i',
                             { id: 'dsl-read', className: 'material-icons md-24' },
@@ -2540,7 +2520,7 @@ var ManageDSL = React.createClass({
                     null,
                     React.createElement(
                         Link,
-                        { to: "/manageDSL/manageDSLSource/" + row.id },
+                        { to: "/manageDSL/manageDSLSource/" + row.id + '/edit' },
                         React.createElement(
                             'i',
                             { id: 'dsl-modify', className: 'material-icons md-24' },
@@ -2548,6 +2528,21 @@ var ManageDSL = React.createClass({
                         )
                     ),
                     deleteDSL
+                );
+            }
+            if (this.state.role == "Guest" && row.permission == "read") {
+                buttons = React.createElement(
+                    'div',
+                    null,
+                    React.createElement(
+                        Link,
+                        { to: "/manageDSL/manageDSLSource/" + row.id + '/view' },
+                        React.createElement(
+                            'i',
+                            { id: 'dsl-modify', className: 'material-icons md-24' },
+                            ''
+                        )
+                    )
                 );
             }
         }
@@ -2695,7 +2690,7 @@ var ManageDSL = React.createClass({
                             { id: 'filter-type' },
                             this.state.type
                         ),
-                        React.createElement(
+                        this.state.role != "Guest" ? React.createElement(
                             'div',
                             { id: 'top-buttons' },
                             React.createElement(
@@ -2730,7 +2725,7 @@ var ManageDSL = React.createClass({
                                     'Delete all selected DSL definitions'
                                 )
                             )
-                        )
+                        ) : ""
                     ),
                     React.createElement(
                         'div',
@@ -2760,7 +2755,7 @@ var ManageDSL = React.createClass({
 
 module.exports = ManageDSL;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":53,"../../stores/SessionStore.react.jsx":55,"../../stores/UserStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-bootstrap-table":191,"react-router":255}],24:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":53,"../../stores/SessionStore.react.jsx":55,"../../stores/UserStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-bootstrap-table":191,"react-router":255}],24:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSLPermission.react.jsx}
@@ -2788,10 +2783,6 @@ var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCre
 function getState() {
     return {
         errors: DSLStore.getErrors(),
-        isLogged: SessionStore.isLogged(),
-        role: UserStore.getRole(),
-        userId: UserStore.getId(),
-        roleFilter: "All",
         USER_LIST: DSLStore.getUserList()
     };
 }
@@ -2800,7 +2791,14 @@ var ManageDSLPermissions = React.createClass({
     displayName: 'ManageDSLPermissions',
 
     getInitialState: function getInitialState() {
-        return getState();
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            role: UserStore.getRole(),
+            userId: UserStore.getId(),
+            roleFilter: "All",
+            USER_LIST: []
+        };
     },
 
     componentDidMount: function componentDidMount() {
@@ -2836,11 +2834,11 @@ var ManageDSLPermissions = React.createClass({
                     { value: 'none' },
                     'None'
                 ),
-                React.createElement(
+                row.role != "Guest" ? React.createElement(
                     'option',
                     { value: 'write' },
                     'Write'
-                ),
+                ) : "",
                 React.createElement(
                     'option',
                     { value: 'read' },
@@ -3027,207 +3025,6 @@ var ManageDSLPermissions = React.createClass({
 module.exports = ManageDSLPermissions;
 
 /*
-function getUserList() {
-    var USER_LIST = DSLStore.getUserList();
-    var PERMISSION_LIST = DSLStore.getUsersPermissions();
-    var i = 0, j = 0;
-    
-    if(USER_LIST && PERMISSION_LIST)
-    {
-        // Add permission field to users
-        while(j < USER_LIST.length && i < PERMISSION_LIST.length)
-        {
-            if(PERMISSION_LIST[i].userId == USER_LIST[j].id)
-            {
-                USER_LIST[j].permission = PERMISSION_LIST[i].permission;
-                j++;
-            }
-            i++;
-        }
-    }
-    return { USER_LIST: USER_LIST };
-}
-
-function getState() {
-    return {
-            errors: DSLStore.getErrors(),
-            isLogged: SessionStore.isLogged(),
-            role: UserStore.getRole(),
-            userId: UserStore.getId(),
-            roleFilter: "All"
-    };
-}
-
-var ManageDSLPermissions = React.createClass({
-    getInitialState: function() {
-        return {
-            errors: [],
-            isLogged: SessionStore.isLogged(),
-            role: UserStore.getRole(),
-            userId: UserStore.getId(),
-            roleFilter: "All",
-            USER_LIST: []
-        };
-    },
-    
-    componentWillMount: function() {
-        RequestDSLActionCreator.loadUsersPermissions(this.props.params.definitionId);
-        RequestDSLActionCreator.loadUserList(CompanyStore.getId());  
-    },
-    
-    componentDidMount: function() {
-        DSLStore.addChangeListener(this._onChange);
-        DSLStore.addUsersListener(this._onLoadUserList);
-    },
-    
-    componentWillUnmount: function() {
-        DSLStore.removeChangeListener(this._onChange);
-        DSLStore.removeUsersListener(this._onLoadUserList);
-        RequestDSLActionCreator.flushUserList();
-    },
-
-    _onChange: function() {
-        this.setState(getState());
-    },
-    
-    _onLoadUserList: function() {
-        this.setState(getUserList());
-    },
-    
-    buttonFormatter: function(cell, row) {
-        var selectId = row.id, instance = this;
-        
-        var changePermission = function() {
-            var permission = document.getElementById(selectId).value;
-            RequestDSLActionCreator.changeDSLDefinitionPermissions(instance.props.params.definitionId, row.id, permission);
-        };
-        
-        return (
-            <div className="table-buttons">
-                <select id={selectId} onChange={changePermission} className="select" defaultValue={row.permission}>
-                    <option value="none">None</option>
-                    <option value="write">Write</option>
-                    <option value="read">Read</option>
-                    <option value="execute">Execute</option>
-                </select>
-            </div>
-        );
-    },
-    
-    onAllClick: function() {
-        this.refs.table.handleFilterData({ });
-        this.setState({roleFilter: "All"});
-    },
-    
-    onMembersClick: function() {
-        this.refs.table.handleFilterData({
-            role: 'Member'
-        });
-        this.setState({roleFilter: "Members"});
-    },
-    
-    onGuestsClick: function() {
-        this.refs.table.handleFilterData({
-            role: 'Guest'
-        });
-        this.setState({roleFilter: "Guests"});
-    },
-    
-    changeAllSelected: function() {
-        alert(this.refs.table.state.selectedRowKeys);
-    },
-    
-    render: function() {
-        if(!this.state.isLogged) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
-        var title,content, errors = [];
-        
-        // SideBar initialization
-        var all = {
-            label: "All",
-            onClick: this.onAllClick,
-            icon: (<i className="material-icons md-24">&#xE8EF;</i>)
-        };
-        var members = {
-            label: "Members",
-            onClick: this.onMembersClick,
-            icon: (<i className="material-icons md-24">&#xE7FD;</i>)
-        };
-        var guests = {
-            label: "Guests",
-            onClick: this.onGuestsClick,
-            icon: (<i className="material-icons md-24">&#xE7FF;</i>)
-        };
-        
-        var data = [];
-        var selectRowProp = {
-            mode: "checkbox",
-            bgColor: "rgba(144, 238, 144, 0.42)"
-        };
-        
-        var sidebarData = [all, members, guests];
-        
-        if(this.state.USER_LIST && this.state.USER_LIST.length > 0)
-        {
-            this.state.USER_LIST.forEach(function(user, i) {
-                data[i] = {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role,
-                    permission: user.permission ? user.permission : "none"
-                };
-            });
-        }
-        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
-        var options = {
-            onRowClick: function(row){
-                //Show user profile
-            },
-            noDataText: "There are no users to display"
-        };
-        title = "Manage DSL definition permissions";
-        content = (
-            <div id="manage-dsl">
-                <Sidebar title="Filter users" data={sidebarData}/>
-                <div className="container sidebar-container">
-                    <div className="tooltip tooltip-bottom" id="editor-back-button">
-                        <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
-                        <p className="tooltip-text tooltip-text-short">Back</p>
-                    </div>
-                    <p className="container-title">{title}</p>
-                    <div id="table-top">
-                        <p id="filter-type">{this.state.roleFilter}</p>
-                        <div id="top-buttons">
-                            <i onClick={this.changeAllSelected} className="material-icons md-48">&#xE32A;</i>
-                        </div>
-                    </div>
-                    <div id="table">
-                        <BootstrapTable ref="table" data={data} pagination={true} 
-                        search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
-                            <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
-                            <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
-                            <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}>Access</TableHeaderColumn>
-                        </BootstrapTable>
-                    </div>
-                </div>
-            </div>
-            );
-        return (
-            <div id="dsl-definition-permissions">
-                {content}
-            </div>
-        );
-    }
-    
-});
-
-module.exports = ManageDSLPermissions;
-*/
-/*
 Guest: esecuzione
 Member: Permesso di scrittura (sui propri)
 Owner/Admin:  Permesso di scrittura (su tutti)
@@ -3272,13 +3069,6 @@ var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
-/*
-Visualizzare in sola lettura il codice del DSL
-Modificare il codice del DSL
-Creare un nuovo DSL
-Fare una copia di un DSL
-*/
-
 function getState() {
     return {
         errors: DSLStore.getErrors(),
@@ -3311,9 +3101,11 @@ var ManageDSLSource = React.createClass({
         if (id) {
             RequestDSLActionCreator.loadDSL(id);
         }
-        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
-        var editorSession = editor.getSession();
-        editorSession.on("change", this.onEdit);
+        if (this.props.params.mode != "view") {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            var editorSession = editor.getSession();
+            editorSession.on("change", this.onEdit);
+        }
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -3322,7 +3114,7 @@ var ManageDSLSource = React.createClass({
 
     onEdit: function onEdit(e) {
         this.setState({ saved: false });
-        if (this.refs.save.classList.contains("saved")) {
+        if (this.refs.save && this.refs.save.classList.contains("saved")) {
             this.refs.save.classList.remove("saved");
         }
     },
@@ -3351,12 +3143,19 @@ var ManageDSLSource = React.createClass({
                 if (this.state.definitionType == "Document") this.refs.definitionType.selectedIndex = 3;
                 if (this.state.definitionType == "Cell") this.refs.definitionType.selectedIndex = 4;
             }
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
             if (this.state.definitionSource) {
-                var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
                 editor.setValue(this.state.definitionSource);
             }
-            this.setState({ saved: true });
-            this.refs.save.classList.toggle("saved");
+            if (this.props.params.mode == "view") {
+                this.refs.definitionName.disabled = true;
+                this.refs.definitionType.disabled = true;
+                editor.setReadOnly(true);
+            }
+            if (this.props.params.mode != "view") {
+                this.setState({ saved: true });
+                this.refs.save.classList.toggle("saved");
+            }
         }
     },
 
@@ -3382,6 +3181,10 @@ var ManageDSLSource = React.createClass({
             }
         }
     },
+
+    onBuild: function onBuild() {},
+
+    onRun: function onRun() {},
 
     toggleErrorPopUp: function toggleErrorPopUp() {
         this.refs.error.classList.toggle("dropdown-show");
@@ -3445,7 +3248,7 @@ var ManageDSLSource = React.createClass({
                     ),
                     React.createElement('input', { onChange: this.onEdit, id: 'definitionName', type: 'text', ref: 'definitionName', placeholder: 'Name' })
                 ),
-                React.createElement(
+                this.props.params.mode != "view" ? React.createElement(
                     'div',
                     { id: 'editor-buttons' },
                     React.createElement(
@@ -3472,7 +3275,7 @@ var ManageDSLSource = React.createClass({
                         ),
                         React.createElement(
                             'i',
-                            { onClick: '', accessKey: 'b', className: 'material-icons md-36 dropdown-button', ref: 'build' },
+                            { onClick: this.onBuild, accessKey: 'b', className: 'material-icons md-36 dropdown-button', ref: 'build' },
                             ''
                         )
                     ),
@@ -3486,11 +3289,11 @@ var ManageDSLSource = React.createClass({
                         ),
                         React.createElement(
                             'i',
-                            { onClick: '', accessKey: 'r', className: 'material-icons md-36 dropdown-button', ref: 'run' },
+                            { onClick: this.onRun, accessKey: 'r', className: 'material-icons md-36 dropdown-button', ref: 'run' },
                             ''
                         )
                     )
-                ),
+                ) : "",
                 React.createElement(
                     'form',
                     { id: 'definition-type' },
@@ -6149,6 +5952,144 @@ module.exports = Sidebar;
 },{"react":488,"react-router":255}],43:[function(require,module,exports){
 'use strict';
 
+// Name: {ChangeCompanyName.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/SuperAdmin/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var React = require('react');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
+var Link = require('react-router').Link;
+
+function getState() {
+  return {
+    name: this.props.params.companyName,
+    companyId: this.props.param.companyId,
+    errors: SuperAdminStore.getErrors(),
+    isLogged: SessionStore.isLogged(),
+    first: "false"
+  };
+}
+
+var ChangeCompanyName = React.createClass({
+  displayName: 'ChangeCompanyName',
+
+
+  getInitialState: function getInitialState() {
+    return {
+      name: this.props.params.companyName,
+      companyId: this.props.param.companyId,
+      first: "true",
+      errors: []
+    };
+  },
+
+  componentDidMount: function componentDidMount() {
+    SuperAdminStore.addChangeListener(this._onChange);
+    this.refs.nome.value = this.state.name;
+  },
+
+  componentWillUnmount: function componentWillUnmount() {
+    SuperAdminStore.removeChangeListener(this._onChange);
+  },
+
+  _onChange: function _onChange() {
+    this.setState(getState());
+  },
+
+  _onSubmit: function _onSubmit(event) {
+    event.preventDefault();
+    var name = this.refs.nome.value;
+
+    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName();else this._setError("No changes to save");
+  },
+
+  _setError: function _setError(error) {
+    this.setState({
+      isRegistered: this.state.isRegistered,
+      errors: error
+    });
+  },
+
+  render: function render() {
+    var title, content, errors;
+
+    if (this.state.errors.length > 0 || this.state.first) {
+      title = "Change company name";
+      if (this.state.errors.length > 0) {
+        errors = React.createElement(
+          'p',
+          { id: 'errors' },
+          this.state.errors
+        );
+      }
+      content = React.createElement(
+        'form',
+        { onSubmit: this._onSubmit, className: 'form-container' },
+        React.createElement(
+          'div',
+          { className: 'form-field' },
+          React.createElement(
+            'label',
+            { htmlFor: 'nome' },
+            'Name'
+          ),
+          React.createElement('input', { type: 'text', id: 'nome', ref: 'nome' })
+        ),
+        errors,
+        React.createElement(
+          'button',
+          { type: 'submit', className: 'form-submit' },
+          'Save changes'
+        )
+      );
+    } else {
+      title = "Company name changed";
+      content = React.createElement(
+        'div',
+        { id: 'successful-operation' },
+        React.createElement(
+          'p',
+          null,
+          'The name of the company has been changed successfully.'
+        ),
+        React.createElement(
+          Link,
+          { id: 'databaseManagement/companiesManagement', className: 'button', to: '/d ' },
+          'Back to Company Management'
+        )
+      );
+    }
+    //var id = this.state.companyId;
+    return React.createElement(
+      'div',
+      null,
+      id,
+      React.createElement(
+        'p',
+        { className: 'container-title' },
+        title
+      ),
+      content
+    );
+  }
+});
+
+module.exports = ChangeCompanyName;
+
+},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-router":255}],44:[function(require,module,exports){
+'use strict';
+
 // Name: {CompaniesManagement.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/SuperAdmin/}
@@ -6171,7 +6112,6 @@ var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuper
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-var DeleteCompany = require('./DeleteCompany.react.jsx');
 
 function getState() {
     return {
@@ -6233,7 +6173,7 @@ var CompaniesManagement = React.createClass({
         };
 
         var confirmDelete = function confirmDelete() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id);
+            //RequestSuperAdminActionCreator.deleteCompany(row.id); // + mail proprietario
             window.alert("funzione di eliminazione");
         };
 
@@ -6303,98 +6243,26 @@ var CompaniesManagement = React.createClass({
                 )
             )
         );
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        var modifyId = "modifyDropdown" + row.id;
-        var onClickModify = function onClickModify() {
-
-            if (instance.state.errors.length > 0) {
-                document.getElementById(errorId).classList.toggle("dropdown-show");
-                //this.refs.errorRefName.classList.toggle("dropdown-show");
-            } else {
-                document.getElementById(deleteId).classList.toggle("dropdown-show");
-                //this.refs.deleteRefName.classList.toggle("dropdown-show");
-            }
-        };
-
-        var confirmModify = function confirmModify() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id);
-        };
-
-        var modifyCompany = React.createElement(
-            'div',
-            { id: 'delete-user', className: 'pop-up' },
-            React.createElement(
-                'i',
-                { onClick: onClickModify, id: 'dsl-modify', className: 'material-icons md-24' },
-                ''
-            ),
-            React.createElement(
-                'div',
-                { className: 'dropdown-content dropdown-popup', id: errorId },
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-title' },
-                    'Error'
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    errors
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-buttons' },
-                    React.createElement(
-                        'button',
-                        { className: 'button' },
-                        'Ok'
-                    )
-                )
-            ),
-            React.createElement(
-                'div',
-                { className: 'dropdown-content dropdown-popup', id: modifyId },
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-title' },
-                    'Modify company'
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    ' modifica della company '
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-buttons' },
-                    React.createElement(
-                        'button',
-                        { className: 'inline-button' },
-                        'annulla'
-                    ),
-                    React.createElement(
-                        'button',
-                        { id: 'delete-button', className: 'inline-button', onClick: confirmModify },
-                        'cancella'
-                    )
-                )
-            )
-        );
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
         buttons = React.createElement(
             'div',
             null,
-            deleteCompany,
-            modifyCompany
+            deleteCompany
         );
 
         return React.createElement(
             'div',
             { className: 'table-buttons' },
-            buttons
+            buttons,
+            React.createElement(
+                Link,
+                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.name + "/" + row.id },
+                React.createElement(
+                    'i',
+                    { id: 'modify-button', className: 'material-icons md-24' },
+                    ''
+                )
+            )
         );
 
         /* return(
@@ -6415,82 +6283,84 @@ var CompaniesManagement = React.createClass({
         if (!this.state.isLogged || this.state.errors.length > 0) {
             return React.createElement(AuthorizationRequired, null);
         }
+        if (this.props.children) {
+            content = this.props.children;
+        } else {
+            var selectRowProp = {
+                mode: "checkbox",
+                clickToSelect: true,
+                bgColor: "rgba(144, 238, 144, 0.42)"
+            };
 
-        var selectRowProp = {
-            mode: "checkbox",
-            clickToSelect: true,
-            bgColor: "rgba(144, 238, 144, 0.42)"
-        };
+            var options = {
+                noDataText: "There are no companies to display"
+            };
 
-        var options = {
-            noDataText: "There are no companies to display"
-        };
+            var data = [];
+            if (this.state.companies && this.state.companies.length > 0) {
+                this.state.companies.forEach(function (company, i) {
+                    data[i] = {
+                        id: company.id,
+                        name: company.name,
+                        owner: company.owner.email
+                    };
+                });
+            }
 
-        var data = [];
-        if (this.state.companies && this.state.companies.length > 0) {
-            this.state.companies.forEach(function (company, i) {
-                data[i] = {
-                    id: company.id,
-                    name: company.name,
-                    owner: company.owner.email
-                };
-            });
-        }
-
-        var title, content;
-        title = "Manage companies";
-        content = React.createElement(
-            'div',
-            { id: 'manage-companies' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                title
-            ),
-            React.createElement(
+            var title, content;
+            title = "Manage companies";
+            content = React.createElement(
                 'div',
-                { id: 'table-top' },
+                { id: 'manage-companies' },
+                React.createElement(
+                    'p',
+                    { className: 'container-title' },
+                    title
+                ),
                 React.createElement(
                     'div',
-                    { id: 'top-buttons' },
+                    { id: 'table-top' },
                     React.createElement(
                         'div',
-                        { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+                        { id: 'top-buttons' },
                         React.createElement(
-                            'i',
-                            { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
-                            ''
-                        ),
-                        React.createElement(
-                            'p',
-                            { className: 'tooltip-text tooltip-text-long' },
-                            'Delete all selected companies'
+                            'div',
+                            { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+                            React.createElement(
+                                'i',
+                                { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
+                                ''
+                            ),
+                            React.createElement(
+                                'p',
+                                { className: 'tooltip-text tooltip-text-long' },
+                                'Delete all selected companies'
+                            )
                         )
                     )
-                )
-            ),
-            React.createElement(
-                'div',
-                { id: 'table' },
+                ),
                 React.createElement(
-                    BootstrapTable,
-                    { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
-                        search: true, striped: true, hover: true, options: options },
+                    'div',
+                    { id: 'table' },
                     React.createElement(
-                        TableHeaderColumn,
-                        { dataField: 'name', dataSort: true },
-                        'Name'
-                    ),
-                    React.createElement(
-                        TableHeaderColumn,
-                        { dataField: 'owner', dataSort: true },
-                        'Owner'
-                    ),
-                    React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+                        BootstrapTable,
+                        { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
+                            search: true, striped: true, hover: true, options: options },
+                        React.createElement(
+                            TableHeaderColumn,
+                            { dataField: 'name', dataSort: true },
+                            'Name'
+                        ),
+                        React.createElement(
+                            TableHeaderColumn,
+                            { dataField: 'owner', dataSort: true },
+                            'Owner'
+                        ),
+                        React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+                    )
                 )
-            )
-        );
-
+            );
+        }
         return React.createElement(
             'div',
             { className: 'container sidebar-container' },
@@ -6501,7 +6371,7 @@ var CompaniesManagement = React.createClass({
 
 module.exports = CompaniesManagement;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"./DeleteCompany.react.jsx":46,"react":488,"react-bootstrap-table":191,"react-router":255}],44:[function(require,module,exports){
+},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"react":488,"react-bootstrap-table":191,"react-router":255}],45:[function(require,module,exports){
 'use strict';
 
 // Name: {DashboardSuperAdmin.react.jsx}
@@ -6558,7 +6428,7 @@ var DashboardSuperAdmin = React.createClass({
 
 module.exports = DashboardSuperAdmin;
 
-},{"react":488,"react-router":255}],45:[function(require,module,exports){
+},{"react":488,"react-router":255}],46:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -6680,157 +6550,7 @@ var DatabaseManagement = React.createClass({
 
 module.exports = DatabaseManagement;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-router":255}],46:[function(require,module,exports){
-'use strict';
-
-// Name: {DeleteCompany.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        08/08/2016        Thomas Fuser
-// ==========================================
-
-var React = require('react');
-var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
-var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
-
-var DeleteCompany = React.createClass({
-    displayName: 'DeleteCompany',
-
-
-    getInitialState: function getInitialState() {
-        return {
-            id: this.props.id,
-            name: this.props.name,
-            email: this.props.email,
-            errors: []
-        };
-    },
-
-    componentDidMount: function componentDidMount() {
-        SuperAdminStore.addChangeListener(this._onChange);
-    },
-
-    componentWillUnmount: function componentWillUnmount() {
-        SuperAdminStore.removeChangeListener(this._onChange);
-    },
-
-    _onChange: function _onChange() {
-        this.setState({ errors: SuperAdminStore.getErrors() });
-    },
-
-    toggleDropdown: function toggleDropdown(event) {
-        event.preventDefault();
-        if (this.state.errors.length > 0) {
-            this.refs.errorDropdown.classList.toggle("dropdown-show");
-        } else {
-            this.refs.deleteDropdown.classList.toggle("dropdown-show");
-        }
-    },
-
-    confirmDelete: function confirmDelete(event) {
-        event.preventDefault();
-        var id = this.state.id;
-        var email = this.state.email;
-        if (id != "") {
-            RequestSuperAdminActionCreator.deleteCompany(id, email);
-        } else {
-            this.setState({ errors: "Error retrieving Company id" });
-        }
-    },
-
-    render: function render() {
-        var errors;
-        if (this.state.errors.length > 0) {
-            errors = React.createElement(
-                'p',
-                { id: 'errors' },
-                this.state.errors
-            );
-        }
-        return React.createElement(
-            'div',
-            { id: 'delete-user', className: 'pop-up' },
-            React.createElement(
-                'i',
-                { onClick: this.toggleDropdown, className: 'material-icons md-24 dropdown-button' },
-                ''
-            ),
-            React.createElement(
-                'div',
-                { className: 'dropdown-content dropdown-popup', ref: 'errorDropdown' },
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-title' },
-                    'Error'
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    errors
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-buttons' },
-                    React.createElement(
-                        'button',
-                        { className: 'button' },
-                        'Ok'
-                    )
-                )
-            ),
-            React.createElement(
-                'div',
-                { className: 'dropdown-content dropdown-popup', ref: 'deleteDropdown' },
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-title' },
-                    'Delete Company'
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    'Are you sure you want to delete '
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    React.createElement(
-                        'span',
-                        { id: 'successful-email' },
-                        this.state.name
-                    ),
-                    '  '
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    'company?'
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-buttons' },
-                    React.createElement(
-                        'button',
-                        { className: 'inline-button' },
-                        'Cancel'
-                    ),
-                    React.createElement(
-                        'button',
-                        { id: 'delete-button', className: 'inline-button', onClick: this.confirmDelete },
-                        'Delete'
-                    )
-                )
-            )
-        );
-    }
-});
-
-module.exports = DeleteCompany;
-
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/SuperAdminStore.react.jsx":56,"react":488}],47:[function(require,module,exports){
+},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-router":255}],47:[function(require,module,exports){
 'use strict';
 
 // Name: {DatabaseManagement.react.jsx}
@@ -6975,10 +6695,8 @@ module.exports = {
     LOAD_DSL_LIST_RESPONSE: null,
     LOAD_DSL_ACCESS_RESPONSE: null,
     LOAD_USER_LIST_RESPONSE: null,
-    LOAD_USERS_PERMISSIONS_LIST_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
     CHANGE_DSL_PERMISSION_RESPONSE: null,
-    FLUSH_USER_LIST: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -7088,6 +6806,7 @@ var EditorConfig = require('./components/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
+var ChangeCompanyName = require('./components/SuperAdmin/ChangeCompanyName.react.jsx');
 var UsersManagement = require('./components/SuperAdmin/UsersManagement.react.jsx');
 var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
 
@@ -7126,7 +6845,7 @@ var Routes = React.createClass({
           Route,
           { path: 'manageDSL', component: ManageDSL },
           React.createElement(Route, { path: 'manageDSLSource', component: ManageDSLSource }),
-          React.createElement(Route, { path: 'manageDSLSource/:definitionId', component: ManageDSLSource }),
+          React.createElement(Route, { path: 'manageDSLSource/:definitionId/:mode', component: ManageDSLSource }),
           React.createElement(Route, { path: 'manageDSLPermissions/:definitionId', component: ManageDSLPermissions })
         ),
         React.createElement(Route, { path: 'editor', component: Editor }),
@@ -7138,7 +6857,11 @@ var Routes = React.createClass({
           React.createElement(
             Route,
             { path: 'databaseManagement', component: DatabaseManagement },
-            React.createElement(Route, { path: 'companiesManagement', component: CompaniesManagement }),
+            React.createElement(
+              Route,
+              { path: 'companiesManagement', component: CompaniesManagement },
+              React.createElement(Route, { path: 'changeCompanyName/:companyName/:companyId', component: ChangeCompanyName })
+            ),
             React.createElement(Route, { path: 'usersManagement', component: UsersManagement })
           ),
           React.createElement(Route, { path: 'impersonateUser', component: ImpersonateUser })
@@ -7152,7 +6875,7 @@ var Routes = React.createClass({
 
 module.exports = Routes;
 
-},{"./components/Company/Company.react.jsx":17,"./components/Company/DeleteCompany.react.jsx":18,"./components/Company/ExternalDatabases.react.jsx":20,"./components/Company/People.react.jsx":22,"./components/DSL/ManageDSL.react.jsx":23,"./components/DSL/ManageDSLPermissions.react.jsx":24,"./components/DSL/ManageDSLSource.react.jsx":25,"./components/Editor.react.jsx":26,"./components/EditorConfig.react.jsx":27,"./components/Error404.react.jsx":28,"./components/Home.react.jsx":31,"./components/Login.react.jsx":32,"./components/MaaSApp.react.jsx":33,"./components/ManageActiveDashboard.react.jsx":34,"./components/Profile/ChangeAvatar.react.jsx":35,"./components/Profile/ChangePassword.react.jsx":36,"./components/Profile/DeleteAccount.react.jsx":37,"./components/Profile/PersonalData.react.jsx":38,"./components/Profile/Profile.react.jsx":39,"./components/Register.react.jsx":40,"./components/ResetPwd.react.jsx":41,"./components/SuperAdmin/CompaniesManagement.react.jsx":43,"./components/SuperAdmin/DashboardSuperAdmin.react.jsx":44,"./components/SuperAdmin/DatabaseManagement.react.jsx":45,"./components/SuperAdmin/ImpersonateUser.react.jsx":47,"./components/SuperAdmin/UsersManagement.react.jsx":48,"react":488,"react-router":255}],52:[function(require,module,exports){
+},{"./components/Company/Company.react.jsx":17,"./components/Company/DeleteCompany.react.jsx":18,"./components/Company/ExternalDatabases.react.jsx":20,"./components/Company/People.react.jsx":22,"./components/DSL/ManageDSL.react.jsx":23,"./components/DSL/ManageDSLPermissions.react.jsx":24,"./components/DSL/ManageDSLSource.react.jsx":25,"./components/Editor.react.jsx":26,"./components/EditorConfig.react.jsx":27,"./components/Error404.react.jsx":28,"./components/Home.react.jsx":31,"./components/Login.react.jsx":32,"./components/MaaSApp.react.jsx":33,"./components/ManageActiveDashboard.react.jsx":34,"./components/Profile/ChangeAvatar.react.jsx":35,"./components/Profile/ChangePassword.react.jsx":36,"./components/Profile/DeleteAccount.react.jsx":37,"./components/Profile/PersonalData.react.jsx":38,"./components/Profile/Profile.react.jsx":39,"./components/Register.react.jsx":40,"./components/ResetPwd.react.jsx":41,"./components/SuperAdmin/ChangeCompanyName.react.jsx":43,"./components/SuperAdmin/CompaniesManagement.react.jsx":44,"./components/SuperAdmin/DashboardSuperAdmin.react.jsx":45,"./components/SuperAdmin/DatabaseManagement.react.jsx":46,"./components/SuperAdmin/ImpersonateUser.react.jsx":47,"./components/SuperAdmin/UsersManagement.react.jsx":48,"react":488,"react-router":255}],52:[function(require,module,exports){
 'use strict';
 
 // Name: {CompanyStore.react.jsx}
@@ -7338,7 +7061,7 @@ var _DSL = {
     type: localStorage.getItem('DSLType')
 };
 
-var _USER_LIST = []; //JSON.parse(localStorage.getItem('userList'));    // Member and Guest list
+var _USER_LIST = []; // Member and Guest list
 
 var _errors = [];
 
@@ -7354,19 +7077,7 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
-    /*
-    emitUsers: function() {
-        this.emit(USERS_EVENT);
-    },
-    
-    addUsersListener: function(callback) {
-        this.on(USERS_EVENT, callback);
-    },
-    
-    removeUsersListener: function(callback) {
-        this.removeListener(USERS_EVENT, callback);
-    },
-    */
+
     getErrors: function getErrors() {
         return _errors;
     },
@@ -7519,117 +7230,30 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                     i++;
                 }
                 _USER_LIST = USER_LIST;
-                //localStorage.setItem('userList', JSON.stringify(action.userList));
             }
             DSLStore.emitChange();
             break;
-        /*    
-        case ActionTypes.LOAD_USER_LIST_RESPONSE:
-            if(action.userList)
-            {
-                _USER_LIST = action.userList;
-                //localStorage.setItem('userList', JSON.stringify(action.userList));
-            }
-            break;
-            
-        case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
-            if(action.usersPermissions)
-            {
-                _USERS_PERMISSIONS = action.usersPermissions;
-                //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
-            }
-            //DSLStore.emitChange();
-            break;
-        */
+
         case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
             if (action.errors) {
                 _errors.push(action.errors);
-            } else if (action.operation && action.DSLAccess) {
+            } else if (action.operation && action.userPermission) {
                 if (action.operation == "create") {
-                    /*
-                    var newPermission = {
-                        id: action.DSLAccess.id,
-                        userId: action.DSLAccess.userId,
-                        permission: action.DSLAccess.permission
-                    };
-                    */
-                    _USERS_PERMISSIONS.push(action.DSLAccess);
+                    _USER_LIST.push(action.userPermission);
                 } else if (action.operation == "update") {
-                    _USERS_PERMISSIONS.forEach(function (permission, i) {
-                        if (permission.id == action.DSLAccess.id) {
-                            permission.permission = action.DSLAccess.permission;
+                    _USER_LIST.forEach(function (permission, i) {
+                        if (permission.id == action.userPermission.id) {
+                            permission.permission = action.userPermission.permission;
                         }
                     });
                 } else if (action.operation == "delete") {
-                    _USERS_PERMISSIONS.forEach(function (permission, i) {
-                        if (permission.id == action.DSLAccess.id) {
-                            _USERS_PERMISSIONS.splice(i, 1);
+                    _USER_LIST.forEach(function (permission, i) {
+                        if (permission.id == action.userPermission.id) {
+                            _USER_LIST.splice(i, 1);
                         }
                     });
                 }
-                //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
             }
-            //DSLStore.emitChange();
-            break;
-        /*
-             case ActionTypes.LOAD_USERS_PERMISSIONS_LIST_RESPONSE:
-        if(action.usersPermissions)
-        {
-            _USERS_PERMISSIONS = action.usersPermissions;
-            permissions_list_loaded = true;
-            //localStorage.setItem('usersPermissions', JSON.stringify(action.usersPermissions));
-        }
-        //if(user_list_loaded)
-            DSLStore.emitUsers();
-        //alert("load permission");
-        //DSLStore.emitChange();
-        break;
-        
-        case ActionTypes.CHANGE_DSL_PERMISSION_RESPONSE:
-        if(action.errors)
-        {
-            _errors.push(action.errors);
-        }
-        else if(action.operation && action.DSLAccess)
-        {    
-            if (action.operation == "create")
-            {
-                var newPermission = {
-                    id: action.DSLAccess.id,
-                    userId: action.DSLAccess.userId,
-                    permission: action.DSLAccess.permission
-                };
-                _USERS_PERMISSIONS.push(newPermission);
-            }
-            else if(action.operation == "update")
-            {
-                _USERS_PERMISSIONS.forEach(function(permission, i) {
-                    if(permission.id == action.DSLAccess.id)
-                    {
-                        permission.permission = action.DSLAccess.permission;
-                    }
-                });
-            }
-            else if(action.operation == "delete")
-            {
-                _USERS_PERMISSIONS.forEach(function(permission, i) {
-                    if(permission.id == action.DSLAccess.id)
-                    {
-                        _USERS_PERMISSIONS.splice(i, 1);
-                    }
-                });
-            }
-            //localStorage.setItem('usersPermissions', JSON.stringify(_USERS_PERMISSIONS));
-        }
-        //DSLStore.emitChange();
-        break;
-        */
-        case ActionTypes.FLUSH_USER_LIST:
-            _USER_LIST = [];
-            //_USERS_PERMISSIONS = [];
-            //localStorage.removeItem('userList');
-            //localStorage.removeItem('usersPermissions');
-            //DSLStore.emitChange();
             break;
     }
 });
@@ -8465,7 +8089,8 @@ module.exports = {
           ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
         } else {
           res = JSON.parse(res.text);
-          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.DSLAccess);
+          console.log(res.userPermission);
+          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
         }
       }
     });
@@ -8494,51 +8119,6 @@ module.exports = {
       }
     });
   }
-
-  /*loadUserList: function(companyId) {
-    var filter = {
-            where: {
-              or: [
-                { role: 'Member'},
-                { role: 'Guest'}
-              ]
-            }
-          };
-    filter = JSON.stringify(filter);
-    request
-      .get(APIEndpoints.COMPANIES + '/' + companyId + '/users')
-      .set('Accept', 'application/json')
-      .set('Authorization', localStorage.getItem('accessToken'))
-      .query({ filter: filter })
-      .end(function(error, res) {
-        if(res)
-        {
-          ResponseDSLActionCreator.responseLoadUserList(res.body);
-        }
-      });
-  },
-  
-  loadUsersPermissions: function(id) {
-    var filter = {
-      where: {
-        dslId: id
-      },
-      fields: ['permission','userId','id']
-    };
-    filter = JSON.stringify(filter);
-    request
-      .get(APIEndpoints.DSL_ACCESSES)
-      .set('Accept', 'application/json')
-      .set('Authorization', localStorage.getItem('accessToken'))
-      .query({ filter: filter})
-      .end(function(error, res) {
-        if(res)
-        {
-          ResponseDSLActionCreator.responseLoadUsersPermissions(res.body);
-        }
-      });
-  }
-  */
 };
 
 },{"../actions/Response/ResponseDSLActionCreator.react.jsx":8,"../constants/Constants.js":49,"superagent":489}],60:[function(require,module,exports){

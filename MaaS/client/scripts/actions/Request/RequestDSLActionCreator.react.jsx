@@ -49,16 +49,6 @@ var RequestDSLActionCreator = {
     
     loadUserList: function(id, companyId) {
         WebAPIUtils.loadUserList(id, companyId);
-    },
-    
-    loadUsersPermissions: function(id) {
-        WebAPIUtils.loadUsersPermissions(id);
-    },
-    
-    flushUserList: function() {
-        Dispatcher.handleViewAction({
-            type: ActionTypes.FLUSH_USER_LIST
-        });
     }
 };
 
