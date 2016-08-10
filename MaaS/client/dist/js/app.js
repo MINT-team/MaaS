@@ -5974,7 +5974,7 @@ var Link = require('react-router').Link;
 function getState() {
   return {
     name: this.props.params.companyName,
-    companyId: this.props.param.companyId,
+    //companyId: this.props.param.companyId,
     errors: SuperAdminStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
@@ -5988,7 +5988,7 @@ var ChangeCompanyName = React.createClass({
   getInitialState: function getInitialState() {
     return {
       name: this.props.params.companyName,
-      companyId: this.props.param.companyId,
+      //companyId:this.props.param.companyId,
       first: "true",
       errors: []
     };
@@ -6074,7 +6074,6 @@ var ChangeCompanyName = React.createClass({
     return React.createElement(
       'div',
       null,
-      id,
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -6256,7 +6255,7 @@ var CompaniesManagement = React.createClass({
             buttons,
             React.createElement(
                 Link,
-                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.name + "/" + row.id },
+                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.name + '/' + row.id },
                 React.createElement(
                     'i',
                     { id: 'modify-button', className: 'material-icons md-24' },

@@ -326,5 +326,105 @@ module.exports = function(app) {
                cb(null, false);
         });
     });
-
+    
+    // DSL ACCESSES
+    
+    Role.registerResolver('Execute', function(role, context, cb) {
+        function reject() {
+            process.nextTick(function() {
+                cb(null, false);
+            });
+        }
+        // If the target model is not Company or user
+        if(context.modelName !== 'DSL') {
+            return reject();
+        }
+        // Do not allow anonymous users
+        var userId = context.accessToken.userId;
+        if(!userId) {
+            return reject();
+        }
+        // Check for execute permission for this DSL
+        if(context.modelName == "DSL") {
+            context.model.findById(context.modelId, function(err, DSLInstance) {
+                if(err || !DSLInstance)
+                    return reject();
+                
+                var DSLAccess = app.models.DSLAccess;
+                DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(accessInstance.permission == "execute")
+                        cb(null, true); // true = user has execute permission
+                    else
+                        cb(null, false);
+                    
+                });
+            });
+        }
+    });
+    
+    Role.registerResolver('Read', function(role, context, cb) {
+        function reject() {
+            process.nextTick(function() {
+                cb(null, false);
+            });
+        }
+        // If the target model is not Company or user
+        if(context.modelName !== 'DSL') {
+            return reject();
+        }
+        // Do not allow anonymous users
+        var userId = context.accessToken.userId;
+        if(!userId) {
+            return reject();
+        }
+        // Check for read permission for this DSL
+        if(context.modelName == "DSL") {
+            context.model.findById(context.modelId, function(err, DSLInstance) {
+                if(err || !DSLInstance)
+                    return reject();
+                
+                var DSLAccess = app.models.DSLAccess;
+                DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(accessInstance.permission == "read")
+                        cb(null, true); // true = user has read permission
+                    else
+                        cb(null, false);
+                    
+                });
+            });
+        }
+    });
+    
+    Role.registerResolver('Write', function(role, context, cb) {
+        function reject() {
+            process.nextTick(function() {
+                cb(null, false);
+            });
+        }
+        // If the target model is not Company or user
+        if(context.modelName !== 'DSL') {
+            return reject();
+        }
+        // Do not allow anonymous users
+        var userId = context.accessToken.userId;
+        if(!userId) {
+            return reject();
+        }
+        // Check for write permission for this DSL
+        if(context.modelName == "DSL") {
+            context.model.findById(context.modelId, function(err, DSLInstance) {
+                if(err || !DSLInstance)
+                    return reject();
+                
+                var DSLAccess = app.models.DSLAccess;
+                DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(accessInstance.permission == "write")
+                        cb(null, true); // true = user has write permission
+                    else
+                        cb(null, false);
+                    
+                });
+            });
+        }
+    });
 };
