@@ -70,6 +70,12 @@ module.exports = {
           }
         } 
       });
+  },
+  
+  //change the name of the company wich has id = companyId
+  changeCompanyName: function(companyid, name){
+    //richiesta alle api della company
   }
+  
   
 };

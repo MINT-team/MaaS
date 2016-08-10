@@ -118,7 +118,7 @@ var CompaniesManagement = React.createClass({
         return (
             <div className="table-buttons">
                 {buttons}
-                <Link to={"/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/"+ row.name +'/'+ row.id}><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
+                <Link to={"/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/"+ row.id + "/" + row.name } ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
         );
     

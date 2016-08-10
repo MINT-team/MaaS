@@ -20,7 +20,7 @@ var Link = require('react-router').Link;
 function getState(){
     return{
       name: this.props.params.companyName,
-      //companyId: this.props.param.companyId,
+      companyId: this.props.params.companyId,
       errors: SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       first: "false"
@@ -33,7 +33,7 @@ var ChangeCompanyName = React.createClass({
   getInitialState: function(){
     return{
         name: this.props.params.companyName,
-        //companyId:this.props.param.companyId,
+        companyId: this.props.params.companyId,
         first: "true",
         errors: []
     };
@@ -55,9 +55,9 @@ var ChangeCompanyName = React.createClass({
   _onSubmit: function(event) {
       event.preventDefault();   
       var name = this.refs.nome.value;
-      
+      var id = this.state.companyId;
       if( name!=this.state.name )
-        RequestSuperAdminActionCreator.changeCompanyName();
+        RequestSuperAdminActionCreator.changeCompanyName(id, name);
       else 
         this._setError("No changes to save");
     
@@ -102,10 +102,9 @@ var ChangeCompanyName = React.createClass({
         </div>
       );
     }
-    //var id = this.state.companyId;
+    var id = this.state.companyId;
     return (
       <div>
-      
         <p className="container-title">{title}</p>
         {content}
       </div>

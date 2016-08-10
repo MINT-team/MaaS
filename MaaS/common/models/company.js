@@ -94,5 +94,28 @@ module.exports = function(Company) {
             http: { verb: 'delete', path: '/deleteCompany/:id' }
         }
     );
+    
+    Company.changeCompanyName = function(id, name, cb){
+        Company.findById(id, function(err, company) {
+            if(err)
+                return cb(err);
+           Company.findOne({where: {name: name}, limit: 1}, function(err, companyInstance) {
+                if(!companyInstance){
+                    company.updateAttribute('name', name, function(err, company) {
+                        if(err) {
+                          console.log('> Failed changing name');
+                          return cb(err);
+                        }
+                          console.log('> Name changed successfully');
+                          return cb(null, null, company.name);   // callback di successo
+                    });
+                }else{
+                    console.log('> Company already exists:', company);
+                    var error = { message: 'A company with this name already exists' };
+                    return cb(error,null,null );   // callback di insuccesso
+                }
+            });
+        });
+    }
 
 };

@@ -189,8 +189,8 @@ var RequestSuperAdminActionCreator = {
         WebAPIUtils.deleteCompany(id, email);
     },
 
-    changeCompanyName: function changeCompanyName() {
-        //WebAPIUtils.changeCompanyName(...);
+    changeCompanyName: function changeCompanyName(companyid, name) {
+        WebAPIUtils.changeCompanyName(companyid, name);
     }
 
 };
@@ -5974,7 +5974,7 @@ var Link = require('react-router').Link;
 function getState() {
   return {
     name: this.props.params.companyName,
-    //companyId: this.props.param.companyId,
+    companyId: this.props.params.companyId,
     errors: SuperAdminStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
@@ -5988,7 +5988,7 @@ var ChangeCompanyName = React.createClass({
   getInitialState: function getInitialState() {
     return {
       name: this.props.params.companyName,
-      //companyId:this.props.param.companyId,
+      companyId: this.props.params.companyId,
       first: "true",
       errors: []
     };
@@ -6010,8 +6010,8 @@ var ChangeCompanyName = React.createClass({
   _onSubmit: function _onSubmit(event) {
     event.preventDefault();
     var name = this.refs.nome.value;
-
-    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName();else this._setError("No changes to save");
+    var id = this.state.companyId;
+    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName(id, name);else this._setError("No changes to save");
   },
 
   _setError: function _setError(error) {
@@ -6070,7 +6070,7 @@ var ChangeCompanyName = React.createClass({
         )
       );
     }
-    //var id = this.state.companyId;
+    var id = this.state.companyId;
     return React.createElement(
       'div',
       null,
@@ -6255,7 +6255,7 @@ var CompaniesManagement = React.createClass({
             buttons,
             React.createElement(
                 Link,
-                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.name + '/' + row.id },
+                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.id + "/" + row.name },
                 React.createElement(
                     'i',
                     { id: 'modify-button', className: 'material-icons md-24' },
@@ -6680,7 +6680,7 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
-
+    CHANGE_COMPANY_NAME: null,
     // Dashboard
 
     // Collection
@@ -6859,7 +6859,7 @@ var Routes = React.createClass({
             React.createElement(
               Route,
               { path: 'companiesManagement', component: CompaniesManagement },
-              React.createElement(Route, { path: 'changeCompanyName/:companyName/:companyId', component: ChangeCompanyName })
+              React.createElement(Route, { path: 'changeCompanyName/:companyId/:companyName', component: ChangeCompanyName })
             ),
             React.createElement(Route, { path: 'usersManagement', component: UsersManagement })
           ),
@@ -8444,6 +8444,11 @@ module.exports = {
         }
       }
     });
+  },
+
+  //change the name of the company wich has id = companyId
+  changeCompanyName: function changeCompanyName(companyid, name) {
+    //richiesta alle api della company
   }
 
 };

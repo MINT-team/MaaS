@@ -75,7 +75,7 @@ var Routes = React.createClass({
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} >
             <Route path="databaseManagement" component={DatabaseManagement} >
               <Route path="companiesManagement" component={CompaniesManagement} >
-                <Route path="changeCompanyName/:companyName/:companyId" component={ChangeCompanyName} />
+                <Route path="changeCompanyName/:companyId/:companyName" component={ChangeCompanyName} />
               </Route>
               <Route path="usersManagement" component={UsersManagement} />
             </Route>
