@@ -15,6 +15,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');  
@@ -38,16 +39,19 @@ var CompaniesManagement = React.createClass({
 
  componentDidMount: function() {
         SessionStore.addChangeListener(this._onChange);
+        SuperAdminStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
         RequestSuperAdminActionCreator.getCompanies();
   },
   
   componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
+      SuperAdminStore.removeChangeListener(this._onChange);
       CompanyStore.removeChangeListener(this._onChange);
   },
   
   _onChange: function() {
+      window.alert("company management");
       this.setState(getState());
   },
   
@@ -163,12 +167,13 @@ var CompaniesManagement = React.createClass({
     if(this.state.companies && this.state.companies.length > 0)
     {
       this.state.companies.forEach(function(company, i) {
-                    data[i] = {
-                        id: company.id,
-                        name: company.name
-                    };
-                });
-            }
+          data[i] = {
+              id: company.id,
+              name: company.name,
+              owner: company.owner.email
+          };
+      });
+    }
     
     var title, content;
     title = "Manage companies";
@@ -176,12 +181,6 @@ var CompaniesManagement = React.createClass({
 	    <div id="manage-companies">
         <p className="container-title">{title}</p>
           <div id="table-top">
-            <div id="top-buttons">
-              <div className="tooltip tooltip-bottom" id="deleteAll-button">
-                <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
-                <p className="tooltip-text tooltip-text-long">Delete all selected companies</p>
-              </div>
-            </div>
           </div>
           <div id="table">
             <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data}

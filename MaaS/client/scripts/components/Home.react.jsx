@@ -31,9 +31,9 @@ var Home = React.createClass({
 	    	<p id="home-description">MaaS is the Software as a Service you need</p>
 	    	<div id="home-container">
 		        <Slider {...settings}>
-		        	<div><img src="../images/text1.gif" alt=""/></div>
-		        	<div><img src="../images/text2.gif" alt=""/></div>
-		        	<div><img src="../images/text3.gif" alt=""/></div>
+		        	<div><img src="../images/dsl.png" alt=""/></div>
+		        	<div><img src="../images/editor.png" alt=""/></div>
+		        	<div><img src="../images/database.png" alt=""/></div>
 		        </Slider>
 	    	</div>
 		</div>

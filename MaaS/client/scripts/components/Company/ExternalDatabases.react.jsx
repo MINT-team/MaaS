@@ -105,13 +105,13 @@ var ExternalDatabases = React.createClass({
     if (row.connected == 'true')
     {
       messageState = (
-        <p className="dropdown-description">Are you sure you want to <span id="successful-email">disconnect {row.name}</span> state?</p>
+        <p className="dropdown-description">Are you sure you want to <span id="successful-email">disconnect {row.name}</span>?</p>
       );
     }
     else
     {
       messageState = (
-        <p className="dropdown-description">Are you sure you want to <span id="successful-email">connect {row.name}</span> state?</p>
+        <p className="dropdown-description">Are you sure you want to <span id="successful-email">connect {row.name}</span>?</p>
       );
     }
   

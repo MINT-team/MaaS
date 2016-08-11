@@ -88,7 +88,6 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = action.errors;
             else
             {
-                window.alert("modifica valore nome");
                 _errors = [];
                 _companyName = action.name;
             }

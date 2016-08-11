@@ -279,6 +279,7 @@ module.exports = function(DSL) {
     2) Carico la source del codice dsl in una variabile;
     3) Utilizzo la funzione compile di sweet.js per compilare il codice, la quale mi ritorna tutto il codice della collection espanso
     in javascript normale, se non ci sono stati errori. (Altrimenti errore di compilazione)
+    4) per eseguire il codice js dentro la variabile si usa la funzione eval().
     
     Bisogna creare delle funzioni per ogni elemento del dsl, le quali si occuperanno di verificare se ci sono errori e ritorneranno un
     json contenente la struttura e i dati da visualizzare. Queste funzioni possono utilizzare altre funzioni di altri elementi innestati.
@@ -286,4 +287,61 @@ module.exports = function(DSL) {
     delle macro.
     */
     
+    /*
+    
+    syntax new = function (ctx) {
+  return #`{var x = 10;}`;
+}
+
+new
+    
+    */
+    var sweet = require('sweet.js');
+    var fs = require('fs');
+    fs.readFile('../macro.sjs', function(err, data) {
+        if(err)
+        {
+            console.log("> Errore:", err);
+        }
+        else
+        {
+            console.log('File macro trovato');
+            //var dsl = "hi";
+            var macro = sweet.loadModule(data);
+            console.log("> Macro:", macro);
+            //var expanded = sweet.compile(dsl, {filename: macro})
+            //console.log(expanded);
+        }
+        
+    });
+    
 };
+
+
+/*
+
+out = sweetjs.compile(content, {
+			modules: [this.macro]
+		});
+
+var intepreterFile = __dirname + "/macro.sjs";
+
+var DslConcreteStrategy = function() {
+	this.macro = null;
+};
+
+DslConcreteStrategy.prototype.init = function(callback, errback) {
+	var self = this;
+	fs.readFile(intepreterFile, function(err, data) {
+		if (err) {
+			errback(new MaapError(err));
+		}
+		else {
+			self.macro = sweetjs.loadModule(data);
+			callback();
+		}
+	});
+};
+
+
+*/

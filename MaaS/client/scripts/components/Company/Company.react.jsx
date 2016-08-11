@@ -111,7 +111,7 @@ var Company = React.createClass({
 
     var database = {
       label: "Database",
-      link: "/company/externalDatabases",
+      link: "/externalDatabases",
       icon: (<i className="material-icons md-24">&#xE1DB;</i>)
     };
     var people = {

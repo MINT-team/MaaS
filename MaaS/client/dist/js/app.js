@@ -115,6 +115,18 @@ var RequestExternalDatabaseActionCreator = {
 
     getDbs: function getDbs(id) {
         WebAPIUtils.getDbs(id);
+    },
+
+    deleteDb: function deleteDb(id, companyId) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.DELETE_DB,
+            id: id
+        });
+        WebAPIUtils.deleteDb(id, companyId);
+    },
+
+    changeStateDb: function changeStateDb(id, status, companyId) {
+        WebAPIUtils.changeStateDb(id, status, companyId);
     }
 };
 
@@ -423,6 +435,14 @@ var ResponseExternalDatabaseActionCreator = {
     responseGetDbs: function responseGetDbs(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_DBS,
+            json: json,
+            errors: errors
+        });
+    },
+
+    responseChangeStateDb: function responseChangeStateDb(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_STATE_DB,
             json: json,
             errors: errors
         });
@@ -773,9 +793,9 @@ var AddExternalDatabase = React.createClass({
                 React.createElement(
                     'form',
                     { className: 'externaldb-form' },
-                    React.createElement('input', { ref: 'name', id: 'name', name: 'name', placeholder: 'name', className: 'dropdown-button', type: 'text', autocomplete: 'off' }),
-                    React.createElement('input', { ref: 'password', id: 'password', name: 'password', placeholder: 'password', className: 'dropdown-button', type: 'password' }),
-                    React.createElement('input', { ref: 'string', id: 'string', name: 'string', placeholder: 'connection string', className: 'dropdown-button full', type: 'text' })
+                    React.createElement('input', { ref: 'name', id: 'name', name: 'name', placeholder: 'name', className: 'dropdown-button', type: 'text', autoComplete: 'off' }),
+                    React.createElement('input', { ref: 'password', id: 'password', name: 'password', placeholder: 'password', className: 'dropdown-button', type: 'password', autoComplete: 'off' }),
+                    React.createElement('input', { ref: 'string', id: 'string', name: 'string', placeholder: 'connection string', className: 'dropdown-button full', type: 'text', autoComplete: 'off' })
                 ),
                 React.createElement(
                     'div',
@@ -1136,7 +1156,7 @@ var Company = React.createClass({
 
     var database = {
       label: "Database",
-      link: "/company/externalDatabases",
+      link: "/externalDatabases",
       icon: React.createElement(
         'i',
         { className: 'material-icons md-24' },
@@ -1596,26 +1616,93 @@ var ExternalDatabases = React.createClass({
   buttonFormatter: function buttonFormatter(cell, row) {
 
     var delDropdown = "deleteDropdown" + row.id;
+    var stateDropdown = "stateDropdown" + row.id;
 
-    var onClick = function onClick() {
+    var tryDel = function tryDel() {
       document.getElementById(delDropdown).classList.toggle("dropdown-show");
     };
+
+    var tryChangeState = function tryChangeState() {
+      document.getElementById(stateDropdown).classList.toggle("dropdown-show");
+    };
+
+    var confirmDelete = function confirmDelete() {
+      RequestExternalDatabaseActionCreator.deleteDb(row.id, CompanyStore.getId());
+    };
+
+    var confirmChangeState = function confirmChangeState() {
+      var newStatus;
+      if (row.connected == 'true') {
+        newStatus = 'false';
+      } else {
+        newStatus = 'true';
+      }
+      RequestExternalDatabaseActionCreator.changeStateDb(row.id, newStatus, CompanyStore.getId());
+    };
+
+    var messageState;
+    if (row.connected == 'true') {
+      messageState = React.createElement(
+        'p',
+        { className: 'dropdown-description' },
+        'Are you sure you want to ',
+        React.createElement(
+          'span',
+          { id: 'successful-email' },
+          'disconnect ',
+          row.name
+        ),
+        '?'
+      );
+    } else {
+      messageState = React.createElement(
+        'p',
+        { className: 'dropdown-description' },
+        'Are you sure you want to ',
+        React.createElement(
+          'span',
+          { id: 'successful-email' },
+          'connect ',
+          row.name
+        ),
+        '?'
+      );
+    }
 
     return React.createElement(
       'div',
       { className: 'table-buttons' },
       React.createElement(
         'div',
-        { className: 'tooltip tooltip-bottom', id: 'Change-button' },
+        { className: 'tooltip tooltip-bottom pop-up', id: 'Change-button' },
         React.createElement(
           'i',
-          { onClick: this.changeState, className: 'material-icons md-24 dropdown-button' },
+          { onClick: tryChangeState, className: 'material-icons md-24 dropdown-button' },
           ''
         ),
         React.createElement(
-          'p',
-          { className: 'tooltip-text tooltip-text-short' },
-          'Change'
+          'div',
+          { className: 'dropdown-content dropdown-popup', id: stateDropdown },
+          React.createElement(
+            'p',
+            { className: 'dropdown-title' },
+            'Change state Database'
+          ),
+          messageState,
+          React.createElement(
+            'div',
+            { className: 'dropdown-buttons' },
+            React.createElement(
+              'button',
+              { className: 'inline-button' },
+              'Cancel'
+            ),
+            React.createElement(
+              'button',
+              { id: 'delete-button', onClick: confirmChangeState, className: 'inline-button' },
+              'Confirm'
+            )
+          )
         )
       ),
       React.createElement(
@@ -1623,13 +1710,8 @@ var ExternalDatabases = React.createClass({
         { className: 'tooltip tooltip-bottom pop-up', id: 'Delete-button' },
         React.createElement(
           'i',
-          { onClick: onClick, className: 'material-icons md-24 dropdown-button' },
+          { onClick: tryDel, className: 'material-icons md-24 dropdown-button' },
           ''
-        ),
-        React.createElement(
-          'p',
-          { className: 'tooltip-text tooltip-text-long' },
-          'Delete'
         ),
         React.createElement(
           'div',
@@ -1660,7 +1742,7 @@ var ExternalDatabases = React.createClass({
             ),
             React.createElement(
               'button',
-              { id: 'delete-button', className: 'inline-button' },
+              { id: 'delete-button', onClick: confirmDelete, className: 'inline-button' },
               'Delete'
             )
           )
@@ -1671,7 +1753,7 @@ var ExternalDatabases = React.createClass({
   statusFormatter: function statusFormatter(cell, row) {
     var status;
 
-    if (row.connected) {
+    if (row.connected == 'true') {
       status = React.createElement(
         'div',
         { className: 'led-box' },
@@ -4307,17 +4389,17 @@ var Home = React.createClass({
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/text1.gif', alt: '' })
+												React.createElement('img', { src: '../images/dsl.png', alt: '' })
 										),
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/text2.gif', alt: '' })
+												React.createElement('img', { src: '../images/editor.png', alt: '' })
 										),
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/text3.gif', alt: '' })
+												React.createElement('img', { src: '../images/database.png', alt: '' })
 										)
 								)
 						)
@@ -6064,9 +6146,7 @@ var ChangeCompanyName = React.createClass({
 
   render: function render() {
     var title, content, errors;
-    window.alert(this.state.first);
-
-    if (this.state.errors.length > 0 || this.state.first) {
+    if (this.state.errors.length > 0 || this.state.first == "true") {
       title = "Change company name";
       if (this.state.errors.length > 0) {
         errors = React.createElement(
@@ -6096,7 +6176,6 @@ var ChangeCompanyName = React.createClass({
         )
       );
     } else {
-      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = React.createElement(
         'div',
@@ -6108,7 +6187,7 @@ var ChangeCompanyName = React.createClass({
         ),
         React.createElement(
           Link,
-          { id: 'databaseManagement/companiesManagement', className: 'button', to: '/d ' },
+          { className: 'button', to: 'dashboardSuperAdmin/databaseManagement/companiesManagement' },
           'Back to Company Management'
         )
       );
@@ -6149,6 +6228,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
+var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');
@@ -6173,16 +6253,19 @@ var CompaniesManagement = React.createClass({
 
     componentDidMount: function componentDidMount() {
         SessionStore.addChangeListener(this._onChange);
+        SuperAdminStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
         RequestSuperAdminActionCreator.getCompanies();
     },
 
     componentWillUnmount: function componentWillUnmount() {
         SessionStore.removeChangeListener(this._onChange);
+        SuperAdminStore.removeChangeListener(this._onChange);
         CompanyStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function _onChange() {
+        window.alert("company management");
         this.setState(getState());
     },
 
@@ -6343,7 +6426,8 @@ var CompaniesManagement = React.createClass({
                 this.state.companies.forEach(function (company, i) {
                     data[i] = {
                         id: company.id,
-                        name: company.name
+                        name: company.name,
+                        owner: company.owner.email
                     };
                 });
             }
@@ -6358,28 +6442,7 @@ var CompaniesManagement = React.createClass({
                     { className: 'container-title' },
                     title
                 ),
-                React.createElement(
-                    'div',
-                    { id: 'table-top' },
-                    React.createElement(
-                        'div',
-                        { id: 'top-buttons' },
-                        React.createElement(
-                            'div',
-                            { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
-                            React.createElement(
-                                'i',
-                                { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
-                                ''
-                            ),
-                            React.createElement(
-                                'p',
-                                { className: 'tooltip-text tooltip-text-long' },
-                                'Delete all selected companies'
-                            )
-                        )
-                    )
-                ),
+                React.createElement('div', { id: 'table-top' }),
                 React.createElement(
                     'div',
                     { id: 'table' },
@@ -6412,7 +6475,7 @@ var CompaniesManagement = React.createClass({
 
 module.exports = CompaniesManagement;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"react":488,"react-bootstrap-table":191,"react-router":255}],45:[function(require,module,exports){
+},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-bootstrap-table":191,"react-router":255}],45:[function(require,module,exports){
 'use strict';
 
 // Name: {DashboardSuperAdmin.react.jsx}
@@ -6745,7 +6808,9 @@ module.exports = {
     // Databases
     ADD_EXT_DB_RESPONSE: null,
     CONNECT_DBS_RESPONSE: null,
-    GET_DBS: null
+    GET_DBS: null,
+    DELETE_DB: null,
+    CHANGE_STATE_DB: null
 
   })
 
@@ -7472,6 +7537,31 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             ExternalDatabaseStore.emitChange();
             break;
+        case ActionTypes.DELETE_DB:
+            if (action.id) {
+                _errors = [];
+
+                _databases.forEach(function (database, i) {
+                    if (database.id == action.id) {
+                        _databases.splice(i, 1);
+                    }
+                });
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
+        case ActionTypes.CHANGE_STATE_DB:
+            if (action.errors) {
+                _errors = action.errors;
+            } else if (action.json) {
+                _errors = [];
+                _databases.forEach(function (database, i) {
+                    if (database.id == action.json.id) {
+                        database.connected = action.json.connected;
+                    }
+                });
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
     }
 });
 
@@ -7688,7 +7778,6 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function (payload) {
 
         case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
             if (action.errors) _errors = action.errors;else {
-                window.alert("modifica valore nome");
                 _errors = [];
                 _companyName = action.name;
             }
@@ -8287,6 +8376,25 @@ module.exports = {
           var errors = _getErrors(res.body.error);
           ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);
         } else ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
+      }
+    });
+  },
+
+  deleteDb: function deleteDb(id, companyId) {
+    request.del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json');
+  },
+
+  changeStateDb: function changeStateDb(id, status, companyId) {
+    request.put(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').send({
+      connected: status
+    }).end(function (err, res) {
+      if (res) {
+        if (res.errors) {
+          var errors = _getErrors(res.body.error);
+          ResponseExternalDatabaseActionCreator.responseChangeStateDb(null, errors);
+        } else {
+          ResponseExternalDatabaseActionCreator.responseChangeStateDb(res.body, null);
+        }
       }
     });
   }

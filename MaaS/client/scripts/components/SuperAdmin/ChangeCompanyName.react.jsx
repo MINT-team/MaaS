@@ -72,9 +72,7 @@ var ChangeCompanyName = React.createClass({
   
 	 render: function() {
 	  var title, content, errors;
-	   window.alert(this.state.first);
-	   
-    if(this.state.errors.length > 0 || this.state.first) 
+    if(this.state.errors.length > 0 || this.state.first == "true") 
     { 
       title = "Change company name";
       if(this.state.errors.length > 0) {
@@ -95,12 +93,11 @@ var ChangeCompanyName = React.createClass({
     } 
     else 
     {
-      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = (
         <div id="successful-operation">
           <p>The name of the company has been changed successfully.</p>
-          <Link id="databaseManagement/companiesManagement" className="button" to="/d ">Back to Company Management</Link>
+          <Link className="button" to="dashboardSuperAdmin/databaseManagement/companiesManagement">Back to Company Management</Link>
         </div>
       );
     }
