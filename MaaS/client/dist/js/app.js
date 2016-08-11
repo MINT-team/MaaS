@@ -189,8 +189,8 @@ var RequestSuperAdminActionCreator = {
         WebAPIUtils.deleteCompany(id, email);
     },
 
-    changeCompanyName: function changeCompanyName() {
-        //WebAPIUtils.changeCompanyName(...);
+    changeCompanyName: function changeCompanyName(companyId, name) {
+        WebAPIUtils.changeCompanyName(companyId, name);
     }
 
 };
@@ -505,6 +505,14 @@ var ResponseSuperAdminActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
             name: name,
+            errors: errors
+        });
+    },
+
+    responseChangeCompanyName: function responseChangeCompanyName(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
+            email: email,
             errors: errors
         });
     }
@@ -5995,7 +6003,7 @@ var Link = require('react-router').Link;
 function getState() {
   return {
     name: this.props.params.companyName,
-    companyId: this.props.param.companyId,
+    companyId: this.props.params.companyId,
     errors: SuperAdminStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
@@ -6009,7 +6017,7 @@ var ChangeCompanyName = React.createClass({
   getInitialState: function getInitialState() {
     return {
       name: this.props.params.companyName,
-      companyId: this.props.param.companyId,
+      companyId: this.props.params.companyId,
       first: "true",
       errors: []
     };
@@ -6031,8 +6039,8 @@ var ChangeCompanyName = React.createClass({
   _onSubmit: function _onSubmit(event) {
     event.preventDefault();
     var name = this.refs.nome.value;
-
-    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName();else this._setError("No changes to save");
+    var id = this.state.companyId;
+    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName(id, name);else this._setError("No changes to save");
   },
 
   _setError: function _setError(error) {
@@ -6091,11 +6099,10 @@ var ChangeCompanyName = React.createClass({
         )
       );
     }
-    //var id = this.state.companyId;
+    var id = this.state.companyId;
     return React.createElement(
       'div',
       null,
-      id,
       React.createElement(
         'p',
         { className: 'container-title' },
@@ -6136,7 +6143,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
-        errors: [], //DSLStore.getErrors(),
+        errors: [], //SuperAdminStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         companies: CompanyStore.getCompanies() //JSON that contains the companies in the system 
     };
@@ -6268,22 +6275,22 @@ var CompaniesManagement = React.createClass({
         buttons = React.createElement(
             'div',
             null,
-            deleteCompany
-        );
-
-        return React.createElement(
-            'div',
-            { className: 'table-buttons' },
-            buttons,
+            deleteCompany,
             React.createElement(
                 Link,
-                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.name + "/" + row.id },
+                { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.id + "/" + row.name },
                 React.createElement(
                     'i',
                     { id: 'modify-button', className: 'material-icons md-24' },
                     ''
                 )
             )
+        );
+
+        return React.createElement(
+            'div',
+            { className: 'table-buttons' },
+            buttons
         );
 
         /* return(
@@ -6322,8 +6329,7 @@ var CompaniesManagement = React.createClass({
                 this.state.companies.forEach(function (company, i) {
                     data[i] = {
                         id: company.id,
-                        name: company.name,
-                        owner: company.owner.email
+                        name: company.name
                     };
                 });
             }
@@ -6702,7 +6708,7 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
-
+    CHANGE_COMPANY_NAME_RESPONSE: null,
     // Dashboard
 
     // Collection
@@ -6881,7 +6887,7 @@ var Routes = React.createClass({
             React.createElement(
               Route,
               { path: 'companiesManagement', component: CompaniesManagement },
-              React.createElement(Route, { path: 'changeCompanyName/:companyName/:companyId', component: ChangeCompanyName })
+              React.createElement(Route, { path: 'changeCompanyName/:companyId/:companyName', component: ChangeCompanyName })
             ),
             React.createElement(Route, { path: 'usersManagement', component: UsersManagement })
           ),
@@ -8457,6 +8463,26 @@ module.exports = {
           ResponseSuperAdminActionCreator.responseDeleteCompany(null, res.error.message);
         } else {
           ResponseSuperAdminActionCreator.responseDeleteCompany(res.name, null);
+        }
+      }
+    });
+  },
+
+  //change the name of the company wich has id = companyId
+  changeCompanyName: function changeCompanyName(companyId, name) {
+    request.put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: companyId,
+      name: name
+    }).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          window.alert("errore (webAPI)");
+          console.log(res);
+          ResponseSuperAdminActionCreator.responseChangeCompanyName(null, res.error.message);
+        } else {
+          window.alert("successo (webAPI)");
+          ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
         }
       }
     });

@@ -249,4 +249,26 @@ module.exports = function(DSL) {
         }
         
     );
+    
+    DSL.executeDefinition = function(id, type, cb) {
+        
+    };
+    
+    DSL.remoteMethod(
+        'executeDefinition',
+        {
+            description: "Change the permissions for one specific DSL definition",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' },
+                { arg: 'type', type: 'string', required: true, description: 'Definition type' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+                
+            ],
+            http: { verb: 'put', path: '/:id/executeDefinition' }
+        }
+        
+    );
 };

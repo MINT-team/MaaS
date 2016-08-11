@@ -107,5 +107,43 @@ module.exports = function(Company) {
             context.args.data.connected = "false";
         })
     });
+    Company.changeCompanyName = function(id, name, cb){
+        Company.findById(id, function(err, company) {
+            if(err)
+                return cb(err);
+           Company.findOne({where: {name: name}, limit: 1}, function(err, companyInstance) {
+                if(!companyInstance){
+                    company.updateAttribute('name', name, function(err, company) {
+                        if(err) {
+                          console.log('> Failed changing name');
+                          return cb(err);
+                        }
+                          console.log('> Name changed successfully');
+                          return cb(null, null, company.name);   
+                    });
+                }else{
+                    var error = { message: 'A company with this name already exists' };
+                    return cb(null, error);   
+                }
+            });
+        });
+    }
+    
+Company.remoteMethod(
+        'changeCompanyName',
+        {
+            description: "Change the name of a company",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Company id' },
+                { arg: 'name', type: 'string', required: true, description: 'New name' },
+                
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'newName', type: 'Object'}
+            ],
+            http: { verb: 'put', path: '/:id/changeCompanyName' }
+        }
+    );
 
 };

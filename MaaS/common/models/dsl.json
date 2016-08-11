@@ -44,16 +44,57 @@
     {
       "accessType": "*",
       "principalType": "ROLE",
-      "principalId": ["Owner", "Administrator"],
+      "principalId": "Owner",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "Administrator",
       "permission": "ALLOW"
     },
     {
       "principalType": "ROLE",
-      "principalId": ["Owner", "Administrator", "Member"],
+      "principalId": "Member",
       "permission": "ALLOW",
       "property": "saveDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Write",
+      "permission": "ALLOW",
+      "property": "overwriteDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Write",
+      "permission": "ALLOW",
+      "property": "deleteDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Member",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Read",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Member",
+      "permission": "ALLOW",
+      "property": "executeDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Execute",
+      "permission": "ALLOW",
+      "property": "executeDefinition"
     }
-    
   ],
   "methods": {}
 }

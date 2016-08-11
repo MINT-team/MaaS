@@ -24,7 +24,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
   return {
-      errors: [],//DSLStore.getErrors(),
+      errors: [],//SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       companies: CompanyStore.getCompanies()  //JSON that contains the companies in the system 
   };
@@ -110,7 +110,7 @@ var CompaniesManagement = React.createClass({
             buttons = (
                 <div>
                     {deleteCompany}
-                    
+                    <Link to={"/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/"+ row.id + "/" + row.name } ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
                 </div>
             );
         
@@ -118,7 +118,6 @@ var CompaniesManagement = React.createClass({
         return (
             <div className="table-buttons">
                 {buttons}
-                <Link to={"/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/"+ row.name +"/"+ row.id}><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
         );
     
@@ -166,8 +165,7 @@ var CompaniesManagement = React.createClass({
       this.state.companies.forEach(function(company, i) {
                     data[i] = {
                         id: company.id,
-                        name: company.name,
-                        owner: company.owner.email
+                        name: company.name
                     };
                 });
             }
