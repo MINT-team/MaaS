@@ -189,8 +189,8 @@ var RequestSuperAdminActionCreator = {
         WebAPIUtils.deleteCompany(id, email);
     },
 
-    changeCompanyName: function changeCompanyName(companyid, name) {
-        WebAPIUtils.changeCompanyName(companyid, name);
+    changeCompanyName: function changeCompanyName(companyId, name) {
+        WebAPIUtils.changeCompanyName(companyId, name);
     }
 
 };
@@ -505,6 +505,14 @@ var ResponseSuperAdminActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
             name: name,
+            errors: errors
+        });
+    },
+
+    responseChangeCompanyName: function responseChangeCompanyName(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
+            email: email,
             errors: errors
         });
     }
@@ -6114,7 +6122,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
-        errors: [], //DSLStore.getErrors(),
+        errors: [], //SuperAdminStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         companies: CompanyStore.getCompanies() //JSON that contains the companies in the system 
     };
@@ -6246,13 +6254,7 @@ var CompaniesManagement = React.createClass({
         buttons = React.createElement(
             'div',
             null,
-            deleteCompany
-        );
-
-        return React.createElement(
-            'div',
-            { className: 'table-buttons' },
-            buttons,
+            deleteCompany,
             React.createElement(
                 Link,
                 { to: "/dashboardSuperAdmin/databaseManagement/companiesManagement/changeCompanyName/" + row.id + "/" + row.name },
@@ -6262,6 +6264,12 @@ var CompaniesManagement = React.createClass({
                     ''
                 )
             )
+        );
+
+        return React.createElement(
+            'div',
+            { className: 'table-buttons' },
+            buttons
         );
 
         /* return(
@@ -6300,8 +6308,7 @@ var CompaniesManagement = React.createClass({
                 this.state.companies.forEach(function (company, i) {
                     data[i] = {
                         id: company.id,
-                        name: company.name,
-                        owner: company.owner.email
+                        name: company.name
                     };
                 });
             }
@@ -6680,7 +6687,7 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
-    CHANGE_COMPANY_NAME: null,
+    CHANGE_COMPANY_NAME_RESPONSE: null,
     // Dashboard
 
     // Collection
@@ -8447,8 +8454,23 @@ module.exports = {
   },
 
   //change the name of the company wich has id = companyId
-  changeCompanyName: function changeCompanyName(companyid, name) {
-    //richiesta alle api della company
+  changeCompanyName: function changeCompanyName(companyId, name) {
+    request.put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: companyId,
+      name: name
+    }).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          window.alert("errore (webAPI)");
+          console.log(res);
+          ResponseSuperAdminActionCreator.responseChangeCompanyName(null, res.error.message);
+        } else {
+          window.alert("successo (webAPI)");
+          ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
+        }
+      }
+    });
   }
 
 };

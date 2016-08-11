@@ -24,6 +24,11 @@
     "role": {
       "type": "string"
     },
+    "activeDashboard": {
+      "type": "string",
+      "default": "default",
+      "required": false
+    },
     "editorConfig": {
       "type": "object",
       "default": {

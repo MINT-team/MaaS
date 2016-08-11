@@ -28,7 +28,15 @@ var ResponseSuperAdminActionCreator = {
           name: name,
           errors: errors
         });
-    }
+    },
+    
+    responseChangeCompanyName: function(email, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
+            email: email,
+            errors: errors
+        });
+    },
     
 };
 

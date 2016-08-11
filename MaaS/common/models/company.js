@@ -107,15 +107,31 @@ module.exports = function(Company) {
                           return cb(err);
                         }
                           console.log('> Name changed successfully');
-                          return cb(null, null, company.name);   // callback di successo
+                          return cb(null, null, company.name);   
                     });
                 }else{
-                    console.log('> Company already exists:', company);
                     var error = { message: 'A company with this name already exists' };
-                    return cb(error,null,null );   // callback di insuccesso
+                    return cb(null, error);   
                 }
             });
         });
     }
+    
+Company.remoteMethod(
+        'changeCompanyName',
+        {
+            description: "Change the name of a company",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Company id' },
+                { arg: 'name', type: 'string', required: true, description: 'New name' },
+                
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'newName', type: 'Object'}
+            ],
+            http: { verb: 'put', path: '/:id/changeCompanyName' }
+        }
+    );
 
 };

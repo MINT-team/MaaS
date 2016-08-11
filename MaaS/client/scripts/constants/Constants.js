@@ -53,7 +53,7 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
-    CHANGE_COMPANY_NAME: null,
+    CHANGE_COMPANY_NAME_RESPONSE: null,
     // Dashboard
 
     // Collection
