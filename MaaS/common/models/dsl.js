@@ -271,4 +271,19 @@ module.exports = function(DSL) {
         }
         
     );
+    
+    
+    /*
+    1) Carico il file interprete del dsl (.sjs) contente le macro sweet.js, utilizzando il fs di loopback in una variabile, 
+    la quale verrà utilizzata dalla funzione di sweet.js per caricare i moduli di macro;
+    2) Carico la source del codice dsl in una variabile;
+    3) Utilizzo la funzione compile di sweet.js per compilare il codice, la quale mi ritorna tutto il codice della collection espanso
+    in javascript normale, se non ci sono stati errori. (Altrimenti errore di compilazione)
+    
+    Bisogna creare delle funzioni per ogni elemento del dsl, le quali si occuperanno di verificare se ci sono errori e ritorneranno un
+    json contenente la struttura e i dati da visualizzare. Queste funzioni possono utilizzare altre funzioni di altri elementi innestati.
+    Bisogna pensare a come compilare il codice del dsl, in quanto la compilazione di sweet js non controlla errori nella chiamata
+    delle macro.
+    */
+    
 };

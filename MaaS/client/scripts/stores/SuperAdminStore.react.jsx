@@ -14,19 +14,21 @@ var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
-
+var DELETE_EVENT = 'delete';
 
 
 var _superAdmin = {
     id: SessionStore.getUserId(),
     email: SessionStore.getEmail()
-}
+};
+
+var _companyName;
+
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
-        //window.alert("emetto il cambiamento super admin");
         this.emit(CHANGE_EVENT);
     },
 
@@ -44,8 +46,16 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     getEmail: function() {
         return _superAdmin.email;
+  },
+  
+  getCompanyName: function(){
+      return _companyName;
+  },
+  
+  getErrors: function() {
+    return _errors;
   }
-
+  
 });
 
 SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
@@ -70,6 +80,18 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
             // remove user data
             _superAdmin.id = null;
             _superAdmin.email = null;
+            SuperAdminStore.emitChange();
+            break;
+        
+        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
+            if(action.errors)
+                _errors = action.errors;
+            else
+            {
+                window.alert("modifica valore nome");
+                _errors = [];
+                _companyName = action.name;
+            }
             SuperAdminStore.emitChange();
             break;
     }

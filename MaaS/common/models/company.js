@@ -107,6 +107,7 @@ module.exports = function(Company) {
             context.args.data.connected = "false";
         })
     });
+    //change name of a company wich as companyId= id 
     Company.changeCompanyName = function(id, name, cb){
         Company.findById(id, function(err, company) {
             if(err)

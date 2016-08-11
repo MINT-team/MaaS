@@ -88,13 +88,10 @@ module.exports = {
           res = JSON.parse(res.text);
           if (res.error)
           {
-            window.alert("errore (webAPI)");
-            console.log(res);
             ResponseSuperAdminActionCreator.responseChangeCompanyName(null,res.error.message);
           }
           else
           {
-            window.alert("successo (webAPI)");
             ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
           }
         }

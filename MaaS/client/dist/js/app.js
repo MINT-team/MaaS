@@ -501,7 +501,7 @@ var ResponseSuperAdminActionCreator = {
     },
 
     responseDeleteCompany: function responseDeleteCompany(name, errors) {
-        window.alert("ho eliminato la company");
+
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
             name: name,
@@ -510,7 +510,6 @@ var ResponseSuperAdminActionCreator = {
     },
 
     responseChangeCompanyName: function responseChangeCompanyName(name, errors) {
-        window.alert("RISPOSTA action change name");
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
             name: name,
@@ -4350,8 +4349,7 @@ function getState() {
   return {
     isLogged: SessionStore.isLogged(),
     userType: SessionStore.whoIam(),
-    errors: SessionStore.getErrors(),
-    activeDashboard: UserStore.getActiveDashboard()
+    errors: SessionStore.getErrors()
   };
 }
 
@@ -4366,24 +4364,23 @@ var Login = React.createClass({
   getInitialState: function getInitialState() {
     return {
       isLogged: SessionStore.isLogged(),
-      errors: [],
-      activeDashboard: []
+      errors: []
     };
   },
 
   componentDidMount: function componentDidMount() {
     SessionStore.addChangeListener(this._onChange);
-    this.handleRedirect();
+    UserStore.addUserLoadListener(this._onUserLoad);
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SessionStore.removeChangeListener(this._onChange);
+    UserStore.removeUserLoadListener(this._onUserLoad);
   },
 
   handleRedirect: function handleRedirect() {
     if (this.state.isLogged) {
       var router = this.context.router;
-
 
       if (this.state.activeDashboard == "default") {
         router.push('/manageDSL'); // redirect to Dashboard page
@@ -4405,6 +4402,10 @@ var Login = React.createClass({
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
       }
     }
+  },
+
+  _onUserLoad: function _onUserLoad() {
+    this.setState({ activeDashboard: UserStore.getActiveDashboard() });
     this.handleRedirect();
   },
 
@@ -6014,8 +6015,7 @@ var Link = require('react-router').Link;
 
 function getState() {
   return {
-    name: this.props.params.companyName,
-    companyId: this.props.params.companyId,
+    name: SuperAdminStore.getCompanyName(),
     errors: SuperAdminStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
@@ -6037,13 +6037,11 @@ var ChangeCompanyName = React.createClass({
 
   componentDidMount: function componentDidMount() {
     SuperAdminStore.addChangeListener(this._onChange);
-    CompanyStore.addChangeListener(this._onChange);
     this.refs.nome.value = this.state.name;
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SuperAdminStore.removeChangeListener(this._onChange);
-    CompanyStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function _onChange() {
@@ -6066,9 +6064,9 @@ var ChangeCompanyName = React.createClass({
 
   render: function render() {
     var title, content, errors;
+    window.alert(this.state.first);
 
     if (this.state.errors.length > 0 || this.state.first) {
-      window.alert("o errore o primo accesso");
       title = "Change company name";
       if (this.state.errors.length > 0) {
         errors = React.createElement(
@@ -6098,6 +6096,7 @@ var ChangeCompanyName = React.createClass({
         )
       );
     } else {
+      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = React.createElement(
         'div',
@@ -6953,7 +6952,6 @@ var _errors = [];
 var CompanyStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function emitChange() {
-        window.alert("emetto il cambiamento company");
         this.emit(CHANGE_EVENT);
     },
 
@@ -7624,17 +7622,20 @@ var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _superAdmin = {
     id: SessionStore.getUserId(),
     email: SessionStore.getEmail()
 };
+
+var _companyName;
+
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function emitChange() {
-        //window.alert("emetto il cambiamento super admin");
         this.emit(CHANGE_EVENT);
     },
 
@@ -7652,6 +7653,14 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     getEmail: function getEmail() {
         return _superAdmin.email;
+    },
+
+    getCompanyName: function getCompanyName() {
+        return _companyName;
+    },
+
+    getErrors: function getErrors() {
+        return _errors;
     }
 
 });
@@ -7674,6 +7683,15 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function (payload) {
             // remove user data
             _superAdmin.id = null;
             _superAdmin.email = null;
+            SuperAdminStore.emitChange();
+            break;
+
+        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
+            if (action.errors) _errors = action.errors;else {
+                window.alert("modifica valore nome");
+                _errors = [];
+                _companyName = action.name;
+            }
             SuperAdminStore.emitChange();
             break;
     }
@@ -7699,6 +7717,7 @@ var assign = require('object-assign');
 var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
+var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
@@ -7729,6 +7748,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
     this.emit(DELETE_EVENT);
   },
 
+  emitUserLoad: function emitUserLoad() {
+    this.emit(USER_LOAD_EVENT);
+  },
+
   addChangeListener: function addChangeListener(callback) {
     this.on(CHANGE_EVENT, callback);
   },
@@ -7743,6 +7766,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeDeleteListener: function removeDeleteListener(callback) {
     this.removeListener(DELETE_EVENT, callback);
+  },
+
+  addUserLoadListener: function addUserLoadListener(callback) {
+    this.on(USER_LOAD_EVENT, callback);
+  },
+
+  removeUserLoadListener: function removeUserLoadListener(callback) {
+    this.removeListener(USER_LOAD_EVENT, callback);
   },
 
   getUser: function getUser() {
@@ -7906,6 +7937,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         localStorage.setItem('userRole', _user.role);
         localStorage.setItem('activeDashboard', _user.activeDashboard);
       }
+      UserStore.emitUserLoad();
       UserStore.emitChange();
       break;
 
@@ -8504,11 +8536,8 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          window.alert("errore (webAPI)");
-          console.log(res);
           ResponseSuperAdminActionCreator.responseChangeCompanyName(null, res.error.message);
         } else {
-          window.alert("successo (webAPI)");
           ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
         }
       }

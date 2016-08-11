@@ -17,8 +17,7 @@ function getState() {
   return {
     isLogged: SessionStore.isLogged(),
     userType:SessionStore.whoIam(),
-    errors: SessionStore.getErrors(),
-    activeDashboard: UserStore.getActiveDashboard()
+    errors: SessionStore.getErrors()
   };
 }
 
@@ -31,25 +30,24 @@ var Login = React.createClass({
     getInitialState: function() {
       return {
         isLogged: SessionStore.isLogged(),
-        errors: [],
-        activeDashboard: []
+        errors: []
       };
     },
 
     componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
-      this.handleRedirect();
+      UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
+      UserStore.removeUserLoadListener(this._onUserLoad);
     },
     
     handleRedirect: function() {
       if(this.state.isLogged)
       {
         const { router } = this.context;
-        
         if (this.state.activeDashboard == "default")
         {
           router.push('/manageDSL');   // redirect to Dashboard page
@@ -65,14 +63,21 @@ var Login = React.createClass({
 
     _onChange: function() {
       this.setState(getState());
-      if(this.state.isLogged) {                                         // loads data to the session
+      if(this.state.isLogged)
+      {     
+            // loads data to the session
             RequestUserActionCreator.getUser(SessionStore.getUserId());
             if(this.state.userType == "commonUser")
-            {                   
+            {
                 RequestUserActionCreator.getCompany(SessionStore.getUserId());
                 RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
             }
+            
       }
+    },
+    
+    _onUserLoad: function() {
+      this.setState({ activeDashboard: UserStore.getActiveDashboard() });
       this.handleRedirect();
     },
 

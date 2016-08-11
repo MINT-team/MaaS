@@ -20,8 +20,7 @@ var Link = require('react-router').Link;
 
 function getState(){
     return{
-      name: this.props.params.companyName,
-      companyId: this.props.params.companyId,
+      name: SuperAdminStore.getCompanyName(),
       errors: SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       first: "false"
@@ -42,13 +41,11 @@ var ChangeCompanyName = React.createClass({
   
   componentDidMount: function() {
       SuperAdminStore.addChangeListener(this._onChange);
-      CompanyStore.addChangeListener(this._onChange);
       this.refs.nome.value = this.state.name;
   },
   
   componentWillUnmount: function() {
       SuperAdminStore.removeChangeListener(this._onChange);
-      CompanyStore.removeChangeListener(this._onChange);
   },
   
   _onChange: function() {
@@ -59,7 +56,7 @@ var ChangeCompanyName = React.createClass({
       event.preventDefault();   
       var name = this.refs.nome.value;
       var id = this.state.companyId;
-      if( name!=this.state.name )
+      if(name != this.state.name)
         RequestSuperAdminActionCreator.changeCompanyName(id, name);
       else 
         this._setError("No changes to save");
@@ -74,11 +71,11 @@ var ChangeCompanyName = React.createClass({
   },
   
 	 render: function() {
-	   var title, content, errors;
+	  var title, content, errors;
+	   window.alert(this.state.first);
 	   
     if(this.state.errors.length > 0 || this.state.first) 
     { 
-      window.alert("o errore o primo accesso");
       title = "Change company name";
       if(this.state.errors.length > 0) {
         errors = (
@@ -98,6 +95,7 @@ var ChangeCompanyName = React.createClass({
     } 
     else 
     {
+      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = (
         <div id="successful-operation">

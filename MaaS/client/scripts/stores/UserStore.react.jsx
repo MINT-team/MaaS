@@ -13,6 +13,7 @@ var assign = require('object-assign');
 var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
+var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
@@ -42,6 +43,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
   emitDelete: function() {
     this.emit(DELETE_EVENT);
   },
+  
+  emitUserLoad: function() {
+    this.emit(USER_LOAD_EVENT);
+  },
 
   addChangeListener: function(callback) {
     this.on(CHANGE_EVENT, callback);
@@ -57,6 +62,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeDeleteListener: function(callback) {
       this.removeListener(DELETE_EVENT, callback);
+  },
+  
+  addUserLoadListener: function(callback) {
+      this.on(USER_LOAD_EVENT, callback);
+  },
+  
+  removeUserLoadListener: function(callback) {
+      this.removeListener(USER_LOAD_EVENT, callback);
   },
 
   getUser: function() {
@@ -233,6 +246,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           localStorage.setItem('userRole', _user.role);
           localStorage.setItem('activeDashboard',_user.activeDashboard);
         }
+        UserStore.emitUserLoad();
         UserStore.emitChange();
         break;
         
