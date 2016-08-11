@@ -9,6 +9,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
@@ -35,30 +36,48 @@ var Login = React.createClass({
 
     componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
-      this.handleRedirect();
+      UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
+      UserStore.removeUserLoadListener(this._onUserLoad);
     },
     
     handleRedirect: function() {
-      if(this.state.isLogged) {
+      if(this.state.isLogged)
+      {
         const { router } = this.context;
-        router.push('/');   // redirect to Dashboard page
+        if (this.state.activeDashboard == "default")
+        {
+          router.push('/manageDSL');   // redirect to Dashboard page
+        }
+        else
+        {
+          //Redirect to active dashboard
+        }
+        
+        //router.push('/');
       }
     },
 
     _onChange: function() {
       this.setState(getState());
-      if(this.state.isLogged) {                                         // loads data to the session
-            RequestUserActionCreator.getUser(SessionStore.getUserId());  
+      if(this.state.isLogged)
+      {     
+            // loads data to the session
+            RequestUserActionCreator.getUser(SessionStore.getUserId());
             if(this.state.userType == "commonUser")
-            {                   
+            {
                 RequestUserActionCreator.getCompany(SessionStore.getUserId());
                 RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
             }
+            
       }
+    },
+    
+    _onUserLoad: function() {
+      this.setState({ activeDashboard: UserStore.getActiveDashboard() });
       this.handleRedirect();
     },
 

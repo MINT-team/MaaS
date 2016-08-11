@@ -15,12 +15,12 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Link = require('react-router').Link;
 
 function getState(){
     return{
-      name: this.props.params.companyName,
-      companyId: this.props.params.companyId,
+      name: SuperAdminStore.getCompanyName(),
       errors: SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       first: "false"
@@ -56,7 +56,7 @@ var ChangeCompanyName = React.createClass({
       event.preventDefault();   
       var name = this.refs.nome.value;
       var id = this.state.companyId;
-      if( name!=this.state.name )
+      if(name != this.state.name)
         RequestSuperAdminActionCreator.changeCompanyName(id, name);
       else 
         this._setError("No changes to save");
@@ -71,7 +71,8 @@ var ChangeCompanyName = React.createClass({
   },
   
 	 render: function() {
-	   var title, content, errors;
+	  var title, content, errors;
+	   window.alert(this.state.first);
 	   
     if(this.state.errors.length > 0 || this.state.first) 
     { 
@@ -94,6 +95,7 @@ var ChangeCompanyName = React.createClass({
     } 
     else 
     {
+      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = (
         <div id="successful-operation">
@@ -102,7 +104,7 @@ var ChangeCompanyName = React.createClass({
         </div>
       );
     }
-    var id = this.state.companyId;
+    
     return (
       <div>
         <p className="container-title">{title}</p>

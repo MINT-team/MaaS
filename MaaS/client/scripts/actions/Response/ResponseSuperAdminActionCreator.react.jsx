@@ -22,7 +22,7 @@ var ResponseSuperAdminActionCreator = {
     },
     
     responseDeleteCompany: function(name, errors) {
-        window.alert("ho eliminato la company");
+        
         Dispatcher.handleServerAction({
           type: ActionTypes.DELETE_COMPANY,
           name: name,
@@ -30,10 +30,10 @@ var ResponseSuperAdminActionCreator = {
         });
     },
     
-    responseChangeCompanyName: function(email, errors) {
+    responseChangeCompanyName: function(name, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
-            email: email,
+            name: name,
             errors: errors
         });
     },

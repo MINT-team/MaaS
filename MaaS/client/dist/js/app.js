@@ -501,7 +501,7 @@ var ResponseSuperAdminActionCreator = {
     },
 
     responseDeleteCompany: function responseDeleteCompany(name, errors) {
-        window.alert("ho eliminato la company");
+
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
             name: name,
@@ -509,10 +509,10 @@ var ResponseSuperAdminActionCreator = {
         });
     },
 
-    responseChangeCompanyName: function responseChangeCompanyName(email, errors) {
+    responseChangeCompanyName: function responseChangeCompanyName(name, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
-            email: email,
+            name: name,
             errors: errors
         });
     }
@@ -4341,6 +4341,7 @@ module.exports = Home;
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
@@ -4369,18 +4370,25 @@ var Login = React.createClass({
 
   componentDidMount: function componentDidMount() {
     SessionStore.addChangeListener(this._onChange);
-    this.handleRedirect();
+    UserStore.addUserLoadListener(this._onUserLoad);
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SessionStore.removeChangeListener(this._onChange);
+    UserStore.removeUserLoadListener(this._onUserLoad);
   },
 
   handleRedirect: function handleRedirect() {
     if (this.state.isLogged) {
       var router = this.context.router;
 
-      router.push('/'); // redirect to Dashboard page
+      if (this.state.activeDashboard == "default") {
+        router.push('/manageDSL'); // redirect to Dashboard page
+      } else {}
+        //Redirect to active dashboard
+
+
+        //router.push('/');
     }
   },
 
@@ -4394,6 +4402,10 @@ var Login = React.createClass({
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
       }
     }
+  },
+
+  _onUserLoad: function _onUserLoad() {
+    this.setState({ activeDashboard: UserStore.getActiveDashboard() });
     this.handleRedirect();
   },
 
@@ -4484,7 +4496,7 @@ var Login = React.createClass({
 
 module.exports = Login;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":55,"react":488,"react-router":255}],33:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":55,"../stores/UserStore.react.jsx":57,"react":488,"react-router":255}],33:[function(require,module,exports){
 'use strict';
 
 // Name: {MaaSApp.react.jsx}
@@ -5998,12 +6010,12 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Link = require('react-router').Link;
 
 function getState() {
   return {
-    name: this.props.params.companyName,
-    companyId: this.props.params.companyId,
+    name: SuperAdminStore.getCompanyName(),
     errors: SuperAdminStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
@@ -6052,6 +6064,7 @@ var ChangeCompanyName = React.createClass({
 
   render: function render() {
     var title, content, errors;
+    window.alert(this.state.first);
 
     if (this.state.errors.length > 0 || this.state.first) {
       title = "Change company name";
@@ -6083,6 +6096,7 @@ var ChangeCompanyName = React.createClass({
         )
       );
     } else {
+      window.alert("ho cambiato i valori");
       title = "Company name changed";
       content = React.createElement(
         'div',
@@ -6099,7 +6113,7 @@ var ChangeCompanyName = React.createClass({
         )
       );
     }
-    var id = this.state.companyId;
+
     return React.createElement(
       'div',
       null,
@@ -6115,7 +6129,7 @@ var ChangeCompanyName = React.createClass({
 
 module.exports = ChangeCompanyName;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-router":255}],44:[function(require,module,exports){
+},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-router":255}],44:[function(require,module,exports){
 'use strict';
 
 // Name: {CompaniesManagement.react.jsx}
@@ -6664,7 +6678,7 @@ module.exports = UsersManagement;
 var keyMirror = require('keymirror');
 
 //var APIRoot = "https://maas-navid94.c9users.io/api";
-var APIRoot = "https://maas-michael-tommi-mick93.c9users.io" + "/api";
+var APIRoot = "https://maas-navid94.c9users.io" + "/api";
 
 module.exports = {
 
@@ -6708,7 +6722,10 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
+
+    // Super Admin
     CHANGE_COMPANY_NAME_RESPONSE: null,
+
     // Dashboard
 
     // Collection
@@ -7605,11 +7622,15 @@ var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var DELETE_EVENT = 'delete';
 
 var _superAdmin = {
     id: SessionStore.getUserId(),
     email: SessionStore.getEmail()
 };
+
+var _companyName;
+
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
@@ -7632,6 +7653,14 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     getEmail: function getEmail() {
         return _superAdmin.email;
+    },
+
+    getCompanyName: function getCompanyName() {
+        return _companyName;
+    },
+
+    getErrors: function getErrors() {
+        return _errors;
     }
 
 });
@@ -7654,6 +7683,15 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function (payload) {
             // remove user data
             _superAdmin.id = null;
             _superAdmin.email = null;
+            SuperAdminStore.emitChange();
+            break;
+
+        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
+            if (action.errors) _errors = action.errors;else {
+                window.alert("modifica valore nome");
+                _errors = [];
+                _companyName = action.name;
+            }
             SuperAdminStore.emitChange();
             break;
     }
@@ -7679,6 +7717,7 @@ var assign = require('object-assign');
 var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
+var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
@@ -7694,7 +7733,8 @@ var _user = {
   softTabs: localStorage.getItem('softTabs'),
   theme: localStorage.getItem('theme'),
   tabSize: localStorage.getItem('tabSize'),
-  fontSize: localStorage.getItem('fontSize')
+  fontSize: localStorage.getItem('fontSize'),
+  activeDashboard: localStorage.getItem('activeDashboard')
 };
 var _errors = [];
 
@@ -7706,6 +7746,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   emitDelete: function emitDelete() {
     this.emit(DELETE_EVENT);
+  },
+
+  emitUserLoad: function emitUserLoad() {
+    this.emit(USER_LOAD_EVENT);
   },
 
   addChangeListener: function addChangeListener(callback) {
@@ -7722,6 +7766,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeDeleteListener: function removeDeleteListener(callback) {
     this.removeListener(DELETE_EVENT, callback);
+  },
+
+  addUserLoadListener: function addUserLoadListener(callback) {
+    this.on(USER_LOAD_EVENT, callback);
+  },
+
+  removeUserLoadListener: function removeUserLoadListener(callback) {
+    this.removeListener(USER_LOAD_EVENT, callback);
   },
 
   getUser: function getUser() {
@@ -7778,6 +7830,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   getEditorFontSize: function getEditorFontSize() {
     return _user.fontSize;
+  },
+
+  getActiveDashboard: function getActiveDashboard() {
+    return _user.activeDashboard;
   }
 
 });
@@ -7870,6 +7926,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _user.gender = action.json.gender || "";
         _user.avatar = action.json.avatar;
         _user.role = action.json.role;
+        _user.activeDashboard = action.json.activeDashboard;
         // save session data
         localStorage.setItem('email', _user.email);
         localStorage.setItem('userName', _user.name);
@@ -7878,7 +7935,9 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         localStorage.setItem('userGender', _user.gender);
         localStorage.setItem('userAvatar', _user.avatar);
         localStorage.setItem('userRole', _user.role);
+        localStorage.setItem('activeDashboard', _user.activeDashboard);
       }
+      UserStore.emitUserLoad();
       UserStore.emitChange();
       break;
 
@@ -8477,11 +8536,8 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          window.alert("errore (webAPI)");
-          console.log(res);
           ResponseSuperAdminActionCreator.responseChangeCompanyName(null, res.error.message);
         } else {
-          window.alert("successo (webAPI)");
           ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
         }
       }
@@ -9262,15 +9318,7 @@ function fromString (that, string, encoding) {
   var length = byteLength(string, encoding) | 0
   that = createBuffer(that, length)
 
-  var actual = that.write(string, encoding)
-
-  if (actual !== length) {
-    // Writing a hex string, for example, that contains invalid characters will
-    // cause everything after the first invalid character to be ignored. (e.g.
-    // 'abxxcd' will be treated as 'ab')
-    that = that.slice(0, actual)
-  }
-
+  that.write(string, encoding)
   return that
 }
 
@@ -9393,9 +9441,9 @@ Buffer.isEncoding = function isEncoding (encoding) {
     case 'utf8':
     case 'utf-8':
     case 'ascii':
-    case 'latin1':
     case 'binary':
     case 'base64':
+    case 'raw':
     case 'ucs2':
     case 'ucs-2':
     case 'utf16le':
@@ -9456,8 +9504,9 @@ function byteLength (string, encoding) {
   for (;;) {
     switch (encoding) {
       case 'ascii':
-      case 'latin1':
       case 'binary':
+      case 'raw':
+      case 'raws':
         return len
       case 'utf8':
       case 'utf-8':
@@ -9530,9 +9579,8 @@ function slowToString (encoding, start, end) {
       case 'ascii':
         return asciiSlice(this, start, end)
 
-      case 'latin1':
       case 'binary':
-        return latin1Slice(this, start, end)
+        return binarySlice(this, start, end)
 
       case 'base64':
         return base64Slice(this, start, end)
@@ -9580,20 +9628,6 @@ Buffer.prototype.swap32 = function swap32 () {
   for (var i = 0; i < len; i += 4) {
     swap(this, i, i + 3)
     swap(this, i + 1, i + 2)
-  }
-  return this
-}
-
-Buffer.prototype.swap64 = function swap64 () {
-  var len = this.length
-  if (len % 8 !== 0) {
-    throw new RangeError('Buffer size must be a multiple of 64-bits')
-  }
-  for (var i = 0; i < len; i += 8) {
-    swap(this, i, i + 7)
-    swap(this, i + 1, i + 6)
-    swap(this, i + 2, i + 5)
-    swap(this, i + 3, i + 4)
   }
   return this
 }
@@ -9680,73 +9714,7 @@ Buffer.prototype.compare = function compare (target, start, end, thisStart, this
   return 0
 }
 
-// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
-// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
-//
-// Arguments:
-// - buffer - a Buffer to search
-// - val - a string, Buffer, or number
-// - byteOffset - an index into `buffer`; will be clamped to an int32
-// - encoding - an optional encoding, relevant is val is a string
-// - dir - true for indexOf, false for lastIndexOf
-function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
-  // Empty buffer means no match
-  if (buffer.length === 0) return -1
-
-  // Normalize byteOffset
-  if (typeof byteOffset === 'string') {
-    encoding = byteOffset
-    byteOffset = 0
-  } else if (byteOffset > 0x7fffffff) {
-    byteOffset = 0x7fffffff
-  } else if (byteOffset < -0x80000000) {
-    byteOffset = -0x80000000
-  }
-  byteOffset = +byteOffset  // Coerce to Number.
-  if (isNaN(byteOffset)) {
-    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
-    byteOffset = dir ? 0 : (buffer.length - 1)
-  }
-
-  // Normalize byteOffset: negative offsets start from the end of the buffer
-  if (byteOffset < 0) byteOffset = buffer.length + byteOffset
-  if (byteOffset >= buffer.length) {
-    if (dir) return -1
-    else byteOffset = buffer.length - 1
-  } else if (byteOffset < 0) {
-    if (dir) byteOffset = 0
-    else return -1
-  }
-
-  // Normalize val
-  if (typeof val === 'string') {
-    val = Buffer.from(val, encoding)
-  }
-
-  // Finally, search either indexOf (if dir is true) or lastIndexOf
-  if (Buffer.isBuffer(val)) {
-    // Special case: looking for empty string/buffer always fails
-    if (val.length === 0) {
-      return -1
-    }
-    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
-  } else if (typeof val === 'number') {
-    val = val & 0xFF // Search for a byte value [0-255]
-    if (Buffer.TYPED_ARRAY_SUPPORT &&
-        typeof Uint8Array.prototype.indexOf === 'function') {
-      if (dir) {
-        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
-      } else {
-        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
-      }
-    }
-    return arrayIndexOf(buffer, [ val ], byteOffset, encoding, dir)
-  }
-
-  throw new TypeError('val must be string, number or Buffer')
-}
-
-function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
+function arrayIndexOf (arr, val, byteOffset, encoding) {
   var indexSize = 1
   var arrLength = arr.length
   var valLength = val.length
@@ -9773,45 +9741,60 @@ function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
     }
   }
 
-  var i
-  if (dir) {
-    var foundIndex = -1
-    for (i = byteOffset; i < arrLength; i++) {
-      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
-        if (foundIndex === -1) foundIndex = i
-        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
-      } else {
-        if (foundIndex !== -1) i -= i - foundIndex
-        foundIndex = -1
-      }
-    }
-  } else {
-    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength
-    for (i = byteOffset; i >= 0; i--) {
-      var found = true
-      for (var j = 0; j < valLength; j++) {
-        if (read(arr, i + j) !== read(val, j)) {
-          found = false
-          break
-        }
-      }
-      if (found) return i
+  var foundIndex = -1
+  for (var i = byteOffset; i < arrLength; ++i) {
+    if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+      if (foundIndex === -1) foundIndex = i
+      if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
+    } else {
+      if (foundIndex !== -1) i -= i - foundIndex
+      foundIndex = -1
     }
   }
 
   return -1
 }
 
+Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
+  if (typeof byteOffset === 'string') {
+    encoding = byteOffset
+    byteOffset = 0
+  } else if (byteOffset > 0x7fffffff) {
+    byteOffset = 0x7fffffff
+  } else if (byteOffset < -0x80000000) {
+    byteOffset = -0x80000000
+  }
+  byteOffset >>= 0
+
+  if (this.length === 0) return -1
+  if (byteOffset >= this.length) return -1
+
+  // Negative offsets start from the end of the buffer
+  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
+
+  if (typeof val === 'string') {
+    val = Buffer.from(val, encoding)
+  }
+
+  if (Buffer.isBuffer(val)) {
+    // special case: looking for empty string/buffer always fails
+    if (val.length === 0) {
+      return -1
+    }
+    return arrayIndexOf(this, val, byteOffset, encoding)
+  }
+  if (typeof val === 'number') {
+    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
+      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
+    }
+    return arrayIndexOf(this, [ val ], byteOffset, encoding)
+  }
+
+  throw new TypeError('val must be string, number or Buffer')
+}
+
 Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
   return this.indexOf(val, byteOffset, encoding) !== -1
-}
-
-Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
-  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
-}
-
-Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
-  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
 }
 
 function hexWrite (buf, string, offset, length) {
@@ -9828,7 +9811,7 @@ function hexWrite (buf, string, offset, length) {
 
   // must be an even number of digits
   var strLen = string.length
-  if (strLen % 2 !== 0) throw new TypeError('Invalid hex string')
+  if (strLen % 2 !== 0) throw new Error('Invalid hex string')
 
   if (length > strLen / 2) {
     length = strLen / 2
@@ -9849,7 +9832,7 @@ function asciiWrite (buf, string, offset, length) {
   return blitBuffer(asciiToBytes(string), buf, offset, length)
 }
 
-function latin1Write (buf, string, offset, length) {
+function binaryWrite (buf, string, offset, length) {
   return asciiWrite(buf, string, offset, length)
 }
 
@@ -9911,9 +9894,8 @@ Buffer.prototype.write = function write (string, offset, length, encoding) {
       case 'ascii':
         return asciiWrite(this, string, offset, length)
 
-      case 'latin1':
       case 'binary':
-        return latin1Write(this, string, offset, length)
+        return binaryWrite(this, string, offset, length)
 
       case 'base64':
         // Warning: maxLength not taken into account in base64Write
@@ -10054,7 +10036,7 @@ function asciiSlice (buf, start, end) {
   return ret
 }
 
-function latin1Slice (buf, start, end) {
+function binarySlice (buf, start, end) {
   var ret = ''
   end = Math.min(buf.length, end)
 
@@ -11355,30 +11337,27 @@ if (typeof Object.create === 'function') {
 }
 
 },{}],71:[function(require,module,exports){
-/*!
- * Determine if an object is a Buffer
+/**
+ * Determine if an object is Buffer
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
- * @license  MIT
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install is-buffer`
  */
 
-// The _isBuffer check is for Safari 5-7 support, because it's missing
-// Object.prototype.constructor. Remove this eventually
 module.exports = function (obj) {
-  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
-}
-
-function isBuffer (obj) {
-  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
-
-// For Node v0.10 support. Remove this eventually.
-function isSlowBuffer (obj) {
-  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+  return !!(obj != null &&
+    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+      (obj.constructor &&
+      typeof obj.constructor.isBuffer === 'function' &&
+      obj.constructor.isBuffer(obj))
+    ))
 }
 
 },{}],72:[function(require,module,exports){
 // shim for using process in browser
+
 var process = module.exports = {};
 
 // cached from whatever global is present so that test runners that stub it
@@ -11390,63 +11369,21 @@ var cachedSetTimeout;
 var cachedClearTimeout;
 
 (function () {
-    try {
-        cachedSetTimeout = setTimeout;
-    } catch (e) {
-        cachedSetTimeout = function () {
-            throw new Error('setTimeout is not defined');
-        }
+  try {
+    cachedSetTimeout = setTimeout;
+  } catch (e) {
+    cachedSetTimeout = function () {
+      throw new Error('setTimeout is not defined');
     }
-    try {
-        cachedClearTimeout = clearTimeout;
-    } catch (e) {
-        cachedClearTimeout = function () {
-            throw new Error('clearTimeout is not defined');
-        }
+  }
+  try {
+    cachedClearTimeout = clearTimeout;
+  } catch (e) {
+    cachedClearTimeout = function () {
+      throw new Error('clearTimeout is not defined');
     }
+  }
 } ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -11471,7 +11408,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = runTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -11488,7 +11425,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    runClearTimeout(timeout);
+    cachedClearTimeout.call(null, timeout);
 }
 
 process.nextTick = function (fun) {
@@ -11500,7 +11437,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
+        cachedSetTimeout.call(null, drainQueue, 0);
     }
 };
 
@@ -13932,28 +13869,20 @@ Document.prototype.modifiedPaths = function() {
  * ####Example
  *
  *     doc.set('documents.0.title', 'changed');
- *     doc.isModified()                      // true
- *     doc.isModified('documents')           // true
- *     doc.isModified('documents.0.title')   // true
- *     doc.isModified('documents otherProp') // true
- *     doc.isDirectModified('documents')     // false
+ *     doc.isModified()                    // true
+ *     doc.isModified('documents')         // true
+ *     doc.isModified('documents.0.title') // true
+ *     doc.isDirectModified('documents')   // false
  *
  * @param {String} [path] optional
  * @return {Boolean}
  * @api public
  */
 
-Document.prototype.isModified = function(paths) {
-  if (paths) {
-    if (!Array.isArray(paths)) {
-      paths = paths.split(' ');
-    }
-    var modified = this.modifiedPaths();
-    return paths.some(function(path) {
-      return !!~modified.indexOf(path);
-    });
-  }
-  return this.$__.activePaths.some('modify');
+Document.prototype.isModified = function(path) {
+  return path
+      ? !!~this.modifiedPaths().indexOf(path)
+      : this.$__.activePaths.some('modify');
 };
 
 /**
@@ -20863,14 +20792,8 @@ SchemaType.prototype.index = function(options) {
  */
 
 SchemaType.prototype.unique = function(bool) {
-  if (this._index === false) {
-    if (!bool) {
-      return;
-    }
-    throw new Error('Path "' + this.path + '" may not have `index` set to ' +
-      'false and `unique` set to true');
-  }
-  if (this._index == null || this._index === true) {
+  if (this._index === null || this._index === undefined ||
+    typeof this._index === 'boolean') {
     this._index = {};
   } else if (typeof this._index === 'string') {
     this._index = {type: this._index};
@@ -23630,9 +23553,6 @@ Subdocument.prototype.$isValid = function(path) {
 Subdocument.prototype.markModified = function(path) {
   Document.prototype.markModified.call(this, path);
   if (this.$parent) {
-    if (this.$parent.isModified(this.$basePath)) {
-      return;
-    }
     this.$parent.markModified([this.$basePath, path].join('.'));
   }
 };
@@ -41850,7 +41770,6 @@ var BootstrapTable = (function (_Component) {
           filterFormatted: column.props.filterFormatted,
           filterValue: column.props.filterValue,
           editable: column.props.editable,
-          customEditor: column.props.customEditor,
           hidden: column.props.hidden,
           hiddenOnInsert: column.props.hiddenOnInsert,
           searchable: column.props.searchable,
@@ -42214,7 +42133,7 @@ var BootstrapTable = (function (_Component) {
       if (enableShowOnlySelected || insertRow || deleteRow || search || this.props.exportCSV) {
         var columns = undefined;
         if (Array.isArray(children)) {
-          columns = children.map(function (column, r) {
+          columns = children.map(function (column) {
             var props = column.props;
 
             return {
@@ -42226,7 +42145,7 @@ var BootstrapTable = (function (_Component) {
               // for create editor, no params for column.editable() indicate that editor for new row
               editable: props.editable && typeof props.editable === 'function' ? props.editable() : props.editable,
               format: props.dataFormat ? function (value) {
-                return props.dataFormat(value, null, props.formatExtraData, r).replace(/<.*?>/g, '');
+                return props.dataFormat(value, null, props.formatExtraData).replace(/<.*?>/g, '');
               } : false
             };
           });
@@ -42981,23 +42900,25 @@ var TableBody = (function (_Component) {
           this.state.currEditCell !== null && this.state.currEditCell.rid === r && this.state.currEditCell.cid === i) {
             var editable = column.editable;
             var format = column.format ? function (value) {
-              return column.format(value, data, column.formatExtraData, r).replace(/<.*?>/g, '');
+              return column.format(value, data, column.formatExtraData).replace(/<.*?>/g, '');
             } : false;
             if (isFun(column.editable)) {
               editable = column.editable(fieldValue, data, r, i);
             }
 
-            return _react2['default'].createElement(_TableEditColumn2['default'], {
-              completeEdit: this.handleCompleteEditCell,
-              // add by bluespring for column editor customize
-              editable: editable,
-              customEditor: column.customEditor,
-              format: column.format ? format : false,
-              key: i,
-              blurToSave: this.props.cellEdit.blurToSave,
-              rowIndex: r,
-              colIndex: i,
-              fieldValue: fieldValue });
+            return _react2['default'].createElement(
+              _TableEditColumn2['default'],
+              {
+                completeEdit: this.handleCompleteEditCell,
+                // add by bluespring for column editor customize
+                editable: editable,
+                format: column.format ? format : false,
+                key: i,
+                blurToSave: this.props.cellEdit.blurToSave,
+                rowIndex: r,
+                colIndex: i },
+              fieldValue
+            );
           } else {
             // add by bluespring for className customize
             var columnChild = fieldValue;
@@ -43008,7 +42929,7 @@ var TableBody = (function (_Component) {
             }
 
             if (typeof column.format !== 'undefined') {
-              var formattedValue = column.format(fieldValue, data, column.formatExtraData, r);
+              var formattedValue = column.format(fieldValue, data, column.formatExtraData);
               if (!_react2['default'].isValidElement(formattedValue)) {
                 columnChild = _react2['default'].createElement('div', { dangerouslySetInnerHTML: { __html: formattedValue } });
               } else {
@@ -43293,8 +43214,6 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
@@ -43363,10 +43282,6 @@ var TableEditColumn = (function (_Component) {
       }
     };
 
-    this.handleCustomUpdate = function (value) {
-      _this.props.completeEdit(value, _this.props.rowIndex, _this.props.colIndex);
-    };
-
     this.timeouteClear = 0;
     this.state = {
       shakeEditor: false
@@ -43428,8 +43343,7 @@ var TableEditColumn = (function (_Component) {
       var _props = this.props;
       var editable = _props.editable;
       var format = _props.format;
-      var fieldValue = _props.fieldValue;
-      var customEditor = _props.customEditor;
+      var children = _props.children;
       var shakeEditor = this.state.shakeEditor;
 
       var attr = {
@@ -43441,20 +43355,10 @@ var TableEditColumn = (function (_Component) {
       editable.placeholder && (attr.placeholder = editable.placeholder);
 
       var editorClass = (0, _classnames2['default'])({ 'animated': shakeEditor, 'shake': shakeEditor });
-      var cellEditor = undefined;
-      if (customEditor) {
-        var customEditorProps = _extends({}, attr, {
-          defaultValue: fieldValue || ''
-        }, customEditor.customEditorParameters);
-        cellEditor = customEditor.getElement(this.handleCustomUpdate, customEditorProps);
-      } else {
-        cellEditor = (0, _Editor2['default'])(editable, attr, format, editorClass, fieldValue || '');
-      }
-
       return _react2['default'].createElement(
         'td',
         { ref: 'td', style: { position: 'relative' } },
-        cellEditor,
+        (0, _Editor2['default'])(editable, attr, format, editorClass, children || ''),
         _react2['default'].createElement(_NotificationJs2['default'], { ref: 'notifier' })
       );
     }
@@ -43478,7 +43382,7 @@ TableEditColumn.propTypes = {
   blurToSave: _react.PropTypes.bool,
   editable: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.object]),
   format: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.func]),
-  fieldValue: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.bool, _react.PropTypes.number, _react.PropTypes.array, _react.PropTypes.object])
+  children: _react.PropTypes.node
 };
 
 exports['default'] = TableEditColumn;
@@ -43864,27 +43768,27 @@ var TableHeaderColumn = (function (_Component) {
       switch (this.props.filter.type) {
         case _Const2['default'].FILTER_TYPE.TEXT:
           {
-            return _react2['default'].createElement(_filtersText2['default'], _extends({ ref: 'textFilter' }, this.props.filter, {
+            return _react2['default'].createElement(_filtersText2['default'], _extends({}, this.props.filter, {
               columnName: this.props.children, filterHandler: this.handleFilter }));
           }
         case _Const2['default'].FILTER_TYPE.REGEX:
           {
-            return _react2['default'].createElement(_filtersRegex2['default'], _extends({ ref: 'regexFilter' }, this.props.filter, {
+            return _react2['default'].createElement(_filtersRegex2['default'], _extends({}, this.props.filter, {
               columnName: this.props.children, filterHandler: this.handleFilter }));
           }
         case _Const2['default'].FILTER_TYPE.SELECT:
           {
-            return _react2['default'].createElement(_filtersSelect2['default'], _extends({ ref: 'selectFilter' }, this.props.filter, {
+            return _react2['default'].createElement(_filtersSelect2['default'], _extends({}, this.props.filter, {
               columnName: this.props.children, filterHandler: this.handleFilter }));
           }
         case _Const2['default'].FILTER_TYPE.NUMBER:
           {
-            return _react2['default'].createElement(_filtersNumber2['default'], _extends({ ref: 'numberFilter' }, this.props.filter, {
+            return _react2['default'].createElement(_filtersNumber2['default'], _extends({}, this.props.filter, {
               columnName: this.props.children, filterHandler: this.handleFilter }));
           }
         case _Const2['default'].FILTER_TYPE.DATE:
           {
-            return _react2['default'].createElement(_filtersDate2['default'], _extends({ ref: 'dateFilter' }, this.props.filter, {
+            return _react2['default'].createElement(_filtersDate2['default'], _extends({}, this.props.filter, {
               columnName: this.props.children, filterHandler: this.handleFilter }));
           }
         case _Const2['default'].FILTER_TYPE.CUSTOM:
@@ -43956,41 +43860,6 @@ var TableHeaderColumn = (function (_Component) {
           this.props.filter ? this.getFilters() : null
         )
       );
-    }
-  }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      if (this.props.filter === undefined) {
-        return;
-      }
-
-      switch (this.props.filter.type) {
-        case _Const2['default'].FILTER_TYPE.TEXT:
-          {
-            this.refs.textFilter.cleanFiltered();
-            break;
-          }
-        case _Const2['default'].FILTER_TYPE.REGEX:
-          {
-            this.refs.regexFilter.cleanFiltered();
-            break;
-          }
-        case _Const2['default'].FILTER_TYPE.SELECT:
-          {
-            this.refs.selectFilter.cleanFiltered();
-            break;
-          }
-        case _Const2['default'].FILTER_TYPE.NUMBER:
-          {
-            this.refs.numberFilter.cleanFiltered();
-            break;
-          }
-        case _Const2['default'].FILTER_TYPE.DATE:
-          {
-            this.refs.dateFilter.cleanFiltered();
-            break;
-          }
-      }
     }
   }]);
 
@@ -44617,16 +44486,6 @@ var DateFilter = (function (_Component) {
       }
     }
   }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      var value = this.setDefaultDate();
-      var comparator = this.props.defaultValue ? this.props.defaultValue.comparator : '';
-      this.setState({ isPlaceholderSelected: value === '' });
-      this.refs.dateFilterComparator.value = comparator;
-      this.refs.inputDate.value = value;
-      this.props.filterHandler({ date: new Date(value), comparator: comparator }, _Const2['default'].FILTER_TYPE.DATE);
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var comparator = this.refs.dateFilterComparator.value;
@@ -44777,16 +44636,6 @@ var NumberFilter = (function (_Component) {
       if (value === '') {
         return;
       }
-      this.props.filterHandler({ number: value, comparator: comparator }, _Const2['default'].FILTER_TYPE.NUMBER);
-    }
-  }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      var value = this.props.defaultValue ? this.props.defaultValue.number : '';
-      var comparator = this.props.defaultValue ? this.props.defaultValue.comparator : '';
-      this.setState({ isPlaceholderSelected: value === '' });
-      this.refs.numberFilterComparator.value = comparator;
-      this.refs.numberFilter.value = value;
       this.props.filterHandler({ number: value, comparator: comparator }, _Const2['default'].FILTER_TYPE.NUMBER);
     }
   }, {
@@ -44959,13 +44808,6 @@ var RegexFilter = (function (_Component) {
       }, this.props.delay);
     }
   }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      var value = this.props.defaultValue ? this.props.defaultValue : '';
-      this.refs.inputText.value = value;
-      this.props.filterHandler(value, _Const2['default'].FILTER_TYPE.TEXT);
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var value = this.refs.inputText.value;
@@ -45060,14 +44902,6 @@ var SelectFilter = (function (_Component) {
       var value = event.target.value;
 
       this.setState({ isPlaceholderSelected: value === '' });
-      this.props.filterHandler(value, _Const2['default'].FILTER_TYPE.SELECT);
-    }
-  }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      var value = this.props.defaultValue !== undefined ? this.props.defaultValue : '';
-      this.setState({ isPlaceholderSelected: value === '' });
-      this.refs.selectInput.value = value;
       this.props.filterHandler(value, _Const2['default'].FILTER_TYPE.SELECT);
     }
   }, {
@@ -45177,13 +45011,6 @@ var TextFilter = (function (_Component) {
       this.timeout = setTimeout(function () {
         _this.props.filterHandler(filterValue, _Const2['default'].FILTER_TYPE.TEXT);
       }, this.props.delay);
-    }
-  }, {
-    key: 'cleanFiltered',
-    value: function cleanFiltered() {
-      var value = this.props.defaultValue ? this.props.defaultValue : '';
-      this.refs.inputText.value = value;
-      this.props.filterHandler(value, _Const2['default'].FILTER_TYPE.TEXT);
     }
   }, {
     key: 'componentDidMount',
@@ -45988,6 +45815,9 @@ var TableDataStore = (function () {
           }
         case '>=':
           {
+            // console.log(targetVal);
+            // console.log(filterVal);
+            // console.log(filterVal.getDate());
             if (targetVal < filterVal) {
               valid = false;
             }
@@ -46077,7 +45907,7 @@ var TableDataStore = (function () {
       var _this4 = this;
 
       var filterObj = this.filterObj;
-      this.filteredData = source.filter(function (row, r) {
+      this.filteredData = source.filter(function (row) {
         var valid = true;
         var filterVal = undefined;
         for (var key in filterObj) {
@@ -46127,7 +45957,7 @@ var TableDataStore = (function () {
             formatExtraData = _this4.colInfos[key].formatExtraData;
             filterValue = _this4.colInfos[key].filterValue;
             if (filterFormatted && format) {
-              targetVal = format(row[key], row, formatExtraData, r);
+              targetVal = format(row[key], row, formatExtraData);
             } else if (filterValue) {
               targetVal = filterValue(row[key], row);
             }
@@ -46157,7 +45987,7 @@ var TableDataStore = (function () {
             default:
               {
                 if (filterObj[key].type === _Const2['default'].FILTER_TYPE.SELECT && filterFormatted && filterFormatted && format) {
-                  filterVal = format(filterVal, row, formatExtraData, r);
+                  filterVal = format(filterVal, row, formatExtraData);
                 }
                 valid = _this4.filterText(targetVal, filterVal);
                 break;
@@ -46183,7 +46013,7 @@ var TableDataStore = (function () {
       } else {
         searchTextArray.push(this.searchText);
       }
-      this.filteredData = source.filter(function (row, r) {
+      this.filteredData = source.filter(function (row) {
         var keys = Object.keys(row);
         var valid = false;
         // for loops are ugly, but performance matters here.
@@ -46202,8 +46032,9 @@ var TableDataStore = (function () {
             var targetVal = row[key];
             if (searchable) {
               if (filterFormatted && format) {
-                targetVal = format(targetVal, row, formatExtraData, r);
+                targetVal = format(targetVal, row, formatExtraData);
               } else if (filterValue) {
+                console.log('inin');
                 targetVal = filterValue(targetVal, row);
               }
               for (var j = 0, textLength = searchTextArray.length; j < textLength; j++) {
@@ -46745,7 +46576,7 @@ var ToolBar = (function (_Component) {
               _react2['default'].createElement(
                 'button',
                 { type: 'button',
-                  className: 'btn btn-primary',
+                  className: 'btn btn-info',
                   onClick: this.handleSaveBtnClick },
                 this.props.saveText
               )
@@ -47629,7 +47460,7 @@ ElementClass.prototype.toggle = function(className) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.14.2';
+  var VERSION = '4.14.1';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -47751,7 +47582,7 @@ ElementClass.prototype.toggle = function(className) {
 
   /**
    * Used to match `RegExp`
-   * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+   * [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns).
    */
   var reRegExpChar = /[\\^$.*+?()[\]{}|]/g,
       reHasRegExpChar = RegExp(reRegExpChar.source);
@@ -47774,7 +47605,7 @@ ElementClass.prototype.toggle = function(className) {
 
   /**
    * Used to match
-   * [ES template delimiters](http://ecma-international.org/ecma-262/7.0/#sec-template-literal-lexical-components).
+   * [ES template delimiters](http://ecma-international.org/ecma-262/6.0/#sec-template-literal-lexical-components).
    */
   var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
 
@@ -47883,9 +47714,9 @@ ElementClass.prototype.toggle = function(className) {
   var contextProps = [
     'Array', 'Buffer', 'DataView', 'Date', 'Error', 'Float32Array', 'Float64Array',
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
-    'Promise', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError', 'Uint8Array',
-    'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap', '_', 'clearTimeout',
-    'isFinite', 'parseInt', 'setTimeout'
+    'Promise', 'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError',
+    'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
+    '_', 'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
   ];
 
   /** Used to make template sourceURLs easier to identify. */
@@ -48746,7 +48577,7 @@ ElementClass.prototype.toggle = function(className) {
   }
 
   /**
-   * Creates a unary function that invokes `func` with its argument transformed.
+   * Creates a function that invokes `func` with its first argument transformed.
    *
    * @private
    * @param {Function} func The function to wrap.
@@ -48899,6 +48730,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /** Built-in constructor references. */
     var Array = context.Array,
+        Date = context.Date,
         Error = context.Error,
         Math = context.Math,
         RegExp = context.RegExp,
@@ -48932,7 +48764,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
      * of values.
      */
     var objectToString = objectProto.toString;
@@ -48948,28 +48780,29 @@ ElementClass.prototype.toggle = function(className) {
 
     /** Built-in value references. */
     var Buffer = moduleExports ? context.Buffer : undefined,
+        Reflect = context.Reflect,
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
-        getPrototype = overArg(Object.getPrototypeOf, Object),
+        enumerate = Reflect ? Reflect.enumerate : undefined,
         iteratorSymbol = Symbol ? Symbol.iterator : undefined,
         objectCreate = context.Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
         splice = arrayProto.splice,
         spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
 
-    /** Mocked built-ins. */
-    var ctxClearTimeout = context.clearTimeout !== root.clearTimeout && context.clearTimeout,
-        ctxNow = context.Date && context.Date.now !== root.Date.now && context.Date.now,
-        ctxSetTimeout = context.setTimeout !== root.setTimeout && context.setTimeout;
+    /** Built-in method references that are mockable. */
+    var clearTimeout = function(id) { return context.clearTimeout.call(root, id); },
+        setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
     var nativeCeil = Math.ceil,
         nativeFloor = Math.floor,
+        nativeGetPrototype = Object.getPrototypeOf,
         nativeGetSymbols = Object.getOwnPropertySymbols,
         nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined,
         nativeIsFinite = context.isFinite,
         nativeJoin = arrayProto.join,
-        nativeKeys = overArg(Object.keys, Object),
+        nativeKeys = Object.keys,
         nativeMax = Math.max,
         nativeMin = Math.min,
         nativeParseInt = context.parseInt,
@@ -49817,31 +49650,6 @@ ElementClass.prototype.toggle = function(className) {
     /*------------------------------------------------------------------------*/
 
     /**
-     * Creates an array of the enumerable property names of the array-like `value`.
-     *
-     * @private
-     * @param {*} value The value to query.
-     * @param {boolean} inherited Specify returning inherited property names.
-     * @returns {Array} Returns the array of property names.
-     */
-    function arrayLikeKeys(value, inherited) {
-      var result = (isArray(value) || isString(value) || isArguments(value))
-        ? baseTimes(value.length, String)
-        : [];
-
-      var length = result.length,
-          skipIndexes = !!length;
-
-      for (var key in value) {
-        if ((inherited || hasOwnProperty.call(value, key)) &&
-            !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
-          result.push(key);
-        }
-      }
-      return result;
-    }
-
-    /**
      * Used by `_.defaults` to customize its `_.assignIn` use.
      *
      * @private
@@ -49877,7 +49685,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Assigns `value` to `key` of `object` if the existing value is not equivalent
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @private
@@ -50085,13 +49893,14 @@ ElementClass.prototype.toggle = function(className) {
       if (object == null) {
         return !length;
       }
-      object = Object(object);
-      while (length--) {
-        var key = props[length],
+      var index = length;
+      while (index--) {
+        var key = props[index],
             predicate = source[key],
             value = object[key];
 
-        if ((value === undefined && !(key in object)) || !predicate(value)) {
+        if ((value === undefined &&
+            !(key in Object(object))) || !predicate(value)) {
           return false;
         }
       }
@@ -50118,7 +49927,7 @@ ElementClass.prototype.toggle = function(className) {
      * @param {Function} func The function to delay.
      * @param {number} wait The number of milliseconds to delay invocation.
      * @param {Array} args The arguments to provide to `func`.
-     * @returns {number|Object} Returns the timer id or timeout object.
+     * @returns {number} Returns the timer id.
      */
     function baseDelay(func, wait, args) {
       if (typeof func != 'function') {
@@ -50463,7 +50272,12 @@ ElementClass.prototype.toggle = function(className) {
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
     function baseHas(object, key) {
-      return object != null && hasOwnProperty.call(object, key);
+      // Avoid a bug in IE 10-11 where objects with a [[Prototype]] of `null`,
+      // that are composed entirely of index properties, return `false` for
+      // `hasOwnProperty` checks of them.
+      return object != null &&
+        (hasOwnProperty.call(object, key) ||
+          (typeof object == 'object' && key in object && getPrototype(object) === null));
     }
 
     /**
@@ -50837,45 +50651,38 @@ ElementClass.prototype.toggle = function(className) {
     }
 
     /**
-     * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+     * The base implementation of `_.keys` which doesn't skip the constructor
+     * property of prototypes or treat sparse arrays as dense.
      *
      * @private
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
-    function baseKeys(object) {
-      if (!isPrototype(object)) {
-        return nativeKeys(object);
-      }
-      var result = [];
-      for (var key in Object(object)) {
-        if (hasOwnProperty.call(object, key) && key != 'constructor') {
-          result.push(key);
-        }
-      }
-      return result;
-    }
+    var baseKeys = overArg(nativeKeys, Object);
 
     /**
-     * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
+     * The base implementation of `_.keysIn` which doesn't skip the constructor
+     * property of prototypes or treat sparse arrays as dense.
      *
      * @private
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
     function baseKeysIn(object) {
-      if (!isObject(object)) {
-        return nativeKeysIn(object);
-      }
-      var isProto = isPrototype(object),
-          result = [];
+      object = object == null ? object : Object(object);
 
+      var result = [];
       for (var key in object) {
-        if (!(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-          result.push(key);
-        }
+        result.push(key);
       }
       return result;
+    }
+
+    // Fallback for IE < 9 with es6-shim.
+    if (enumerate && !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf')) {
+      baseKeysIn = function(object) {
+        return iteratorToArray(enumerate(object));
+      };
     }
 
     /**
@@ -50962,7 +50769,7 @@ ElementClass.prototype.toggle = function(className) {
         return;
       }
       if (!(isArray(source) || isTypedArray(source))) {
-        var props = baseKeysIn(source);
+        var props = keysIn(source);
       }
       arrayEach(props || source, function(srcValue, key) {
         if (props) {
@@ -51329,9 +51136,6 @@ ElementClass.prototype.toggle = function(className) {
      * @returns {Object} Returns `object`.
      */
     function baseSet(object, path, value, customizer) {
-      if (!isObject(object)) {
-        return object;
-      }
       path = isKey(path, object) ? [path] : castPath(path);
 
       var index = -1,
@@ -51340,19 +51144,20 @@ ElementClass.prototype.toggle = function(className) {
           nested = object;
 
       while (nested != null && ++index < length) {
-        var key = toKey(path[index]),
-            newValue = value;
-
-        if (index != lastIndex) {
-          var objValue = nested[key];
-          newValue = customizer ? customizer(objValue, key, nested) : undefined;
-          if (newValue === undefined) {
-            newValue = isObject(objValue)
-              ? objValue
-              : (isIndex(path[index + 1]) ? [] : {});
+        var key = toKey(path[index]);
+        if (isObject(nested)) {
+          var newValue = value;
+          if (index != lastIndex) {
+            var objValue = nested[key];
+            newValue = customizer ? customizer(objValue, key, nested) : undefined;
+            if (newValue === undefined) {
+              newValue = objValue == null
+                ? (isIndex(path[index + 1]) ? [] : {})
+                : objValue;
+            }
           }
+          assignValue(nested, key, newValue);
         }
-        assignValue(nested, key, newValue);
         nested = nested[key];
       }
       return object;
@@ -51645,7 +51450,7 @@ ElementClass.prototype.toggle = function(className) {
       object = parent(object, path);
 
       var key = toKey(last(path));
-      return !(object != null && hasOwnProperty.call(object, key)) || delete object[key];
+      return !(object != null && baseHas(object, key)) || delete object[key];
     }
 
     /**
@@ -51799,16 +51604,6 @@ ElementClass.prototype.toggle = function(className) {
       end = end === undefined ? length : end;
       return (!start && end >= length) ? array : baseSlice(array, start, end);
     }
-
-    /**
-     * A simple wrapper around the global [`clearTimeout`](https://mdn.io/clearTimeout).
-     *
-     * @private
-     * @param {number|Object} id The timer id or timeout object of the timer to clear.
-     */
-    var clearTimeout = ctxClearTimeout || function(id) {
-      return root.clearTimeout(id);
-    };
 
     /**
      * Creates a clone of  `buffer`.
@@ -52303,7 +52098,7 @@ ElementClass.prototype.toggle = function(className) {
     function createCtor(Ctor) {
       return function() {
         // Use a `switch` statement to work with class constructors. See
-        // http://ecma-international.org/ecma-262/7.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
+        // http://ecma-international.org/ecma-262/6.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
         // for more details.
         var args = arguments;
         switch (args.length) {
@@ -52991,7 +52786,7 @@ ElementClass.prototype.toggle = function(className) {
         case regexpTag:
         case stringTag:
           // Coerce regexes to strings and treat strings, primitives and objects,
-          // as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring
+          // as equal. See http://www.ecma-international.org/ecma-262/6.0/#sec-regexp.prototype.tostring
           // for more details.
           return object == (other + '');
 
@@ -53053,7 +52848,7 @@ ElementClass.prototype.toggle = function(className) {
       var index = objLength;
       while (index--) {
         var key = objProps[index];
-        if (!(isPartial ? key in other : hasOwnProperty.call(other, key))) {
+        if (!(isPartial ? key in other : baseHas(other, key))) {
           return false;
         }
       }
@@ -53190,6 +52985,19 @@ ElementClass.prototype.toggle = function(className) {
     }
 
     /**
+     * Gets the "length" property value of `object`.
+     *
+     * **Note:** This function is used to avoid a
+     * [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792) that affects
+     * Safari on at least iOS 8.1-8.3 ARM64.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {*} Returns the "length" value.
+     */
+    var getLength = baseProperty('length');
+
+    /**
      * Gets the data for `map`.
      *
      * @private
@@ -53236,6 +53044,15 @@ ElementClass.prototype.toggle = function(className) {
       var value = getValue(object, key);
       return baseIsNative(value) ? value : undefined;
     }
+
+    /**
+     * Gets the `[[Prototype]]` of `value`.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {null|Object} Returns the `[[Prototype]]`.
+     */
+    var getPrototype = overArg(nativeGetPrototype, Object);
 
     /**
      * Creates an array of the own enumerable symbol properties of `object`.
@@ -53447,6 +53264,23 @@ ElementClass.prototype.toggle = function(className) {
         case symbolTag:
           return cloneSymbol(object);
       }
+    }
+
+    /**
+     * Creates an array of index keys for `object` values of arrays,
+     * `arguments` objects, and strings, otherwise `null` is returned.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array|null} Returns index keys, else `null`.
+     */
+    function indexKeys(object) {
+      var length = object ? object.length : undefined;
+      if (isLength(length) &&
+          (isArray(object) || isString(object) || isArguments(object))) {
+        return baseTimes(length, String);
+      }
+      return null;
     }
 
     /**
@@ -53734,25 +53568,6 @@ ElementClass.prototype.toggle = function(className) {
     }
 
     /**
-     * This function is like
-     * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
-     * except that it includes inherited enumerable properties.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @returns {Array} Returns the array of property names.
-     */
-    function nativeKeysIn(object) {
-      var result = [];
-      if (object != null) {
-        for (var key in Object(object)) {
-          result.push(key);
-        }
-      }
-      return result;
-    }
-
-    /**
      * Gets the parent value at `path` of `object`.
      *
      * @private
@@ -53819,18 +53634,6 @@ ElementClass.prototype.toggle = function(className) {
         return baseSetData(key, value);
       };
     }());
-
-    /**
-     * A simple wrapper around the global [`setTimeout`](https://mdn.io/setTimeout).
-     *
-     * @private
-     * @param {Function} func The function to delay.
-     * @param {number} wait The number of milliseconds to delay invocation.
-     * @returns {number|Object} Returns the timer id or timeout object.
-     */
-    var setTimeout = ctxSetTimeout || function(func, wait) {
-      return root.setTimeout(func, wait);
-    };
 
     /**
      * Sets the `toString` method of `wrapper` to mimic the source of `reference`
@@ -54052,7 +53855,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Creates an array of `array` values not included in the other given arrays
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons. The order of result values is determined by the
      * order they occur in the first array.
      *
@@ -54555,7 +54358,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Gets the index at which the first occurrence of `value` is found in `array`
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons. If `fromIndex` is negative, it's used as the
      * offset from the end of `array`.
      *
@@ -54603,13 +54406,12 @@ ElementClass.prototype.toggle = function(className) {
      * // => [1, 2]
      */
     function initial(array) {
-      var length = array ? array.length : 0;
-      return length ? baseSlice(array, 0, -1) : [];
+      return dropRight(array, 1);
     }
 
     /**
      * Creates an array of unique values that are included in all given arrays
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons. The order of result values is determined by the
      * order they occur in the first array.
      *
@@ -54813,7 +54615,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Removes all given values from `array` using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * **Note:** Unlike `_.without`, this method mutates `array`. Use `_.remove`
@@ -55282,8 +55084,7 @@ ElementClass.prototype.toggle = function(className) {
      * // => [2, 3]
      */
     function tail(array) {
-      var length = array ? array.length : 0;
-      return length ? baseSlice(array, 1, length) : [];
+      return drop(array, 1);
     }
 
     /**
@@ -55440,7 +55241,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Creates an array of unique values, in order, from all given arrays using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -55521,7 +55322,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Creates a duplicate-free version of an array, using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons, in which only the first occurrence of each
      * element is kept.
      *
@@ -55666,7 +55467,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Creates an array excluding all given values using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * **Note:** Unlike `_.pull`, this method returns a new array.
@@ -56237,11 +56038,6 @@ ElementClass.prototype.toggle = function(className) {
      * Iteration is stopped once `predicate` returns falsey. The predicate is
      * invoked with three arguments: (value, index|key, collection).
      *
-     * **Note:** This method returns `true` for
-     * [empty collections](https://en.wikipedia.org/wiki/Empty_set) because
-     * [everything is true](https://en.wikipedia.org/wiki/Vacuous_truth) of
-     * elements of empty collections.
-     *
      * @static
      * @memberOf _
      * @since 0.1.0
@@ -56559,7 +56355,7 @@ ElementClass.prototype.toggle = function(className) {
     /**
      * Checks if `value` is in `collection`. If `collection` is a string, it's
      * checked for a substring of `value`, otherwise
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * is used for equality comparisons. If `fromIndex` is negative, it's used as
      * the offset from the end of `collection`.
      *
@@ -57027,7 +56823,7 @@ ElementClass.prototype.toggle = function(className) {
           return collection.size;
         }
       }
-      return baseKeys(collection).length;
+      return keys(collection).length;
     }
 
     /**
@@ -57139,9 +56935,9 @@ ElementClass.prototype.toggle = function(className) {
      * }, _.now());
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
-    var now = ctxNow || function() {
-      return root.Date.now();
-    };
+    function now() {
+      return Date.now();
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -57682,7 +57478,7 @@ ElementClass.prototype.toggle = function(className) {
      * **Note:** The cache is exposed as the `cache` property on the memoized
      * function. Its creation may be customized by replacing the `_.memoize.Cache`
      * constructor with one whose instances implement the
-     * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
+     * [`Map`](http://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-map-prototype-object)
      * method interface of `delete`, `get`, `has`, and `set`.
      *
      * @static
@@ -57982,7 +57778,7 @@ ElementClass.prototype.toggle = function(className) {
     /**
      * Creates a function that invokes `func` with the `this` binding of the
      * create function and an array of arguments much like
-     * [`Function#apply`](http://www.ecma-international.org/ecma-262/7.0/#sec-function.prototype.apply).
+     * [`Function#apply`](http://www.ecma-international.org/ecma-262/6.0/#sec-function.prototype.apply).
      *
      * **Note:** This method is based on the
      * [spread operator](https://mdn.io/spread_operator).
@@ -58329,7 +58125,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Performs a
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * comparison between two values to determine if they are equivalent.
      *
      * @static
@@ -58509,7 +58305,7 @@ ElementClass.prototype.toggle = function(className) {
      * // => false
      */
     function isArrayLike(value) {
-      return value != null && isLength(value.length) && !isFunction(value);
+      return value != null && isLength(getLength(value)) && !isFunction(value);
     }
 
     /**
@@ -58609,7 +58405,8 @@ ElementClass.prototype.toggle = function(className) {
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a DOM element, else `false`.
+     * @returns {boolean} Returns `true` if `value` is a DOM element,
+     *  else `false`.
      * @example
      *
      * _.isElement(document.body);
@@ -58667,14 +58464,12 @@ ElementClass.prototype.toggle = function(className) {
           return !value.size;
         }
       }
-      var isProto = isPrototype(value);
       for (var key in value) {
-        if (hasOwnProperty.call(value, key) &&
-            !(isProto && key == 'constructor')) {
+        if (hasOwnProperty.call(value, key)) {
           return false;
         }
       }
-      return !(nonEnumShadows && nativeKeys(value).length);
+      return !(nonEnumShadows && keys(value).length);
     }
 
     /**
@@ -58693,7 +58488,8 @@ ElementClass.prototype.toggle = function(className) {
      * @category Lang
      * @param {*} value The value to compare.
      * @param {*} other The other value to compare.
-     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+     * @returns {boolean} Returns `true` if the values are equivalent,
+     *  else `false`.
      * @example
      *
      * var object = { 'a': 1 };
@@ -58722,7 +58518,8 @@ ElementClass.prototype.toggle = function(className) {
      * @param {*} value The value to compare.
      * @param {*} other The other value to compare.
      * @param {Function} [customizer] The function to customize comparisons.
-     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+     * @returns {boolean} Returns `true` if the values are equivalent,
+     *  else `false`.
      * @example
      *
      * function isGreeting(value) {
@@ -58756,7 +58553,8 @@ ElementClass.prototype.toggle = function(className) {
      * @since 3.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is an error object, else `false`.
+     * @returns {boolean} Returns `true` if `value` is an error object,
+     *  else `false`.
      * @example
      *
      * _.isError(new Error);
@@ -58784,7 +58582,8 @@ ElementClass.prototype.toggle = function(className) {
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a finite number, else `false`.
+     * @returns {boolean} Returns `true` if `value` is a finite number,
+     *  else `false`.
      * @example
      *
      * _.isFinite(3);
@@ -58861,15 +58660,16 @@ ElementClass.prototype.toggle = function(className) {
     /**
      * Checks if `value` is a valid array-like length.
      *
-     * **Note:** This method is loosely based on
-     * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+     * **Note:** This function is loosely based on
+     * [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
      *
      * @static
      * @memberOf _
      * @since 4.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+     * @returns {boolean} Returns `true` if `value` is a valid length,
+     *  else `false`.
      * @example
      *
      * _.isLength(3);
@@ -58891,7 +58691,7 @@ ElementClass.prototype.toggle = function(className) {
 
     /**
      * Checks if `value` is the
-     * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+     * [language type](http://www.ecma-international.org/ecma-262/6.0/#sec-ecmascript-language-types)
      * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
      *
      * @static
@@ -58970,12 +58770,8 @@ ElementClass.prototype.toggle = function(className) {
      * Performs a partial deep comparison between `object` and `source` to
      * determine if `object` contains equivalent property values.
      *
-     * **Note:** This method is equivalent to `_.matches` when `source` is
-     * partially applied.
-     *
-     * Partial comparisons will match empty array and empty object `source`
-     * values against any array or object value, respectively. See `_.isEqual`
-     * for a list of supported value comparisons.
+     * **Note:** This method supports comparing the same values as `_.isEqual`
+     * and is equivalent to `_.matches` when `source` is partially applied.
      *
      * @static
      * @memberOf _
@@ -59188,7 +58984,8 @@ ElementClass.prototype.toggle = function(className) {
      * @since 0.8.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+     * @returns {boolean} Returns `true` if `value` is a plain object,
+     *  else `false`.
      * @example
      *
      * function Foo() {
@@ -59252,7 +59049,8 @@ ElementClass.prototype.toggle = function(className) {
      * @since 4.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a safe integer, else `false`.
+     * @returns {boolean} Returns `true` if `value` is a safe integer,
+     *  else `false`.
      * @example
      *
      * _.isSafeInteger(3);
@@ -59546,7 +59344,7 @@ ElementClass.prototype.toggle = function(className) {
      * Converts `value` to an integer.
      *
      * **Note:** This method is loosely based on
-     * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+     * [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
      *
      * @static
      * @memberOf _
@@ -59580,7 +59378,7 @@ ElementClass.prototype.toggle = function(className) {
      * array-like object.
      *
      * **Note:** This method is based on
-     * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+     * [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
      *
      * @static
      * @memberOf _
@@ -59809,7 +59607,13 @@ ElementClass.prototype.toggle = function(className) {
      * // => { 'a': 1, 'b': 2, 'c': 3, 'd': 4 }
      */
     var assignIn = createAssigner(function(object, source) {
-      copyObject(source, keysIn(source), object);
+      if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
+        copyObject(source, keysIn(source), object);
+        return;
+      }
+      for (var key in source) {
+        assignValue(object, key, source[key]);
+      }
     });
 
     /**
@@ -60418,7 +60222,7 @@ ElementClass.prototype.toggle = function(className) {
      * Creates an array of the own enumerable property names of `object`.
      *
      * **Note:** Non-object values are coerced to objects. See the
-     * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+     * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
      * for more details.
      *
      * @static
@@ -60443,7 +60247,23 @@ ElementClass.prototype.toggle = function(className) {
      * // => ['0', '1']
      */
     function keys(object) {
-      return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+      var isProto = isPrototype(object);
+      if (!(isProto || isArrayLike(object))) {
+        return baseKeys(object);
+      }
+      var indexes = indexKeys(object),
+          skipIndexes = !!indexes,
+          result = indexes || [],
+          length = result.length;
+
+      for (var key in object) {
+        if (baseHas(object, key) &&
+            !(skipIndexes && (key == 'length' || isIndex(key, length))) &&
+            !(isProto && key == 'constructor')) {
+          result.push(key);
+        }
+      }
+      return result;
     }
 
     /**
@@ -60470,7 +60290,23 @@ ElementClass.prototype.toggle = function(className) {
      * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
      */
     function keysIn(object) {
-      return isArrayLike(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
+      var index = -1,
+          isProto = isPrototype(object),
+          props = baseKeysIn(object),
+          propsLength = props.length,
+          indexes = indexKeys(object),
+          skipIndexes = !!indexes,
+          result = indexes || [],
+          length = result.length;
+
+      while (++index < propsLength) {
+        var key = props[index];
+        if (!(skipIndexes && (key == 'length' || isIndex(key, length))) &&
+            !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
+          result.push(key);
+        }
+      }
+      return result;
     }
 
     /**
@@ -62650,12 +62486,8 @@ ElementClass.prototype.toggle = function(className) {
      * object and `source`, returning `true` if the given object has equivalent
      * property values, else `false`.
      *
-     * **Note:** The created function is equivalent to `_.isMatch` with `source`
-     * partially applied.
-     *
-     * Partial comparisons will match empty array and empty object `source`
-     * values against any array or object value, respectively. See `_.isEqual`
-     * for a list of supported value comparisons.
+     * **Note:** The created function supports comparing the same values as
+     * `_.isEqual` is equivalent to `_.isMatch` with `source` partially applied.
      *
      * @static
      * @memberOf _
@@ -62682,9 +62514,7 @@ ElementClass.prototype.toggle = function(className) {
      * value at `path` of a given object to `srcValue`, returning `true` if the
      * object value is equivalent, else `false`.
      *
-     * **Note:** Partial comparisons will match empty array and empty object
-     * `srcValue` values against any array or object value, respectively. See
-     * `_.isEqual` for a list of supported value comparisons.
+     * **Note:** This method supports comparing the same values as `_.isEqual`.
      *
      * @static
      * @memberOf _
@@ -64234,8 +64064,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _react = require('react');
@@ -64310,14 +64138,18 @@ var Collapse = _react2.default.createClass({
   onHeightReady: function onHeightReady(height) {
     var _props = this.props;
     var isOpened = _props.isOpened;
+    var keepCollapsedContent = _props.keepCollapsedContent;
     var onHeightReady = _props.onHeightReady;
 
 
     if (this.renderStatic && isOpened) {
       this.height = stringHeight(height);
     }
-
-    this.setState({ height: isOpened || !this.renderStatic ? height : 0 });
+    if (keepCollapsedContent) {
+      this.setState({ height: height });
+    } else {
+      this.setState({ height: isOpened || !this.renderStatic ? height : 0 });
+    }
 
     var reportHeight = isOpened ? height : 0;
 
@@ -64329,7 +64161,6 @@ var Collapse = _react2.default.createClass({
     var _props2 = this.props;
     var isOpened = _props2.isOpened;
     var springConfig = _props2.springConfig;
-    var fixedHeight = _props2.fixedHeight;
     var isOpenedChanged = this.state.isOpenedChanged;
 
 
@@ -64337,7 +64168,7 @@ var Collapse = _react2.default.createClass({
 
     // No need to animate if content is closed and it was closed previously
     // Also no need to animate if height did not change
-    var skipAnimation = !isOpenedChanged && !isOpened || this.height === newHeight && fixedHeight === -1;
+    var skipAnimation = !isOpenedChanged && !isOpened || this.height === newHeight;
 
     var springHeight = (0, _reactMotion.spring)(isOpened ? Math.max(0, height) : 0, _extends({
       precision: PRECISION
@@ -64438,45 +64269,24 @@ var Collapse = _react2.default.createClass({
     );
 
     if (renderStatic) {
-      var _ret = function () {
-        var newStyle = isOpened ? { height: 'auto' } : { overflow: 'hidden', height: 0 };
+      var newStyle = isOpened ? { height: 'auto' } : { overflow: 'hidden', height: 0 };
 
-        if (!isOpened && height > -1) {
-          if (!keepCollapsedContent) {
-            return {
-              v: null
-            };
-          }
-
-          return {
-            v: _react2.default.createElement(
-              'div',
-              _extends({ style: _extends({ height: 0, overflow: 'hidden' }, style) }, props),
-              content
-            )
-          };
+      if (!isOpened && height > -1) {
+        if (!keepCollapsedContent) {
+          return null;
         }
+        return _react2.default.createElement(
+          'div',
+          _extends({ style: _extends({ height: 0, overflow: 'hidden' }, style) }, props),
+          content
+        );
+      }
 
-        // <Motion> to prevent loosing input after causing this component to rerender
-        return {
-          v: _react2.default.createElement(
-            _reactMotion.Motion,
-            {
-              defaultStyle: { height: Math.max(0, height) },
-              style: { height: Math.max(0, height) },
-              onRest: onRest },
-            function () {
-              return _react2.default.createElement(
-                'div',
-                _extends({ style: _extends({}, newStyle, style) }, props),
-                content
-              );
-            }
-          )
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      return _react2.default.createElement(
+        'div',
+        _extends({ style: _extends({}, newStyle, style) }, props),
+        content
+      );
     }
 
     return _react2.default.createElement(

@@ -13,6 +13,7 @@ var assign = require('object-assign');
 var SessionStore = require('./SessionStore.react.jsx');
 
 var ActionTypes = Constants.ActionTypes;
+var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
@@ -28,7 +29,8 @@ var _user = {
               softTabs: localStorage.getItem('softTabs'),
               theme: localStorage.getItem('theme'),
               tabSize: localStorage.getItem('tabSize'),
-              fontSize: localStorage.getItem('fontSize')
+              fontSize: localStorage.getItem('fontSize'),
+              activeDashboard: localStorage.getItem('activeDashboard')
             };
 var _errors = [];
 
@@ -40,6 +42,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
   
   emitDelete: function() {
     this.emit(DELETE_EVENT);
+  },
+  
+  emitUserLoad: function() {
+    this.emit(USER_LOAD_EVENT);
   },
 
   addChangeListener: function(callback) {
@@ -56,6 +62,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeDeleteListener: function(callback) {
       this.removeListener(DELETE_EVENT, callback);
+  },
+  
+  addUserLoadListener: function(callback) {
+      this.on(USER_LOAD_EVENT, callback);
+  },
+  
+  removeUserLoadListener: function(callback) {
+      this.removeListener(USER_LOAD_EVENT, callback);
   },
 
   getUser: function() {
@@ -112,6 +126,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
   
   getEditorFontSize: function() {
     return _user.fontSize;
+  },
+  
+  getActiveDashboard: function() {
+    return _user.activeDashboard;
   }
 
 });
@@ -217,6 +235,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           _user.gender = action.json.gender || "";
           _user.avatar = action.json.avatar;
           _user.role = action.json.role;
+          _user.activeDashboard = action.json.activeDashboard;
           // save session data
           localStorage.setItem('email', _user.email);
           localStorage.setItem('userName', _user.name);
@@ -225,7 +244,9 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           localStorage.setItem('userGender', _user.gender);
           localStorage.setItem('userAvatar', _user.avatar);
           localStorage.setItem('userRole', _user.role);
+          localStorage.setItem('activeDashboard',_user.activeDashboard);
         }
+        UserStore.emitUserLoad();
         UserStore.emitChange();
         break;
         

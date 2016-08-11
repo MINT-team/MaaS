@@ -17,26 +17,27 @@ function getState() {
     var type = SessionStore.whoIam();
     if(type == "commonUser")
     {
-       return {
-        isLogged: SessionStore.isLogged(),
-        company: CompanyStore.getName(),
-        
-        user: {
-        	name:	UserStore.getName(),
-        	surname:	UserStore.getSurname(),
-        	dateOfBirth: UserStore.getDateOfBirth(),
-            gender: UserStore.getGender(),
-            avatar: UserStore.getAvatar(),
-            type: type
-            }
+        return {
+            isLogged: SessionStore.isLogged(),
+            company: CompanyStore.getName(),
+            
+            user: {
+            	name:	        UserStore.getName(),
+            	surname:	    UserStore.getSurname(),
+            	dateOfBirth:    UserStore.getDateOfBirth(),
+                gender:         UserStore.getGender(),
+                avatar:         UserStore.getAvatar(),
+                type:           type
+                }
         }; 
-    }else
+    }
+    else
     {
         return {
-        isLogged: SessionStore.isLogged(),
-        user: {
-            type: type
-            }
+            isLogged: SessionStore.isLogged(),
+            user: {
+                type:           type
+                }
         };
     }
     

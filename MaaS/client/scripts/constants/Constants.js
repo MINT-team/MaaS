@@ -53,7 +53,10 @@ module.exports = {
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
+    
+    // Super Admin
     CHANGE_COMPANY_NAME_RESPONSE: null,
+    
     // Dashboard
 
     // Collection
