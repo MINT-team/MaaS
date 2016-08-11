@@ -298,7 +298,8 @@ new
     */
     var sweet = require('sweet.js');
     var fs = require('fs');
-    fs.readFile('../macro.sjs', function(err, data) {
+    var intepreterFile = __dirname + "../macro.sjs";
+    fs.readFile(intepreterFile, function(err, data) {
         if(err)
         {
             console.log("> Errore:", err);
