@@ -7,6 +7,7 @@
 // ==========================================
 
 var app = require('../../server/server.js');
+var mongoose = require('mongoose');
 
 module.exports = function(Company) {
     
@@ -94,5 +95,17 @@ module.exports = function(Company) {
             http: { verb: 'delete', path: '/deleteCompany/:id' }
         }
     );
+    
+    //checks if the connection string points to a real mongodb database
+    Company.beforeRemote('__create__externalDatabases', function(context, extDbInstance, next){
+        var connString = context.args.data.connString;
+        console.log('> connection string: ', connString);
+        mongoose.connect(connString);
+        var db = mongoose.connection;
+        db.on('error', function(){
+            console.log('> connection error for the connection string: ', connString);
+            context.args.data.connected = "false";
+        })
+    });
 
 };

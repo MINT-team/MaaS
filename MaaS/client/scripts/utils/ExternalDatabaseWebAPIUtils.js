@@ -26,33 +26,28 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
 
-setExtDb: function(id, name, password) {
+addExtDb: function(id, name, password, connString) {
     request
-      .get(APIEndpoints.EXTERNAL_DATABASES + '/' + id + '/databases')
+      .post(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
       .set('Authorization', localStorage.getItem('accessToken'))
       .send({
-        id: id,
         name: name,
-        password: password})
+        password: password,
+        connString: connString})
       .set('Accept', 'application/json')
       .end(function(err, res){
-        if(res) {
-          console.log(res);
-            if(res.error) {
+        if(res) 
+        {
+            if(res.error) 
+            {
                 var errors = _getErrors(res.body.error);
-                ResponseExternalDatabaseActionCreator.responseSetExtDb(null, errors);
-            } else {
-                var json = {
-                        id: res.body.email,
-                        name: res.body.company,
-                        password: res.body.password
-
-                    };
-                ResponseExternalDatabaseActionCreator.responseSetExtDb(json, null);
+                ResponseExternalDatabaseActionCreator.responseAddExtDb(null, errors);
             }
-        }
-        if(err){
-          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+            else
+            {
+              ResponseExternalDatabaseActionCreator.responseAddExtDb(res.body, null);
+            }
+            
         }
       });
   },
@@ -84,12 +79,10 @@ connectDb: function() {
 getDbs: function(id) {
   request
     .get(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
-    //.get(APIEndpoints.EXTERNAL_DATABASES + '?filter=%7B%22where%22%3A%7B%22companyName%22%3A%22' + localStorage.getItem('companyName') + '%22%7D%7D')
     .set('Authorization', localStorage.getItem('accessToken'))
     .set('Accept', 'application/json')
     .end(function(err, res){
       if(res) {
-        console.log(res);
           if(res.error) {
               var errors = _getErrors(res.body.error);
               ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);

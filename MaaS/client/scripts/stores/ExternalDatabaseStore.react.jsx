@@ -17,7 +17,7 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
 
-var _databases = [];
+var _databases = JSON.parse(localStorage.getItem('databaseList'));
 var _connections = [];
 var _errors = [];
 
@@ -140,10 +140,8 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
             else if(action.json)
             {
                 _errors = []; // empty old errors
-                // set databases of the company
                 _databases = action.json;
-                console.log(_databases);
-                localStorage.setItem('dbCount', _databases.length);
+                localStorage.setItem('databaseList',JSON.stringify(action.json));
             }
             ExternalDatabaseStore.emitChange();
             break;
@@ -160,12 +158,25 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
                 var length = _databases.length;
                 if(length > 0)
                 {
-                    for(var i = 0; i < length; ++i){
+                    for(var i = 0; i < length; ++i)
+                    {
                         var connString = _databases[i].connString;
                         var conn = mongoose.createConnection(connString);
                         _connections.push(conn);
                     }
                 }
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
+        case ActionTypes.ADD_EXT_DB_RESPONSE:
+            if(action.errors)
+            {
+                _errors = action.errors;
+            }
+            else if(action.json)
+            {
+                _errors = []; // empty old errors
+                _databases.push(action.json);
             }
             ExternalDatabaseStore.emitChange();
             break;

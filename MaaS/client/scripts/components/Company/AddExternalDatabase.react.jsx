@@ -9,13 +9,16 @@
 
 var React = require('react');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
+var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 
 var AddExternalDatabase = React.createClass({
     
     getInitialState: function() {
         return {
-            errors: []
+            errors: [],
+            companyId: CompanyStore.getId()
+            
         };
     },
     
@@ -44,18 +47,10 @@ var AddExternalDatabase = React.createClass({
 	},
 	
 	confirmAdd: function(event) {
-	    /*
         event.preventDefault();
-        var id = this.state.id;
-        if(id != "")
-        {
-            RequestDSLActionCreator.deleteDSLDefinition(id);
-        }
-        else
-        {
-            this.setState({ errors: "Error retrieving DSL id" });
-        }
-        */
+        //id, name, password, connString
+        RequestExternalDatabaseActionCreator.addExtDb(this.state.companyId, this.refs.name.value, this.refs.password.value, this.refs.string.value);
+        
     },
     
     render: function() {
@@ -78,9 +73,9 @@ var AddExternalDatabase = React.createClass({
                 <div className="dropdown-content dropdown-popup" ref="addDropdown">
                     <p className="dropdown-title">Add new database</p>
                     <form className="externaldb-form">
-                        <input id="name" name="name" placeholder="Database name" className="dropdown-button" type="text" autocomplete="off"/>
-                        <input id="password" name="password" placeholder="Database password" className="dropdown-button" type="password" autocomplete="off"/>    
-                        <input id="string" name="string" placeholder="Connection string" className="dropdown-button full"  type="text" autocomplete="off"/>
+                        <input ref="name" id="name" name="name" placeholder="name" className="dropdown-button" type="text" autocomplete="off"/>
+                        <input ref="password" id="password" name="password" placeholder="password" className="dropdown-button" type="password"/>    
+                        <input ref="string" id="string" name="string" placeholder="connection string" className="dropdown-button full"  type="text"/>
                     </form>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>

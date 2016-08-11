@@ -72,7 +72,14 @@
       "principalId": "Administrator",
       "permission": "ALLOW",
       "property": "__get__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "__post__externalDatabases"
     }
+    
   ],
   "methods": {}
 }

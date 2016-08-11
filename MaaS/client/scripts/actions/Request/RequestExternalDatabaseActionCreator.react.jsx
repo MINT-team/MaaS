@@ -14,8 +14,8 @@ var ActionTypes = Constants.ActionTypes;
 
 
 var RequestExternalDatabaseActionCreator = {
-    setExtDb: function(companyId, name, password) {
-        WebAPIUtils.setExtDb(companyId, name, password);
+    addExtDb: function(id, name, password, connString) {
+        WebAPIUtils.addExtDb(id, name, password, connString);
     },
     
     connectDb: function() {

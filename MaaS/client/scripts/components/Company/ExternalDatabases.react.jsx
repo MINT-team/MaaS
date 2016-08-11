@@ -29,7 +29,8 @@ function getState() {
           isOpened: false,
           _isOpened: true,
           isLogged: SessionStore.isLogged(),
-          type: "All"
+          type: "All",
+          databases: ExternalDatabaseStore.getDbs()
       };
 }
 
@@ -67,36 +68,62 @@ var ExternalDatabases = React.createClass({
       ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
   
+  
+ 
+  
   buttonFormatter: function(cell, row) {
-    var buttons;
-    if(true)
-    {
-      buttons = (
-        <div>
-          <Link to=""><i className="material-icons md-24">&#xE157;</i></Link>
-          <Link to=""><i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i></Link>
-        </div>
-      );
-    }
-    else
-    {
-      buttons = (
-        <div>
-          <Link to=""><i onClick="" className="material-icons md-24 dropdown-button">&#xE5C9;</i></Link>
-        </div>
-      );
-    }
+    
+    var delDropdown ="deleteDropdown"+row.id;
+    
+    var onClick = function() {
+      document.getElementById(delDropdown).classList.toggle("dropdown-show");
+    };
+    
     return (
       <div className="table-buttons">
-        {buttons}
+         <div className="tooltip tooltip-bottom" id="Change-button">
+            <i onClick={this.changeState} className="material-icons md-24 dropdown-button">&#xE8D4;</i>
+            <p className="tooltip-text tooltip-text-short">Change</p>
+          </div>  
+          <div className="tooltip tooltip-bottom pop-up" id="Delete-button">
+            <i onClick={onClick} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
+            <p className="tooltip-text tooltip-text-long">Delete</p>
+            <div className="dropdown-content dropdown-popup" id={delDropdown}>
+			        <p className="dropdown-title">Delete Database</p>
+			        <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> Database?</p>
+              <div className="dropdown-buttons">
+                <button className="inline-button">Cancel</button>
+                <button id="delete-button" className="inline-button">Delete</button>
+              </div>
+		        </div>
+       	  </div>
       </div>
     );
   },
   statusFormatter: function(cell,row) {
+    var status;
+    
+    if(row.connected)
+    {
+      status = (
+      <div className="led-box">
+        <div className="led-green"></div>
+      </div>
+      );
+    }
+    else
+    {
+      status = (
+      <div className="led-box">
+        <div className="led-red"></div>
+      </div>
+      );
+      }
+      
     return (
-    <div className="led-box">
-      <div className="led-green"></div>
-    </div>
+      <div>
+      {status}
+      </div>
     );
   },
   
@@ -106,22 +133,30 @@ var ExternalDatabases = React.createClass({
   },
     
   onConnectedClick: function() {
-      /*this.refs.table.handleFilterData({
-          type: 'Connected'
-      });*/
+      this.refs.table.handleFilterData({
+          connected: 'true'
+      });
       this.setState({type: "Connected"});
   },
   
   onDisconnectedClick: function() {
-      /*this.refs.table.handleFilterData({
-          type: 'Disconnected'
-      });*/
+      this.refs.table.handleFilterData({
+          connected: 'false'
+      });
       this.setState({type: "Disconnected"});
   },
   
   deleteAllSelected: function() {
     alert(this.refs.table.state.selectedRowKeys);
   },
+  
+  changeState: function() {
+        
+    },
+    
+  deleteDatabase: function() {
+      
+    },  
   
   render: function() {
     if(!this.state.isLogged || this.state.errors.length > 0)
@@ -153,13 +188,19 @@ var ExternalDatabases = React.createClass({
         bgColor: "rgba(144, 238, 144, 0.42)",
     };
   
-    var data = [];  
-    data = [
-      {
-        id: null,
-        name: "Prova"
-      }
-    ];
+    var data = [];
+    
+    if(this.state.databases && this.state.databases.length > 0)
+    {
+        this.state.databases.forEach(function(database, i) {
+            data[i] = {
+                id: database.id,
+                name: database.name,
+                connected: database.connected,
+                connectionString: database.connString
+            };
+        });
+    }
     
     var options = {
       onRowClick: function(row){
@@ -208,35 +249,5 @@ var ExternalDatabases = React.createClass({
     );
   }
 });
-
-/*
-
-<div id="successful-operation">
-                <p>Manage your external databases, add new or disable existing ones.</p>
-            </div>
-            <div id="add-database">
-            <button onClick={this.openForm} className="inline-button">Add Database</button>
-            <button className="inline-button">Delete Database</button>
-            <button className="inline-button">Disable Database</button>
-              <Collapse isOpened={this.state.isOpened} >
-                <form action="" method="post" className="externaldb">
-                  <fieldset>
-                    <input id="name" name="name" placeholder="Database name" type="text" />
-                    <input id="password" name="password" placeholder="Database password" type="password" />    
-                    <input id="string" name="string" placeholder="Connection string" type="text" />
-                    <button className="inline-button">Add</button>
-                  </fieldset>
-                </form>
-              </Collapse>  
-            </div>
-
-
-<Collapse _onChange={this.handleChange} isOpened={this.state._isOpened} >
-              <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} search={true} striped={true} hover={true}>
-                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
-                <TableHeaderColumn dataField="allowed">Status</TableHeaderColumn>
-              </BootstrapTable>
-              </Collapse>
-*/
 
 module.exports = ExternalDatabases;
