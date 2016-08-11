@@ -1,125 +1,27 @@
 var app = require('../../server/server.js');
 var sweet = require('sweet.js');
 var fs = require('fs');
-//var hi = require('./macro.sjs');
-
-require("babel-core/register");
-
-import { hi } from './macro.js';
-// da qui usa Babel
 
 module.exports = function(DSL) {
     
-    console.log(hi);
-    /*
-
-out = sweetjs.compile(content, {
-			modules: [this.macro]
-		});
-
-var intepreterFile = __dirname + "/macro.sjs";
-
-var DslConcreteStrategy = function() {
-	this.macro = null;
-};
-
-DslConcreteStrategy.prototype.init = function(callback, errback) {
-	var self = this;
-	fs.readFile(intepreterFile, function(err, data) {
-		if (err) {
-			errback(new MaapError(err));
-		}
-		else {
-			self.macro = sweetjs.loadModule(data);
-			callback();
-		}
-	});
-};
-
-
-*/
-
-/*
-(Str, {
-        sourceMap: Bool,
-        filename: Str,
-        readableNames: Bool,
-        maxExpands: Num
-    }) -> {
-        code: Str,
-        sourceMap: Str
-    }
-sweet.compile(code, options)
-Parameters:
-
-code the code to expand
-options options object:
-sourceMap if true generate a source map
-filename file name of the source file to go into the source map
-readableNames clean up variables that were renamed from hygiene (foo$100 becomes foo where ever possible). Only supports ES5 code.
-maxExpands maximum number of times to expand macros. Used to implement macro stepping.
-
-
-
-*/
-    
-    
-       /*
-    
-    syntax new = function (ctx) {
-  return #`{var x = 10;}`;
-}
-
-new
-    
-    */
-    
-    /*
     var intepreterFile = __dirname + "/macro.sjs";
-    fs.readFile(intepreterFile, function(err, data) {
+    fs.readFile(intepreterFile, function(err, macro) {
         if(err)
         {
             console.log("> Errore:", err);
         }
         else
         {
+            macro = macro.toString();
             var dsl = "hi";
-            console.log(intepreterFile);
-            //console.log('File macro trovato:');
-            var dsl = "syntax hi = function (ctx) { return #`console.log('hello, world!')`; }";
-            
-            var expanded = sweet.compile(dsl, {
-                                                sourceMap: false,
-                                                moduleLoader: intepreterFile,
-                                                readableNames: true,
-                                                maxExpands: 10 });
-                                           
-            // compile(source, {
-            //     cwd: '.',
-            //     transform,
-            //     moduleResolver: x => x,
-            //     moduleLoader: path => loader[path],
-            //     includeImports: false
-            //   });
+            var data = macro + dsl;
+            var expanded = sweet.compile(data);
             console.log(expanded);
-            
+            eval(expanded.code);
         }
-        
     });
     
-    // -----------------------------------------
     
-    
-    
-    
-    
-    */
-    
-    
-    
-    
-    
-
     // Create a DSL definition
     DSL.saveDefinition = function(userId ,type, name, source, cb) {
         
@@ -128,7 +30,7 @@ new
             DSL.destroyById(DSLInstance.id, function(err) {
                 if(err) 
                     return cb(err, null, null);
-            })
+            });
             console.log("> Error creating relationship for the DSL");
             return cb(err, null, null);
         }
