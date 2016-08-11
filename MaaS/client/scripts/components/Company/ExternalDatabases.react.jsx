@@ -74,26 +74,69 @@ var ExternalDatabases = React.createClass({
   buttonFormatter: function(cell, row) {
     
     var delDropdown ="deleteDropdown"+row.id;
+    var stateDropdown ="stateDropdown"+row.id;
     
-    var onClick = function() {
+    var tryDel = function() {
       document.getElementById(delDropdown).classList.toggle("dropdown-show");
     };
     
+    var tryChangeState = function() {
+      document.getElementById(stateDropdown).classList.toggle("dropdown-show");
+    };
+    
+    var confirmDelete = function() {
+      RequestExternalDatabaseActionCreator.deleteDb(row.id, CompanyStore.getId());
+    };
+    
+    var confirmChangeState = function() {
+      var newStatus;
+      if(row.connected == 'true')
+      {
+        newStatus = 'false';
+      }
+      else
+      {
+        newStatus = 'true';
+      }
+      RequestExternalDatabaseActionCreator.changeStateDb(row.id, newStatus, CompanyStore.getId());
+    };
+    
+    var messageState;
+    if (row.connected == 'true')
+    {
+      messageState = (
+        <p className="dropdown-description">Are you sure you want to <span id="successful-email">disconnect {row.name}</span> state?</p>
+      );
+    }
+    else
+    {
+      messageState = (
+        <p className="dropdown-description">Are you sure you want to <span id="successful-email">connect {row.name}</span> state?</p>
+      );
+    }
+  
+    
     return (
       <div className="table-buttons">
-         <div className="tooltip tooltip-bottom" id="Change-button">
-            <i onClick={this.changeState} className="material-icons md-24 dropdown-button">&#xE8D4;</i>
-            <p className="tooltip-text tooltip-text-short">Change</p>
-          </div>  
+          <div className="tooltip tooltip-bottom pop-up" id="Change-button">
+            <i onClick={tryChangeState} className="material-icons md-24 dropdown-button">&#xE8D4;</i>
+            <div className="dropdown-content dropdown-popup" id={stateDropdown}>
+			        <p className="dropdown-title">Change state Database</p>
+			        {messageState}
+              <div className="dropdown-buttons">
+                <button className="inline-button">Cancel</button>
+                <button id="delete-button" onClick={confirmChangeState} className="inline-button">Confirm</button>
+              </div>
+		        </div>
+          </div>
           <div className="tooltip tooltip-bottom pop-up" id="Delete-button">
-            <i onClick={onClick} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
-            <p className="tooltip-text tooltip-text-long">Delete</p>
+            <i onClick={tryDel} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
             <div className="dropdown-content dropdown-popup" id={delDropdown}>
 			        <p className="dropdown-title">Delete Database</p>
 			        <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> Database?</p>
               <div className="dropdown-buttons">
                 <button className="inline-button">Cancel</button>
-                <button id="delete-button" className="inline-button">Delete</button>
+                <button id="delete-button" onClick={confirmDelete} className="inline-button">Delete</button>
               </div>
 		        </div>
        	  </div>
@@ -103,7 +146,7 @@ var ExternalDatabases = React.createClass({
   statusFormatter: function(cell,row) {
     var status;
     
-    if(row.connected)
+    if(row.connected == 'true')
     {
       status = (
       <div className="led-box">

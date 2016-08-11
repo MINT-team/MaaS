@@ -24,6 +24,18 @@ var RequestExternalDatabaseActionCreator = {
     
     getDbs: function(id) {
         WebAPIUtils.getDbs(id);
+    },
+    
+    deleteDb: function(id, companyId) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.DELETE_DB,
+            id: id
+        });
+        WebAPIUtils.deleteDb(id, companyId);
+    },
+    
+    changeStateDb: function(id, status, companyId) {
+        WebAPIUtils.changeStateDb(id, status, companyId);
     }
 };
 

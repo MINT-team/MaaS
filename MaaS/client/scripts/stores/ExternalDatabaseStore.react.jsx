@@ -180,6 +180,37 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             ExternalDatabaseStore.emitChange();
             break;
+        case ActionTypes.DELETE_DB:
+            if(action.id)
+            {
+                _errors = [];
+                
+                _databases.forEach(function(database, i) {
+                    if (database.id == action.id)
+                    {
+                        _databases.splice(i,1);
+                    }
+                });
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
+        case ActionTypes.CHANGE_STATE_DB:
+            if (action.errors)
+            {
+                _errors = action.errors;
+            }
+            else if(action.json)
+            {
+                _errors = [];
+                _databases.forEach(function(database,i) {
+                    if (database.id == action.json.id)
+                    {
+                        database.connected = action.json.connected;
+                    }
+                });
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
     }
 });
 

@@ -91,6 +91,36 @@ getDbs: function(id) {
               ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
       }
     });
+},
+
+deleteDb: function(id, companyId) {
+  request
+    .del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
+    .set('Authorization', localStorage.getItem('accessToken'))
+    .set('Accept', 'application/json');
+},
+
+changeStateDb: function(id, status, companyId) {
+  request
+    .put(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
+    .set('Authorization', localStorage.getItem('accessToken'))
+    .set('Accept', 'application/json')
+    .send({
+      connected: status
+    })
+    .end(function(err, res){
+      if(res) {
+        if (res.errors)
+        {
+          var errors = _getErrors(res.body.error);
+          ResponseExternalDatabaseActionCreator.responseChangeStateDb(null, errors);
+        }
+        else
+        {
+          ResponseExternalDatabaseActionCreator.responseChangeStateDb(res.body, null);
+        }
+      }
+    });
 }
 
 };

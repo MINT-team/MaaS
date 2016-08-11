@@ -73,9 +73,9 @@ var AddExternalDatabase = React.createClass({
                 <div className="dropdown-content dropdown-popup" ref="addDropdown">
                     <p className="dropdown-title">Add new database</p>
                     <form className="externaldb-form">
-                        <input ref="name" id="name" name="name" placeholder="name" className="dropdown-button" type="text" autocomplete="off"/>
-                        <input ref="password" id="password" name="password" placeholder="password" className="dropdown-button" type="password"/>    
-                        <input ref="string" id="string" name="string" placeholder="connection string" className="dropdown-button full"  type="text"/>
+                        <input ref="name" id="name" name="name" placeholder="name" className="dropdown-button" type="text" autoComplete="off"/>
+                        <input ref="password" id="password" name="password" placeholder="password" className="dropdown-button" type="password" autoComplete="off"/>    
+                        <input ref="string" id="string" name="string" placeholder="connection string" className="dropdown-button full"  type="text" autoComplete="off"/>
                     </form>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>

@@ -34,6 +34,14 @@ var ResponseExternalDatabaseActionCreator = {
           json: json,
           errors: errors
         });
+    },
+    
+    responseChangeStateDb: function(json, errors){
+        Dispatcher.handleServerAction({
+          type: ActionTypes.CHANGE_STATE_DB,
+          json: json,
+          errors: errors
+        });  
     }
 
 };

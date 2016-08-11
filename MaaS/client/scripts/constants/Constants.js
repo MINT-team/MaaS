@@ -73,7 +73,9 @@ module.exports = {
     // Databases
     ADD_EXT_DB_RESPONSE: null,
     CONNECT_DBS_RESPONSE: null,
-    GET_DBS: null
+    GET_DBS: null,
+    DELETE_DB: null,
+    CHANGE_STATE_DB: null
 
   })
 
