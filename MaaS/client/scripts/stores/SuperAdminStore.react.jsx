@@ -26,6 +26,7 @@ var _errors = [];
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
+        //window.alert("emetto il cambiamento super admin");
         this.emit(CHANGE_EVENT);
     },
 

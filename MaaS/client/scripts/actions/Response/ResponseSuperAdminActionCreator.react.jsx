@@ -30,10 +30,11 @@ var ResponseSuperAdminActionCreator = {
         });
     },
     
-    responseChangeCompanyName: function(email, errors) {
+    responseChangeCompanyName: function(name, errors) {
+        window.alert("RISPOSTA action change name");
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
-            email: email,
+            name: name,
             errors: errors
         });
     },

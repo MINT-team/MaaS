@@ -9,6 +9,7 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
@@ -16,7 +17,8 @@ function getState() {
   return {
     isLogged: SessionStore.isLogged(),
     userType:SessionStore.whoIam(),
-    errors: SessionStore.getErrors()
+    errors: SessionStore.getErrors(),
+    activeDashboard: UserStore.getActiveDashboard()
   };
 }
 
@@ -29,7 +31,8 @@ var Login = React.createClass({
     getInitialState: function() {
       return {
         isLogged: SessionStore.isLogged(),
-        errors: []
+        errors: [],
+        activeDashboard: []
       };
     },
 
@@ -43,16 +46,27 @@ var Login = React.createClass({
     },
     
     handleRedirect: function() {
-      if(this.state.isLogged) {
+      if(this.state.isLogged)
+      {
         const { router } = this.context;
-        router.push('/');   // redirect to Dashboard page
+        
+        if (this.state.activeDashboard == "default")
+        {
+          router.push('/manageDSL');   // redirect to Dashboard page
+        }
+        else
+        {
+          //Redirect to active dashboard
+        }
+        
+        //router.push('/');
       }
     },
 
     _onChange: function() {
       this.setState(getState());
       if(this.state.isLogged) {                                         // loads data to the session
-            RequestUserActionCreator.getUser(SessionStore.getUserId());  
+            RequestUserActionCreator.getUser(SessionStore.getUserId());
             if(this.state.userType == "commonUser")
             {                   
                 RequestUserActionCreator.getCompany(SessionStore.getUserId());

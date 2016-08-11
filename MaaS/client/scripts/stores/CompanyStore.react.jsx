@@ -29,6 +29,7 @@ var _errors = [];
 var CompanyStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
+        window.alert("emetto il cambiamento company");
         this.emit(CHANGE_EVENT);
     },
     
