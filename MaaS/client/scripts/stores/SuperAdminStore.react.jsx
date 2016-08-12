@@ -22,7 +22,7 @@ var _superAdmin = {
     email: SessionStore.getEmail()
 };
 
-//var _companyName;   
+  
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
@@ -46,10 +46,7 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     getEmail: function() {
         return _superAdmin.email;
   },
-  /*getCompanyName: function(){
-      return _companyName;
-  },*/
-  
+ 
   getErrors: function() {
     return _errors;
   }

@@ -3,6 +3,7 @@ var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 
@@ -26,7 +27,7 @@ var DatabaseManagement = React.createClass({
  componentDidMount: function() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestSuperAdminActionCreator.getCompanies();  
+        RequestCompanyActionCreator.getCompanies();  
   },
   
   componentWillUnmount: function() {

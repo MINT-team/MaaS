@@ -147,7 +147,11 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             else
             {
                 _errors = [];
-                //_companyName = action.name;
+                //Correction of the list containing the System companies
+                var i = 0;
+                while(i < _companies.length && _companies[i].name != action.data.oldName)
+                    i++;
+                _companies[i].name = action.data.newName;
             }
             CompanyStore.emitChange();
             break;

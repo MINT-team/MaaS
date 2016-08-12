@@ -53,7 +53,6 @@ var CompaniesManagement = React.createClass({
   },
   
   _onChange: function() {
-      window.alert("company management");
       this.setState(getState());
   },
   

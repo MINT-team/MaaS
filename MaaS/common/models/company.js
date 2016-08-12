@@ -114,13 +114,18 @@ module.exports = function(Company) {
                 return cb(err);
            Company.findOne({where: {name: name}, limit: 1}, function(err, companyInstance) {
                 if(!companyInstance){
+                    var oldName = company.name;
                     company.updateAttribute('name', name, function(err, company) {
                         if(err) {
                           console.log('> Failed changing name');
                           return cb(err);
                         }
                           console.log('> Name changed successfully');
-                          return cb(null, null, company.name);   
+                          var data = {
+                              newName: company.name,
+                              oldName: oldName
+                          };
+                          return cb(null, null, data);   
                     });
                 }else{
                     var error = { message: 'A company with this name already exists' };
@@ -141,7 +146,7 @@ Company.remoteMethod(
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
-                { arg: 'newName', type: 'Object'}
+                { arg: 'data', type: 'Object'},
             ],
             http: { verb: 'put', path: '/:id/changeCompanyName' }
         }

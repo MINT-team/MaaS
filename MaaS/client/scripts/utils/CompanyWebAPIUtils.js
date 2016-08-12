@@ -70,7 +70,6 @@ module.exports = {
   },
   
   getCompanies: function() {    //returns all companies in the db
-  window.alert("WEB API UTIL");
     request
       .get(APIEndpoints.COMPANIES)
       .set('Accept', 'application/json')
@@ -84,7 +83,6 @@ module.exports = {
         if(res) {
           console.log(res);
             if(res.error) {
-              window.alert("errore");
                 var errors = _getErrors(res.body.error);
                 ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
             } else {
@@ -92,6 +90,33 @@ module.exports = {
             }
         }
       });
+  },
+  
+  //change the name of the company wich has id = companyId
+  changeCompanyName: function(companyId, name){
+     request
+      .put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName')
+      .set('Accept','application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        id: companyId,
+        name: name
+      })
+      .end(function(error, res) {
+        if (res)
+        {
+          res = JSON.parse(res.text);
+          if (res.error)
+          {
+            ResponseCompanyActionCreator.responseChangeCompanyName(null,res.error.message);
+          }
+          else
+          {
+            ResponseCompanyActionCreator.responseChangeCompanyName(res.data, null);
+          }
+        }
+      });
+
   }
   
   

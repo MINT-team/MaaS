@@ -20,15 +20,7 @@ var ResponseSuperAdminActionCreator = {
           name: name,
           errors: errors
         });
-    },
-    
-    responseChangeCompanyName: function(name, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
-            name: name,
-            errors: errors
-        });
-    },
+    }
     
 };
 

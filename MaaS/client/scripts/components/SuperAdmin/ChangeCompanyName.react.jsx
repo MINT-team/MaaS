@@ -13,6 +13,7 @@
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
@@ -20,8 +21,8 @@ var Link = require('react-router').Link;
 
 function getState(){
     return{
-      name: SuperAdminStore.getCompanyName(),
-      errors: SuperAdminStore.getErrors(),
+      name: CompanyStore.getName(),
+      errors: CompanyStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       first: "false"
     };
@@ -41,11 +42,13 @@ var ChangeCompanyName = React.createClass({
   
   componentDidMount: function() {
       SuperAdminStore.addChangeListener(this._onChange);
+      CompanyStore.addChangeListener(this._onChange);
       this.refs.nome.value = this.state.name;
   },
   
   componentWillUnmount: function() {
       SuperAdminStore.removeChangeListener(this._onChange);
+      CompanyStore.removeChangeListener(this._onChange);
   },
   
   _onChange: function() {
@@ -57,7 +60,7 @@ var ChangeCompanyName = React.createClass({
       var name = this.refs.nome.value;
       var id = this.state.companyId;
       if(name != this.state.name)
-        RequestSuperAdminActionCreator.changeCompanyName(id, name);
+        RequestCompanyActionCreator.changeCompanyName(id, name);
       else 
         this._setError("No changes to save");
     

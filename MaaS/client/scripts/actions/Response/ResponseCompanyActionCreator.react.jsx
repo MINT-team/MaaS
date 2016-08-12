@@ -34,6 +34,14 @@ var ResponseCompanyActionCreator = {
           json: json,
           errors: errors
         });
+    },
+    
+    responseChangeCompanyName: function(data, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
+            data: data,
+            errors: errors
+        });
     }
     
 };

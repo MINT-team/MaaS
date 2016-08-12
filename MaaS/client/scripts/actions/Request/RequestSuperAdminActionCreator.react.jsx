@@ -19,10 +19,6 @@ var RequestSuperAdminActionCreator = {
     
     deleteCompany: function(id, email){
         WebAPIUtils.deleteCompany(id, email);
-    },
-    
-    changeCompanyName: function(companyId, name){
-        WebAPIUtils.changeCompanyName(companyId, name);
     }
     
 };

@@ -23,6 +23,10 @@ var RequestCompanyActionCreator = {
     
     getCompanies: function() {
         WebAPIUtils.getCompanies();
+    },
+    
+    changeCompanyName: function(companyId, name){
+        WebAPIUtils.changeCompanyName(companyId, name);
     }
     
 };
