@@ -130,7 +130,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             CompanyStore.emitDelete();
             break;
             
-        case ActionTypes.COMPANIES:
+        case ActionTypes.COMPANIES:     //get companies
             if(action.errors) {
                 _errors = action.errors;
             } else if(action.json) {
@@ -140,6 +140,18 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             CompanyStore.emitChange();
             break;
+        
+        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
+            if(action.errors)
+                _errors = action.errors;
+            else
+            {
+                _errors = [];
+                //_companyName = action.name;
+            }
+            CompanyStore.emitChange();
+            break;
+            
     }
 
     return true;  // richiesto dal Promise nel Dispatcher

@@ -26,29 +26,6 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
   
-    getCompanies: function() {
-    request
-      .get(APIEndpoints.COMPANIES)
-      .set('Accept', 'application/json')
-      .set('Authorization', localStorage.getItem('accessToken'))
-      .query({
-              filter: { 
-                    include:["owner"]
-              }
-        })
-      .end(function(err, res){
-        if(res) {
-          console.log(res);
-            if(res.error) {
-              window.alert("errore");
-                var errors = _getErrors(res.body.error);
-                ResponseSuperAdminActionCreator.responseCompanyCompanies(null, errors);
-            } else {
-                ResponseSuperAdminActionCreator.responseCompanyCompanies(res.body, null);
-            }
-        }
-      });
-  },
   
   //delete the select company, all the users all the DSL definitions and theire Relations
   deleteCompany: function(id, email){

@@ -19,7 +19,7 @@ module.exports = function(app) {
         });
     });
 
-   function createSuperAdmins(cb) {
+    function createSuperAdmins(cb) {
        
         var email_value='superadmin@gmail.com';
         var user = app.models.user;
@@ -45,7 +45,7 @@ module.exports = function(app) {
             }
             else
             {
-                console.log('> Email already registered as SuperAdmin')
+                console.log('> Email already registered as SuperAdmin');
             }
         });
     }

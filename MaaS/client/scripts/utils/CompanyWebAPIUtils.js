@@ -67,6 +67,33 @@ module.exports = {
           }
         } 
       });
+  },
+  
+  getCompanies: function() {    //returns all companies in the db
+  window.alert("WEB API UTIL");
+    request
+      .get(APIEndpoints.COMPANIES)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .query({
+              filter: { 
+                    include:["owner"]
+              }
+        })
+      .end(function(err, res){
+        if(res) {
+          console.log(res);
+            if(res.error) {
+              window.alert("errore");
+                var errors = _getErrors(res.body.error);
+                ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
+            } else {
+                ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
+            }
+        }
+      });
   }
+  
+  
   
 };

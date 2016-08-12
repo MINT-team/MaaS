@@ -22,8 +22,7 @@ var _superAdmin = {
     email: SessionStore.getEmail()
 };
 
-var _companyName;
-
+//var _companyName;   
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
@@ -47,10 +46,9 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     getEmail: function() {
         return _superAdmin.email;
   },
-  
-  getCompanyName: function(){
+  /*getCompanyName: function(){
       return _companyName;
-  },
+  },*/
   
   getErrors: function() {
     return _errors;
@@ -80,17 +78,6 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
             // remove user data
             _superAdmin.id = null;
             _superAdmin.email = null;
-            SuperAdminStore.emitChange();
-            break;
-        
-        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
-            if(action.errors)
-                _errors = action.errors;
-            else
-            {
-                _errors = [];
-                _companyName = action.name;
-            }
             SuperAdminStore.emitChange();
             break;
     }

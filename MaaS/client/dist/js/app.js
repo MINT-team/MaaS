@@ -22,6 +22,10 @@ var RequestCompanyActionCreator = {
 
     deleteCompany: function deleteCompany(id, email) {
         WebAPIUtils.deleteCompany(id, email);
+    },
+
+    getCompanies: function getCompanies() {
+        WebAPIUtils.getCompanies();
     }
 
 };
@@ -192,10 +196,6 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var RequestSuperAdminActionCreator = {
-
-    getCompanies: function getCompanies() {
-        WebAPIUtils.getCompanies();
-    },
 
     deleteCompany: function deleteCompany(id, email) {
         WebAPIUtils.deleteCompany(id, email);
@@ -511,14 +511,6 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var ResponseSuperAdminActionCreator = {
-
-    responseCompanyCompanies: function responseCompanyCompanies(json, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.COMPANIES,
-            json: json,
-            errors: errors
-        });
-    },
 
     responseDeleteCompany: function responseDeleteCompany(name, errors) {
 
@@ -6231,6 +6223,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
@@ -6255,7 +6248,8 @@ var CompaniesManagement = React.createClass({
         SessionStore.addChangeListener(this._onChange);
         SuperAdminStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestSuperAdminActionCreator.getCompanies();
+
+        RequestCompanyActionCreator.getCompanies();
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -6475,7 +6469,7 @@ var CompaniesManagement = React.createClass({
 
 module.exports = CompaniesManagement;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-bootstrap-table":191,"react-router":255}],45:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-bootstrap-table":191,"react-router":255}],45:[function(require,module,exports){
 'use strict';
 
 // Name: {DashboardSuperAdmin.react.jsx}
@@ -7119,6 +7113,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
 
         case ActionTypes.COMPANIES:
+            //get companies
             if (action.errors) {
                 _errors = action.errors;
             } else if (action.json) {
@@ -7128,6 +7123,15 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             CompanyStore.emitChange();
             break;
+
+        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
+            if (action.errors) _errors = action.errors;else {
+                _errors = [];
+                //_companyName = action.name;
+            }
+            CompanyStore.emitChange();
+            break;
+
     }
 
     return true; // richiesto dal Promise nel Dispatcher
@@ -7719,8 +7723,7 @@ var _superAdmin = {
     email: SessionStore.getEmail()
 };
 
-var _companyName;
-
+//var _companyName;   
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
@@ -7744,10 +7747,9 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     getEmail: function getEmail() {
         return _superAdmin.email;
     },
-
-    getCompanyName: function getCompanyName() {
+    /*getCompanyName: function(){
         return _companyName;
-    },
+    },*/
 
     getErrors: function getErrors() {
         return _errors;
@@ -7773,14 +7775,6 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function (payload) {
             // remove user data
             _superAdmin.id = null;
             _superAdmin.email = null;
-            SuperAdminStore.emitChange();
-            break;
-
-        case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
-            if (action.errors) _errors = action.errors;else {
-                _errors = [];
-                _companyName = action.name;
-            }
             SuperAdminStore.emitChange();
             break;
     }
@@ -8131,6 +8125,27 @@ module.exports = {
           ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
         } else {
           ResponseCompanyActionCreator.responseDeleteCompany(res.name, null);
+        }
+      }
+    });
+  },
+
+  getCompanies: function getCompanies() {
+    //returns all companies in the db
+    window.alert("WEB API UTIL");
+    request.get(APIEndpoints.COMPANIES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
+      filter: {
+        include: ["owner"]
+      }
+    }).end(function (err, res) {
+      if (res) {
+        console.log(res);
+        if (res.error) {
+          window.alert("errore");
+          var errors = _getErrors(res.body.error);
+          ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
+        } else {
+          ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
         }
       }
     });
@@ -8598,25 +8613,6 @@ function _getErrors(json) {
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-
-  getCompanies: function getCompanies() {
-    request.get(APIEndpoints.COMPANIES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
-      filter: {
-        include: ["owner"]
-      }
-    }).end(function (err, res) {
-      if (res) {
-        console.log(res);
-        if (res.error) {
-          window.alert("errore");
-          var errors = _getErrors(res.body.error);
-          ResponseSuperAdminActionCreator.responseCompanyCompanies(null, errors);
-        } else {
-          ResponseSuperAdminActionCreator.responseCompanyCompanies(res.body, null);
-        }
-      }
-    });
-  },
 
   //delete the select company, all the users all the DSL definitions and theire Relations
   deleteCompany: function deleteCompany(id, email) {

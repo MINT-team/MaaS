@@ -3,23 +3,40 @@ var sweet = require('sweet.js');
 var fs = require('fs');
 
 module.exports = function(DSL) {
+    /*
+    DSL.compile = function(dsl, cb) {
+        var intepreterFile = __dirname + "/macro.sjs";
+        var expanded;
+        fs.readFile(intepreterFile, function(err, macro) {
+            if(err)
+            {
+                console.log("> Errore:", err);
+                //return cb(err);
+            }
+            else
+            {
+                macro = macro.toString();
+                expanded = sweet.compile(macro + dsl);
+                console.log(expanded);
+                cb(null,expanded.code);
+                //eval(expanded.code);
+                
+                //res = expanded.code;
+            }
+        });
+        
+        //return res;
+    };
+    */
     
-    var intepreterFile = __dirname + "/macro.sjs";
-    fs.readFile(intepreterFile, function(err, macro) {
-        if(err)
-        {
-            console.log("> Errore:", err);
-        }
-        else
-        {
-            macro = macro.toString();
-            var dsl = "hi";
-            var data = macro + dsl;
-            var expanded = sweet.compile(data);
-            console.log(expanded);
-            eval(expanded.code);
-        }
+    /*var dsl = "hi";
+    DSL.findById("57ac8a5b0e9fb83d6001430b", function(err, DSLInstance) {
+        var code = DSLInstance.compile(dsl);
+        console.log("> Code:", code);
+        eval(code);
     });
+    */
+    
     
     
     // Create a DSL definition

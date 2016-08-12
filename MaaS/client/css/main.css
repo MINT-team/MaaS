@@ -795,6 +795,7 @@ input {
 
 .slick-slide img {
     display: block;
+    margin: auto;        /* center images on slider */
 }
 
 .slick-slide.slick-loading img {
@@ -876,11 +877,11 @@ input {
 }
 
 .slick-prev {
-    left: 15%;
+    left: 10%;
 }
 
 .slick-next {
-    right: 15%;
+    right: 10%;
 }
 
 .slider-container {
@@ -893,11 +894,11 @@ input {
 
 @media (max-width: 1400px) {
     .slick-prev {
-        left: 10%;
+        left: 8%;
     }
     
     .slick-next {
-        right: 10%;
+        right: 8%;
     }
     .slick-prev, .slick-next {
         top: 60%;

@@ -16,9 +16,6 @@ var ActionTypes = Constants.ActionTypes;
 
 var RequestSuperAdminActionCreator = {
     
-    getCompanies: function() {
-        WebAPIUtils.getCompanies();
-    },
     
     deleteCompany: function(id, email){
         WebAPIUtils.deleteCompany(id, email);

@@ -18,6 +18,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');  
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
@@ -27,7 +28,7 @@ function getState() {
   return {
       errors: [],//SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
-      companies: CompanyStore.getCompanies()  //JSON that contains the companies in the system 
+      companies: CompanyStore.getCompanies()       //JSON that contains the companies in the system 
   };
 }
 
@@ -41,7 +42,8 @@ var CompaniesManagement = React.createClass({
         SessionStore.addChangeListener(this._onChange);
         SuperAdminStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestSuperAdminActionCreator.getCompanies();
+        
+        RequestCompanyActionCreator.getCompanies();
   },
   
   componentWillUnmount: function() {
