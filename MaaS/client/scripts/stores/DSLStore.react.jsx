@@ -165,6 +165,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             else if(action.definition)
             {
+                //console.log(_DSL_LIST);
                 _DSL.id = action.definition.id;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;

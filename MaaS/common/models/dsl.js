@@ -198,12 +198,16 @@ module.exports = function(DSL) {
     );
     
     DSL.overwriteDefinition = function(id, type, source, name, cb) {
-        DSL.findById(id, function(err, DSL) {
+        DSL.findById(id, function(err, DSLInstance) {
             if(err)
+            {
                 return cb(err, null, null);
-            DSL.updateAttributes({type: type, source: source, name: name}, function(err, newDSL) {
+            }
+            DSLInstance.updateAttributes({type: type, source: source, name: name}, function(err, newDSL) {
                 if(err)
+                {
                     return cb(err, null, null);
+                }
                 console.log("> Updated DSL:", newDSL.id);
                 return cb(null, null, newDSL);
             });

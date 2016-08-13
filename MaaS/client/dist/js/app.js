@@ -7102,10 +7102,13 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = action.errors;
             } else {
                 _errors = [];
-                _company.name = action.name;
-                // modifica della lista
+                var i = 0;
+                //removal of the deleted company from the list of the companies
+                while (_companies[i].id != action.name && i < _companies.length) {
+                    i++;
+                }_companies.splice(i, 1);
             }
-            CompanyStore.emitDelete();
+            CompanyStore.emitChange();
             break;
 
         case ActionTypes.COMPANIES:
@@ -7295,6 +7298,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             if (action.errors) {
                 _errors.push(action.errors);
             } else if (action.definition) {
+                //console.log(_DSL_LIST);
                 _DSL.id = action.definition.id;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
