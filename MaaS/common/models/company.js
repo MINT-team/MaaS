@@ -12,7 +12,7 @@ var mongoose = require('mongoose');
 module.exports = function(Company) {
     
     // Elimino l'azienda e i relativi utenti
-    Company.deleteCompany = function(id, email, cb) {
+    Company.deleteCompany = function(id, email, cb) {       ///database
         console.log("> delete company");
         Company.findById(id, function(err, company) {
             console.log(">if findID");
@@ -23,12 +23,41 @@ module.exports = function(Company) {
                 if(err || !userInstance)
                     return cb(err);
                 if(userInstance.role != "Owner" && company.owner == userInstance) {
-                    console.log(">non sono un superAdmin");
+                    console.log(">non sono un Admin");
                     var error = {
                         message: 'You haven\'t the rights to delete this company'
                     };
                     return cb(null, error);
                 } 
+                      
+                userInstance.dsl.destroyAll( function(err) {
+                    if (err)
+                    {
+                        console.log(err);
+                        return cb(err);
+                    }
+                    console.log("tutto ok");
+                    
+                });
+                
+                //Remove Users of the company
+                company.users.destroyAll(function(err) {
+                    if(err)
+                        return cb(err);
+                    Company.deleteById(company.id, function(err) {
+                        if(err) console.log("> error deleting company:", company.name);
+                        console.log("> company deleted:", company.name);
+                        return cb(null, null, company.id);
+                    });
+                });
+            });
+        });
+        
+    };
+                
+                /*
+               
+                
                 
                 // Remove DSL of the company
                 var DSL = app.models.DSL;
@@ -71,19 +100,11 @@ module.exports = function(Company) {
                         });
                     });
                 });
-                //Remove Users of the company
-                company.users.destroyAll(function(err) {
-                    if(err)
-                        return cb(err);
-                    Company.deleteById(company.id, function(err) {
-                        if(err) console.log("> error deleting company:", company.name);
-                        console.log("> company deleted:", company.name);
-                        return cb(null, null, company.name);
-                    });
-                });
-            });
-        });
-    };
+                
+                
+                */
+                
+                
 
     Company.remoteMethod(
         'deleteCompany',
@@ -110,7 +131,7 @@ module.exports = function(Company) {
         db.on('error', function(){
             console.log('> connection error for the connection string: ', connString);
             context.args.data.connected = "false";
-        })
+        });
     });
     //change name of a company wich as companyId= id 
     Company.changeCompanyName = function(id, name, cb){
@@ -138,7 +159,7 @@ module.exports = function(Company) {
                 }
             });
         });
-    }
+    };
     
 Company.remoteMethod(
         'changeCompanyName',
