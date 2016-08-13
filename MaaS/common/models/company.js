@@ -29,7 +29,7 @@ module.exports = function(Company) {
                     };
                     return cb(null, error);
                 } 
-                console.log(">sono un superAdmin");
+                
                 // Remove DSL of the company
                 var DSL = app.models.DSL;
                 userInstance.dsl({ where: {} }, function(err, DSLList) {
@@ -39,34 +39,39 @@ module.exports = function(Company) {
                     }
                     // Remove DSL accesses
                     DSLList.forEach(function(DSLInstance, i) {
-                        console.log(">cancellazione DSL definition");
+                        
                         DSLInstance.users({ where: {} }, function(err, users) {
                             if(err)
                             {
                                 return cb(err, null);
                             }
-                            users.forEach(function(user, i) {
-                                DSLInstance.users.remove(user, function(err) {
-                                    if(err) 
-                                    {
-                                        console.log("> Error deleting DSL definition");
-                                        return cb(err, null);
-                                    }
-                                });
+                            
+                        users.forEach(function(user, i) {
+                         // QUESTO NON FUNZIONA  ==> NON ENTRA QUI   
+                            DSLInstance.users.remove(user, function(err) {
+                                if(err) 
+                                {
+                                    console.log("> Error deleting DSL definition");
+                                    return cb(err, null);
+                                }
+                                 console.log(">eliminazione dei permessi");
                             });
-                            // Success
+                            
+                        });
+    
                             DSL.destroyById(DSLInstance.id, function(err) {
+                                console.log("> sto per distruggere un dsl");
                                 if(err) 
                                 {
                                     return cb(err, null);
                                 }
                                 console.log("> DSL definition deleted:", id);
-                                return cb(null, null);
+                                //return cb(null, null);
                             });
                         });
                     });
-                    
-                    //Remove Users of the company
+                });
+                //Remove Users of the company
                 company.users.destroyAll(function(err) {
                     if(err)
                         return cb(err);
@@ -76,17 +81,6 @@ module.exports = function(Company) {
                         return cb(null, null, company.name);
                     });
                 });
-                });
-                // Remove Users of the company
-                // company.users.destroyAll(function(err) {
-                //     if(err)
-                //         return cb(err);
-                //     Company.deleteById(company.id, function(err) {
-                //         if(err) console.log("> error deleting company:", company.name);
-                //         console.log("> company deleted:", company.name);
-                //         return cb(null, null, company.name);
-                //     });
-                // });
             });
         });
     };
