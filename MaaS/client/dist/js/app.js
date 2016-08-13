@@ -86,6 +86,10 @@ var RequestDSLActionCreator = {
 
     loadUserList: function loadUserList(id, companyId) {
         WebAPIUtils.loadUserList(id, companyId);
+    },
+
+    executeDefinition: function executeDefinition(id, type) {
+        WebAPIUtils.executeDefinition(id, type);
     }
 };
 
@@ -2768,7 +2772,7 @@ var ManageDSL = React.createClass({
             }
             var options = {
                 onRowClick: function onRowClick(row) {
-                    //Execute DSL definition
+                    RequestDSLActionCreator.executeDefinition(row.id, row.type);
                 },
                 noDataText: "There are no DSL definitions to display"
             };
@@ -8314,6 +8318,12 @@ module.exports = {
           }
         });
       }
+    });
+  },
+
+  executeDefinition: function executeDefinition(id, type) {
+    request.post(APIEndpoints.DSL + '/' + id + '/executeDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({ type: type }).end(function (error, res) {
+      if (res) {}
     });
   }
 };

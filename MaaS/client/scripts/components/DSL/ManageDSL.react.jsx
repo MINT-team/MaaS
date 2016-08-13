@@ -252,7 +252,7 @@ var ManageDSL = React.createClass({
             }
             var options = {
                 onRowClick: function(row){
-                    //Execute DSL definition
+                    RequestDSLActionCreator.executeDefinition(row.id, row.type);
                 },
                 noDataText: "There are no DSL definitions to display"
             };
