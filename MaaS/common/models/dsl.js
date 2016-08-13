@@ -26,9 +26,9 @@ module.exports = function(DSL) {
         });
         
         //return res;
-    };*/
-    
-    
+    };
+    */
+    /*
     var dsl = "cell (sortby: \"surname\",type: \"string\",order: \"asc\",query: {age: {$lt: 40}}){value: \"user\"}";
     var intepreterFile = __dirname + "/macro.sjs";
         var expanded;
@@ -40,6 +40,7 @@ module.exports = function(DSL) {
             }
             else
             {
+            */
                 /*
                 console.log(expanded.code) =
                 
@@ -55,6 +56,7 @@ module.exports = function(DSL) {
                 "identity: {  sortby: "surname",   type: "string",   order: "asc", query: {age: {$lt: 40}}}, body: {value: "user"}"
                 
                 */
+                /*
                 macro = macro.toString();
                 expanded = sweet.compile(macro + dsl);
                 var res = JSON.stringify(expanded.code);
@@ -90,6 +92,7 @@ module.exports = function(DSL) {
                 //res = expanded.code;
             }
         });
+    */
     //DSL.compile(dsl, );
     /*DSL.findById("57ac8a5b0e9fb83d6001430b", function(err, DSLInstance) {
         var code = DSLInstance.compile(dsl);
@@ -194,11 +197,11 @@ module.exports = function(DSL) {
         }
     );
     
-    DSL.overwriteDefinition = function(id, type, source, cb) {
+    DSL.overwriteDefinition = function(id, type, source, name, cb) {
         DSL.findById(id, function(err, DSL) {
             if(err)
                 return cb(err, null, null);
-            DSL.updateAttributes({type: type, source: source}, function(err, newDSL) {
+            DSL.updateAttributes({type: type, source: source, name: name}, function(err, newDSL) {
                 if(err)
                     return cb(err, null, null);
                 console.log("> Updated DSL:", newDSL.id);
@@ -214,7 +217,8 @@ module.exports = function(DSL) {
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
-                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' },
+                { arg: 'name', type: 'string', required: true, description: 'Definition name' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },

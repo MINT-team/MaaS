@@ -139,9 +139,18 @@ var ManageDSLSource = React.createClass({
             else
             {
                 if(definitionName == this.state.definitionName)
-                    RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);
+                    RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource, definitionName);
                 else
-                    RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                {
+                    if (this.props.params.mode == "edit")
+                    {
+                        RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource, definitionName);
+                    }
+                    else
+                    {
+                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                    }
+                }
             }
             if(errors.length > 0)
             {

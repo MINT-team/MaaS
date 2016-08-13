@@ -58,7 +58,7 @@ module.exports = {
         });
     },
     
-    overwriteDSLDefinition: function(id, type, source) {
+    overwriteDSLDefinition: function(id, type, source, name) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition')
         .set('Accept', 'application/json')
@@ -66,7 +66,8 @@ module.exports = {
         .send({
           id: id,
           type: type,
-          source: source
+          source: source,
+          name: name
         })
         .end(function(err, res) {
           if(res)

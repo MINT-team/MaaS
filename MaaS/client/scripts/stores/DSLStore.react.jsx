@@ -166,9 +166,21 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             else if(action.definition)
             {
                 _DSL.id = action.definition.id;
-                _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                if (action.definition.name != _DSL.name)
+                {
+                    _DSL.name = action.definition.name;
+                    var trovato = false;
+                    for (var i = 0; !trovato && i<_DSL_LIST.length; i++)
+                    {
+                        if (action.definition.id == _DSL_LIST[i].dsl.id)
+                        {
+                            _DSL_LIST[i].dsl.name = _DSL.name;
+                            trovato = true;
+                        }
+                    }
+                }
                 
                 localStorage.setItem('DSLId',_DSL.id);
                 localStorage.setItem('DSLName',_DSL.name);

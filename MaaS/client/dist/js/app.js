@@ -26,6 +26,10 @@ var RequestCompanyActionCreator = {
 
     getCompanies: function getCompanies() {
         WebAPIUtils.getCompanies();
+    },
+
+    changeCompanyName: function changeCompanyName(companyId, name) {
+        WebAPIUtils.changeCompanyName(companyId, name);
     }
 
 };
@@ -60,8 +64,8 @@ var RequestDSLActionCreator = {
         WebAPIUtils.saveDSLDefinition(userId, type, name, source);
     },
 
-    overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source) {
-        WebAPIUtils.overwriteDSLDefinition(id, type, source);
+    overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source, name) {
+        WebAPIUtils.overwriteDSLDefinition(id, type, source, name);
     },
 
     loadDSL: function loadDSL(id) {
@@ -199,17 +203,7 @@ var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var RequestSuperAdminActionCreator = {
-
-    deleteCompany: function deleteCompany(id, email) {
-        WebAPIUtils.deleteCompany(id, email);
-    },
-
-    changeCompanyName: function changeCompanyName(companyId, name) {
-        WebAPIUtils.changeCompanyName(companyId, name);
-    }
-
-};
+var RequestSuperAdminActionCreator = {};
 
 module.exports = RequestSuperAdminActionCreator;
 
@@ -307,6 +301,14 @@ var ResponseCompanyActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.COMPANIES,
             json: json,
+            errors: errors
+        });
+    },
+
+    responseChangeCompanyName: function responseChangeCompanyName(data, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
+            data: data,
             errors: errors
         });
     }
@@ -514,26 +516,7 @@ var Constants = require("../../constants/Constants.js");
 
 var ActionTypes = Constants.ActionTypes;
 
-var ResponseSuperAdminActionCreator = {
-
-    responseDeleteCompany: function responseDeleteCompany(name, errors) {
-
-        Dispatcher.handleServerAction({
-            type: ActionTypes.DELETE_COMPANY,
-            name: name,
-            errors: errors
-        });
-    },
-
-    responseChangeCompanyName: function responseChangeCompanyName(name, errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
-            name: name,
-            errors: errors
-        });
-    }
-
-};
+var ResponseSuperAdminActionCreator = {};
 
 module.exports = ResponseSuperAdminActionCreator;
 
@@ -3281,7 +3264,13 @@ var ManageDSLSource = React.createClass({
                     errors.push('Fill the definiton name before saving');
                 }
             } else {
-                if (definitionName == this.state.definitionName) RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource);else RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                if (definitionName == this.state.definitionName) RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource, definitionName);else {
+                    if (this.props.params.mode == "edit") {
+                        RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource, definitionName);
+                    } else {
+                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                    }
+                }
             }
             if (errors.length > 0) {
                 this.setState({ errors: errors });
@@ -6086,6 +6075,7 @@ module.exports = Sidebar;
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SuperAdminStore = require('../../stores/SuperAdminStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
@@ -6093,8 +6083,8 @@ var Link = require('react-router').Link;
 
 function getState() {
   return {
-    name: SuperAdminStore.getCompanyName(),
-    errors: SuperAdminStore.getErrors(),
+    name: CompanyStore.getName(),
+    errors: CompanyStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     first: "false"
   };
@@ -6115,11 +6105,13 @@ var ChangeCompanyName = React.createClass({
 
   componentDidMount: function componentDidMount() {
     SuperAdminStore.addChangeListener(this._onChange);
+    CompanyStore.addChangeListener(this._onChange);
     this.refs.nome.value = this.state.name;
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SuperAdminStore.removeChangeListener(this._onChange);
+    CompanyStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function _onChange() {
@@ -6130,7 +6122,7 @@ var ChangeCompanyName = React.createClass({
     event.preventDefault();
     var name = this.refs.nome.value;
     var id = this.state.companyId;
-    if (name != this.state.name) RequestSuperAdminActionCreator.changeCompanyName(id, name);else this._setError("No changes to save");
+    if (name != this.state.name) RequestCompanyActionCreator.changeCompanyName(id, name);else this._setError("No changes to save");
   },
 
   _setError: function _setError(error) {
@@ -6204,7 +6196,7 @@ var ChangeCompanyName = React.createClass({
 
 module.exports = ChangeCompanyName;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-router":255}],44:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../../stores/SuperAdminStore.react.jsx":56,"../AuthorizationRequired.react.jsx":14,"react":488,"react-router":255}],44:[function(require,module,exports){
 'use strict';
 
 // Name: {CompaniesManagement.react.jsx}
@@ -6263,13 +6255,12 @@ var CompaniesManagement = React.createClass({
     },
 
     _onChange: function _onChange() {
-        window.alert("company management");
         this.setState(getState());
     },
 
-    deleteAllSelected: function deleteAllSelected() {
-        alert(this.refs.table.state.selectedRowKeys);
-    },
+    /*deleteAllSelected: function() {
+      alert(this.refs.table.state.selectedRowKeys);
+    },*/
 
     buttonFormatter: function buttonFormatter(cell, row) {
         var buttons;
@@ -6296,8 +6287,7 @@ var CompaniesManagement = React.createClass({
         };
 
         var confirmDelete = function confirmDelete() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id); // + mail proprietario
-            window.alert("funzione di eliminazione");
+            RequestCompanyActionCreator.deleteCompany(row.id, row.owner); //row.owner -> owner email
         };
 
         var deleteCompany = React.createElement(
@@ -6538,6 +6528,7 @@ var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 
@@ -6561,7 +6552,7 @@ var DatabaseManagement = React.createClass({
     componentDidMount: function componentDidMount() {
         SessionStore.addChangeListener(this._onChange);
         CompanyStore.addChangeListener(this._onChange);
-        RequestSuperAdminActionCreator.getCompanies();
+        RequestCompanyActionCreator.getCompanies();
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -6652,7 +6643,7 @@ var DatabaseManagement = React.createClass({
 
 module.exports = DatabaseManagement;
 
-},{"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-router":255}],47:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":52,"../../stores/SessionStore.react.jsx":55,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":42,"react":488,"react-router":255}],47:[function(require,module,exports){
 'use strict';
 
 // Name: {DatabaseManagement.react.jsx}
@@ -7112,6 +7103,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             } else {
                 _errors = [];
                 _company.name = action.name;
+                // modifica della lista
             }
             CompanyStore.emitDelete();
             break;
@@ -7131,7 +7123,11 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
         case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
             if (action.errors) _errors = action.errors;else {
                 _errors = [];
-                //_companyName = action.name;
+                //Correction of the list containing the System companies
+                var i = 0;
+                while (i < _companies.length && _companies[i].name != action.data.oldName) {
+                    i++;
+                }_companies[i].name = action.data.newName;
             }
             CompanyStore.emitChange();
             break;
@@ -7300,9 +7296,18 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors.push(action.errors);
             } else if (action.definition) {
                 _DSL.id = action.definition.id;
-                _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                if (action.definition.name != _DSL.name) {
+                    _DSL.name = action.definition.name;
+                    var trovato = false;
+                    for (var i = 0; !trovato && i < _DSL_LIST.length; i++) {
+                        if (action.definition.id == _DSL_LIST[i].dsl.id) {
+                            _DSL_LIST[i].dsl.name = _DSL.name;
+                            trovato = true;
+                        }
+                    }
+                }
 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -7727,7 +7732,6 @@ var _superAdmin = {
     email: SessionStore.getEmail()
 };
 
-//var _companyName;   
 var _errors = [];
 
 var SuperAdminStore = assign({}, EventEmitter.prototype, {
@@ -7751,9 +7755,6 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     getEmail: function getEmail() {
         return _superAdmin.email;
     },
-    /*getCompanyName: function(){
-        return _companyName;
-    },*/
 
     getErrors: function getErrors() {
         return _errors;
@@ -8117,7 +8118,8 @@ module.exports = {
     });
   },
 
-  // delete company and all users account
+  // delete company and all users account  -> old
+  //delete the select company, all the users all the DSL definitions and theire Relations  ->new
   deleteCompany: function deleteCompany(id, email) {
     request.del(APIEndpoints.COMPANIES + '/deleteCompany/' + id).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       email: email
@@ -8136,7 +8138,6 @@ module.exports = {
 
   getCompanies: function getCompanies() {
     //returns all companies in the db
-    window.alert("WEB API UTIL");
     request.get(APIEndpoints.COMPANIES).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).query({
       filter: {
         include: ["owner"]
@@ -8145,11 +8146,27 @@ module.exports = {
       if (res) {
         console.log(res);
         if (res.error) {
-          window.alert("errore");
           var errors = _getErrors(res.body.error);
           ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
         } else {
           ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
+        }
+      }
+    });
+  },
+
+  //change the name of the company wich has id = companyId
+  changeCompanyName: function changeCompanyName(companyId, name) {
+    request.put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: companyId,
+      name: name
+    }).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          ResponseCompanyActionCreator.responseChangeCompanyName(null, res.error.message);
+        } else {
+          ResponseCompanyActionCreator.responseChangeCompanyName(res.data, null);
         }
       }
     });
@@ -8211,11 +8228,12 @@ module.exports = {
     });
   },
 
-  overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source) {
+  overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source, name) {
     request.put(APIEndpoints.DSL + '/' + id + '/overwriteDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       type: type,
-      source: source
+      source: source,
+      name: name
     }).end(function (err, res) {
       if (res) {
         res = JSON.parse(res.text);
@@ -8609,56 +8627,20 @@ var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
 function _getErrors(json) {
-  var error, message;
-  if (json.message) {
-    message = json.message;
-    // Other cases
-    if (!error) {
-      error = message;
+    var error, message;
+    if (json.message) {
+        message = json.message;
+        // Other cases
+        if (!error) {
+            error = message;
+        }
     }
-  }
-  return error;
+    return error;
 }
 
 var APIEndpoints = Constants.APIEndpoints;
 
-module.exports = {
-
-  //delete the select company, all the users all the DSL definitions and theire Relations
-  deleteCompany: function deleteCompany(id, email) {
-    request.del(APIEndpoints.COMPANIES + '/deleteCompany/' + id).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
-      email: email
-    }).end(function (error, res) {
-      if (res) {
-        res = JSON.parse(res.text);
-        if (res.error) {
-          // res.error.message: errori di loopback e error definito dal remote method
-          ResponseSuperAdminActionCreator.responseDeleteCompany(null, res.error.message);
-        } else {
-          ResponseSuperAdminActionCreator.responseDeleteCompany(res.name, null);
-        }
-      }
-    });
-  },
-
-  //change the name of the company wich has id = companyId
-  changeCompanyName: function changeCompanyName(companyId, name) {
-    request.put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
-      id: companyId,
-      name: name
-    }).end(function (error, res) {
-      if (res) {
-        res = JSON.parse(res.text);
-        if (res.error) {
-          ResponseSuperAdminActionCreator.responseChangeCompanyName(null, res.error.message);
-        } else {
-          ResponseSuperAdminActionCreator.responseChangeCompanyName(res.newName, null);
-        }
-      }
-    });
-  }
-
-};
+module.exports = {};
 
 },{"../actions/Response/ResponseSuperAdminActionCreator.react.jsx":11,"../constants/Constants.js":49,"superagent":489}],63:[function(require,module,exports){
 'use strict';
