@@ -3,8 +3,8 @@ var sweet = require('sweet.js');
 var fs = require('fs');
 
 module.exports = function(DSL) {
-    /*
-    DSL.compile = function(dsl, cb) {
+    
+    /*DSL.compile = function(dsl, cb) {
         var intepreterFile = __dirname + "/macro.sjs";
         var expanded;
         fs.readFile(intepreterFile, function(err, macro) {
@@ -26,16 +26,77 @@ module.exports = function(DSL) {
         });
         
         //return res;
-    };
-    */
+    };*/
     
-    /*var dsl = "hi";
-    DSL.findById("57ac8a5b0e9fb83d6001430b", function(err, DSLInstance) {
+    
+    var dsl = "cell (sortby: \"surname\",type: \"string\",order: \"asc\",query: {age: {$lt: 40}}){value: \"user\"}";
+    var intepreterFile = __dirname + "/macro.sjs";
+        var expanded;
+        fs.readFile(intepreterFile, function(err, macro) {
+            if(err)
+            {
+                console.log("> Errore:", err);
+                //return cb(err);
+            }
+            else
+            {
+                /*
+                console.log(expanded.code) =
+                
+                identity: {
+                  sortby: "surname"_, _;
+                  type: "string"_, _;
+                  order: "asc"_, _;
+                query: {age: {$lt: 40}}}
+                _, _;
+                body: {
+                value: "user"}
+                
+                "identity: {  sortby: "surname",   type: "string",   order: "asc", query: {age: {$lt: 40}}}, body: {value: "user"}"
+                
+                */
+                macro = macro.toString();
+                expanded = sweet.compile(macro + dsl);
+                var res = JSON.stringify(expanded.code);
+                res = res.replace(/_,/g, ",");
+                res = res.replace(/_;/g, "");
+                res = res.replace(/\\n/g, "");
+                res = res.replace(/\\/g, "");
+                res = res.replace("\"", "");
+                res = res.replace("}\"", "}");
+                res = res.replace("identity", "\"identity\"");
+                res = res.replace("sortby", "\"sortby\"");
+                res = res.replace("type", "\"type\"");
+                res = res.replace("order", "\"order\"");
+                res = res.replace("query", "\"query\"");
+                res = res.replace("body", "\"body\"");
+                res = res.replace("value", "\"value\"");
+                res = res.replace(/ /g, "");
+                //res = res.replace(/"/g, "'");
+                console.log(res);
+                
+                
+                // res = JSON.stringify(res);
+                // res = JSON.stringify(res);
+                // console.log(res);
+                var code = JSON.parse("{"+res+"}");
+                console.log(code);
+                // console.log(JSON.stringify(code.toString()));
+                // console.log(typeof code);
+                // console.log(JSON.parse(code));
+                //cb(null,expanded.code);
+                //eval(expanded.code);
+                
+                //res = expanded.code;
+            }
+        });
+    //DSL.compile(dsl, );
+    /*DSL.findById("57ac8a5b0e9fb83d6001430b", function(err, DSLInstance) {
         var code = DSLInstance.compile(dsl);
         console.log("> Code:", code);
         eval(code);
-    });
-    */
+    });*/
+    
     
     
     
@@ -287,8 +348,99 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.executeDefinition = function(id, type, cb) {
+    /*
+        macro collection {
+	case {
+		$collection_keyword ( $($key:ident : $val:expr) (,) ... ) { $body ... }
+	} => {
+		var _collection = makeIdent("_collection", #{$collection_keyword});
+		letstx $_collection = [_collection];
+		var collectionModel = makeIdent("collectionModel", #{$collection_keyword});
+		letstx $collectionModel = [collectionModel];
+		
+		return #{ {
+			var $_collection = new DslCollectionModel(domain, {
+				$($key: $val) (,) ...
+			});
+			registerCollection($_collection);
+			$body ...
+		} };
+	}
+
+    
+    
+    */
+    
+    DSL.executeCell = function(cb) {
+        console.log('funzia');
+    };
+    
+    DSL.remoteMethod(
+        'executeCell',
+        {
+            description: "Execute a Cell macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'data', type: 'object', required: true, description: 'Cell properties' }
+            ]
+        }
+    
+    );
+    
+    
+    /*
+    
+        DSL.executeCell( expanded );
+        expanded = {
+            identity: {
+                sortby: {},
+                type: {},
+                query: {lsffef}
+            },
+            body: {}
+        }
+        expanded.identity.query
         
+        
+        
+        {
+          identity: {
+          sortby: "surname"type: "string"order: "asc"query: {age: {$lt: 40}}}
+          body: {
+          value: "user"}
+        }
+
+    */
+    
+    
+    DSL.executeDefinition = function(id, type, cb) {
+        /*DSL.findById(id, function(err, DSLInstance) {
+            DSL.executeCell();
+            
+            
+        });
+        */
+        /*
+        if(db.conncted)
+        {
+            // fai connessione
+            // switch
+        }
+        */
+        switch (type) {
+            case 'Cell':
+                
+                break;
+                
+            case 'Document':
+                break;
+                
+            case 'Collection':
+                break;
+                
+            case 'Dashboard':
+                break;
+        }
     };
     
     DSL.remoteMethod(
@@ -304,7 +456,7 @@ module.exports = function(DSL) {
                 { arg: 'data', type: 'Object' }
                 
             ],
-            http: { verb: 'put', path: '/:id/executeDefinition' }
+            http: { verb: 'post', path: '/:id/executeDefinition' }
         }
         
     );
@@ -322,9 +474,6 @@ module.exports = function(DSL) {
     json contenente la struttura e i dati da visualizzare. Queste funzioni possono utilizzare altre funzioni di altri elementi innestati.
     Bisogna pensare a come compilare il codice del dsl, in quanto la compilazione di sweet js non controlla errori nella chiamata
     delle macro.
-    */
     
- 
+    */
 };
-
-
