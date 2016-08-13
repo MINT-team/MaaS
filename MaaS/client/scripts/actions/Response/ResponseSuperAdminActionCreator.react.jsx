@@ -13,14 +13,6 @@ var ActionTypes = Constants.ActionTypes;
 
 var ResponseSuperAdminActionCreator = {
     
-    responseDeleteCompany: function(name, errors) {
-        
-        Dispatcher.handleServerAction({
-          type: ActionTypes.DELETE_COMPANY,
-          name: name,
-          errors: errors
-        });
-    }
     
 };
 

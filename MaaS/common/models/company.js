@@ -65,8 +65,8 @@ module.exports = function(Company) {
                             });
                         });
                     });
-                });
-                // Remove Users of the company
+                    
+                    //Remove Users of the company
                 company.users.destroyAll(function(err) {
                     if(err)
                         return cb(err);
@@ -76,6 +76,17 @@ module.exports = function(Company) {
                         return cb(null, null, company.name);
                     });
                 });
+                });
+                // Remove Users of the company
+                // company.users.destroyAll(function(err) {
+                //     if(err)
+                //         return cb(err);
+                //     Company.deleteById(company.id, function(err) {
+                //         if(err) console.log("> error deleting company:", company.name);
+                //         console.log("> company deleted:", company.name);
+                //         return cb(null, null, company.name);
+                //     });
+                // });
             });
         });
     };

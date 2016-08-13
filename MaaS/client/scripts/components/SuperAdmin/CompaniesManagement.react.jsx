@@ -57,9 +57,9 @@ var CompaniesManagement = React.createClass({
   },
   
   
-  deleteAllSelected: function() {
+  /*deleteAllSelected: function() {
     alert(this.refs.table.state.selectedRowKeys);
-  },
+  },*/
   
   buttonFormatter: function(cell, row) {
         var buttons;
@@ -75,20 +75,19 @@ var CompaniesManagement = React.createClass({
         var instance = this;
         var onClickDelete = function() {
             if(instance.state.errors.length > 0)
-    		{
-    		    document.getElementById(errorId).classList.toggle("dropdown-show");
-    		    //this.refs.errorRefName.classList.toggle("dropdown-show");
-    		}
-    		else
-    		{
-    		    document.getElementById(deleteId).classList.toggle("dropdown-show");
-    		    //this.refs.deleteRefName.classList.toggle("dropdown-show");
-    		}
+    		    {
+    		      document.getElementById(errorId).classList.toggle("dropdown-show");
+    		      //this.refs.errorRefName.classList.toggle("dropdown-show");
+    		    }
+    		    else
+    		    {
+    		      document.getElementById(deleteId).classList.toggle("dropdown-show");
+    		      //this.refs.deleteRefName.classList.toggle("dropdown-show");
+    		    }
         };
         
         var confirmDelete = function() {
-            //RequestSuperAdminActionCreator.deleteCompany(row.id); // + mail proprietario
-            window.alert("funzione di eliminazione");
+            RequestCompanyActionCreator.deleteCompany(row.id, row.owner);  //row.owner -> owner email
         };
         
         var deleteCompany = (

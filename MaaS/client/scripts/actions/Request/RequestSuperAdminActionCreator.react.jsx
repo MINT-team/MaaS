@@ -17,9 +17,7 @@ var ActionTypes = Constants.ActionTypes;
 var RequestSuperAdminActionCreator = {
     
     
-    deleteCompany: function(id, email){
-        WebAPIUtils.deleteCompany(id, email);
-    }
+    
     
 };
 

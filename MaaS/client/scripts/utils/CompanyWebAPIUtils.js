@@ -47,7 +47,8 @@ module.exports = {
       });
   },
 
-  // delete company and all users account
+  // delete company and all users account  -> old
+  //delete the select company, all the users all the DSL definitions and theire Relations  ->new
   deleteCompany: function(id, email) {
     request
       .del(APIEndpoints.COMPANIES + '/deleteCompany/' + id)

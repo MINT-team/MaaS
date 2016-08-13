@@ -126,6 +126,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             } else {
                 _errors = [];
                 _company.name = action.name;
+                // modifica della lista
             }
             CompanyStore.emitDelete();
             break;
