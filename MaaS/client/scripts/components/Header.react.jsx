@@ -101,7 +101,7 @@ var Header = React.createClass({
                         <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
                             <ul>
                                 <Link to="/dashboardSuperAdmin"><li>Dashboard</li></Link>
-                                <Link onClick={this.logout} to=""><li>Logout</li></Link>
+                                <Link onClick={this.logout} to=""><li><i className="material-icons md-24">&#xE879;</i>Logout</li></Link>
                             </ul>
                         </div>
                     </div>
