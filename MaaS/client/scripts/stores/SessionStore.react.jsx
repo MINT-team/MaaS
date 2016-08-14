@@ -91,7 +91,6 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
             localStorage.setItem('accessToken', action.json.id);
             localStorage.setItem('userId', action.json.userId);
             localStorage.setItem('userType', action.json.type);
-            console.log("fine richieste login");
         }
         SessionStore.emitChange();
         break;
