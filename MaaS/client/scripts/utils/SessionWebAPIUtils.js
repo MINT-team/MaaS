@@ -113,6 +113,7 @@ module.exports = {
             {
                 if(res.body.type == "superAdmin")  //super admin login
                 {
+                    
                     request.post(APIEndpoints.SUPERADMINS + '/login')
                     .send({
                         email: email,
