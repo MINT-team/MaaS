@@ -66,6 +66,9 @@ var ManageDSLSource = React.createClass({
     },
 
     _onChange: function() {
+        var overwrite = false;
+        if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
+            overwrite = true; 
         this.setState(getState());
         if(!(this.state.errors.length > 0))
         {
@@ -74,7 +77,8 @@ var ManageDSLSource = React.createClass({
             {
                 var dslId = this.state.definitionId;
                 var userId = SessionStore.getUserId();
-                RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the table
+                if(!overwrite)
+                    RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the table
                 this.setState({ saved: true });
                 this.refs.save.classList.toggle("saved");
             }
@@ -185,7 +189,7 @@ var ManageDSLSource = React.createClass({
         var content, errors = [];
         if(this.state.errors.length > 0) 
         {
-            errors = ( <p id="errors">{this.state.errors.map((error) => <p className="error-item">{error}</p>)}</p> );
+            errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
             this.toggleErrorPopUp();
         }
         content = (
@@ -232,7 +236,7 @@ var ManageDSLSource = React.createClass({
                 </div>
                 <div className="dropdown-content dropdown-popup" ref="error">
                     <p className="dropdown-title">Error</p>
-                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-description">{errors}</div>
                     <div className="dropdown-buttons">
                         <button onClick={this.emptyErrors} className="button">Ok</button>
                     </div>

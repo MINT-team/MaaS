@@ -12,18 +12,10 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var ResponseExternalDatabaseActionCreator = {
-    responseAddExtDb: function(json, errors){
+    responseAddExtDb: function(database, errors){
         Dispatcher.handleServerAction({
             type: ActionTypes.ADD_EXT_DB_RESPONSE,
-            json: json,
-            errors: errors
-        });
-    },
-    
-    responseConnectDb: function(name, errors){
-         Dispatcher.handleServerAction({
-            type: ActionTypes.CONNECT_DBS_RESPONSE,
-            name: name,
+            database: database,
             errors: errors
         });
     },

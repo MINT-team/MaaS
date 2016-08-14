@@ -48,9 +48,7 @@ var AddExternalDatabase = React.createClass({
 	
 	confirmAdd: function(event) {
         event.preventDefault();
-        //id, name, password, connString
-        RequestExternalDatabaseActionCreator.addExtDb(this.state.companyId, this.refs.name.value, this.refs.password.value, this.refs.string.value);
-        
+        RequestExternalDatabaseActionCreator.addExtDb(this.state.companyId, this.refs.name.value, this.refs.string.value);
     },
     
     render: function() {
@@ -65,7 +63,7 @@ var AddExternalDatabase = React.createClass({
                 <i onClick={this.toggleDropdown} className="material-icons md-48 dropdown-button">&#xE147;</i>
                 <div className="dropdown-content dropdown-popup" ref="errorDropdown">
                     <p className="dropdown-title">Error</p>
-                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-description">{errors}</div>
                     <div className="dropdown-buttons">
                         <button className="button">Ok</button>
                     </div>
@@ -73,9 +71,8 @@ var AddExternalDatabase = React.createClass({
                 <div className="dropdown-content dropdown-popup" ref="addDropdown">
                     <p className="dropdown-title">Add new database</p>
                     <form className="externaldb-form">
-                        <input ref="name" id="name" name="name" placeholder="name" className="dropdown-button" type="text" autoComplete="off"/>
-                        <input ref="password" id="password" name="password" placeholder="password" className="dropdown-button" type="password" autoComplete="off"/>    
-                        <input ref="string" id="string" name="string" placeholder="connection string" className="dropdown-button full"  type="text" autoComplete="off"/>
+                        <input ref="name" id="name" name="name" placeholder="name" className="dropdown-button" type="text"/>
+                        <input ref="string" id="string" name="string" placeholder="connection string" className="dropdown-button full"  type="text"/>
                     </form>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>

@@ -150,7 +150,6 @@ module.exports = {
             res = JSON.parse(res.text);
             if(res.error) 
             {
-              // res.error.message: errori di loopback e error definito dal remote method
               ResponseDSLActionCreator.responseDeleteDSLDefinition(res.error.message, null);
             } 
             else 
@@ -181,7 +180,6 @@ module.exports = {
             else
             {
               res=JSON.parse(res.text);
-              console.log(res.userPermission);
               ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
             }
           }

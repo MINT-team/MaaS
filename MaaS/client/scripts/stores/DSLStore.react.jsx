@@ -165,14 +165,13 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             else if(action.definition)
             {
-                //console.log(_DSL_LIST);
                 _DSL.id = action.definition.id;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 if (action.definition.name != _DSL.name)
                 {
                     _DSL.name = action.definition.name;
-                    var trovato = false;
+                    let trovato = false;
                     for (var i = 0; !trovato && i<_DSL_LIST.length; i++)
                     {
                         if (action.definition.id == _DSL_LIST[i].dsl.id)
@@ -182,7 +181,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                         }
                     }
                 }
-                
                 localStorage.setItem('DSLId',_DSL.id);
                 localStorage.setItem('DSLName',_DSL.name);
                 localStorage.setItem('DSLType',_DSL.type);
@@ -199,15 +197,16 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             else if(action.id)
             {
                 _errors = [];
-                var index;
-                _DSL_LIST.forEach(function(DSL, i) 
+                
+                let trovato = false;
+                for (var i = 0; !trovato && i<_DSL_LIST.length; i++)
                 {
-                    if(DSL.dsl.id == action.id) 
+                    if (_DSL_LIST[i].dsl.id == action.id)
                     {
-                        index = i;
+                        trovato = true;
+                        _DSL_LIST.splice(i,1);
                     }
-                });
-                _DSL_LIST.splice(index, 1);
+                }
                 localStorage.removeItem('DSLId');
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');

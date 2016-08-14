@@ -10,10 +10,6 @@
       "type": "string",
       "required": true
     },
-    "password": {
-      "type": "string",
-      "required": true
-    },
     "connString": {
       "type": "string",
       "required": true
@@ -45,14 +41,12 @@
       "principalId": "Owner",
       "permission": "ALLOW"
     },
-    
     {
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "Administrator",
       "permission": "ALLOW"
     }
-    
-    ],
+  ],
   "methods": {}
 }

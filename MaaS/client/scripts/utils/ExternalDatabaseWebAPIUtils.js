@@ -26,101 +26,77 @@ var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
 
-addExtDb: function(id, name, password, connString) {
+  addExtDb: function(companyId, name, connString) {
+      request
+        .post(APIEndpoints.EXTERNAL_DATABASES + '/addExtDb')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .set('Accept', 'application/json')
+        .send({
+          companyId: companyId,
+          name: name,
+          connString: connString
+        })
+        .end(function(err, res){
+          if(res)
+          {
+              res = JSON.parse(res.text);
+              if(res.error) 
+              {
+                  ResponseExternalDatabaseActionCreator.responseAddExtDb(null, res.error.message);
+              }
+              else
+              {
+                  ResponseExternalDatabaseActionCreator.responseAddExtDb(res.database, null);
+              }
+              
+          }
+        });
+    },
+  
+  getDbs: function(id) {
     request
-      .post(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
+      .get(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
       .set('Authorization', localStorage.getItem('accessToken'))
-      .send({
-        name: name,
-        password: password,
-        connString: connString})
       .set('Accept', 'application/json')
       .end(function(err, res){
-        if(res) 
-        {
-            if(res.error) 
-            {
+        if(res) {
+            if(res.error) {
                 var errors = _getErrors(res.body.error);
-                ResponseExternalDatabaseActionCreator.responseAddExtDb(null, errors);
+                ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);
             }
             else
-            {
-              ResponseExternalDatabaseActionCreator.responseAddExtDb(res.body, null);
-            }
-            
+                ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
         }
       });
   },
-
-// connect db dovrebbe essere POST e passare dei dati al server per effettuare la connessione del db no?
-connectDb: function() {
-  request
-    .get(APIEndpoints.EXTERNAL_DATABASES)
-    .set('Authorization', localStorage.getItem('accessToken'))
-    .set('Accept', 'application/json')
-    .end(function(err, res){
-      if(res) {
-        console.log(res);
-          if(res.error) {
-              var errors = _getErrors(res.body.error);
-              ResponseExternalDatabaseActionCreator.responseConnectDbs(null, errors);
-          }
-          else{
-              //var company = localStorage.getItem('companyName'); // qua ci va una variabile ricevuta dal server!! (es. res.companyName)
-              ResponseExternalDatabaseActionCreator.responseConnectDb(company, null);
-          }
-      }
-      if(err){
-        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
-      }
-    });
-},
-
-getDbs: function(id) {
-  request
-    .get(APIEndpoints.COMPANIES + '/' + id + '/externalDatabases')
-    .set('Authorization', localStorage.getItem('accessToken'))
-    .set('Accept', 'application/json')
-    .end(function(err, res){
-      if(res) {
-          if(res.error) {
-              var errors = _getErrors(res.body.error);
-              ResponseExternalDatabaseActionCreator.responseGetDbs(null, errors);
+  
+  deleteDb: function(id, companyId) {
+    request
+      .del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .set('Accept', 'application/json');
+  },
+  
+  changeStateDb: function(id, status, companyId) {
+    request
+      .put(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .set('Accept', 'application/json')
+      .send({
+        connected: status
+      })
+      .end(function(err, res){
+        if(res) {
+          if (res.errors)
+          {
+            var errors = _getErrors(res.body.error);
+            ResponseExternalDatabaseActionCreator.responseChangeStateDb(null, errors);
           }
           else
-              ResponseExternalDatabaseActionCreator.responseGetDbs(res.body, null);
-      }
-    });
-},
-
-deleteDb: function(id, companyId) {
-  request
-    .del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
-    .set('Authorization', localStorage.getItem('accessToken'))
-    .set('Accept', 'application/json');
-},
-
-changeStateDb: function(id, status, companyId) {
-  request
-    .put(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
-    .set('Authorization', localStorage.getItem('accessToken'))
-    .set('Accept', 'application/json')
-    .send({
-      connected: status
-    })
-    .end(function(err, res){
-      if(res) {
-        if (res.errors)
-        {
-          var errors = _getErrors(res.body.error);
-          ResponseExternalDatabaseActionCreator.responseChangeStateDb(null, errors);
+          {
+            ResponseExternalDatabaseActionCreator.responseChangeStateDb(res.body, null);
+          }
         }
-        else
-        {
-          ResponseExternalDatabaseActionCreator.responseChangeStateDb(res.body, null);
-        }
-      }
-    });
-}
-
+      });
+  }
 };

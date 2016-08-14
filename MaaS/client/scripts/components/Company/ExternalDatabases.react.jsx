@@ -19,9 +19,6 @@ var AddExternalDatabase = require('./AddExternalDatabase.react.jsx');
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-var ReactMotion = require('react-motion');
-var Collapse = require('react-collapse');
-var ReactHeight = require('react-height');
 
 function getState() {
   return {
@@ -55,21 +52,18 @@ var ExternalDatabases = React.createClass({
     this.setState({value: event.target.value});
   },
   */
+  componentWillMount: function() {
+    RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
+  },
+  
   componentDidMount: function() {
-      //Collapse.addChangeListener(this._onChange);
-      //SessionStore.addChangeListener(this._onChange);
-      ExternalDatabaseStore.addChangeListener(this._onChange);
-      RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
+    ExternalDatabaseStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function() {
-      //Collapse.removeChangeListener(this._onChange);
-      //SessionStore.removeChangeListener(this._onChange);
-      ExternalDatabaseStore.removeChangeListener(this._onChange);
+    ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
   
-  
- 
   
   buttonFormatter: function(cell, row) {
     

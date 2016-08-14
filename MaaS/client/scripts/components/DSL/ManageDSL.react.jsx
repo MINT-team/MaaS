@@ -36,15 +36,25 @@ var ManageDSL = React.createClass({
     getInitialState: function() {
         return getState();
     },
-
-    componentDidMount: function() {
-        DSLStore.addChangeListener(this._onChange);
-        UserStore.addChangeListener(this._onUserChange);
+    
+    componentWillMount: function() {
         RequestUserActionCreator.getUser(this.state.userId);
         if(!this.props.children)
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
+    },
+
+    componentDidMount: function() {
+        DSLStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onUserChange);
+        /*
+        RequestUserActionCreator.getUser(this.state.userId);
+        if(!this.props.children)
+        {
+            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        }
+        */
     },
 
     componentWillUnmount: function() {
@@ -252,7 +262,7 @@ var ManageDSL = React.createClass({
             }
             var options = {
                 onRowClick: function(row){
-                    RequestDSLActionCreator.executeDefinition(row.id, row.type);
+                    //RequestDSLActionCreator.executeDefinition(row.id, row.type);
                 },
                 noDataText: "There are no DSL definitions to display"
             };

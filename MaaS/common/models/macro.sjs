@@ -2,18 +2,6 @@ syntax hi = function (ctx) {
   return #`console.log('hello, world!')`;
 }
 
-/*
-Welcome to sweet.js!
-
-You can play around with macro writing here on the left side and
-your code will automatically be compiled on the right. This page
-will also save your code to localStorage on every successful
-compile so feel free to close the page and come back later!
-*/
-
-// The `syntax` keyword is used to create and name new macros.
-
-
 syntax cell = function (ctx) {
     var ctxItem = ctx.next().value;
     if(!ctxItem.isParens())     // check for parens

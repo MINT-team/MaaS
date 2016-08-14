@@ -18,7 +18,7 @@ module.exports = function(app) {
             });
         }
         // If the target model is not Company or user
-        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'DSL') 
+        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'ExternalDatabase' && context.modelName !== 'DSL') 
         {
             return reject();
         }
@@ -56,6 +56,43 @@ module.exports = function(app) {
                 else
                     return reject();
             });
+        }
+        if(context.modelName == "ExternalDatabase") 
+        {
+            var user = app.models.user;
+            // Creating a new database
+            if(context.remotingContext.req.url == '/addExtDb') 
+            {
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    if(userInstance.role == "Owner")
+                        cb(null, true); // true = user is Owner so he can create databases
+                    else
+                        return reject();    
+                });
+            }
+            else    // Existing database
+            {
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    var Company = app.models.Company;
+                    Company.findById(userInstance.companyId, function(err, companyInstance) {
+                        if(err || !companyInstance) 
+                            return reject();
+                            
+                        companyInstance.externalDatabases.findById(context.modelId, function(err, database) {
+                            if(err || !database)
+                                return reject();
+                            if(userInstance.role == "Owner")
+                                cb(null, true);     // user is Owner and his company own this database
+                            else
+                                return reject();
+                        });
+                    });
+                });
+            }
         }
         if(context.modelName == "DSL") 
         {
@@ -99,7 +136,7 @@ module.exports = function(app) {
             });
         }
         // If the target model is not Company or user
-        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'DSL') {
+        if(context.modelName !== 'Company' && context.modelName !== 'user' && context.modelName !== 'ExternalDatabase' && context.modelName !== 'DSL') {
             return reject();
         }
         // Do not allow anonymous users
@@ -138,6 +175,43 @@ module.exports = function(app) {
                         cb(null, false);
                 });
             });   
+        }
+        if(context.modelName == "ExternalDatabase") 
+        {
+            var user = app.models.user;
+            // Creating a new database
+            if(context.remotingContext.req.url == '/addExtDb') 
+            {
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    if(userInstance.role == "Administrator")
+                        cb(null, true); // true = user is Administrator so he can create databases
+                    else
+                        return reject();    
+                });
+            }
+            else    // Existing database
+            {
+                user.findById(userId, function(err, userInstance) {
+                    if(err || !userInstance)
+                        return reject();
+                    var Company = app.models.Company;
+                    Company.findById(userInstance.companyId, function(err, companyInstance) {
+                        if(err || !companyInstance) 
+                            return reject();
+                            
+                        companyInstance.externalDatabases.findById(context.modelId, function(err, database) {
+                            if(err || !database)
+                                return reject();
+                            if(userInstance.role == "Administrator")
+                                cb(null, true);     // user is Administrator and his company own this database
+                            else
+                                return reject();
+                        });
+                    });
+                });
+            }
         }
         if(context.modelName == "DSL") {
             // Creating a new DSL definition
