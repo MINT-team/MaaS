@@ -32,6 +32,11 @@
       "foreignKey": "dslId",
       "through": "DSLAccess",
       "keyThrough": "userId"
+    },
+    "externalDatabase": {
+      "type": "belongsTo",
+      "model": "ExternalDatabase",
+      "foreignKey": "externalDatabaseId"
     }
   },
   "acls": [

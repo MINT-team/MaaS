@@ -42,27 +42,26 @@ module.exports = function(ExternalDatabase) {
                         console.log('> Failed connecting database.');
                         return cb(null, error, null);
                     }
+                    // Create database
+                    ExternalDatabase.create({name: name, connString: connString, companyId: companyInstance.id}, function(err, externalDatabaseInstance){
+                        if(err)
+                        {
+                            ExternalDatabase.destroyById(externalDatabaseInstance.id);
+                            var error = {
+                                message: "Failed creating database"
+                            };
+                            console.log('> Failed creating database.');
+                            return cb(null, error, null);
+                        }
+                        else
+                        {
+                            console.log("> Database added:", externalDatabaseInstance);
+                            return cb(null, null, externalDatabaseInstance);
+                        }
+                    });
                 });
                 //mongoose.connection.close();
                 conn.disconnect();
-                
-                // Create database
-                ExternalDatabase.create({name: name, connString: connString, companyId: companyInstance.id}, function(err, externalDatabaseInstance){
-                    if(err)
-                    {
-                        ExternalDatabase.destroyById(externalDatabaseInstance.id);
-                        var error = {
-                            message: "Failed creating database"
-                        };
-                        console.log('> Failed creating database.');
-                        return cb(null, error, null);
-                    }
-                    else
-                    {
-                        console.log("> Database added:", externalDatabaseInstance);
-                        return cb(null, null, externalDatabaseInstance);
-                    }
-                });
             });
         }
         else

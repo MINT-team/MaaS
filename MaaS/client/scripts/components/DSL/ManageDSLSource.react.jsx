@@ -152,7 +152,7 @@ var ManageDSLSource = React.createClass({
                     }
                     else
                     {
-                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource, this.props.location.query.databaseID);
                     }
                 }
             }

@@ -40,7 +40,7 @@ module.exports = {
           if(res)
           {
               res = JSON.parse(res.text);
-              if(res.error) 
+              if(res.error)
               {
                   ResponseExternalDatabaseActionCreator.responseAddExtDb(null, res.error.message);
               }
@@ -48,7 +48,6 @@ module.exports = {
               {
                   ResponseExternalDatabaseActionCreator.responseAddExtDb(res.database, null);
               }
-              
           }
         });
     },
@@ -74,7 +73,21 @@ module.exports = {
     request
       .del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id)
       .set('Authorization', localStorage.getItem('accessToken'))
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        if(res)
+        {
+          if(res.errors)
+          {
+            res = JSON.parse(res.text);
+            ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message);
+          }
+          else
+          {
+            ResponseExternalDatabaseActionCreator.responseDeleteDb(null);
+          }
+        }
+      });
   },
   
   changeStateDb: function(id, status, companyId) {

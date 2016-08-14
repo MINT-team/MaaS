@@ -104,7 +104,7 @@ module.exports = function(DSL) {
     
     
     // Create a DSL definition
-    DSL.saveDefinition = function(userId ,type, name, source, cb) {
+    DSL.saveDefinition = function(userId, type, name, source, externalDatabaseId, cb) {
         
         // Clear and returns the error
         function relationError(DSLInstance, err) {
@@ -123,7 +123,7 @@ module.exports = function(DSL) {
             };
             return cb(null, error, null);
         }
-        DSL.create({type: type, name: name, source: source, createdBy: userId}, function(err, DSLInstance) {
+        DSL.create({type: type, name: name, source: source, createdBy: userId, externalDatabaseId: externalDatabaseId}, function(err, DSLInstance) {
             if(err || !DSLInstance)
             {
                console.log('> Failed creating DSL.');
@@ -187,7 +187,8 @@ module.exports = function(DSL) {
                 { arg: 'userId', type: 'string', required: true, description: 'User id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
                 { arg: 'name', type: 'string', required: true, description: 'Definition name' },
-                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' },
+                { arg: 'externalDatabaseId', type: 'string', required: true, description: 'External DatabaseId id' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },

@@ -16,22 +16,10 @@ var ResponseDSLActionCreator = require('../actions/Response/ResponseDSLActionCre
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
-function _getErrors(json) {
-  var error, message;
-    if(json.message) {
-        message = json.message;
-        // Other cases
-        if(!error) {
-            error = message;
-        }
-    }
-    return error;
-}
-
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-    saveDSLDefinition: function(userId, type, name, source) {
+    saveDSLDefinition: function(userId, type, name, source, databaseId) {
       request
         .post(APIEndpoints.DSL + '/saveDefinition')
         .set('Accept', 'application/json')
@@ -40,7 +28,8 @@ module.exports = {
           userId: userId,
           type: type,
           name: name,
-          source: source
+          source: source,
+          externalDatabaseId: databaseId
         })
         .end(function(err, res) {
           if(res)

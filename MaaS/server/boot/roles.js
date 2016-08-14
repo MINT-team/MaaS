@@ -59,10 +59,10 @@ module.exports = function(app) {
         }
         if(context.modelName == "ExternalDatabase") 
         {
-            var user = app.models.user;
             // Creating a new database
             if(context.remotingContext.req.url == '/addExtDb') 
             {
+                var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
@@ -74,6 +74,7 @@ module.exports = function(app) {
             }
             else    // Existing database
             {
+                var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
@@ -193,6 +194,7 @@ module.exports = function(app) {
             }
             else    // Existing database
             {
+                var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
                     if(err || !userInstance)
                         return reject();
@@ -215,7 +217,7 @@ module.exports = function(app) {
         }
         if(context.modelName == "DSL") {
             // Creating a new DSL definition
-            if(context.remotingContext.req.url == '/saveDefinition') 
+            if(context.remotingContext.req.url == '/saveDefinition')
             {
                 var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
@@ -426,6 +428,8 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(err)
+                        return reject();
                     if(accessInstance.permission == "execute")
                         cb(null, true); // true = user has execute permission
                     else
@@ -459,6 +463,8 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(err)
+                        return reject();
                     if(accessInstance.permission == "read")
                         cb(null, true); // true = user has read permission
                     else
@@ -492,6 +498,8 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
+                    if(err)
+                        return reject();
                     if(accessInstance.permission == "write")
                         cb(null, true); // true = user has write permission
                     else

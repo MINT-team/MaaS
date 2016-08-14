@@ -32,6 +32,8 @@ var AddExternalDatabase = React.createClass({
     
     _onChange: function() {
         this.setState({errors: ExternalDatabaseStore.getErrors() });
+        if(this.state.errors.length > 0)
+            this.refs.errorDropdown.classList.toggle("dropdown-show");
     },
     
     toggleDropdown: function(event) {
@@ -51,6 +53,10 @@ var AddExternalDatabase = React.createClass({
         RequestExternalDatabaseActionCreator.addExtDb(this.state.companyId, this.refs.name.value, this.refs.string.value);
     },
     
+    emptyErrors: function() {
+	    this.setState({ errors: [] });
+	},
+    
     render: function() {
         var errors;
         if(this.state.errors.length > 0) {
@@ -65,7 +71,7 @@ var AddExternalDatabase = React.createClass({
                     <p className="dropdown-title">Error</p>
                     <div className="dropdown-description">{errors}</div>
                     <div className="dropdown-buttons">
-                        <button className="button">Ok</button>
+                        <button onClick={this.emptyErrors} className="button">Ok</button>
                     </div>
                 </div>
                 <div className="dropdown-content dropdown-popup" ref="addDropdown">

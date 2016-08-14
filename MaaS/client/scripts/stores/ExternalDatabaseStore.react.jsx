@@ -46,6 +46,10 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
     
     getErrors: function() {
         return _errors;
+    },
+    
+    getDbs: function() {
+        return _databases;
     }
 });
 

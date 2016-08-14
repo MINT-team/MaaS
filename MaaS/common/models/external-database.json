@@ -26,6 +26,11 @@
       "type": "belongsTo",
       "model": "Company",
       "foreignKey": "companyId"
+    },
+    "dsl": {
+      "type": "hasMany",
+      "model": "DSL",
+      "foreignKey": "dslId"
     }
   },
   "acls": [

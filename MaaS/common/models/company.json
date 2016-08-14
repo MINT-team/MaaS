@@ -72,6 +72,18 @@
       "principalId": "Administrator",
       "permission": "ALLOW",
       "property": "__get__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "__destroyById__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "__updateById__externalDatabases"
     }
   ],
   "methods": {}

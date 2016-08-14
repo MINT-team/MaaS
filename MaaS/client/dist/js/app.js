@@ -60,8 +60,8 @@ var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
 var ActionTypes = Constants.ActionTypes;
 
 var RequestDSLActionCreator = {
-    saveDSLDefinition: function saveDSLDefinition(userId, type, name, source) {
-        WebAPIUtils.saveDSLDefinition(userId, type, name, source);
+    saveDSLDefinition: function saveDSLDefinition(userId, type, name, source, databaseId) {
+        WebAPIUtils.saveDSLDefinition(userId, type, name, source, databaseId);
     },
 
     overwriteDSLDefinition: function overwriteDSLDefinition(id, type, source, name) {
@@ -440,6 +440,13 @@ var ResponseExternalDatabaseActionCreator = {
             json: json,
             errors: errors
         });
+    },
+
+    responseDeleteDb: function responseDeleteDb(errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_DB,
+            errors: errors
+        });
     }
 
 };
@@ -692,6 +699,7 @@ var AddExternalDatabase = React.createClass({
 
     _onChange: function _onChange() {
         this.setState({ errors: ExternalDatabaseStore.getErrors() });
+        if (this.state.errors.length > 0) this.refs.errorDropdown.classList.toggle("dropdown-show");
     },
 
     toggleDropdown: function toggleDropdown(event) {
@@ -706,6 +714,10 @@ var AddExternalDatabase = React.createClass({
     confirmAdd: function confirmAdd(event) {
         event.preventDefault();
         RequestExternalDatabaseActionCreator.addExtDb(this.state.companyId, this.refs.name.value, this.refs.string.value);
+    },
+
+    emptyErrors: function emptyErrors() {
+        this.setState({ errors: [] });
     },
 
     render: function render() {
@@ -743,7 +755,7 @@ var AddExternalDatabase = React.createClass({
                     { className: 'dropdown-buttons' },
                     React.createElement(
                         'button',
-                        { className: 'button' },
+                        { onClick: this.emptyErrors, className: 'button' },
                         'Ok'
                     )
                 )
@@ -1531,8 +1543,6 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
   return {
     errors: ExternalDatabaseStore.getErrors(),
-    isOpened: false,
-    _isOpened: true,
     isLogged: SessionStore.isLogged(),
     type: "All",
     databases: ExternalDatabaseStore.getDbs()
@@ -1543,6 +1553,10 @@ var ExternalDatabases = React.createClass({
   displayName: 'ExternalDatabases',
 
 
+  contextTypes: { // serve per utilizzare il router
+    router: React.PropTypes.object.isRequired
+  },
+
   getInitialState: function getInitialState() {
     return getState();
   },
@@ -1551,17 +1565,6 @@ var ExternalDatabases = React.createClass({
     this.setState(getState());
   },
 
-  openForm: function openForm() {
-    this.setState({ isOpened: !this.state.isOpened });
-    if (this.state.isOpened) {
-      this.refs.table.setState({ _isOpened: false });
-    }
-  },
-
-  /*handleChange: function(event) {
-    this.setState({value: event.target.value});
-  },
-  */
   componentWillMount: function componentWillMount() {
     RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
@@ -1601,8 +1604,10 @@ var ExternalDatabases = React.createClass({
       RequestExternalDatabaseActionCreator.changeStateDb(row.id, newStatus, CompanyStore.getId());
     };
 
+    var titleState;
     var messageState;
     if (row.connected == 'true') {
+      titleState = "Disconnect database";
       messageState = React.createElement(
         'p',
         { className: 'dropdown-description' },
@@ -1616,6 +1621,7 @@ var ExternalDatabases = React.createClass({
         '?'
       );
     } else {
+      titleState = "Connect database";
       messageState = React.createElement(
         'p',
         { className: 'dropdown-description' },
@@ -1647,7 +1653,7 @@ var ExternalDatabases = React.createClass({
           React.createElement(
             'p',
             { className: 'dropdown-title' },
-            'Change state Database'
+            titleState
           ),
           messageState,
           React.createElement(
@@ -1758,84 +1764,91 @@ var ExternalDatabases = React.createClass({
     alert(this.refs.table.state.selectedRowKeys);
   },
 
-  changeState: function changeState() {},
-
-  deleteDatabase: function deleteDatabase() {},
-
   render: function render() {
-    if (!this.state.isLogged || this.state.errors.length > 0) {
+    if (!this.state.isLogged) {
       return React.createElement(AuthorizationRequired, null);
     }
+    if (this.props.params.mode != "select") {
+      var all = {
+        label: "All",
+        onClick: this.onAllClick,
+        icon: React.createElement(
+          'i',
+          { className: 'material-icons md-24' },
+          ''
+        )
+      };
+      var connected = {
+        label: "Connected",
+        onClick: this.onConnectedClick,
+        icon: React.createElement(
+          'i',
+          { className: 'material-icons md-24' },
+          ''
+        )
+      };
+      var disconnected = {
+        label: "Disconnected",
+        onClick: this.onDisconnectedClick,
+        icon: React.createElement(
+          'i',
+          { className: 'material-icons md-24' },
+          ''
+        )
+      };
 
-    var all = {
-      label: "All",
-      onClick: this.onAllClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
-    var connected = {
-      label: "Connected",
-      onClick: this.onConnectedClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
-    var disconnected = {
-      label: "Disconnected",
-      onClick: this.onDisconnectedClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
+      var sidebarData = [all, connected, disconnected];
 
-    var sidebarData = [all, connected, disconnected];
-    var selectRowProp = {
-      mode: "checkbox",
-      bgColor: "rgba(144, 238, 144, 0.42)"
-    };
+      var selectRowProp = {
+        mode: "checkbox",
+        bgColor: "rgba(144, 238, 144, 0.42)"
+      };
+    }
 
     var data = [];
-
+    var instance = this;
     if (this.state.databases && this.state.databases.length > 0) {
       this.state.databases.forEach(function (database, i) {
-        data[i] = {
+        if (instance.props.params.mode != "select" || instance.props.params.mode == "select" && database.connected == "true") data.push({
           id: database.id,
           name: database.name,
           connected: database.connected,
           connectionString: database.connString
-        };
+        });
       });
     }
 
-    var options = {
-      onRowClick: function onRowClick(row) {
-        //Show information page of ExternalDatabase
-      },
-      noDataText: "There are no databases to display"
-    };
+    var router = this.context.router;
+
+    var options;
+    if (this.props.params.mode == "select") {
+      options = {
+        onRowClick: function onRowClick(row) {
+          router.push('/manageDSL/manageDSLSource?databaseID=' + row.id); // redirect to DSL page
+        },
+        noDataText: "There are no databases to display"
+      };
+    } else {
+      options = {
+        noDataText: "There are no databases to display"
+      };
+    }
 
     var title, content;
-    title = "Manage databases";
+    if (this.props.params.mode != "select") title = "Manage databases";else title = "Select one database";
     content = React.createElement(
       'div',
       { id: 'manage-externalDatabases' },
-      React.createElement(Sidebar, { title: 'Filter databases', data: sidebarData }),
+      this.props.params.mode != "select" ? React.createElement(Sidebar, { title: 'Filter databases', data: sidebarData }) : "",
       React.createElement(
         'div',
-        { className: 'container sidebar-container' },
+        { className: this.props.params.mode == "select" ? "container" : "container  sidebar-container" },
         React.createElement(
           'p',
           { className: 'container-title' },
           title
         ),
-        React.createElement(
+        this.props.params.mode != "select" ? React.createElement(
           'div',
           { id: 'table-top' },
           React.createElement(
@@ -1871,11 +1884,20 @@ var ExternalDatabases = React.createClass({
               )
             )
           )
-        ),
+        ) : "",
         React.createElement(
           'div',
           { id: 'table' },
-          React.createElement(
+          this.props.params.mode == "select" ? React.createElement(
+            BootstrapTable,
+            { ref: 'table', keyField: 'id', pagination: true, data: data,
+              search: true, striped: true, hover: true, options: options },
+            React.createElement(
+              TableHeaderColumn,
+              { dataField: 'name', dataSort: true },
+              'Name'
+            )
+          ) : React.createElement(
             BootstrapTable,
             { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
               search: true, striped: true, hover: true, options: options },
@@ -2442,13 +2464,6 @@ var ManageDSL = React.createClass({
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
         UserStore.addChangeListener(this._onUserChange);
-        /*
-        RequestUserActionCreator.getUser(this.state.userId);
-        if(!this.props.children)
-        {
-            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
-        }
-        */
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -2780,7 +2795,7 @@ var ManageDSL = React.createClass({
                                 { className: 'tooltip tooltip-bottom', id: 'add-button' },
                                 React.createElement(
                                     Link,
-                                    { to: '/manageDSL/manageDSLSource' },
+                                    { to: '/manageDSL/externalDatabases/select' },
                                     React.createElement(
                                         'i',
                                         { className: 'material-icons md-48' },
@@ -3262,7 +3277,7 @@ var ManageDSLSource = React.createClass({
                     if (this.props.params.mode == "edit") {
                         RequestDSLActionCreator.overwriteDSLDefinition(this.state.definitionId, definitionType, definitionSource, definitionName);
                     } else {
-                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource);
+                        RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource, this.props.location.query.databaseID);
                     }
                 }
             }
@@ -4249,6 +4264,11 @@ var Header = React.createClass({
                                     React.createElement(
                                         'li',
                                         null,
+                                        React.createElement(
+                                            'i',
+                                            { className: 'material-icons md-24' },
+                                            ''
+                                        ),
                                         'Logout'
                                     )
                                 )
@@ -4456,9 +4476,9 @@ var Login = React.createClass({
   _onChange: function _onChange() {
     this.setState(getState());
     if (this.state.isLogged) {
-      // loads data to the session
-      RequestUserActionCreator.getUser(SessionStore.getUserId());
       if (this.state.userType == "commonUser") {
+        // loads data to the session
+        RequestUserActionCreator.getUser(SessionStore.getUserId());
         RequestUserActionCreator.getCompany(SessionStore.getUserId());
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
       }
@@ -6939,6 +6959,7 @@ var Routes = React.createClass({
         React.createElement(
           Route,
           { path: 'manageDSL', component: ManageDSL },
+          React.createElement(Route, { path: 'externalDatabases/:mode', component: ExternalDatabases }),
           React.createElement(Route, { path: 'manageDSLSource', component: ManageDSLSource }),
           React.createElement(Route, { path: 'manageDSLSource/:definitionId/:mode', component: ManageDSLSource }),
           React.createElement(Route, { path: 'manageDSLPermissions/:definitionId', component: ManageDSLPermissions })
@@ -7433,6 +7454,10 @@ var ExternalDatabaseStore = assign({}, EventEmitter.prototype, {
 
     getErrors: function getErrors() {
         return _errors;
+    },
+
+    getDbs: function getDbs() {
+        return _databases;
     }
 });
 
@@ -8106,27 +8131,16 @@ var ResponseDSLActionCreator = require('../actions/Response/ResponseDSLActionCre
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
 
-function _getErrors(json) {
-  var error, message;
-  if (json.message) {
-    message = json.message;
-    // Other cases
-    if (!error) {
-      error = message;
-    }
-  }
-  return error;
-}
-
 var APIEndpoints = Constants.APIEndpoints;
 
 module.exports = {
-  saveDSLDefinition: function saveDSLDefinition(userId, type, name, source) {
+  saveDSLDefinition: function saveDSLDefinition(userId, type, name, source, databaseId) {
     request.post(APIEndpoints.DSL + '/saveDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       userId: userId,
       type: type,
       name: name,
-      source: source
+      source: source,
+      externalDatabaseId: databaseId
     }).end(function (err, res) {
       if (res) {
         res = JSON.parse(res.text);
@@ -8315,7 +8329,16 @@ module.exports = {
   },
 
   deleteDb: function deleteDb(id, companyId) {
-    request.del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json');
+    request.del(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/' + id).set('Authorization', localStorage.getItem('accessToken')).set('Accept', 'application/json').end(function (err, res) {
+      if (res) {
+        if (res.errors) {
+          res = JSON.parse(res.text);
+          ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message);
+        } else {
+          ResponseExternalDatabaseActionCreator.responseDeleteDb(null);
+        }
+      }
+    });
   },
 
   changeStateDb: function changeStateDb(id, status, companyId) {
@@ -8429,6 +8452,7 @@ module.exports = {
             if (res) {
                 if (res.body.type == "superAdmin") //super admin login
                     {
+
                         request.post(APIEndpoints.SUPERADMINS + '/login').send({
                             email: email,
                             password: password

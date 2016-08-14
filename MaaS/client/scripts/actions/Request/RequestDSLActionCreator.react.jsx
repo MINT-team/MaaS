@@ -19,8 +19,8 @@ var WebAPIUtils = require("../../utils/DSLWebAPIUtils.js");
 var ActionTypes = Constants.ActionTypes;
 
 var RequestDSLActionCreator = {
-    saveDSLDefinition: function(userId, type, name, source) {
-        WebAPIUtils.saveDSLDefinition(userId, type, name, source);
+    saveDSLDefinition: function(userId, type, name, source, databaseId) {
+        WebAPIUtils.saveDSLDefinition(userId, type, name, source, databaseId);
     },
     
     overwriteDSLDefinition: function(id, type, source, name) {

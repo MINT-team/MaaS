@@ -12,7 +12,7 @@ var Constants = require("../../constants/Constants.js");
 var ActionTypes = Constants.ActionTypes;
 
 var ResponseExternalDatabaseActionCreator = {
-    responseAddExtDb: function(database, errors){
+    responseAddExtDb: function(database, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.ADD_EXT_DB_RESPONSE,
             database: database,
@@ -20,7 +20,7 @@ var ResponseExternalDatabaseActionCreator = {
         });
     },
     
-    responseGetDbs:function(json, errors){
+    responseGetDbs:function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.GET_DBS,
           json: json,
@@ -28,10 +28,17 @@ var ResponseExternalDatabaseActionCreator = {
         });
     },
     
-    responseChangeStateDb: function(json, errors){
+    responseChangeStateDb: function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.CHANGE_STATE_DB,
           json: json,
+          errors: errors
+        });  
+    },
+    
+    responseDeleteDb: function(errors) {
+        Dispatcher.handleServerAction({
+          type: ActionTypes.DELETE_DB,
           errors: errors
         });  
     }

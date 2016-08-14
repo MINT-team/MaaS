@@ -48,13 +48,6 @@ var ManageDSL = React.createClass({
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
         UserStore.addChangeListener(this._onUserChange);
-        /*
-        RequestUserActionCreator.getUser(this.state.userId);
-        if(!this.props.children)
-        {
-            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
-        }
-        */
     },
 
     componentWillUnmount: function() {
@@ -277,7 +270,7 @@ var ManageDSL = React.createClass({
                             {this.state.role != "Guest" ?
                                 <div id="top-buttons">
                                     <div className="tooltip tooltip-bottom" id="add-button">
-                                        <Link to="/manageDSL/manageDSLSource"><i className="material-icons md-48">&#xE147;</i></Link>
+                                        <Link to="/manageDSL/externalDatabases/select"><i className="material-icons md-48">&#xE147;</i></Link>
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
                                     <div className="tooltip tooltip-bottom" id="deleteAll-button">

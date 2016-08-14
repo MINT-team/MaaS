@@ -23,8 +23,6 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
   return {
           errors: ExternalDatabaseStore.getErrors(),
-          isOpened: false,
-          _isOpened: true,
           isLogged: SessionStore.isLogged(),
           type: "All",
           databases: ExternalDatabaseStore.getDbs()
@@ -32,6 +30,10 @@ function getState() {
 }
 
 var ExternalDatabases = React.createClass({
+  
+  contextTypes: {   // serve per utilizzare il router
+    router: React.PropTypes.object.isRequired
+  },
   
   getInitialState: function() {
       return getState();
@@ -41,17 +43,6 @@ var ExternalDatabases = React.createClass({
     	this.setState(getState());
   },
   
-  openForm: function(){
-    this.setState({isOpened: !this.state.isOpened});
-    if(this.state.isOpened) { 
-        this.refs.table.setState({_isOpened: false});
-    }
- },
- 
-  /*handleChange: function(event) {
-    this.setState({value: event.target.value});
-  },
-  */
   componentWillMount: function() {
     RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
@@ -63,7 +54,6 @@ var ExternalDatabases = React.createClass({
   componentWillUnmount: function() {
     ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
-  
   
   buttonFormatter: function(cell, row) {
     
@@ -95,15 +85,18 @@ var ExternalDatabases = React.createClass({
       RequestExternalDatabaseActionCreator.changeStateDb(row.id, newStatus, CompanyStore.getId());
     };
     
+    var titleState;
     var messageState;
     if (row.connected == 'true')
     {
+      titleState="Disconnect database";
       messageState = (
         <p className="dropdown-description">Are you sure you want to <span id="successful-email">disconnect {row.name}</span>?</p>
       );
     }
     else
     {
+      titleState="Connect database";
       messageState = (
         <p className="dropdown-description">Are you sure you want to <span id="successful-email">connect {row.name}</span>?</p>
       );
@@ -115,7 +108,7 @@ var ExternalDatabases = React.createClass({
           <div className="tooltip tooltip-bottom pop-up" id="Change-button">
             <i onClick={tryChangeState} className="material-icons md-24 dropdown-button">&#xE8D4;</i>
             <div className="dropdown-content dropdown-popup" id={stateDropdown}>
-			        <p className="dropdown-title">Change state Database</p>
+			        <p className="dropdown-title">{titleState}</p>
 			        {messageState}
               <div className="dropdown-buttons">
                 <button className="inline-button">Cancel</button>
@@ -155,7 +148,7 @@ var ExternalDatabases = React.createClass({
         <div className="led-red"></div>
       </div>
       );
-      }
+    }
       
     return (
       <div>
@@ -187,93 +180,114 @@ var ExternalDatabases = React.createClass({
     alert(this.refs.table.state.selectedRowKeys);
   },
   
-  changeState: function() {
-        
-    },
-    
-  deleteDatabase: function() {
-      
-    },  
-  
   render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0)
+    if(!this.state.isLogged)
     {
       return (
         <AuthorizationRequired />
       );
     }
-    
-    var all = {
-      label: "All",
-      onClick: this.onAllClick,
-      icon: (<i className="material-icons md-24">&#xE8EF;</i>)
-    };
-    var connected = {
-        label: "Connected",
-        onClick: this.onConnectedClick,
-        icon: (<i className="material-icons md-24">&#xE8C0;</i>)
-    };
-    var disconnected = {
-        label: "Disconnected",
-        onClick: this.onDisconnectedClick,
-        icon: (<i className="material-icons md-24">&#xE033;</i>)
-    };
-    
-    var sidebarData = [all, connected, disconnected];
-    var selectRowProp = {
-        mode: "checkbox",
-        bgColor: "rgba(144, 238, 144, 0.42)",
-    };
+    if (this.props.params.mode != "select")
+    {
+      var all = {
+        label: "All",
+        onClick: this.onAllClick,
+        icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+      };
+      var connected = {
+          label: "Connected",
+          onClick: this.onConnectedClick,
+          icon: (<i className="material-icons md-24">&#xE8C0;</i>)
+      };
+      var disconnected = {
+          label: "Disconnected",
+          onClick: this.onDisconnectedClick,
+          icon: (<i className="material-icons md-24">&#xE033;</i>)
+      };
+      
+      var sidebarData = [all, connected, disconnected];
+      
+      var selectRowProp = {
+          mode: "checkbox",
+          bgColor: "rgba(144, 238, 144, 0.42)"
+      };
+    }
   
     var data = [];
-    
+    var instance = this;
     if(this.state.databases && this.state.databases.length > 0)
     {
         this.state.databases.forEach(function(database, i) {
-            data[i] = {
+          if(instance.props.params.mode != "select" || (instance.props.params.mode == "select" && database.connected == "true") )
+            data.push({
                 id: database.id,
                 name: database.name,
                 connected: database.connected,
                 connectionString: database.connString
-            };
+            });
         });
     }
     
-    var options = {
-      onRowClick: function(row){
-        //Show information page of ExternalDatabase
-      },
-      noDataText: "There are no databases to display"
-    };
+    const { router } = this.context;
+    var options;
+    if(this.props.params.mode == "select")
+    {
+      options = {
+        onRowClick: function(row){
+          router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
+        },
+        noDataText: "There are no databases to display"
+      };
+    }
+    else
+    {
+      options = {
+        noDataText: "There are no databases to display"
+      };
+    }
   
     
     var title, content;
-    title = "Manage databases";
+    if(this.props.params.mode != "select")
+      title = "Manage databases";
+    else
+      title = "Select one database";
     content = (
           <div id="manage-externalDatabases">
-            <Sidebar title="Filter databases" data={sidebarData}/>
-            <div className="container sidebar-container">
+            {this.props.params.mode != "select" ?
+              <Sidebar title="Filter databases" data={sidebarData}/>
+            : "" }
+              <div className={this.props.params.mode == "select" ? "container" : "container  sidebar-container" }>
               <p className="container-title">{title}</p>
-              <div id="table-top">
-                <p id="filter-type">{this.state.type}</p>
-                <div id="top-buttons">
-                  <div className="tooltip tooltip-bottom" id="add-button">
-                    <AddExternalDatabase />
-                    <p className="tooltip-text tooltip-text-long">Add new database</p>
-                  </div>
-                  <div className="tooltip tooltip-bottom" id="deleteAll-button">
-                    <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
-                    <p className="tooltip-text tooltip-text-long">Delete all selected databases</p>
+              {this.props.params.mode != "select" ?
+                <div id="table-top">
+                  <p id="filter-type">{this.state.type}</p>
+                  <div id="top-buttons">
+                    <div className="tooltip tooltip-bottom" id="add-button">
+                      <AddExternalDatabase />
+                      <p className="tooltip-text tooltip-text-long">Add new database</p>
+                    </div>
+                    <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                      <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                      <p className="tooltip-text tooltip-text-long">Delete all selected databases</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              : "" }
               <div id="table">
-                <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} 
+                {this.props.params.mode == "select" ?
+                  <BootstrapTable ref="table" keyField="id" pagination={true} data={data} 
+                  search={true} striped={true} hover={true} options={options}>
+                    <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                  </BootstrapTable>
+                
+                : 
+                  <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} 
                 search={true} striped={true} hover={true} options={options}>
-                  <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
-                  <TableHeaderColumn dataField="status" dataFormat={this.statusFormatter}>Status</TableHeaderColumn>
-                  <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
-                </BootstrapTable>
+                    <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                    <TableHeaderColumn dataField="status" dataFormat={this.statusFormatter}>Status</TableHeaderColumn>
+                    <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                  </BootstrapTable>}
               </div>
             </div>
           </div>
