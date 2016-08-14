@@ -1,3 +1,23 @@
+syntax cell = function (ctx) {
+    let params = ctx.next().value.inner();
+    let tot = #``;
+    for (let x of params)
+    {
+        params.next(); // salta :
+        tot = tot.concat(#`${x}: ${params.next('expr').value}`);
+        params.next(); // salta ,
+    }
+    tot = #`dsl.executeCell({${tot}})`;
+    return tot;
+}
+
+// cell (type: "aaa", sortby: "bbdìb", asc: "ccc")
+// risultato: dsl.executeCell({type: "aaa", sortby: "bbdìb", asc: "ccc"});
+
+
+
+/*
+
 syntax hi = function (ctx) {
   return #`console.log('hello, world!')`;
 }
@@ -87,7 +107,7 @@ syntax cell = function (ctx) {
     return res;
 }
 
-
+*/
 
 // -> sortby: "surname"
 
