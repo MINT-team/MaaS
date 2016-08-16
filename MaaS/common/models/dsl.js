@@ -258,7 +258,8 @@ module.exports = function(DSL) {
     );
     
     DSL.executeCell = function(identity, body) {
-        console.log(data);
+        console.log(identity);
+        console.log(body);
     };
     
     DSL.remoteMethod(
@@ -289,7 +290,6 @@ module.exports = function(DSL) {
             {
                 macro = macro.toString();
                 expanded = sweet.compile(macro + dsl);
-                console.log(expanded);
                 return cb(null, expanded.code);
             }
         });
@@ -325,12 +325,10 @@ module.exports = function(DSL) {
                     console.log("> Errore:", err);
                     return cb(err);
                 }
-                console.log('prima di eval');
                 eval(expanded);
             });
             switch (DSLInstance.type) {
                 case 'Cell':
-                    //DSL.executeCell();
                     
                     
                     break;

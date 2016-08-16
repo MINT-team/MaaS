@@ -8,25 +8,38 @@ syntax Cell = function (ctx) {
     let identity = #``;
     let body = #``;
     
-    let sortby;
-    let type;
-    let order;
-    let query;
-    let value;
+    let sortby = false;
+    let type = false;
+    let order = false;
+    let query = false;
     
     // read itentity
     for(let item of params)
     {
-        if(item.val() == 'sortby' || item.val() == 'type' || item.val() == 'order' || item.val() == 'query')
+        if( (item.val() == 'sortby' && sortby == false) ||
+            (item.val() == 'type' && type == false) || 
+            (item.val() == 'order' && order == false) || 
+            (item.val() == 'query' && query == false) )
         {
-            
+            if(item.val() == 'sortby')
+                sortby = true;
+            else if(item.val() == 'type')
+                type = true;
+            else if(item.val() == 'order')
+                order = true;
+            else if(item.val() == 'query')
+                query = true;
+                
             params.next();      // salta ':'
             identity = identity.concat(#`${item}: ${params.next('expr').value}`);
             params.next(); // salta ','
         }
         else
         {
-            throw new Error('unknown syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
+            if(item.val() != 'sortby' && item.val() != 'type' && item.val() != 'order' && item.val() != 'query')
+                throw new Error('Unknown syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
+            else
+                throw new Error('Keyword already defined: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
         }
     }
     
@@ -40,18 +53,17 @@ syntax Cell = function (ctx) {
         params = ctxItem.inner();
         for (let item of params)
         {
-            if(item.val() == "value")
+            if(item.val() == 'value')
             {
                 params.next();     // salta ':'
                 body = body.concat(#`${item}: ${params.next('expr').value}`);
             }
             else
             {
-                throw new Error('unknown syntax: ' + #`${item}`);
+                throw new Error('Unknown syntax: ' + #`${item}`);
             }
         }
     }
-    
     tot = #`DSL.executeCell({${identity}}, {${body}})`;
     return tot;
 }
