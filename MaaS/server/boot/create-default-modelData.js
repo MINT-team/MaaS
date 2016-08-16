@@ -21,7 +21,8 @@ module.exports = function(app) {
 
     function createSuperAdmins(cb) {
        
-        var email_value='superadmin@gmail.com';
+        var email_value = process.env.SUPERADMIN_EMAIL;
+        var password_value = process.env.SUPERADMIN_PASSWORD;
         var user = app.models.user;
         var SuperAdmin = app.models.SuperAdmin;
         SuperAdmin.findOne({where: {email: email_value}, limit: 1}, function(err,results){
@@ -35,10 +36,13 @@ module.exports = function(app) {
                     else 
                     {
                         SuperAdmin.create([
-                            { email: email_value, password: '123456789' }
+                            { email: email_value, password: password_value }
                         ], cb);
                         maas.autoupdate('SuperAdmin', function(err) {
-                            if (err) { return cb(err); }
+                            if (err)
+                            {
+                                return cb(err);
+                            }
                         });
                     }
                 });
