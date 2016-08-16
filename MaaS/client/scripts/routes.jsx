@@ -30,6 +30,7 @@ var People = require('./components/Company/People.react.jsx');
 var ManageDSL = require('./components/DSL/ManageDSL.react.jsx');
 var ManageDSLSource = require('./components/DSL/ManageDSLSource.react.jsx');
 var ManageDSLPermissions = require('./components/DSL/ManageDSLPermissions.react.jsx');
+var ExecuteDSL = require('./components/DSL/ExecuteDSL.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
@@ -66,6 +67,7 @@ var Routes = React.createClass({
           <Route path="externalDatabases" component={ExternalDatabases} />
           <Route path="manageDSL" component={ManageDSL}>
             <Route path="externalDatabases/:mode" component={ExternalDatabases} />
+            <Route path="executeDSL/:definitionId" component={ExecuteDSL} />
             <Route path="manageDSLSource" component={ManageDSLSource} />
             <Route path="manageDSLSource/:definitionId/:mode" component={ManageDSLSource} />
             <Route path="manageDSLPermissions/:definitionId" component={ManageDSLPermissions} />

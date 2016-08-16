@@ -1,67 +1,33 @@
-syntax cell = function (ctx) {
-    let params = ctx.next().value.inner();
-    let tot = #``;
-    for (let x of params)
-    {
-        params.next(); // salta :
-        tot = tot.concat(#`${x}: ${params.next('expr').value}`);
-        params.next(); // salta ,
-    }
-    tot = #`dsl.executeCell({${tot}})`;
-    return tot;
-}
-
-// cell (type: "aaa", sortby: "bbdìb", asc: "ccc")
-// risultato: dsl.executeCell({type: "aaa", sortby: "bbdìb", asc: "ccc"});
-
-
-
-/*
-
-syntax hi = function (ctx) {
-  return #`console.log('hello, world!')`;
-}
-
-syntax cell = function (ctx) {
-    var ctxItem = ctx.next().value;
-    if(!ctxItem.isParens())     // check for parens
+syntax Cell = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
         throw new Error('unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
-    let parens = ctxItem.inner();
-    var sortby;
-    var type;
-    var order;
-    var query;
-    var value;
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+    let body = #``;
+    
+    let sortby;
+    let type;
+    let order;
+    let query;
+    let value;
     
     // read itentity
-    for (let item of parens)
+    for(let item of params)
     {
-        if(item.val() == 'sortby')
+        if(item.val() == 'sortby' || item.val() == 'type' || item.val() == 'order' || item.val() == 'query')
         {
-            parens.next();      // prende ':'
-            sortby = parens.expand('expr').value;
             
-        }
-        else if(item.val() == 'type')
-        {
-            parens.next();      // prende ':'
-            type = parens.expand('expr').value;
-        }
-        else if(item.val() == 'order')
-        {
-            parens.next();      // prende ':'
-            order = parens.expand('expr').value;
-        }
-        else if(item.val() == 'query')
-        {
-            parens.next();      // prende ':'
-            query = parens.expand('expr').value;
+            params.next();      // salta ':'
+            identity = identity.concat(#`${item}: ${params.next('expr').value}`);
+            params.next(); // salta ','
         }
         else
         {
             throw new Error('unknown syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
         }
-        parens.next();      // prende ','
     }
     
     // read body
@@ -71,13 +37,13 @@ syntax cell = function (ctx) {
         ctxItem = ctxItem.value;
         if(!ctxItem.isBraces())     // check for braces
             throw new Error('unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
-        let braces = ctxItem.inner();
-        for (let item of braces)
+        params = ctxItem.inner();
+        for (let item of params)
         {
             if(item.val() == "value")
             {
-                braces.next();
-                value = braces.expand('expr').value;
+                params.next();     // salta ':'
+                body = body.concat(#`${item}: ${params.next('expr').value}`);
             }
             else
             {
@@ -86,127 +52,6 @@ syntax cell = function (ctx) {
         }
     }
     
-    // return the object
-    let dummy = #`dummy`.get(0);
-    let dsl = #`DSL`;
-    var identity = #``;
-    if(sortby)
-        identity = identity.concat(#`sortby: ${sortby}_,_`);
-    if(type)
-        identity = identity.concat(#`type: ${type}_,_`);
-    if(order)
-        identity = identity.concat(#`order: ${order}_,_`);
-    if(query)
-        identity = identity.concat(#`query: ${query}`);
-        
-    var body = #``;
-    if(value)
-        body = body.concat(#`value: ${value}`);
-        
-    var res = #`identity: {${identity}}_,_ body: {${body}}`;
-    return res;
+    tot = #`DSL.executeCell({${identity}}, {${body}})`;
+    return tot;
 }
-
-*/
-
-// -> sortby: "surname"
-
-
-//     cell(	// primo valore della query
-//     	    sortby: “surname”,
-//         order: “asc”,
-//         query: {age: {$lt: 40}},
-//         type: “string”
-//     ){
-//     	value: ””	// opzionale
-//     }
-
-
-// dashboard(
-//     	row(
-//     		collection()
-//     		document()
-//     		cell()
-//     	)
-//     	row(
-//     		cell()
-//     	)
-//     ){
-//     	name: “nome_dashboard”
-//     }
-    
-    
-//     collection(
-//         name: “customers”,
-//         label: “JuniorCustomers”,
-//         id: “Junior”,
-//         weight:”0”
-//     ) {
-//         index(
-//     		perpage: “20”,
-//     		sortby: “surname”,
-//     		order: “asc”,
-//     		query: {age: {$lt: 40}}
-//     	) {
-//     		column(
-//     	        name: “name”,
-//             	label: “Nome”,
-//             	sortable: false,
-//             	selectable: false
-//             	transformation: function(val) {
-//                     return val.lenght;
-//             	}
-//             )
-//     		column()
-//         }
-    
-//         action() {
-//         	export: “true”,
-//         	sendEmail: “true”
-//         }
-    
-//         document() {
-//             row(
-//             	name: “name”,
-//             	label: “Nome”,
-//             	//trasformation: 
-//             	//populate
-//             )
-//             row(
-//         	    ...
-//             )
-//         }
-//     }
-    
-    
-//     document(
-//     	name: “name”,	// collection mongoDB
-//     	query: { 		// viene visualizzato solo il primo valore della query
-//             age: {$lt: 40}
-//             city: {$eq: “Laredo”}
-//         },
-//         order: “asc”
-//     ) {
-//     	row(
-//             name: “name”,
-//             label: “Nome”,
-//             transformation: 
-//     	)
-//     	row(
-    
-//     	)
-//     }
-    
-    
-//     cell(	// primo valore della query
-//     	    sortby: “surname”,
-//         order: “asc”,
-//         query: {age: {$lt: 40}},
-//         type: “string”
-//     ){
-//     	value: ””	// opzionale
-//     }
-
-    
-    
-    

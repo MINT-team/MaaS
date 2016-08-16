@@ -214,12 +214,11 @@ module.exports = {
         });
     },
     
-    executeDefinition: function(id, type) {
+    executeDefinition: function(id) {
       request
         .post(APIEndpoints.DSL + '/' + id + '/executeDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
-        .send({ type: type })
         .end(function(error, res) {
           if(res)
           {

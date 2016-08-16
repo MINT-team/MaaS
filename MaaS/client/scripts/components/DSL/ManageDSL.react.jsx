@@ -38,16 +38,13 @@ var ManageDSL = React.createClass({
     },
     
     componentWillMount: function() {
+        DSLStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onUserChange);
         RequestUserActionCreator.getUser(this.state.userId);
         if(!this.props.children)
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
-    },
-
-    componentDidMount: function() {
-        DSLStore.addChangeListener(this._onChange);
-        UserStore.addChangeListener(this._onUserChange);
     },
 
     componentWillUnmount: function() {
@@ -66,6 +63,13 @@ var ManageDSL = React.createClass({
             role: UserStore.getRole(),
             userId: UserStore.getId(),
         });
+    },
+    
+    nameFormatter: function(cell, row) {
+        return (
+            <Link to={"/manageDSL/executeDSL/" + row.id}>{row.name}</Link>
+        
+        );
     },
     
     buttonFormatter: function(cell, row) {
@@ -254,9 +258,6 @@ var ManageDSL = React.createClass({
                 });
             }
             var options = {
-                onRowClick: function(row){
-                    //RequestDSLActionCreator.executeDefinition(row.id, row.type);
-                },
                 noDataText: "There are no DSL definitions to display"
             };
             title = "Manage your DSL definitions";
@@ -283,7 +284,8 @@ var ManageDSL = React.createClass({
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
-                                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                                <TableHeaderColumn dataField="name" dataSort={true} dataFormat={this.nameFormatter} >Name</TableHeaderColumn>
+                                <TableHeaderColumn dataField="type" dataSort={true}>Type</TableHeaderColumn>
                                 <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
                             </BootstrapTable>
                         </div>

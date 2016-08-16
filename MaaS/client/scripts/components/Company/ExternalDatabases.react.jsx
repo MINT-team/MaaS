@@ -44,13 +44,10 @@ var ExternalDatabases = React.createClass({
   },
   
   componentWillMount: function() {
+    ExternalDatabaseStore.addChangeListener(this._onChange);
     RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
   
-  componentDidMount: function() {
-    ExternalDatabaseStore.addChangeListener(this._onChange);
-  },
-
   componentWillUnmount: function() {
     ExternalDatabaseStore.removeChangeListener(this._onChange);
   },
