@@ -8,10 +8,15 @@ syntax Cell = function (ctx) {
     let identity = #``;
     let body = #``;
     
+    let name = false;
+    let label = false;
+    let table = false;
     let sortby = false;
     let type = false;
     let order = false;
     let query = false;
+    let trasformation = false;
+    let columnLabel = false;
     
     // read itentity
     for(let item of params)
@@ -19,7 +24,13 @@ syntax Cell = function (ctx) {
         if( (item.val() == 'sortby' && sortby == false) ||
             (item.val() == 'type' && type == false) || 
             (item.val() == 'order' && order == false) || 
-            (item.val() == 'query' && query == false) )
+            (item.val() == 'query' && query == false) ||
+            (item.val() == 'name' && name == false) ||
+            (item.val() == 'label' && label == false) ||
+            (item.val() == 'table' && table == false) ||
+            (item.val() == 'trasformation' && trasformation == false) ||
+            (item.val() == 'columnLabel' && columnLabel == false)
+            )
         {
             if(item.val() == 'sortby')
                 sortby = true;
@@ -29,6 +40,16 @@ syntax Cell = function (ctx) {
                 order = true;
             else if(item.val() == 'query')
                 query = true;
+            else if (item.val() == 'name')
+                name = true;
+            else if (item.val() == 'label')
+                label = true;
+            else if (item.val() == 'columnLabel')
+                columnLabel = true;
+            else if (item.val() == 'trasformation')
+                trasformation = true;
+            else if (item.val() == 'table')
+                table = true;
                 
             params.next();      // salta ':'
             identity = identity.concat(#`${item}: ${params.next('expr').value}`);
@@ -64,6 +85,6 @@ syntax Cell = function (ctx) {
             }
         }
     }
-    tot = #`DSL.executeCell({${identity}}, {${body}})`;
+    tot = #`DSL.executeCell({${identity}}, {${body}}, conn, cb)`;
     return tot;
 }

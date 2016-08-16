@@ -1,6 +1,9 @@
 var app = require('../../server/server.js');
 var sweet = require('sweet.js');
 var fs = require('fs');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var DocumentSchema = new Schema({}, {strict: false});
 
 module.exports = function(DSL) {
     // Create a DSL definition
@@ -257,10 +260,31 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.executeCell = function(identity, body) {
-        console.log(identity);
-        console.log(body);
+    DSL.executeCell = function(identity, body, conn, cb) {
+        console.log("> identity", identity);
+        console.log("> body", body);
+        console.log("table:",identity.table);
+        console.log("query:", identity.query);
+        console.log("name:",identity.name);
+        
+        var collection = conn.model(identity.table, DocumentSchema);
+        var query = collection.findOne(identity.query, identity.name, function(err, result) {
+            if (err)
+            {
+                console.log(err);
+                return cb(err);
+            }
+            console.log("> result: ", result);
+            return cb(null, result);
+        });
+        
+        
     };
+    
+    /*
+    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
+    
+    */
     
     DSL.remoteMethod(
         'executeCell',
@@ -270,6 +294,10 @@ module.exports = function(DSL) {
             accepts : [
                 { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
                 { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
             ]
         }
     
@@ -313,46 +341,52 @@ module.exports = function(DSL) {
     
     
     DSL.executeDefinition = function(id, cb) {
+        var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
             {
                 console.log(err);
                 return cb(err);
             }
-            DSL.compile(DSLInstance.source, function(err, expanded) {
+            
+            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
                 if(err)
                 {
-                    console.log("> Errore:", err);
-                    return cb(err);
+                   console.log("> Error finding database of dsl");
+                   return cb(err);
                 }
-                eval(expanded);
+               
+                var conn = mongoose.connect(database.connString, function(err) {
+                    if (err)
+                    {
+                        var error = {
+                            message: "Failed connecting database"
+                        };
+                        console.log('> Failed connecting database.');
+                        return cb(null, error, null);
+                    }
+               });
+               
+               
+                DSL.compile(DSLInstance.source, function(err, expanded) {
+                    if(err)
+                    {
+                        console.log("> Errore:", err);
+                        return cb(err);
+                    }
+                    
+                    var cb = function(err, data) {
+                        if(err)
+                        {
+                            return cb(err);
+                        }
+                        console.log('funzia');
+                        conn.disconnect();
+                    };
+                    eval(expanded);
+                    /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, cb);*/
+                });
             });
-            switch (DSLInstance.type) {
-                case 'Cell':
-                    
-                    
-                    break;
-                    
-                case 'Document':
-                    break;
-                    
-                case 'Collection':
-                    break;
-                    
-                case 'Dashboard':
-                    break;
-            }
-            
-        
-        
-        /*
-        if(db.conncted)
-        {
-            // fai connessione
-            // switch
-        }
-        */
-        
         });
     };
     
@@ -371,93 +405,4 @@ module.exports = function(DSL) {
             http: { verb: 'post', path: '/:id/executeDefinition' }
         }
     );
-    
-    /*
-    var dsl = "cell (sortby: \"surname\",type: \"string\",order: \"asc\",query: {age: {$lt: 40}}){value: \"user\"}";
-    var intepreterFile = __dirname + "/macro.sjs";
-        var expanded;
-        fs.readFile(intepreterFile, function(err, macro) {
-            if(err)
-            {
-                console.log("> Errore:", err);
-                //return cb(err);
-            }
-            else
-            {
-            */
-                /*
-                console.log(expanded.code) =
-                
-                identity: {
-                  sortby: "surname"_, _;
-                  type: "string"_, _;
-                  order: "asc"_, _;
-                query: {age: {$lt: 40}}}
-                _, _;
-                body: {
-                value: "user"}
-                
-                "identity: {  sortby: "surname",   type: "string",   order: "asc", query: {age: {$lt: 40}}}, body: {value: "user"}"
-                
-                */
-                /*
-                macro = macro.toString();
-                expanded = sweet.compile(macro + dsl);
-                var res = JSON.stringify(expanded.code);
-                res = res.replace(/_,/g, ",");
-                res = res.replace(/_;/g, "");
-                res = res.replace(/\\n/g, "");
-                res = res.replace(/\\/g, "");
-                res = res.replace("\"", "");
-                res = res.replace("}\"", "}");
-                res = res.replace("identity", "\"identity\"");
-                res = res.replace("sortby", "\"sortby\"");
-                res = res.replace("type", "\"type\"");
-                res = res.replace("order", "\"order\"");
-                res = res.replace("query", "\"query\"");
-                res = res.replace("body", "\"body\"");
-                res = res.replace("value", "\"value\"");
-                res = res.replace(/ /g, "");
-                //res = res.replace(/"/g, "'");
-                console.log(res);
-                
-                
-                // res = JSON.stringify(res);
-                // res = JSON.stringify(res);
-                // console.log(res);
-                var code = JSON.parse("{"+res+"}");
-                console.log(code);
-                // console.log(JSON.stringify(code.toString()));
-                // console.log(typeof code);
-                // console.log(JSON.parse(code));
-                //cb(null,expanded.code);
-                //eval(expanded.code);
-                
-                //res = expanded.code;
-            }
-        });
-    */
-    //DSL.compile(dsl, );
-    /*DSL.findById("57ac8a5b0e9fb83d6001430b", function(err, DSLInstance) {
-        var code = DSLInstance.compile(dsl);
-        console.log("> Code:", code);
-        eval(code);
-    });*/
-    
-    
-    
-    /*
-    1) Carico il file interprete del dsl (.sjs) contente le macro sweet.js, utilizzando il fs di loopback in una variabile, 
-    la quale verrà utilizzata dalla funzione di sweet.js per caricare i moduli di macro;
-    2) Carico la source del codice dsl in una variabile;
-    3) Utilizzo la funzione compile di sweet.js per compilare il codice, la quale mi ritorna tutto il codice della collection espanso
-    in javascript normale, se non ci sono stati errori. (Altrimenti errore di compilazione)
-    4) per eseguire il codice js dentro la variabile si usa la funzione eval().
-    
-    Bisogna creare delle funzioni per ogni elemento del dsl, le quali si occuperanno di verificare se ci sono errori e ritorneranno un
-    json contenente la struttura e i dati da visualizzare. Queste funzioni possono utilizzare altre funzioni di altri elementi innestati.
-    Bisogna pensare a come compilare il codice del dsl, in quanto la compilazione di sweet js non controlla errori nella chiamata
-    delle macro.
-    
-    */
 };
