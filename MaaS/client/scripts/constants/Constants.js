@@ -48,14 +48,15 @@ module.exports = {
     GET_COMPANY: null,
     CHANGE_EDITOR_CONFIG_RESPONSE: null,
     CHANGE_ROLE_RESPONSE: null,
-
+    GET_ALL_USERS: null,
+    
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
+    CHANGE_COMPANY_NAME_RESPONSE: null,
     
     // Super Admin
-    CHANGE_COMPANY_NAME_RESPONSE: null,
     
     // Dashboard
 

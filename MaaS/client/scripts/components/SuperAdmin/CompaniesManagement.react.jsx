@@ -124,21 +124,6 @@ var CompaniesManagement = React.createClass({
                 {buttons}
             </div>
         );
-    
-    
-    
-   /* return(
-      <div>
-        <DeleteCompany id={row.id} name={row.name} email={row.owner}/>
-        <Link to={"/manageDSL/manageDSLSource/" + row.id }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
-      </div>
-      );*/
-    /*return (
-      <div className="companiesManagement-buttons">
-        <div>Bottone modifica</div>
-        <div>Bottone eliminazione</div>
-      </div>
-    );*/
   },
   
   render: function() {

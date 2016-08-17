@@ -73,6 +73,13 @@ var ResponseUserActionCreator = {
             email: email,
             errors: errors
         });
+    },
+    
+    responseGetUsers: function(json) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_ALL_USERS,
+            json: json
+        });
     }
 };
 

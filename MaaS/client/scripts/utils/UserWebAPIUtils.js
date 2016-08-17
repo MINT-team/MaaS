@@ -240,5 +240,18 @@ module.exports = {
           }
         }
       });
-  }
+  },
+    //get all the users of MaaS
+   getUsers: function() {
+     request
+      .get(APIEndpoints.USERS)
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .end(function(error, res) {
+        if(res) 
+        {
+          ResponseUserActionCreator.responseGetUsers(res.body);
+        }
+      });
+   }
 };

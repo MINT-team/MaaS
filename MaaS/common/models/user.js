@@ -762,7 +762,48 @@ module.exports = function(user) {
             
         next();
     });
-
+    
+    
+    
+   //remote hook for fix the information of getuses
+    user.afterRemote('find', function(ctx, remoteMethodOutput, next) {
+        
+        var Company = app.models.Company;
+        var userList = ctx.result;
+        if(userList.length == 0) next();
+        userList.forEach(function(userInstance, i) {
+       
+           //recovery of the interesting data from the response
+            var companyId = userList[i].companyId;
+            var companyName = "null";
+            var userId = userList[i].id;
+            var userEmail = userList[i].email;
+            var userRole = userList[i].role;   
+            
+           //Research of the company with id = companyId
+            Company.findById(companyId, function(err, results) {
+                if(err) 
+                    console.log("error, cannot find company");
+                if(results)
+                {
+                    companyName = results.name;
+                   //saving interesting data
+                    ctx.result[i] = {
+                        email: userEmail,
+                        role: userRole,
+                        id: userId,
+                        companyName: companyName 
+                    };   
+                   //exit condition
+                    if(i == (userList.length)-1) next();
+                }
+                else
+                    console.log("error, cannot find company"); 
+            });
+        });
+    });
+    
+    
 };
 
 

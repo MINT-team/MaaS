@@ -33,7 +33,7 @@ var _user = {
               activeDashboard: localStorage.getItem('activeDashboard')
             };
 var _errors = [];
-
+var _users = JSON.parse(localStorage.getItem('users')); //all users in the system
 var UserStore = assign({}, EventEmitter.prototype, {
 
   emitChange: function() {
@@ -130,6 +130,11 @@ var UserStore = assign({}, EventEmitter.prototype, {
   
   getActiveDashboard: function() {
     return _user.activeDashboard;
+  },
+  
+  getAllUsers: function() {
+    console.log("users: ",_users);
+    return _users;
   }
 
 });
@@ -285,9 +290,26 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else {
             _errors = [];
-            //var email = action.email;
+            //var email = action.email;  
+            var index;
+            _users.forEach(function(user, i) {
+                if(user.email == action.email) 
+                  index = i;
+            });
+            _users.splice(index, 1);
         }
         UserStore.emitDelete();
+        break;
+      
+      case ActionTypes.GET_ALL_USERS:
+          if(action.errors) {
+            _errors = action.errors;
+        } else {
+            _errors = [];
+            _users = action.json;
+            localStorage.setItem('users', JSON.stringify(_users));
+        }
+        UserStore.emitChange();
         break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
