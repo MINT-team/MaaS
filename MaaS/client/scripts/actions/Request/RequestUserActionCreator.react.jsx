@@ -47,6 +47,10 @@ var RequestUserActionCreator = {
     
     changeRole: function(email, role, id) {
         WebAPIUtils.changeRole(email, role, id);
+    },
+    
+    getUsers: function(){
+        WebAPIUtils.getUsers();
     }
 };
 
