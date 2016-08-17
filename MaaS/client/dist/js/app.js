@@ -2491,7 +2491,7 @@ var ExecuteDSL = React.createClass({
     },
 
     render: function render() {
-        if (!this.state.isLogged || this.state.errors.length > 0) {
+        if (!this.state.isLogged) {
             return React.createElement(AuthorizationRequired, null);
         }
         var content, errors, title;
@@ -2572,9 +2572,14 @@ var ExecuteDSL = React.createClass({
                 }
             } else {
                 content = React.createElement(
-                    'p',
-                    { className: 'container-description' },
-                    'Querying data...'
+                    'div',
+                    null,
+                    React.createElement('p', { className: 'loader' }),
+                    React.createElement(
+                        'p',
+                        { className: 'container-description' },
+                        'Querying data...'
+                    )
                 );
             }
         }
@@ -3424,6 +3429,10 @@ var ManageDSLSource = React.createClass({
 
     _onChange: function _onChange() {
         var overwrite = false;
+        if (this.state.building) {
+            this.refs.build.classList.toggle("loader-small");
+            this.setState({ building: false });
+        }
         if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
         this.setState(getState());
         if (!(this.state.errors.length > 0)) {
@@ -3494,14 +3503,18 @@ var ManageDSLSource = React.createClass({
     },
 
     onBuild: function onBuild() {
-        RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+        if (!this.state.building) {
+            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            this.setState({ building: true });
+            this.refs.build.classList.toggle("loader-small");
+        } else alert("aspetta");
     },
 
     onRun: function onRun() {},
 
-    toggleErrorPopUp: function toggleErrorPopUp() {
-        this.refs.error.classList.toggle("dropdown-show");
-    },
+    //     toggleErrorPopUp: function() {
+    // 		this.refs.error.classList.toggle("dropdown-show");
+    // 	},
 
     emptyErrors: function emptyErrors() {
         this.setState({ errors: [] });
@@ -3514,18 +3527,18 @@ var ManageDSLSource = React.createClass({
         var content,
             errors = [];
         if (this.state.errors.length > 0) {
+            //id="errors"className="error-item"
             errors = React.createElement(
                 'div',
-                { id: 'errors' },
+                null,
                 this.state.errors.map(function (error) {
                     return React.createElement(
                         'p',
-                        { key: error, className: 'error-item' },
+                        null,
                         error
                     );
                 })
             );
-            this.toggleErrorPopUp();
         }
         content = React.createElement(
             'div',
@@ -3580,7 +3593,7 @@ var ManageDSLSource = React.createClass({
                     ),
                     React.createElement(
                         'div',
-                        { className: 'tooltip tooltip-top' },
+                        { className: 'tooltip tooltip-top', ref: 'build' },
                         React.createElement(
                             'p',
                             { className: 'tooltip-text tooltip-text-long' },
@@ -3588,7 +3601,7 @@ var ManageDSLSource = React.createClass({
                         ),
                         React.createElement(
                             'i',
-                            { onClick: this.onBuild, accessKey: 'b', className: 'material-icons md-36 dropdown-button', ref: 'build' },
+                            { onClick: this.onBuild, accessKey: 'b', className: 'material-icons md-36 dropdown-button' },
                             ''
                         )
                     ),
@@ -3649,28 +3662,18 @@ var ManageDSLSource = React.createClass({
             ),
             React.createElement(
                 'div',
-                { className: 'dropdown-content dropdown-popup', ref: 'error' },
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-title' },
-                    'Error'
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-description' },
-                    errors
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'dropdown-buttons' },
-                    React.createElement(
-                        'button',
-                        { onClick: this.emptyErrors, className: 'button' },
-                        'Ok'
-                    )
-                )
+                { id: 'editor-errors' },
+                errors
             )
         );
+
+        // <div className="dropdown-content dropdown-popup" ref="error">
+        //             <p className="dropdown-title">Error</p>
+        //             <div className="dropdown-description">{errors}</div>
+        //             <div className="dropdown-buttons">
+        //                 <button onClick={this.emptyErrors} className="button">Ok</button>
+        //             </div>
+        //         </div>
 
         return React.createElement(
             'div',

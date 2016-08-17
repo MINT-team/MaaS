@@ -67,6 +67,11 @@ var ManageDSLSource = React.createClass({
 
     _onChange: function() {
         var overwrite = false;
+        if(this.state.building)
+        {
+            this.refs.build.classList.toggle("loader-small");
+            this.setState({building: false});
+        }
         if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
             overwrite = true; 
         this.setState(getState());
@@ -164,16 +169,23 @@ var ManageDSLSource = React.createClass({
     },
     
     onBuild: function() {
-        RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+        if(!this.state.building)
+        {
+            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            this.setState({building: true});
+            this.refs.build.classList.toggle("loader-small");
+        }
+        else
+            alert("aspetta");
     },
     
     onRun: function() {
         
     },
     
-    toggleErrorPopUp: function() {
-		this.refs.error.classList.toggle("dropdown-show");
-	},
+//     toggleErrorPopUp: function() {
+// 		this.refs.error.classList.toggle("dropdown-show");
+// 	},
 	
 	emptyErrors: function() {
 	    this.setState({ errors: [] });
@@ -188,9 +200,8 @@ var ManageDSLSource = React.createClass({
         }
         var content, errors = [];
         if(this.state.errors.length > 0) 
-        {
-            errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
-            this.toggleErrorPopUp();
+        {//id="errors"className="error-item"
+            errors = ( <div>{this.state.errors.map((error) => <p >{error}</p>)}</div> );
         }
         content = (
             <div id="editor-container">
@@ -209,9 +220,9 @@ var ManageDSLSource = React.createClass({
                                 <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
                                 <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
                             </div>
-                            <div className="tooltip tooltip-top">
+                            <div className="tooltip tooltip-top" ref="build">
                                 <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
-                                <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
+                                <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button">&#xE869;</i>
                             </div>
                             <div className="tooltip tooltip-top">
                                 <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
@@ -234,15 +245,19 @@ var ManageDSLSource = React.createClass({
                 <div id="editor-viewer">
                     <Editor />
                 </div>
-                <div className="dropdown-content dropdown-popup" ref="error">
-                    <p className="dropdown-title">Error</p>
-                    <div className="dropdown-description">{errors}</div>
-                    <div className="dropdown-buttons">
-                        <button onClick={this.emptyErrors} className="button">Ok</button>
-                    </div>
+                <div id="editor-errors">
+                    {errors}
                 </div>
             </div>
         );
+        
+        // <div className="dropdown-content dropdown-popup" ref="error">
+        //             <p className="dropdown-title">Error</p>
+        //             <div className="dropdown-description">{errors}</div>
+        //             <div className="dropdown-buttons">
+        //                 <button onClick={this.emptyErrors} className="button">Ok</button>
+        //             </div>
+        //         </div>
         
         return (
             <div id="dsl-definition">

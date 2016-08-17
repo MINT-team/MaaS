@@ -1,5 +1,5 @@
 module.exports = {
-    readOptionalAttributes: function(source, optional) {
+    readOptionalAttributes: function(source, optional, cb) {
         var result = {};
         for (var i=0; i<optional.length; i++)
         {
@@ -14,7 +14,7 @@ module.exports = {
 	    }
     },
     
-    readRequiredAttributes: function(source, required, errback) {
+    readRequiredAttributes: function(source, required, cb) {
         var missingAttributes = [];
         var result = {};
         for(var i = 0; i < required.length; i++)
@@ -34,11 +34,11 @@ module.exports = {
 	    // Attributi mancanti
 	    if (missingAttributes.length > 0)
 	    {
-		    return errback(missingAttributes);
+		    return cb(missingAttributes, null);
 	    }
 	    else
 	    {
-	        return result;
+	        return cb(null, result);
 	    }
     }
 };

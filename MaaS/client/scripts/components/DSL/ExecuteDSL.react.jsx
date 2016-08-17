@@ -51,7 +51,7 @@ var ExecuteDSL = React.createClass({
     },
     
     render: function() {
-        if(!this.state.isLogged || this.state.errors.length > 0) 
+        if(!this.state.isLogged) 
         {
             return (
                 <AuthorizationRequired />
@@ -124,7 +124,12 @@ var ExecuteDSL = React.createClass({
             }
             else
             {
-                content = (<p className="container-description">Querying data...</p>);
+                content = (
+                    <div>
+                        <p className="loader"></p>
+                        <p className="container-description">Querying data...</p>
+                    </div>        
+                );
             }
         }
         

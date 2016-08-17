@@ -4,7 +4,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
-var compileErrors = require('./compileErrors.js');
+var CompileErrors = require('./compileErrors.js');
 var AttributesReader = require('./attributesReader.js');
 
 module.exports = function(DSL) {
@@ -299,13 +299,15 @@ module.exports = function(DSL) {
                     var callback = function(err, identity, body) {
                         if(err)
                         {
+                            console.log("errore remote method");
+                            conn.disconnect();
                             return cb(null, err);
                         }
+                        console.log('Non deve andare');
                         conn.disconnect();
                         return cb(null, null);
                     };
-                    eval(expanded);     //  DSL.compileCell()
-                    return cb(null, null);
+                    eval(expanded);     //  DSL.compileCell({...}, callback)
                 });
             });
         });
@@ -360,8 +362,7 @@ module.exports = function(DSL) {
                         return cb(null, error, null);
                     }
                 });
-               
-               
+                
                 DSL.compile(DSLInstance.source, function(err, expanded) {
                     if(err)
                     {
@@ -376,6 +377,7 @@ module.exports = function(DSL) {
                             conn.disconnect();
                             return cb(null, err);
                         }
+                        conn.disconnect();
                         switch(DSLInstance.type)
                         {
                             case "Cell":
@@ -385,8 +387,7 @@ module.exports = function(DSL) {
                                 break;
                         }
                     };
-                    eval(expanded); // DSL.compileCell({})
-                    /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, callback);*/
+                    eval(expanded); // DSL.compileCell({...})
                 });
             });
         });
@@ -450,20 +451,69 @@ module.exports = function(DSL) {
     );
     
     DSL.compileCell = function(identity, body, cb) {
-        /*
-        //AttributesReader.readOptionalAttributes(identity, ['sortby', 'order'], );
-        var identityAttributes = AttributesReader.readRequiredAttributes(identity, ['name', 'table', 'type'], function(missing) {
-        
-        });
-        if (body)
-        {
-            var bodyAttributes = AttributesReader.readRequiredAttributes(body, ['value'], function(missing) {
-            
+        AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
+                    
+                
+            AttributesReader.readRequiredAttributes(identity, ['name', 'table', 'type'], function(identityMissing, identityRequiredAttributes) {
+                if(identityMissing)
+                {
+                    if(Object.getOwnPropertyNames(body).length !== 0)
+                    {
+                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
+                            if(bodyMissing)
+                            {
+                                var missing = [];
+                                identityMissing.forEach(function(attr, i) {
+                                    missing.push(attr);
+                                });
+                                bodyMissing.forEach(function(attr, i) {
+                                    missing.push(attr);
+                                });
+                                CompileErrors.missingRequiredAttributes(missing, function(error) {
+                                    console.log("> DSL compilation error:", error.message);
+                                        
+                                    return cb(error, null, null); // return errors of both identity and body
+                                });
+                            }
+                        });
+                    }
+                    else
+                    {
+                        CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
+                            console.log("> DSL compilation error:", identityError.message);
+                            return cb(identityError, null, null); // return only errors of identity
+                        });
+                    }
+                }
+                
+                console.log("identityAttributes: ", identityRequiredAttributes);
+                
+                if(Object.getOwnPropertyNames(body).length !== 0)
+                {
+                    AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
+                        if(bodyMissing)
+                        {
+                            CompileErrors.missingRequiredAttributes(bodyMissing, function(bodyError) {
+                                console.log("> DSL compilation error:", bodyError.message);
+                                return cb(bodyError, null, null); // return only body errors
+                            });
+                        }
+                        /*
+                        AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
+                        
+                        });
+                        */
+                        console.log("identityAttributes: ", bodyAttributes);
+                        return cb(null, null, identityAttributes, bodyRequiredAttributes); // return both identity and body attributes
+                    });
+                }
+                else
+                {
+                    
+                    return cb(null, null, identityAttributes, null); // return only identity attributes
+                }
             });
-        }
-        return cb(null, null, identityAttributes, bodyAttributes);
-        */
-        console.log('compile cell');
+        });
     };
     
     DSL.remoteMethod(
