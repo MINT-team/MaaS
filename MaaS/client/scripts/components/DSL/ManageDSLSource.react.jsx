@@ -164,7 +164,7 @@ var ManageDSLSource = React.createClass({
     },
     
     onBuild: function() {
-        
+        RequestDSLActionCreator.compileDefinition(this.state.definitionId);
     },
     
     onRun: function() {

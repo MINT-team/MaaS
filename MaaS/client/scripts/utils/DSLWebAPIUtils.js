@@ -214,6 +214,27 @@ module.exports = {
         });
     },
     
+    compileDefinition: function(id) {
+      request
+        .post(APIEndpoints.DSL + '/' + id + '/compileDefinition')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if(res)
+          {
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseCompileDefinition(null);
+            }
+          }
+        });
+    },
+    
     executeDefinition: function(id) {
       request
         .post(APIEndpoints.DSL + '/' + id + '/executeDefinition')

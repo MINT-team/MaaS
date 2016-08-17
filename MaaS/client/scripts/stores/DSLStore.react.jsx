@@ -33,7 +33,7 @@ var _DSL = {
 
 var _USER_LIST = []; // Member and Guest list
 
-var _DSL_DATA = {}; // Data results from DSL execution
+var _DSL_DATA; // Data results from DSL execution
 
 var _errors = [];
 
@@ -274,7 +274,19 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             break;
             
-        case ActionTypes.EXECUTE_DEFINITION:
+        case ActionTypes.COMPILE_DEFINITION_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else
+            {
+                _errors = [];
+            }
+            DSLStore.emitChange();
+            break;
+            
+        case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
             if(action.errors)
             {
                 _errors.push(action.errors);

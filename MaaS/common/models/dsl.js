@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
 var compileErrors = require('./compileErrors.js');
+var AttributesReader = require('./attributesReader.js');
 
 module.exports = function(DSL) {
     // Create a DSL definition
@@ -261,81 +262,77 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.executeCell = function(identity, body, conn, cb) {
-        
-        
-        var collection = conn.model(identity.table, DocumentSchema);
-        var query = collection.findOne(identity.query, identity.name, function(err, result) {
-            if (err)
+    DSL.compileDefinition = function(id, cb) {
+        var ExternalDatabase = app.models.ExternalDatabase;
+        DSL.findById(id, function(err, DSLInstance) {
+            if(err)
             {
                 console.log(err);
                 return cb(err);
             }
-            console.log("> result: ", result);
-            return cb(null, result);
+            
+            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
+                if(err)
+                {
+                   console.log("> Error finding database of dsl");
+                   return cb(err);
+                }
+               
+                var conn = mongoose.connect(database.connString, function(err) {
+                    if (err)
+                    {
+                        var error = {
+                            message: "Failed connecting database"
+                        };
+                        console.log('> Failed connecting database.');
+                        return cb(null, error, null);
+                    }
+                });
+               
+                DSL.compile(DSLInstance.source, function(err, expanded) {
+                    if(err)
+                    {
+                        console.log("> DSL compilation error:", err);
+                        conn.disconnect();
+                        return cb(null, err);
+                    }
+                    var callback = function(err, identity, body) {
+                        if(err)
+                        {
+                            return cb(null, err);
+                        }
+                        conn.disconnect();
+                        return cb(null, null);
+                    };
+                    eval(expanded);     //  DSL.compileCell()
+                    return cb(null, null);
+                });
+            });
         });
-        
     };
+    
+    DSL.remoteMethod(
+        'compileDefinition',
+        {
+            description: "Change the permissions for one specific DSL definition",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'post', path: '/:id/compileDefinition' }
+        }
+    );
     
     /*
-    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
     
+    Compilo -> compileDefinition -> compile -> macro -> compileXXX -> err / null
+    
+    Eseguo -> executeDefinition -> compile -> macro -> compileXXX -> err / null
+                                -> executeXXX -> err / result
+                                                    
     */
-    
-    DSL.remoteMethod(
-        'executeCell',
-        {
-            description: "Execute a Cell macro",
-            isStatic: true,
-            accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
-            ],
-            returns: [
-                { arg: 'error', type: 'Object' },
-                { arg: 'data', type: 'Object' }
-            ]
-        }
-    
-    );
-    
-    
-    DSL.compile = function(dsl, cb) {
-        
-        var intepreterFile = __dirname + "/macro.sjs";
-        var expanded;
-        fs.readFile(intepreterFile, function(err, macro) {
-            if(err)
-            {
-                console.log("> Errore:", err);
-                return cb(err, null);
-            }
-            else
-            {
-                macro = macro.toString();
-                expanded = sweet.compile(macro + dsl);
-                return cb(null, expanded.code);
-            }
-        });
-    };
-    
-    
-    DSL.remoteMethod(
-        'compile',
-        {
-            description: "Compile one DSL definition",
-            accepts: [
-                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
-            ],
-            returns: [
-                { arg: 'err', type: 'string' },
-                { arg: 'expanded', type: 'string' }
-                
-            ],
-            isStatic: true
-        }
-    );
-    
     
     DSL.executeDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
@@ -362,25 +359,33 @@ module.exports = function(DSL) {
                         console.log('> Failed connecting database.');
                         return cb(null, error, null);
                     }
-               });
+                });
                
                
                 DSL.compile(DSLInstance.source, function(err, expanded) {
                     if(err)
                     {
-                        console.log("> Errore di compilazione:", err);
-                        return cb(err, null, null);
+                        console.log("> DSL compilation error:", err);
+                        conn.disconnect();
+                        return cb(null, err, null);
                     }
                     
-                    var callback = function(err, data) {
+                    var callback = function(err, identity, body) {
                         if(err)
                         {
-                            return cb(err);
+                            conn.disconnect();
+                            return cb(null, err);
                         }
-                        conn.disconnect();
-                        return cb(null, null, data);
+                        switch(DSLInstance.type)
+                        {
+                            case "Cell":
+                                DSL.executeCell(identity, body, conn, function(){
+                                    
+                                });
+                                break;
+                        }
                     };
-                    eval(expanded);
+                    eval(expanded); // DSL.compileCell({})
                     /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, callback);*/
                 });
             });
@@ -397,9 +402,125 @@ module.exports = function(DSL) {
             returns: [
                 { arg: 'error', type: 'Object' },
                 { arg: 'data', type: 'Object' }
-                
             ],
             http: { verb: 'post', path: '/:id/executeDefinition' }
         }
+    );
+    
+    DSL.compile = function(dsl, cb) {
+        var intepreterFile = __dirname + "/macro.sjs";
+        var expanded;
+        fs.readFile(intepreterFile, function(err, macro) {
+            if(err)
+            {
+                console.log("> Errore:", err);
+                return cb(err, null);
+            }
+            else
+            {
+                macro = macro.toString();
+                try
+                {
+                    expanded = sweet.compile(macro + dsl);
+                }
+                catch(err)
+                {
+                    return cb(err.description, null);
+                }
+                return cb(null, expanded.code);
+            }
+        });
+    };
+    
+    
+    DSL.remoteMethod(
+        'compile',
+        {
+            description: "Compile one DSL definition",
+            accepts: [
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
+            ],
+            returns: [
+                { arg: 'err', type: 'string' },
+                { arg: 'expanded', type: 'string' }
+                
+            ],
+            isStatic: true
+        }
+    );
+    
+    DSL.compileCell = function(identity, body, cb) {
+        /*
+        //AttributesReader.readOptionalAttributes(identity, ['sortby', 'order'], );
+        var identityAttributes = AttributesReader.readRequiredAttributes(identity, ['name', 'table', 'type'], function(missing) {
+        
+        });
+        if (body)
+        {
+            var bodyAttributes = AttributesReader.readRequiredAttributes(body, ['value'], function(missing) {
+            
+            });
+        }
+        return cb(null, null, identityAttributes, bodyAttributes);
+        */
+        console.log('compile cell');
+    };
+    
+    DSL.remoteMethod(
+        'compileCell',
+        {
+            description: "Compile a Cell macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'identity', type: 'Object' },
+                { arg: 'body', type: 'Object' }
+            ]
+        }
+        
+    );
+    
+    
+    /*
+    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
+    
+    */
+    
+    DSL.executeCell = function(identity, body, conn, cb) {
+        var errors = DSL.compileCell(identity, body);
+        if (!errors)
+        {
+            var collection = conn.model(identity.table, DocumentSchema);
+            var query = collection.findOne(identity.query, identity.name, function(err, result) {
+                if (err)
+                {
+                    console.log(err);
+                    return cb(err);
+                }
+                console.log("> Cell result: ", result);
+                return cb(null, result);
+            });
+        }
+    };
+    
+    DSL.remoteMethod(
+        'executeCell',
+        {
+            description: "Execute a Cell macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ]
+        }
+    
     );
 };

@@ -1068,7 +1068,7 @@ input {
     border: 2px solid lightgrey;
 }
 
-#editor-container {
+#editor-container, #dsl-data-container {
     width: 70%;
     min-height: 35em;
     margin: auto;
@@ -1213,7 +1213,7 @@ input {
     }
 }
 
-/*------------------------------------------- MANAGE DSL DEFINITION, EXTERNAL DATABASES --------------------------------------------------------------*/
+/*------------------------------------------- MANAGE DSL DEFINITION, EXTERNAL DATABASES, DSL EXECUTION --------------------------------------------------------------*/
 #table-top {
     margin-left: 5em;
     margin-right: 5em;
@@ -1275,6 +1275,11 @@ input {
 
 #dsl-change-permission:hover {
     color: #60D42E;
+}
+
+#dsl-data-table {
+    width: 70%;
+    margin: auto;
 }
 
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/

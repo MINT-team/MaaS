@@ -51,6 +51,10 @@ var RequestDSLActionCreator = {
         WebAPIUtils.loadUserList(id, companyId);
     },
     
+    compileDefinition: function(id) {
+        WebAPIUtils.compileDefinition(id);
+    },
+    
     executeDefinition: function(id) {
         WebAPIUtils.executeDefinition(id);
     }

@@ -1,4 +1,13 @@
 /* --------------------------------- BOOTSTRAP ----------------------- */
+.react-bs-table td a {
+  text-decoration: none;
+  color: black;
+}
+
+.react-bs-table td a:hover {
+  color: #60D42E;
+}
+
 #table-database input{
   width:98.4%;
   display: block;

@@ -21,7 +21,8 @@ function getState() {
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            data: DSLStore.getDSLData()
+            data: DSLStore.getDSLData(),
+            queried: true
     };
 }
 
@@ -31,7 +32,8 @@ var ExecuteDSL = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
-            data: {}
+            data: null,
+            queried: false
         };
     },
     
@@ -55,7 +57,7 @@ var ExecuteDSL = React.createClass({
                 <AuthorizationRequired />
             );
         }
-        var content;
+        var content, errors, title;
         var data = [];
         
         /*data = [
@@ -77,41 +79,64 @@ var ExecuteDSL = React.createClass({
         ];*/
         
         
-        if(this.state.data)
+        if(this.state.data && this.state.queried)
         {
-            data = this.state.data;
-            console.log(data);
+            title = (<p className="container-title">DSL Title</p>);
+            //console.log(this.state.data);
+            var columns = [];
+            if(this.state.data.length > 0)
+            {
+                alert("data.length > 0    : "+data.length);
+                data = this.state.data;
+                columns = Object.keys(data[0]);
+            }
+            else
+            {
+                columns = Object.keys(this.state.data);
+                data.push(this.state.data);
+            }
+            //console.log(columns);
+    
+            content = (
+                
+                <div id="dsl-data-table">
+                    <BootstrapTable ref="table" data={data} pagination={true} striped={true} hover={true} keyField={columns[0]}>
+                        {columns.map((column) => 
+                            <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                        )}
+                    </BootstrapTable>
+                </div>
+                
+            );
         }
-        
-        
-        var columns = [];
-        if(data.length > 0)
+        else
         {
-            alert(data.length);
-            columns = Object.keys(data[0]);
-            // keys.forEach(function(key, i) {
-            //     alert(key);
-            //     columns.push();
-            // });
+            if(this.state.queried)
+            {
+                if(this.state.errors.length > 0) 
+                {
+                    errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
+                }
+                else
+                {
+                    content = (<p className="container-description">There is no data to display</p>);
+                }
+            }
+            else
+            {
+                content = (<p className="container-description">Querying data...</p>);
+            }
         }
-        //console.log(columns[0]);
-
-        content = (
-            
-            <div id="table">
-                <BootstrapTable ref="table" data={data} pagination={true} striped={true} hover={true} keyField={columns[0]}>
-                    {columns.map((column) => 
-                        <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn>
-                    )}
-                </BootstrapTable>
-            </div>
-            
-        );
-        
         
         return (
-            <div id="dsl" className="container">
+            <div id="dsl-data-container">
+                <div className="tooltip tooltip-bottom" id="editor-back-button">
+                    <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                    <p className="tooltip-text tooltip-text-short">Back</p>
+                </div>
+                {title}
                 {content}
+                {errors}
             </div>
         );
     }
