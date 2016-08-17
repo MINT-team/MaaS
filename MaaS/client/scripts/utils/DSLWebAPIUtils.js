@@ -162,13 +162,13 @@ module.exports = {
         .end(function(error, res) {
           if(res)
           {
+            res=JSON.parse(res.text);
             if(res.error) 
             {
-              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message, null, null);
             }
             else
             {
-              res=JSON.parse(res.text);
               ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
             }
           }
@@ -222,7 +222,15 @@ module.exports = {
         .end(function(error, res) {
           if(res)
           {
-            
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseExecuteDefinition(res.error.message, null);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseExecuteDefinition(null, res.data);
+            }
           }
         });
     }

@@ -20,14 +20,19 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
     return {
             errors: DSLStore.getErrors(),
-            isLogged: SessionStore.isLogged()
+            isLogged: SessionStore.isLogged(),
+            data: DSLStore.getDSLData()
     };
 }
 
 var ExecuteDSL = React.createClass({
     
     getInitialState: function() {
-        return getState();
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            data: {}
+        };
     },
     
     componentWillMount: function() {
@@ -53,7 +58,7 @@ var ExecuteDSL = React.createClass({
         var content;
         var data = [];
         
-        data = [
+        /*data = [
             {
                 id: 0,
                 name: "ciao",
@@ -69,12 +74,20 @@ var ExecuteDSL = React.createClass({
                 name: "ciao3",
                 type: "qwe"
             }
-        ];
+        ];*/
+        
+        
+        if(this.state.data)
+        {
+            data = this.state.data;
+            console.log(data);
+        }
         
         
         var columns = [];
         if(data.length > 0)
         {
+            alert(data.length);
             columns = Object.keys(data[0]);
             // keys.forEach(function(key, i) {
             //     alert(key);

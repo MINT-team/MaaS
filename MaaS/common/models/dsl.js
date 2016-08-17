@@ -4,6 +4,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
+var compileErrors = require('./compileErrors.js');
 
 module.exports = function(DSL) {
     // Create a DSL definition
@@ -261,11 +262,7 @@ module.exports = function(DSL) {
     );
     
     DSL.executeCell = function(identity, body, conn, cb) {
-        console.log("> identity", identity);
-        console.log("> body", body);
-        console.log("table:",identity.table);
-        console.log("query:", identity.query);
-        console.log("name:",identity.name);
+        
         
         var collection = conn.model(identity.table, DocumentSchema);
         var query = collection.findOne(identity.query, identity.name, function(err, result) {
@@ -277,7 +274,6 @@ module.exports = function(DSL) {
             console.log("> result: ", result);
             return cb(null, result);
         });
-        
         
     };
     
@@ -312,7 +308,7 @@ module.exports = function(DSL) {
             if(err)
             {
                 console.log("> Errore:", err);
-                return cb(err);
+                return cb(err, null);
             }
             else
             {
@@ -332,6 +328,7 @@ module.exports = function(DSL) {
                 { arg: 'source', type: 'string', required: true, description: 'Definition source' }
             ],
             returns: [
+                { arg: 'err', type: 'string' },
                 { arg: 'expanded', type: 'string' }
                 
             ],
@@ -371,20 +368,20 @@ module.exports = function(DSL) {
                 DSL.compile(DSLInstance.source, function(err, expanded) {
                     if(err)
                     {
-                        console.log("> Errore:", err);
-                        return cb(err);
+                        console.log("> Errore di compilazione:", err);
+                        return cb(err, null, null);
                     }
                     
-                    var cb = function(err, data) {
+                    var callback = function(err, data) {
                         if(err)
                         {
                             return cb(err);
                         }
-                        console.log('funzia');
                         conn.disconnect();
+                        return cb(null, null, data);
                     };
                     eval(expanded);
-                    /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, cb);*/
+                    /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, callback);*/
                 });
             });
         });

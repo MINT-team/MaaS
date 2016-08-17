@@ -33,6 +33,8 @@ var _DSL = {
 
 var _USER_LIST = []; // Member and Guest list
 
+var _DSL_DATA = {}; // Data results from DSL execution
+
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
@@ -74,6 +76,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getUserList: function() {
         return _USER_LIST;
+    },
+    
+    getDSLData: function() {
+        return _DSL_DATA;
     }
 });
 
@@ -266,6 +272,19 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                     });
                 }
             }
+            break;
+            
+        case ActionTypes.EXECUTE_DEFINITION:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.data)
+            {
+                _errors = [];
+                _DSL_DATA = action.data;
+            }
+            DSLStore.emitChange();
             break;
     }
     

@@ -85,6 +85,6 @@ syntax Cell = function (ctx) {
             }
         }
     }
-    tot = #`DSL.executeCell({${identity}}, {${body}}, conn, cb)`;
+    tot = #`DSL.executeCell({${identity}}, {${body}}, conn, callback)`;
     return tot;
 }

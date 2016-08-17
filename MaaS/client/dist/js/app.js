@@ -396,6 +396,14 @@ var ResponseDSLActionCreator = {
             operation: operation,
             userPermission: userPermission
         });
+    },
+
+    responseExecuteDefinition: function responseExecuteDefinition(errors, data) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EXECUTE_DEFINITION,
+            errors: errors,
+            daa: data
+        });
     }
 };
 
@@ -2432,7 +2440,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
     return {
         errors: DSLStore.getErrors(),
-        isLogged: SessionStore.isLogged()
+        isLogged: SessionStore.isLogged(),
+        data: DSLStore.getDSLData()
     };
 }
 
@@ -2441,7 +2450,11 @@ var ExecuteDSL = React.createClass({
 
 
     getInitialState: function getInitialState() {
-        return getState();
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            data: {}
+        };
     },
 
     componentWillMount: function componentWillMount() {
@@ -2464,22 +2477,32 @@ var ExecuteDSL = React.createClass({
         var content;
         var data = [];
 
-        data = [{
-            id: 0,
-            name: "ciao",
-            type: "lol"
-        }, {
-            id: 1,
-            name: "ciao2",
-            type: "lol"
-        }, {
-            id: 2,
-            name: "ciao3",
-            type: "qwe"
-        }];
+        /*data = [
+            {
+                id: 0,
+                name: "ciao",
+                type: "lol"
+            },
+            {
+                id: 1,
+                name: "ciao2",
+                type: "lol"
+            },
+            {
+                id: 2,
+                name: "ciao3",
+                type: "qwe"
+            }
+        ];*/
+
+        if (this.state.data) {
+            data = this.state.data;
+            console.log(data);
+        }
 
         var columns = [];
         if (data.length > 0) {
+            alert(data.length);
             columns = Object.keys(data[0]);
             // keys.forEach(function(key, i) {
             //     alert(key);
@@ -6921,6 +6944,7 @@ module.exports = {
     LOAD_USER_LIST_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
     CHANGE_DSL_PERMISSION_RESPONSE: null,
+    EXECUTE_DEFINITION: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -7310,6 +7334,8 @@ var _DSL = {
 
 var _USER_LIST = []; // Member and Guest list
 
+var _DSL_DATA = {}; // Data results from DSL execution
+
 var _errors = [];
 
 var DSLStore = assign({}, EventEmitter.prototype, {
@@ -7351,6 +7377,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getUserList: function getUserList() {
         return _USER_LIST;
+    },
+
+    getDSLData: function getDSLData() {
+        return _DSL_DATA;
     }
 });
 
@@ -7510,6 +7540,16 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                     });
                 }
             }
+            break;
+
+        case ActionTypes.EXECUTE_DEFINITION:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else if (action.data) {
+                _errors = [];
+                _DSL_DATA = action.data;
+            }
+            DSLStore.emitChange();
             break;
     }
 });
@@ -8341,10 +8381,10 @@ module.exports = {
       permission: permission
     }).end(function (error, res) {
       if (res) {
+        res = JSON.parse(res.text);
         if (res.error) {
-          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
+          ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message, null, null);
         } else {
-          res = JSON.parse(res.text);
           ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
         }
       }
@@ -8377,7 +8417,14 @@ module.exports = {
 
   executeDefinition: function executeDefinition(id) {
     request.post(APIEndpoints.DSL + '/' + id + '/executeDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
-      if (res) {}
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          ResponseDSLActionCreator.responseExecuteDefinition(res.error.message, null);
+        } else {
+          ResponseDSLActionCreator.responseExecuteDefinition(null, res.data);
+        }
+      }
     });
   }
 };

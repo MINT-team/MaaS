@@ -79,6 +79,14 @@ var ResponseDSLActionCreator = {
             operation: operation,
             userPermission: userPermission
         });
+    },
+    
+    responseExecuteDefinition: function(errors, data) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EXECUTE_DEFINITION,
+            errors: errors,
+            daa: data
+        });
     }
 };
 
