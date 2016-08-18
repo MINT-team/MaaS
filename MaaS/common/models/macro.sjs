@@ -26,7 +26,7 @@ syntax Cell = function (ctx) {
         params = ctxItem.inner();
         for (let item of params)
         {
-            iparams.next();     // salta ':'
+            params.next();     // salta ':'
             body = body.concat(#`${item}: ${params.next('expr').value}`);
         }
     }

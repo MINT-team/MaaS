@@ -263,6 +263,7 @@ module.exports = function(DSL) {
     );
     
     DSL.compileDefinition = function(id, cb) {
+        console.log('compileDefinition');
         var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
@@ -299,11 +300,9 @@ module.exports = function(DSL) {
                     var callback = function(err, identity, body) {
                         if(err)
                         {
-                            console.log("errore remote method");
                             conn.disconnect();
                             return cb(null, err);
                         }
-                        console.log('Non deve andare');
                         conn.disconnect();
                         return cb(null, null);
                     };
@@ -375,7 +374,7 @@ module.exports = function(DSL) {
                         if(err)
                         {
                             conn.disconnect();
-                            return cb(null, err);
+                            return cb(null, err, null);
                         }
                         conn.disconnect();
                         switch(DSLInstance.type)
@@ -409,6 +408,7 @@ module.exports = function(DSL) {
     );
     
     DSL.compile = function(dsl, cb) {
+        console.log('compile');
         var intepreterFile = __dirname + "/macro.sjs";
         var expanded;
         fs.readFile(intepreterFile, function(err, macro) {
@@ -426,7 +426,22 @@ module.exports = function(DSL) {
                 }
                 catch(err)
                 {
-                    return cb(err.description, null);
+                    console.log("CATCH:", err);
+                    var message;
+                    if(!err.description)
+                    {
+                        if(err.toString().match(/replacement values for syntax template must not be null or undefined/g))
+                        {
+                            message = "Syntax error. For example some commas are missing";
+                        }
+                    }
+                    else
+                    {
+                        message = err.description;
+                    }
+                    
+                    return cb(message, null);
+                    // errore virgole: [Error: replacement values for syntax template must not be null or undefined] 
                 }
                 return cb(null, expanded.code);
             }
@@ -451,14 +466,103 @@ module.exports = function(DSL) {
     );
     
     DSL.compileCell = function(identity, body, cb) {
+        /*
+        Compilation errors:     - missing required attributes
+                                - wrong type keyword
+                                - wrong order keyword
+        
+        Default values:         - type -> string
+                                - order -> asc
+                                
+        
+        Structure:              read identity optional attributes
+                                read identity required attributes
+                                if !identity required attributes
+                                    if !body
+                                        return only missing identity attributes error
+                                    else
+                                        read body required attributes
+                                        if !body required attributes
+                                            return both identity and body missing attributes error
+                                        else
+                                            return only missing identity attributes error
+                                else
+                                    check type keyword and store error if exist
+                                    merge identity required and optional attributes
+                                    if !body
+                                        return only identity object
+                                    else
+                                        read body required attributes
+                                        if !body required attributes
+                                            if wrong type keyword
+                                                return body missing attributes error and wrong type error
+                                            else
+                                                return body missing attributes error
+                                        else
+                                            if wrong type keyword
+                                                return wrong type error
+                                            else
+                                                return identity and body objects
+                                    if wrong type keyword
+                                        return wrong type error
+                                    else
+                                        return identity object
+        */
+        
+        
+        /*
+        Two types of cell:
+        
+        1) Cell with value:
+            Identity:
+                type | required | "string"
+                label | optional
+                columnLabel | optional
+                transformation | optional
+            Body:
+                value | required
+        
+        2) Cell without value:
+            Identity:
+                name | required
+                table | required
+                label | optional
+                transformation | optional
+                columnLabel | optional
+                type | required | "string"
+                sortby | optional
+                order | optional | "asc"
+                query | optional
+            Body:
+                empty
+        
+        */
+        
+        /*
+        Alternative structure:      if body
+                                        read body required attributes ['value']
+                                        if !body required attributes
+                                            return missing body attributes error
+                                        else
+                                            read identity optional attributes ['label','transformation','columnLabel']
+                                            read identity required attribute ['type']
+        
+                                    else
+                                    
+                                        
+        
+        */
+        
+        
+        console.log('compileCell');
         AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
-                    
-                
-            AttributesReader.readRequiredAttributes(identity, ['name', 'table', 'type'], function(identityMissing, identityRequiredAttributes) {
+            AttributesReader.readRequiredAttributes(identity, ['name', 'table'], function(identityMissing, identityRequiredAttributes) {
                 if(identityMissing)
                 {
+                    console.log("--> identityMissing: ",identityMissing);
                     if(Object.getOwnPropertyNames(body).length !== 0)
                     {
+                        console.log("oggetto pieno");
                         AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
                             if(bodyMissing)
                             {
@@ -470,47 +574,88 @@ module.exports = function(DSL) {
                                     missing.push(attr);
                                 });
                                 CompileErrors.missingRequiredAttributes(missing, function(error) {
-                                    console.log("> DSL compilation error:", error.message);
-                                        
+                                    console.log("> DSL compilation error:", error);
                                     return cb(error, null, null); // return errors of both identity and body
+                                });
+                            }
+                            else
+                            {
+                                CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
+                                    console.log("> DSL compilation error:", identityError);
+                                    return cb(identityError, null, null); // return only errors of identity
                                 });
                             }
                         });
                     }
                     else
                     {
+                        console.log("oggetto vuoto");
                         CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
-                            console.log("> DSL compilation error:", identityError.message);
+                            console.log("> DSL compilation error:", identityError);
                             return cb(identityError, null, null); // return only errors of identity
                         });
                     }
                 }
-                
-                console.log("identityAttributes: ", identityRequiredAttributes);
-                
-                if(Object.getOwnPropertyNames(body).length !== 0)
-                {
-                    AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
-                        if(bodyMissing)
-                        {
-                            CompileErrors.missingRequiredAttributes(bodyMissing, function(bodyError) {
-                                console.log("> DSL compilation error:", bodyError.message);
-                                return cb(bodyError, null, null); // return only body errors
-                            });
-                        }
-                        /*
-                        AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
-                        
-                        });
-                        */
-                        console.log("identityAttributes: ", bodyAttributes);
-                        return cb(null, null, identityAttributes, bodyRequiredAttributes); // return both identity and body attributes
-                    });
-                }
                 else
                 {
+                    var typeError;
+                    var type = identityRequiredAttributes.type;
+                    if (type != 'string' || type != 'image' || type != 'number' || type != 'link' || type != 'date')
+                    {
+                        CompileErrors.wrongTypeError(type, function(identityError) {
+                            console.log("> DSL compilation error:", identityError);
+                            typeError = identityError;
+                        });
+                    }
+                    var identityAttributes = Object.assign(identityRequiredAttributes, identityOptionalAttributes);
+                    console.log("identityAttributes: ", identityAttributes);
                     
-                    return cb(null, null, identityAttributes, null); // return only identity attributes
+                    if(Object.getOwnPropertyNames(body).length !== 0)
+                    {
+                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
+                            if(bodyMissing)
+                            {
+                                CompileErrors.missingRequiredAttributes(bodyMissing, function(bodyError) {
+                                    console.log("> DSL compilation error:", bodyError);
+                                    if (typeError)
+                                    {
+                                        var error  = Object.assign(typeError, bodyError);
+                                        return cb(error, null, null); // return body and type errors
+                                    }
+                                    return cb(bodyError, null, null); // return only body errors
+                                });
+                            }
+                            else
+                            {
+                                if (typeError)
+                                {
+                                    return cb(typeError, null, null);
+                                }
+                                console.log("bodyAttributes: ", bodyRequiredAttributes);
+                                return cb(null, identityAttributes, bodyRequiredAttributes); // return both identity and body attributes
+                            }
+                        });
+                    }
+                    else
+                    {
+                        var orderError;
+                        if (identityOptionalAttributes.order != 'asc' || identityOptionalAttributes != 'desc')
+                        {
+                            CompileErrors.orderError(identityOptionalAttributes.order, function(identityError) {
+                                console.log("> DSL compilation error:", identityError);
+                                orderError = identityError;
+                                
+                            });
+                        }
+                        if (typeError || orderError)
+                        {
+                            var error = Object.assign(orderError, typeError);
+                            //return cb(typeError, null, null);
+                            return cb(error, null, null);
+                        }
+                        
+                        return cb(null, identityAttributes, null); // return only identity attributes
+                    }
                 }
             });
         });

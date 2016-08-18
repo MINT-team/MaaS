@@ -259,6 +259,10 @@ var RequestUserActionCreator = {
 
     changeRole: function changeRole(email, role, id) {
         WebAPIUtils.changeRole(email, role, id);
+    },
+
+    getUsers: function getUsers() {
+        WebAPIUtils.getUsers();
     }
 };
 
@@ -3396,7 +3400,7 @@ var ManageDSLSource = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
-            definitionId: this.props.definitionId,
+            definitionId: this.props.params.definitionId,
             definitionName: null,
             definitionSource: DSLStore.getSource(),
             saved: this.props.params.definitionId ? true : false
@@ -3405,6 +3409,9 @@ var ManageDSLSource = React.createClass({
 
     componentDidMount: function componentDidMount() {
         DSLStore.addChangeListener(this._onChange);
+        DSLStore.addSaveListener(this._onSave);
+        DSLStore.addCompileListener(this._onCompile);
+        DSLStore.addExecuteListener(this._onExecute);
         var id = this.props.params.definitionId;
         if (id) {
             RequestDSLActionCreator.loadDSL(id);
@@ -3418,6 +3425,9 @@ var ManageDSLSource = React.createClass({
 
     componentWillUnmount: function componentWillUnmount() {
         DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeSaveListener(this._onSave);
+        DSLStore.removeCompileListener(this._onCompile);
+        DSLStore.removeExecuteListener(this._onExecute);
     },
 
     onEdit: function onEdit(e) {
@@ -3428,23 +3438,8 @@ var ManageDSLSource = React.createClass({
     },
 
     _onChange: function _onChange() {
-        var overwrite = false;
-        if (this.state.building) {
-            this.refs.build.classList.toggle("loader-small");
-            this.setState({ building: false });
-        }
-        if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
         this.setState(getState());
-        if (!(this.state.errors.length > 0)) {
-            // Successful saving
-            if (this.state.saved == false) {
-                var dslId = this.state.definitionId;
-                var userId = SessionStore.getUserId();
-                if (!overwrite) RequestDSLActionCreator.loadDSLAccess(dslId, userId); // Load the new object to be visualized in the table
-                this.setState({ saved: true });
-                this.refs.save.classList.toggle("saved");
-            }
-        }
+        alert("change");
         // On DSL load
         var id = this.props.params.definitionId;
         if (id) {
@@ -3471,6 +3466,43 @@ var ManageDSLSource = React.createClass({
                 this.refs.save.classList.toggle("saved");
             }
         }
+    },
+
+    _onSave: function _onSave() {
+        this.setState({ errors: DSLStore.getErrors() });
+        var overwrite = false;
+        if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
+        if (!(this.state.errors.length > 0)) {
+            // Successful saving
+            alert("saving...");
+            var dslId = this.state.definitionId;
+            var userId = SessionStore.getUserId();
+            alert(overwrite);
+            if (!overwrite) RequestDSLActionCreator.loadDSLAccess(dslId, userId); // Load the new object to be visualized in the ManageDSL's table
+            alert("saved: " + this.sate.saved);
+            if (this.sate.saved == false) {
+                this.setState({ saved: true });
+                this.refs.save.classList.toggle("saved");
+            }
+            alert("building: " + this.state.building);
+            // if save was launched by a build request then build the source
+            if (this.state.building) {
+                alert("build after save");
+                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
+        }
+    },
+
+    _onCompile: function _onCompile() {
+        this.setState({ errors: DSLStore.getErrors() });
+        if (this.state.building) {
+            this.refs.build.classList.toggle("loader-small");
+            this.setState({ building: false });
+        }
+    },
+
+    _onExecute: function _onExecute() {
+        this.setState({ errors: DSLStore.getErrors() });
     },
 
     onSave: function onSave() {
@@ -3504,9 +3536,14 @@ var ManageDSLSource = React.createClass({
 
     onBuild: function onBuild() {
         if (!this.state.building) {
-            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             this.setState({ building: true });
             this.refs.build.classList.toggle("loader-small");
+            if (this.state.saved == false) {
+                alert("save first");
+                this.onSave(); // first save definition
+            } else {
+                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
         } else alert("aspetta");
     },
 
@@ -3531,15 +3568,16 @@ var ManageDSLSource = React.createClass({
             errors = React.createElement(
                 'div',
                 null,
-                this.state.errors.map(function (error) {
+                this.state.errors.map(function (error, i) {
                     return React.createElement(
                         'p',
-                        null,
+                        { key: i },
                         error
                     );
                 })
             );
         }
+
         content = React.createElement(
             'div',
             { id: 'editor-container' },
@@ -7700,7 +7738,9 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
-var USERS_EVENT = 'users';
+var SAVE_EVENT = 'save';
+var COMPILE_EVENT = 'compile';
+var EXECUTE_EVENT = 'execute';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -7728,6 +7768,42 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    emitSave: function emitSave() {
+        this.emit(SAVE_EVENT);
+    },
+
+    addSaveListener: function addSaveListener(callback) {
+        this.on(SAVE_EVENT, callback);
+    },
+
+    removeSaveListener: function removeSaveListener(callback) {
+        this.removeListener(SAVE_EVENT, callback);
+    },
+
+    emitCompile: function emitCompile() {
+        this.emit(COMPILE_EVENT);
+    },
+
+    addCompileListener: function addCompileListener(callback) {
+        this.on(COMPILE_EVENT, callback);
+    },
+
+    removeCompileListener: function removeCompileListener(callback) {
+        this.removeListener(COMPILE_EVENT, callback);
+    },
+
+    emitExecute: function emitExecute() {
+        this.emit(EXECUTE_EVENT);
+    },
+
+    addExecuteListener: function addExecuteListener(callback) {
+        this.on(EXECUTE_EVENT, callback);
+    },
+
+    removeExecuteListener: function removeExecuteListener(callback) {
+        this.removeListener(EXECUTE_EVENT, callback);
     },
 
     getErrors: function getErrors() {
@@ -7830,7 +7906,8 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitSave();
             break;
 
         case ActionTypes.OVERWRITE_DSL_RESPONSE:
@@ -7857,6 +7934,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLSource', _DSL.source);
             }
             DSLStore.emitChange();
+            DSLStore.emitSave();
             break;
 
         case ActionTypes.DELETE_DSL_RESPONSE:
@@ -7923,11 +8001,19 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
 
         case ActionTypes.COMPILE_DEFINITION_RESPONSE:
             if (action.errors) {
-                _errors.push(action.errors);
+                if (typeof action.errors == 'string') {
+                    _errors.push(action.errors);
+                } else {
+                    var messages = Object.keys(action.errors);
+                    messages.forEach(function (error) {
+                        _errors.push(action.errors[error]);
+                    });
+                }
             } else {
                 _errors = [];
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitCompile();
             break;
 
         case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
@@ -7937,7 +8023,8 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
                 _DSL_DATA = action.data;
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitExecute();
             break;
     }
 });
@@ -8829,7 +8916,10 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+          //if(res.error.message)   // errore nostro
+          //ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+          if (res.error) // errore sweet
+            ResponseDSLActionCreator.responseCompileDefinition(res.error);
         } else {
           ResponseDSLActionCreator.responseCompileDefinition(null);
         }

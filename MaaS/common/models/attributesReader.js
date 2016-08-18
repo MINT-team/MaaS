@@ -8,10 +8,10 @@ module.exports = {
     		if (source[attr] !== undefined)
     		{
     			result[attr] = source[attr];
-    			//delete source[attr];
     			continue;
     		}
 	    }
+	    return cb(result);
     },
     
     readRequiredAttributes: function(source, required, cb) {
@@ -20,8 +20,6 @@ module.exports = {
         for(var i = 0; i < required.length; i++)
         {
 		    var attr = required[i];
-		    
-			//var keys = Object.keys(identity);
 			
 		    if(source[attr] !== undefined)
 		    {

@@ -32,7 +32,7 @@ var ManageDSLSource = React.createClass({
         return {
                 errors: [],
                 isLogged: SessionStore.isLogged(),
-                definitionId: this.props.definitionId,
+                definitionId: this.props.params.definitionId,
                 definitionName: null,
                 definitionSource: DSLStore.getSource(),
                 saved: this.props.params.definitionId ? true : false
@@ -41,6 +41,9 @@ var ManageDSLSource = React.createClass({
 
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
+        DSLStore.addSaveListener(this._onSave);
+        DSLStore.addCompileListener(this._onCompile);
+        DSLStore.addExecuteListener(this._onExecute);
         var id = this.props.params.definitionId;
         if(id)
         {
@@ -56,6 +59,9 @@ var ManageDSLSource = React.createClass({
     
     componentWillUnmount: function() {
         DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeSaveListener(this._onSave);
+        DSLStore.removeCompileListener(this._onCompile);
+        DSLStore.removeExecuteListener(this._onExecute);
     },
     
     onEdit: function(e) {
@@ -66,28 +72,8 @@ var ManageDSLSource = React.createClass({
     },
 
     _onChange: function() {
-        var overwrite = false;
-        if(this.state.building)
-        {
-            this.refs.build.classList.toggle("loader-small");
-            this.setState({building: false});
-        }
-        if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
-            overwrite = true; 
         this.setState(getState());
-        if(!(this.state.errors.length > 0))
-        {
-            // Successful saving
-            if(this.state.saved == false)
-            {
-                var dslId = this.state.definitionId;
-                var userId = SessionStore.getUserId();
-                if(!overwrite)
-                    RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the table
-                this.setState({ saved: true });
-                this.refs.save.classList.toggle("saved");
-            }
-        }
+        alert("change");
         // On DSL load
         var id = this.props.params.definitionId;
         if(id)
@@ -124,6 +110,50 @@ var ManageDSLSource = React.createClass({
                 this.refs.save.classList.toggle("saved");
             }
         }
+    },
+    
+    _onSave: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        var overwrite = false;
+        if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
+            overwrite = true; 
+        if(!(this.state.errors.length > 0))
+        {
+            // Successful saving
+            alert("saving...");
+            var dslId = this.state.definitionId;
+            var userId = SessionStore.getUserId();
+            alert(overwrite);
+            if(!overwrite)
+                RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the ManageDSL's table
+            alert("saved: "+this.sate.saved);
+            if(this.sate.saved == false)
+            {
+                this.setState({ saved: true });
+                this.refs.save.classList.toggle("saved");
+            }
+            alert("building: "+this.state.building);
+            // if save was launched by a build request then build the source
+            if(this.state.building)
+            {
+                alert("build after save");
+                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
+        }
+    },
+    
+    _onCompile: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        if(this.state.building)
+        {
+            this.refs.build.classList.toggle("loader-small");
+            this.setState({building: false});
+        }
+    },
+    
+    _onExecute: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        
     },
     
     onSave: function() {
@@ -171,9 +201,17 @@ var ManageDSLSource = React.createClass({
     onBuild: function() {
         if(!this.state.building)
         {
-            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             this.setState({building: true});
             this.refs.build.classList.toggle("loader-small");
+            if(this.state.saved == false)
+            {
+                alert("save first");
+                this.onSave();  // first save definition
+            }
+            else
+            {
+                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
         }
         else
             alert("aspetta");
@@ -201,8 +239,9 @@ var ManageDSLSource = React.createClass({
         var content, errors = [];
         if(this.state.errors.length > 0) 
         {//id="errors"className="error-item"
-            errors = ( <div>{this.state.errors.map((error) => <p >{error}</p>)}</div> );
+            errors = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
         }
+        
         content = (
             <div id="editor-container">
                 <div className="tooltip tooltip-bottom" id="editor-back-button">

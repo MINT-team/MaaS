@@ -19,7 +19,9 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
-var USERS_EVENT = 'users';
+var SAVE_EVENT = 'save';
+var COMPILE_EVENT = 'compile';
+var EXECUTE_EVENT = 'execute';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -48,6 +50,42 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+    
+    emitSave: function() {
+        this.emit(SAVE_EVENT);
+    },
+
+    addSaveListener: function(callback) {
+        this.on(SAVE_EVENT, callback);
+    },
+
+    removeSaveListener: function(callback) {
+        this.removeListener(SAVE_EVENT, callback);
+    },
+    
+    emitCompile: function() {
+        this.emit(COMPILE_EVENT);
+    },
+
+    addCompileListener: function(callback) {
+        this.on(COMPILE_EVENT, callback);
+    },
+
+    removeCompileListener: function(callback) {
+        this.removeListener(COMPILE_EVENT, callback);
+    },
+    
+    emitExecute: function() {
+        this.emit(EXECUTE_EVENT);
+    },
+
+    addExecuteListener: function(callback) {
+        this.on(EXECUTE_EVENT, callback);
+    },
+
+    removeExecuteListener: function(callback) {
+        this.removeListener(EXECUTE_EVENT, callback);
     },
     
     getErrors: function() {
@@ -160,7 +198,8 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource',_DSL.source);
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitSave();
             break;
         
         case ActionTypes.OVERWRITE_DSL_RESPONSE:
@@ -193,6 +232,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLSource',_DSL.source);
             }
             DSLStore.emitChange();
+            DSLStore.emitSave();
             break;
             
         case ActionTypes.DELETE_DSL_RESPONSE:
@@ -277,13 +317,24 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
         case ActionTypes.COMPILE_DEFINITION_RESPONSE:
             if(action.errors)
             {
-                _errors.push(action.errors);
+                if(typeof action.errors == 'string')
+                {
+                    _errors.push(action.errors);
+                }
+                else
+                {
+                    var messages = Object.keys(action.errors);
+                    messages.forEach(function(error) {
+                       _errors.push(action.errors[error]);
+                    });
+                }
             }
             else
             {
                 _errors = [];
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitCompile();
             break;
             
         case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
@@ -296,7 +347,8 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = [];
                 _DSL_DATA = action.data;
             }
-            DSLStore.emitChange();
+            //DSLStore.emitChange();
+            DSLStore.emitExecute();
             break;
     }
     

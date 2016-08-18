@@ -225,7 +225,10 @@ module.exports = {
             res=JSON.parse(res.text);
             if(res.error) 
             {
-              ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+              //if(res.error.message)   // errore nostro
+                //ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+              if(res.error)           // errore sweet
+                ResponseDSLActionCreator.responseCompileDefinition(res.error);
             }
             else
             {
