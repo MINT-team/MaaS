@@ -3439,7 +3439,6 @@ var ManageDSLSource = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
-        alert("change");
         // On DSL load
         var id = this.props.params.definitionId;
         if (id) {
@@ -3472,24 +3471,17 @@ var ManageDSLSource = React.createClass({
         this.setState({ errors: DSLStore.getErrors() });
         var overwrite = false;
         if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
-        if (!(this.state.errors.length > 0)) {
-            // Successful saving
-            alert("saving...");
-            var dslId = this.state.definitionId;
-            var userId = SessionStore.getUserId();
-            alert(overwrite);
-            if (!overwrite) RequestDSLActionCreator.loadDSLAccess(dslId, userId); // Load the new object to be visualized in the ManageDSL's table
-            alert("saved: " + this.sate.saved);
-            if (this.sate.saved == false) {
-                this.setState({ saved: true });
-                this.refs.save.classList.toggle("saved");
-            }
-            alert("building: " + this.state.building);
-            // if save was launched by a build request then build the source
-            if (this.state.building) {
-                alert("build after save");
-                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
-            }
+        // Successful saving
+        var dslId = this.state.definitionId;
+        var userId = SessionStore.getUserId();
+        if (!overwrite) RequestDSLActionCreator.loadDSLAccess(dslId, userId); // Load the new object to be visualized in the ManageDSL's table
+        if (this.state.saved == false) {
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
+        }
+        // if save was launched by a build request then build the source
+        if (this.state.building) {
+            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
         }
     },
 
@@ -3539,7 +3531,6 @@ var ManageDSLSource = React.createClass({
             this.setState({ building: true });
             this.refs.build.classList.toggle("loader-small");
             if (this.state.saved == false) {
-                alert("save first");
                 this.onSave(); // first save definition
             } else {
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
@@ -7892,7 +7883,6 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             DSLStore.emitChange();
 
         case ActionTypes.SAVE_DSL_RESPONSE:
-            _errors = [];
             if (action.errors) {
                 _errors.push(action.errors);
             } else if (action.definition) {
@@ -7911,7 +7901,6 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
 
         case ActionTypes.OVERWRITE_DSL_RESPONSE:
-            _errors = [];
             if (action.errors) {
                 _errors.push(action.errors);
             } else if (action.definition) {

@@ -181,7 +181,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             DSLStore.emitChange();
         
         case ActionTypes.SAVE_DSL_RESPONSE:
-            _errors = [];
             if(action.errors)
             {
                 _errors.push(action.errors);
@@ -203,7 +202,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
         
         case ActionTypes.OVERWRITE_DSL_RESPONSE:
-            _errors = [];
             if(action.errors)
             {
                 _errors.push(action.errors);

@@ -539,15 +539,34 @@ module.exports = function(DSL) {
         */
         
         /*
-        Alternative structure:      if body
+        Alternative structure:      if body // cell with value
                                         read body required attributes ['value']
-                                        if !body required attributes
-                                            return missing body attributes error
-                                        else
-                                            read identity optional attributes ['label','transformation','columnLabel']
-                                            read identity required attribute ['type']
+                                        read identity optional attributes ['label','transformation','columnLabel']
+                                        read identity required attribute ['type']
         
-                                    else
+                                        if !body required attributes
+                                            if !identity required attributes
+                                                keyword value errors = wrongCellKeywordValueError(transformation)
+                                                error = missing body attributes error + keyword value errors + missing identity attributes error
+                                                return error
+                                            else
+                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
+                                                error = missing body attributes error + keyword value errors
+                                                return error
+                                        else // there is body
+                                            if !identity required attributes
+                                                keyword value errors = wrongCellKeywordValueError(transformation)
+                                                error = keyword value errors + missing identity attributes error
+                                                return error
+                                            else // there are body and identity
+                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
+                                                if keyword value errors
+                                                    return keyword value errors
+                                                else // all keyword values are ok
+                                                    return identity and body objects
+                                            
+                                            
+                                    else // cell without value
                                     
                                         
         
