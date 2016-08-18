@@ -40,6 +40,7 @@ var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.r
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
 var ChangeCompanyName = require('./components/SuperAdmin/ChangeCompanyName.react.jsx');
+var ChangeUserPersonalData = require('./components/SuperAdmin/ChangeUserPersonalData.react.jsx');
 var UsersManagement = require('./components/SuperAdmin/UsersManagement.react.jsx');
 var ImpersonateUser = require('./components/SuperAdmin/ImpersonateUser.react.jsx');
             
@@ -80,7 +81,9 @@ var Routes = React.createClass({
               <Route path="companiesManagement" component={CompaniesManagement} >
                 <Route path="changeCompanyName/:companyId/:companyName" component={ChangeCompanyName} />
               </Route>
-              <Route path="usersManagement" component={UsersManagement} />
+              <Route path="usersManagement" component={UsersManagement} >
+                <Route path="changeUserPersonalData/:userId/:userEmail" component={ChangeUserPersonalData} />
+              </Route>
             </Route>
             <Route path="impersonateUser" component={ImpersonateUser} />
           </Route>

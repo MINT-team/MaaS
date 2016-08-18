@@ -16,8 +16,6 @@ var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
-var DSLStore = require('../../stores/DSLStore.react.jsx');
-var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
@@ -28,7 +26,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
     return {
             users: UserStore.getAllUsers(),
-            errors: DSLStore.getErrors(),
+            errors: UserStore.getErrors(),
             isLogged: SessionStore.isLogged(),
             type: "All"
     };
@@ -44,11 +42,13 @@ var usersManagement = React.createClass({
         RequestUserActionCreator.getUsers();  //Recovery all the users
         UserStore.addChangeListener(this._onChange);
         UserStore.addDeleteListener(this._onChange);
+        UserStore.addUserLoadListener(this._onChange);
     },
 
     componentWillUnmount: function() {
         UserStore.removeChangeListener(this._onChange);
         UserStore.removeDeleteListener(this._onChange);
+        UserStore.removeUserLoadListener(this._onChange);
     },
 
     _onChange: function() {
@@ -71,12 +71,10 @@ var usersManagement = React.createClass({
             if(instance.state.errors.length > 0)
     		    {
     		      document.getElementById(errorId).classList.toggle("dropdown-show");
-    		      //this.refs.errorRefName.classList.toggle("dropdown-show");
     		    }
     		    else
     		    {
     		      document.getElementById(deleteId).classList.toggle("dropdown-show");
-    		      //this.refs.deleteRefName.classList.toggle("dropdown-show");
     		    }
         };
         
@@ -96,7 +94,7 @@ var usersManagement = React.createClass({
                 </div>
                 <div className="dropdown-content dropdown-popup" id={deleteId}>
                     <p className="dropdown-title">Delete user</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> user?</p>
+                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>
@@ -105,22 +103,14 @@ var usersManagement = React.createClass({
             </div>
         );
         
-        if(row.role == "Owner")
-        {
-            buttons = (
-                <div>
-                    <Link to={"/"} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
-                </div>
-            );
-        }else
-        {
+       
             buttons = (
             <div>
                 {deleteUser}
-                <Link to={"/"} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
+                <Link to={"/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/"+ row.id +"/"+ row.email} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
             );
-        }
+        
         
         return (
             <div className="table-buttons">
@@ -132,6 +122,13 @@ var usersManagement = React.createClass({
     onAllClick: function() {
         this.refs.table.handleFilterData({ });
         this.setState({type: "All"});
+    },
+    
+    onOwnersClick: function() {
+        this.refs.table.handleFilterData({
+            role: 'Owner'
+        });
+        this.setState({type: "Owner"});
     },
     
     onAdministratorsClick: function() {
@@ -157,7 +154,7 @@ var usersManagement = React.createClass({
     
     render: function() {
   
-        if(!this.state.isLogged || this.state.errors.length > 0) 
+        if(!this.state.isLogged) 
         {
             return (
                 <AuthorizationRequired />
@@ -174,23 +171,29 @@ var usersManagement = React.createClass({
             var all = {
                 label: "All",
                 onClick: this.onAllClick,
-                icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+                icon: (<i className="material-icons md-24">&#xE8D3;</i>)
+            };
+            
+            var owner = {
+                label: "Owners",
+                onClick: this.onOwnersClick,
+                icon: (<i className="material-icons md-24">&#xE8F4;</i>)
             };
             
             var administrators = {
                 label: "Administrators",
                 onClick: this.onAdministratorsClick,
-                icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+                icon: (<i className="material-icons md-24">&#xE853;</i>)
             };
             var members = {
                 label: "Members",
-                onClick: this.onMembersClick,
-                icon: (<i className="material-icons md-24">&#xE871;</i>)
+                onClick: this.onMembersClick, 
+                icon: (<i className="material-icons md-24">&#xE7FD;</i>)
             };
             var guests = {
                 label: "Guests",
                 onClick: this.onGuestsClick,
-                icon: (<i className="material-icons md-24">list</i>)
+                icon: (<i className="material-icons md-24">&#xE7FF;</i>)
             };
             
             var data = [];
@@ -204,7 +207,7 @@ var usersManagement = React.createClass({
                 noDataText: "There are no users to display"
             };
             
-            var sidebarData = [all, administrators, members, guests];
+            var sidebarData = [all, owner, administrators, members, guests];
             if(this.state.users && this.state.users.length > 0)
             {
                 this.state.users.forEach(function(user, i) {
@@ -229,7 +232,7 @@ var usersManagement = React.createClass({
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
-                            search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="email">
+                            search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
                                 <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
                                 <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>

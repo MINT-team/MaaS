@@ -49,7 +49,7 @@ module.exports = {
     CHANGE_EDITOR_CONFIG_RESPONSE: null,
     CHANGE_ROLE_RESPONSE: null,
     GET_ALL_USERS: null,
-    
+    CHANGE_USER_EMAIL: null,  // add thomas 17 agosto
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,

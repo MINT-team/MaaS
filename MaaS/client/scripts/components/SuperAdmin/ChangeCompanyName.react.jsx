@@ -40,11 +40,14 @@ var ChangeCompanyName = React.createClass({
     };
   },
   
-  componentDidMount: function() {
+  componentWillMount: function() {
       SuperAdminStore.addChangeListener(this._onChange);
       CompanyStore.addChangeListener(this._onChange);
-      this.refs.nome.value = this.state.name;
   },
+  
+  componentDidMount: function() {
+    this.refs.nome.value = this.state.name;
+ },
   
   componentWillUnmount: function() {
       SuperAdminStore.removeChangeListener(this._onChange);

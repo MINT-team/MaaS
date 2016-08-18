@@ -133,7 +133,6 @@ var UserStore = assign({}, EventEmitter.prototype, {
   },
   
   getAllUsers: function() {
-    console.log("users: ",_users);
     return _users;
   }
 
@@ -309,8 +308,23 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _users = action.json;
             localStorage.setItem('users', JSON.stringify(_users));
         }
-        UserStore.emitChange();
+        UserStore.emitUserLoad();
         break;
+      
+      case ActionTypes.CHANGE_USER_EMAIL:
+        if(action.errors) {
+          _errors = action.errors;
+        }
+        else
+        {
+          _errors = [];
+          var i = 0;
+          while(i < _users.length && _users[i].id != action.json.id )
+              i++;
+          _users[i].email = action.json.newEmail;
+        }
+        UserStore.emitChange();  
+      break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });

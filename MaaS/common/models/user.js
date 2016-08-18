@@ -279,6 +279,7 @@ module.exports = function(user) {
 
     // Cambio password dopo l'email di verifica - vedesi relativo ACL
     user.changePassword = function(id, password, confirmation, cb) {
+        console.log("user id: ", id);
         user.findById(id, function(err, user) {
             if(err)
                 return cb(err);
@@ -744,6 +745,84 @@ module.exports = function(user) {
         }
     );
     
+    
+    user.changeUserEmail = function(id, email, confirmationEmail, cb) {
+       
+         user.findOne({where: {email: email}, limit: 1}, function(err, existingEmail) {
+             
+            if(err)  console.log('> find email error');
+            if(!existingEmail)
+            {
+                user.findById(id, function(err, user) {
+                    if (err)
+                       return cb(err);
+                   if(email == confirmationEmail)
+                   {
+                    user.updateAttributes({ email: email }, function() {
+                    if (err)
+                    {
+                        console.log('> Failed changing email configuration for: ', id);
+                        return cb(err);
+                    }
+                    });
+                    
+                    var data = {
+                        id: id,
+                        newEmail: email
+                    };
+                    return cb(null, null, data);
+                    }
+                    else
+                    {
+                        var error = {
+                            message: 'there is a difference between e-mail and email confirmation'
+                        };
+                        return cb(null, error, null);
+                    }
+                });
+            }else
+            {
+                if(confirmationEmail.length == 0)
+                {
+                    var error = {
+                        message: 'enter the email confirmation'
+                    };
+                    return cb(null, error, null); 
+                }else
+                {
+                    var error = {
+                        message: 'email is already used'
+                    };
+                    return cb(null, error, null);
+                }
+            } 
+         });
+    };
+    
+    user.remoteMethod(
+        'changeUserEmail',
+        {
+            description: 'Change user email by passing id to change email for, email and confirmation of the same.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User ID which you want to change the e-mail'},
+                { arg: 'email', type: 'string', required: true, description: 'New email'},
+                { arg: 'confirmationEmail', type: 'string', required: true, description: 'Confirmation of the new e-mail'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'data', type: 'Object'}
+            ],
+            http: { verb: 'put', path: '/:id/changeUserEmail' }
+        }
+    );
+    
+    
+    
+    
+    
+    
+    
+    
     // Add specifications on wich user has logged in
     user.afterRemote('login', function(ctx, remoteMethodOutput, next) {
         var ctx_ttl = ctx.result.ttl ;
@@ -801,7 +880,10 @@ module.exports = function(user) {
                     console.log("error, cannot find company"); 
             });
         });
+        
     });
+    
+    
     
     
 };

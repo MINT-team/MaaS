@@ -80,6 +80,14 @@ var ResponseUserActionCreator = {
             type: ActionTypes.GET_ALL_USERS,
             json: json
         });
+    },
+    
+    responseChangeUserEmail: function(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_USER_EMAIL,
+            json: json,
+            errors: errors
+        });
     }
 };
 

@@ -51,6 +51,10 @@ var RequestUserActionCreator = {
     
     getUsers: function(){
         WebAPIUtils.getUsers();
+    },
+    
+    changeEmail: function(id, email, confirmationEmail){
+        WebAPIUtils.changeEmail(id, email, confirmationEmail);
     }
 };
 

@@ -147,6 +147,7 @@ module.exports = {
       .end(function(error, res) {
         if(res) 
         {
+          console.log("ricevo una risposta");
            res = JSON.parse(res.text);
           if(res.error) 
           {
@@ -253,5 +254,29 @@ module.exports = {
           ResponseUserActionCreator.responseGetUsers(res.body);
         }
       });
-   }
+   },
+   
+   //funzione che permette di modificare l'indirizzo email di un utente
+    changeEmail: function(id, email, confirmationEmail) {
+      request
+      .put(APIEndpoints.USERS + '/' + id + '/changeUserEmail')
+      .set('Accept','application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        email: email,
+        confirmationEmail: confirmationEmail
+      })
+      .end(function(error, res) {
+        if (res)
+        {
+          res = JSON.parse(res.text);
+          if (res.error)
+              ResponseUserActionCreator.responseChangeUserEmail(null,res.error.message);
+          else
+            ResponseUserActionCreator.responseChangeUserEmail(res.data, null); 
+        }
+      });
+  }
+  
+  
 };
