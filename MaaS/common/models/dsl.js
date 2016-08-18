@@ -4,6 +4,8 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
+var CompileErrors = require('./compileErrors.js');
+var AttributesReader = require('./attributesReader.js');
 
 module.exports = function(DSL) {
     // Create a DSL definition
@@ -260,85 +262,78 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.executeCell = function(identity, body, conn, cb) {
-        console.log("> identity", identity);
-        console.log("> body", body);
-        console.log("table:",identity.table);
-        console.log("query:", identity.query);
-        console.log("name:",identity.name);
-        
-        var collection = conn.model(identity.table, DocumentSchema);
-        var query = collection.findOne(identity.query, identity.name, function(err, result) {
-            if (err)
+    DSL.compileDefinition = function(id, cb) {
+        console.log('compileDefinition');
+        var ExternalDatabase = app.models.ExternalDatabase;
+        DSL.findById(id, function(err, DSLInstance) {
+            if(err)
             {
                 console.log(err);
                 return cb(err);
             }
-            console.log("> result: ", result);
-            return cb(null, result);
+            
+            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
+                if(err)
+                {
+                   console.log("> Error finding database of dsl");
+                   return cb(err);
+                }
+               
+                var conn = mongoose.connect(database.connString, function(err) {
+                    if (err)
+                    {
+                        var error = {
+                            message: "Failed connecting database"
+                        };
+                        console.log('> Failed connecting database.');
+                        return cb(null, error, null);
+                    }
+                });
+               
+                DSL.compile(DSLInstance.source, function(err, expanded) {
+                    if(err)
+                    {
+                        console.log("> DSL compilation error:", err);
+                        conn.disconnect();
+                        return cb(null, err);
+                    }
+                    var callback = function(err, identity, body) {
+                        if(err)
+                        {
+                            conn.disconnect();
+                            return cb(null, err);
+                        }
+                        conn.disconnect();
+                        return cb(null, null);
+                    };
+                    eval(expanded);     //  DSL.compileCell({...}, callback)
+                });
+            });
         });
-        
-        
     };
+    
+    DSL.remoteMethod(
+        'compileDefinition',
+        {
+            description: "Change the permissions for one specific DSL definition",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'post', path: '/:id/compileDefinition' }
+        }
+    );
     
     /*
-    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
     
+    Compilo -> compileDefinition -> compile -> macro -> compileXXX -> err / null
+    
+    Eseguo -> executeDefinition -> compile -> macro -> compileXXX -> err / null
+                                -> executeXXX -> err / result
+                                                    
     */
-    
-    DSL.remoteMethod(
-        'executeCell',
-        {
-            description: "Execute a Cell macro",
-            isStatic: true,
-            accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
-            ],
-            returns: [
-                { arg: 'error', type: 'Object' },
-                { arg: 'data', type: 'Object' }
-            ]
-        }
-    
-    );
-    
-    
-    DSL.compile = function(dsl, cb) {
-        
-        var intepreterFile = __dirname + "/macro.sjs";
-        var expanded;
-        fs.readFile(intepreterFile, function(err, macro) {
-            if(err)
-            {
-                console.log("> Errore:", err);
-                return cb(err);
-            }
-            else
-            {
-                macro = macro.toString();
-                expanded = sweet.compile(macro + dsl);
-                return cb(null, expanded.code);
-            }
-        });
-    };
-    
-    
-    DSL.remoteMethod(
-        'compile',
-        {
-            description: "Compile one DSL definition",
-            accepts: [
-                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
-            ],
-            returns: [
-                { arg: 'expanded', type: 'string' }
-                
-            ],
-            isStatic: true
-        }
-    );
-    
     
     DSL.executeDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
@@ -365,26 +360,33 @@ module.exports = function(DSL) {
                         console.log('> Failed connecting database.');
                         return cb(null, error, null);
                     }
-               });
-               
-               
+                });
+                
                 DSL.compile(DSLInstance.source, function(err, expanded) {
                     if(err)
                     {
-                        console.log("> Errore:", err);
-                        return cb(err);
+                        console.log("> DSL compilation error:", err);
+                        conn.disconnect();
+                        return cb(null, err, null);
                     }
                     
-                    var cb = function(err, data) {
+                    var callback = function(err, identity, body) {
                         if(err)
                         {
-                            return cb(err);
+                            conn.disconnect();
+                            return cb(null, err, null);
                         }
-                        console.log('funzia');
                         conn.disconnect();
+                        switch(DSLInstance.type)
+                        {
+                            case "Cell":
+                                DSL.executeCell(identity, body, conn, function(){
+                                    
+                                });
+                                break;
+                        }
                     };
-                    eval(expanded);
-                    /*DSL.executeCell({table: 'users', name: 'level', query: { email: 'admin@example.com' }}, {}, conn, cb);*/
+                    eval(expanded); // DSL.compileCell({...})
                 });
             });
         });
@@ -400,9 +402,339 @@ module.exports = function(DSL) {
             returns: [
                 { arg: 'error', type: 'Object' },
                 { arg: 'data', type: 'Object' }
-                
             ],
             http: { verb: 'post', path: '/:id/executeDefinition' }
         }
+    );
+    
+    DSL.compile = function(dsl, cb) {
+        console.log('compile');
+        var intepreterFile = __dirname + "/macro.sjs";
+        var expanded;
+        fs.readFile(intepreterFile, function(err, macro) {
+            if(err)
+            {
+                console.log("> Errore:", err);
+                return cb(err, null);
+            }
+            else
+            {
+                macro = macro.toString();
+                try
+                {
+                    expanded = sweet.compile(macro + dsl);
+                }
+                catch(err)
+                {
+                    console.log("CATCH:", err);
+                    var message;
+                    if(!err.description)
+                    {
+                        if(err.toString().match(/replacement values for syntax template must not be null or undefined/g))
+                        {
+                            message = "Syntax error. For example some commas are missing";
+                        }
+                    }
+                    else
+                    {
+                        message = err.description;
+                    }
+                    
+                    return cb(message, null);
+                    // errore virgole: [Error: replacement values for syntax template must not be null or undefined] 
+                }
+                return cb(null, expanded.code);
+            }
+        });
+    };
+    
+    
+    DSL.remoteMethod(
+        'compile',
+        {
+            description: "Compile one DSL definition",
+            accepts: [
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
+            ],
+            returns: [
+                { arg: 'err', type: 'string' },
+                { arg: 'expanded', type: 'string' }
+                
+            ],
+            isStatic: true
+        }
+    );
+    
+    DSL.compileCell = function(identity, body, cb) {
+        /*
+        Compilation errors:     - missing required attributes
+                                - wrong type keyword
+                                - wrong order keyword
+        
+        Default values:         - type -> string
+                                - order -> asc
+                                
+        
+        Structure:              read identity optional attributes
+                                read identity required attributes
+                                if !identity required attributes
+                                    if !body
+                                        return only missing identity attributes error
+                                    else
+                                        read body required attributes
+                                        if !body required attributes
+                                            return both identity and body missing attributes error
+                                        else
+                                            return only missing identity attributes error
+                                else
+                                    check type keyword and store error if exist
+                                    merge identity required and optional attributes
+                                    if !body
+                                        return only identity object
+                                    else
+                                        read body required attributes
+                                        if !body required attributes
+                                            if wrong type keyword
+                                                return body missing attributes error and wrong type error
+                                            else
+                                                return body missing attributes error
+                                        else
+                                            if wrong type keyword
+                                                return wrong type error
+                                            else
+                                                return identity and body objects
+                                    if wrong type keyword
+                                        return wrong type error
+                                    else
+                                        return identity object
+        */
+        
+        
+        /*
+        Two types of cell:
+        
+        1) Cell with value:
+            Identity:
+                type | required | "string"
+                label | optional
+                columnLabel | optional
+                transformation | optional
+            Body:
+                value | required
+        
+        2) Cell without value:
+            Identity:
+                name | required
+                table | required
+                label | optional
+                transformation | optional
+                columnLabel | optional
+                type | required | "string"
+                sortby | optional
+                order | optional | "asc"
+                query | optional
+            Body:
+                empty
+        
+        */
+        
+        /*
+        Alternative structure:      if body // cell with value
+                                        read body required attributes ['value']
+                                        read identity optional attributes ['label','transformation','columnLabel']
+                                        read identity required attribute ['type']
+        
+                                        if !body required attributes
+                                            if !identity required attributes
+                                                keyword value errors = wrongCellKeywordValueError(transformation)
+                                                error = missing body attributes error + keyword value errors + missing identity attributes error
+                                                return error
+                                            else
+                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
+                                                error = missing body attributes error + keyword value errors
+                                                return error
+                                        else // there is body
+                                            if !identity required attributes
+                                                keyword value errors = wrongCellKeywordValueError(transformation)
+                                                error = keyword value errors + missing identity attributes error
+                                                return error
+                                            else // there are body and identity
+                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
+                                                if keyword value errors
+                                                    return keyword value errors
+                                                else // all keyword values are ok
+                                                    return identity and body objects
+                                            
+                                            
+                                    else // cell without value
+                                    
+                                        
+        
+        */
+        
+        
+        console.log('compileCell');
+        AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
+            AttributesReader.readRequiredAttributes(identity, ['name', 'table'], function(identityMissing, identityRequiredAttributes) {
+                if(identityMissing)
+                {
+                    console.log("--> identityMissing: ",identityMissing);
+                    if(Object.getOwnPropertyNames(body).length !== 0)
+                    {
+                        console.log("oggetto pieno");
+                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
+                            if(bodyMissing)
+                            {
+                                var missing = [];
+                                identityMissing.forEach(function(attr, i) {
+                                    missing.push(attr);
+                                });
+                                bodyMissing.forEach(function(attr, i) {
+                                    missing.push(attr);
+                                });
+                                CompileErrors.missingRequiredAttributes(missing, function(error) {
+                                    console.log("> DSL compilation error:", error);
+                                    return cb(error, null, null); // return errors of both identity and body
+                                });
+                            }
+                            else
+                            {
+                                CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
+                                    console.log("> DSL compilation error:", identityError);
+                                    return cb(identityError, null, null); // return only errors of identity
+                                });
+                            }
+                        });
+                    }
+                    else
+                    {
+                        console.log("oggetto vuoto");
+                        CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
+                            console.log("> DSL compilation error:", identityError);
+                            return cb(identityError, null, null); // return only errors of identity
+                        });
+                    }
+                }
+                else
+                {
+                    var typeError;
+                    var type = identityRequiredAttributes.type;
+                    if (type != 'string' || type != 'image' || type != 'number' || type != 'link' || type != 'date')
+                    {
+                        CompileErrors.wrongTypeError(type, function(identityError) {
+                            console.log("> DSL compilation error:", identityError);
+                            typeError = identityError;
+                        });
+                    }
+                    var identityAttributes = Object.assign(identityRequiredAttributes, identityOptionalAttributes);
+                    console.log("identityAttributes: ", identityAttributes);
+                    
+                    if(Object.getOwnPropertyNames(body).length !== 0)
+                    {
+                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
+                            if(bodyMissing)
+                            {
+                                CompileErrors.missingRequiredAttributes(bodyMissing, function(bodyError) {
+                                    console.log("> DSL compilation error:", bodyError);
+                                    if (typeError)
+                                    {
+                                        var error  = Object.assign(typeError, bodyError);
+                                        return cb(error, null, null); // return body and type errors
+                                    }
+                                    return cb(bodyError, null, null); // return only body errors
+                                });
+                            }
+                            else
+                            {
+                                if (typeError)
+                                {
+                                    return cb(typeError, null, null);
+                                }
+                                console.log("bodyAttributes: ", bodyRequiredAttributes);
+                                return cb(null, identityAttributes, bodyRequiredAttributes); // return both identity and body attributes
+                            }
+                        });
+                    }
+                    else
+                    {
+                        var orderError;
+                        if (identityOptionalAttributes.order != 'asc' || identityOptionalAttributes != 'desc')
+                        {
+                            CompileErrors.orderError(identityOptionalAttributes.order, function(identityError) {
+                                console.log("> DSL compilation error:", identityError);
+                                orderError = identityError;
+                                
+                            });
+                        }
+                        if (typeError || orderError)
+                        {
+                            var error = Object.assign(orderError, typeError);
+                            //return cb(typeError, null, null);
+                            return cb(error, null, null);
+                        }
+                        
+                        return cb(null, identityAttributes, null); // return only identity attributes
+                    }
+                }
+            });
+        });
+    };
+    
+    DSL.remoteMethod(
+        'compileCell',
+        {
+            description: "Compile a Cell macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'identity', type: 'Object' },
+                { arg: 'body', type: 'Object' }
+            ]
+        }
+        
+    );
+    
+    
+    /*
+    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
+    
+    */
+    
+    DSL.executeCell = function(identity, body, conn, cb) {
+        var errors = DSL.compileCell(identity, body);
+        if (!errors)
+        {
+            var collection = conn.model(identity.table, DocumentSchema);
+            var query = collection.findOne(identity.query, identity.name, function(err, result) {
+                if (err)
+                {
+                    console.log(err);
+                    return cb(err);
+                }
+                console.log("> Cell result: ", result);
+                return cb(null, result);
+            });
+        }
+    };
+    
+    DSL.remoteMethod(
+        'executeCell',
+        {
+            description: "Execute a Cell macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ]
+        }
+    
     );
 };

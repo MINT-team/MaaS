@@ -32,7 +32,7 @@ var ManageDSLSource = React.createClass({
         return {
                 errors: [],
                 isLogged: SessionStore.isLogged(),
-                definitionId: this.props.definitionId,
+                definitionId: this.props.params.definitionId,
                 definitionName: null,
                 definitionSource: DSLStore.getSource(),
                 saved: this.props.params.definitionId ? true : false
@@ -41,6 +41,9 @@ var ManageDSLSource = React.createClass({
 
     componentDidMount: function() {
         DSLStore.addChangeListener(this._onChange);
+        DSLStore.addSaveListener(this._onSave);
+        DSLStore.addCompileListener(this._onCompile);
+        DSLStore.addExecuteListener(this._onExecute);
         var id = this.props.params.definitionId;
         if(id)
         {
@@ -56,6 +59,9 @@ var ManageDSLSource = React.createClass({
     
     componentWillUnmount: function() {
         DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeSaveListener(this._onSave);
+        DSLStore.removeCompileListener(this._onCompile);
+        DSLStore.removeExecuteListener(this._onExecute);
     },
     
     onEdit: function(e) {
@@ -66,23 +72,7 @@ var ManageDSLSource = React.createClass({
     },
 
     _onChange: function() {
-        var overwrite = false;
-        if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
-            overwrite = true; 
         this.setState(getState());
-        if(!(this.state.errors.length > 0))
-        {
-            // Successful saving
-            if(this.state.saved == false)
-            {
-                var dslId = this.state.definitionId;
-                var userId = SessionStore.getUserId();
-                if(!overwrite)
-                    RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the table
-                this.setState({ saved: true });
-                this.refs.save.classList.toggle("saved");
-            }
-        }
         // On DSL load
         var id = this.props.params.definitionId;
         if(id)
@@ -119,6 +109,42 @@ var ManageDSLSource = React.createClass({
                 this.refs.save.classList.toggle("saved");
             }
         }
+    },
+    
+    _onSave: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        var overwrite = false;
+        if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
+            overwrite = true; 
+        // Successful saving
+        var dslId = this.state.definitionId;
+        var userId = SessionStore.getUserId();
+        if(!overwrite)
+            RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the ManageDSL's table
+        if(this.state.saved == false)
+        {
+            this.setState({ saved: true });
+            this.refs.save.classList.toggle("saved");
+        }
+        // if save was launched by a build request then build the source
+        if(this.state.building)
+        {
+            RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+        }
+    },
+    
+    _onCompile: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        if(this.state.building)
+        {
+            this.refs.build.classList.toggle("loader-small");
+            this.setState({building: false});
+        }
+    },
+    
+    _onExecute: function() {
+        this.setState({errors: DSLStore.getErrors()});
+        
     },
     
     onSave: function() {
@@ -164,16 +190,30 @@ var ManageDSLSource = React.createClass({
     },
     
     onBuild: function() {
-        
+        if(!this.state.building)
+        {
+            this.setState({building: true});
+            this.refs.build.classList.toggle("loader-small");
+            if(this.state.saved == false)
+            {
+                this.onSave();  // first save definition
+            }
+            else
+            {
+                RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
+        }
+        else
+            alert("aspetta");
     },
     
     onRun: function() {
         
     },
     
-    toggleErrorPopUp: function() {
-		this.refs.error.classList.toggle("dropdown-show");
-	},
+//     toggleErrorPopUp: function() {
+// 		this.refs.error.classList.toggle("dropdown-show");
+// 	},
 	
 	emptyErrors: function() {
 	    this.setState({ errors: [] });
@@ -188,10 +228,10 @@ var ManageDSLSource = React.createClass({
         }
         var content, errors = [];
         if(this.state.errors.length > 0) 
-        {
-            errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
-            this.toggleErrorPopUp();
+        {//id="errors"className="error-item"
+            errors = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
         }
+        
         content = (
             <div id="editor-container">
                 <div className="tooltip tooltip-bottom" id="editor-back-button">
@@ -209,9 +249,9 @@ var ManageDSLSource = React.createClass({
                                 <p className="tooltip-text tooltip-text-long">Save [Alt + S]</p>
                                 <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
                             </div>
-                            <div className="tooltip tooltip-top">
+                            <div className="tooltip tooltip-top" ref="build">
                                 <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
-                                <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button" ref="build">&#xE869;</i>
+                                <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button">&#xE869;</i>
                             </div>
                             <div className="tooltip tooltip-top">
                                 <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
@@ -234,15 +274,19 @@ var ManageDSLSource = React.createClass({
                 <div id="editor-viewer">
                     <Editor />
                 </div>
-                <div className="dropdown-content dropdown-popup" ref="error">
-                    <p className="dropdown-title">Error</p>
-                    <div className="dropdown-description">{errors}</div>
-                    <div className="dropdown-buttons">
-                        <button onClick={this.emptyErrors} className="button">Ok</button>
-                    </div>
+                <div id="editor-errors">
+                    {errors}
                 </div>
             </div>
         );
+        
+        // <div className="dropdown-content dropdown-popup" ref="error">
+        //             <p className="dropdown-title">Error</p>
+        //             <div className="dropdown-description">{errors}</div>
+        //             <div className="dropdown-buttons">
+        //                 <button onClick={this.emptyErrors} className="button">Ok</button>
+        //             </div>
+        //         </div>
         
         return (
             <div id="dsl-definition">

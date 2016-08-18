@@ -162,13 +162,13 @@ module.exports = {
         .end(function(error, res) {
           if(res)
           {
+            res=JSON.parse(res.text);
             if(res.error) 
             {
-              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message);
+              ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(res.error.message, null, null);
             }
             else
             {
-              res=JSON.parse(res.text);
               ResponseDSLActionCreator.responseChangeDSLDefinitionPermissions(null, res.operation, res.userPermission);
             }
           }
@@ -214,6 +214,30 @@ module.exports = {
         });
     },
     
+    compileDefinition: function(id) {
+      request
+        .post(APIEndpoints.DSL + '/' + id + '/compileDefinition')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .end(function(error, res) {
+          if(res)
+          {
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              //if(res.error.message)   // errore nostro
+                //ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
+              if(res.error)           // errore sweet
+                ResponseDSLActionCreator.responseCompileDefinition(res.error);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseCompileDefinition(null);
+            }
+          }
+        });
+    },
+    
     executeDefinition: function(id) {
       request
         .post(APIEndpoints.DSL + '/' + id + '/executeDefinition')
@@ -222,7 +246,15 @@ module.exports = {
         .end(function(error, res) {
           if(res)
           {
-            
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseExecuteDefinition(res.error.message, null);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseExecuteDefinition(null, res.data);
+            }
           }
         });
     }

@@ -79,6 +79,21 @@ var ResponseDSLActionCreator = {
             operation: operation,
             userPermission: userPermission
         });
+    },
+    
+    responseCompileDefinition: function(errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.COMPILE_DEFINITION_RESPONSE,
+            errors: errors
+        });
+    },
+    
+    responseExecuteDefinition: function(errors, data) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EXECUTE_DEFINITION_RESPONSE,
+            errors: errors,
+            data: data
+        });
     }
 };
 

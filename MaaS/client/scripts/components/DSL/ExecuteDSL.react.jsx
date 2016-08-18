@@ -20,14 +20,21 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
     return {
             errors: DSLStore.getErrors(),
-            isLogged: SessionStore.isLogged()
+            isLogged: SessionStore.isLogged(),
+            data: DSLStore.getDSLData(),
+            queried: true
     };
 }
 
 var ExecuteDSL = React.createClass({
     
     getInitialState: function() {
-        return getState();
+        return {
+            errors: [],
+            isLogged: SessionStore.isLogged(),
+            data: null,
+            queried: false
+        };
     },
     
     componentWillMount: function() {
@@ -44,16 +51,16 @@ var ExecuteDSL = React.createClass({
     },
     
     render: function() {
-        if(!this.state.isLogged || this.state.errors.length > 0) 
+        if(!this.state.isLogged) 
         {
             return (
                 <AuthorizationRequired />
             );
         }
-        var content;
+        var content, errors, title;
         var data = [];
         
-        data = [
+        /*data = [
             {
                 id: 0,
                 name: "ciao",
@@ -69,36 +76,72 @@ var ExecuteDSL = React.createClass({
                 name: "ciao3",
                 type: "qwe"
             }
-        ];
+        ];*/
         
         
-        var columns = [];
-        if(data.length > 0)
+        if(this.state.data && this.state.queried)
         {
-            columns = Object.keys(data[0]);
-            // keys.forEach(function(key, i) {
-            //     alert(key);
-            //     columns.push();
-            // });
+            title = (<p className="container-title">DSL Title</p>);
+            //console.log(this.state.data);
+            var columns = [];
+            if(this.state.data.length > 0)
+            {
+                alert("data.length > 0    : "+data.length);
+                data = this.state.data;
+                columns = Object.keys(data[0]);
+            }
+            else
+            {
+                columns = Object.keys(this.state.data);
+                data.push(this.state.data);
+            }
+            //console.log(columns);
+    
+            content = (
+                
+                <div id="dsl-data-table">
+                    <BootstrapTable ref="table" data={data} pagination={true} striped={true} hover={true} keyField={columns[0]}>
+                        {columns.map((column) => 
+                            <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                        )}
+                    </BootstrapTable>
+                </div>
+                
+            );
         }
-        //console.log(columns[0]);
-
-        content = (
-            
-            <div id="table">
-                <BootstrapTable ref="table" data={data} pagination={true} striped={true} hover={true} keyField={columns[0]}>
-                    {columns.map((column) => 
-                        <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn>
-                    )}
-                </BootstrapTable>
-            </div>
-            
-        );
-        
+        else
+        {
+            if(this.state.queried)
+            {
+                if(this.state.errors.length > 0) 
+                {
+                    errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
+                }
+                else
+                {
+                    content = (<p className="container-description">There is no data to display</p>);
+                }
+            }
+            else
+            {
+                content = (
+                    <div>
+                        <p className="loader"></p>
+                        <p className="container-description">Querying data...</p>
+                    </div>        
+                );
+            }
+        }
         
         return (
-            <div id="dsl" className="container">
+            <div id="dsl-data-container">
+                <div className="tooltip tooltip-bottom" id="editor-back-button">
+                    <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                    <p className="tooltip-text tooltip-text-short">Back</p>
+                </div>
+                {title}
                 {content}
+                {errors}
             </div>
         );
     }
