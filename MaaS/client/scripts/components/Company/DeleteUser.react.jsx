@@ -10,14 +10,16 @@
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-//var SessionStore = require('../../stores/SessionStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 var DeleteUser = React.createClass({
 
     getInitialState: function() {
+        
         return {
             id: UserStore.getId(),
+            type : SessionStore.whoIam(),
             errors: []
         };
     },
@@ -46,6 +48,7 @@ var DeleteUser = React.createClass({
 	},
 
     confirmDelete: function(event) {
+       
         event.preventDefault();
         var email = this.props.email;
         var id = this.state.id;

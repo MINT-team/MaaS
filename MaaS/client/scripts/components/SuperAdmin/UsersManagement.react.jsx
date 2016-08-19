@@ -17,6 +17,7 @@ var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -72,15 +73,35 @@ var usersManagement = React.createClass({
     		    {
     		      document.getElementById(errorId).classList.toggle("dropdown-show");
     		    }
-    		    else
+    		    else //////////
     		    {
     		      document.getElementById(deleteId).classList.toggle("dropdown-show");
     		    }
         };
         
         var confirmDelete = function() {
-           RequestUserActionCreator.deleteUser(row.email,row.id);
+           if(row.role != "Owner")
+                RequestUserActionCreator.deleteUser(row.email,row.id);
+           else{
+               RequestCompanyActionCreator.deleteCompany(row.companyId, row.email);
+           }
+                
         };
+        
+        var alertBox;
+        if(row.role != 'Owner')
+        {
+            alertBox = ( <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>);
+        }
+        else
+        {
+            alertBox = ( <div>
+                            <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>
+                            <p className="dropdown-description"> <span id="successful-email"> This will delete the entire company!</span></p>
+                        </div>
+                        );
+        }
+    
         
         var deleteUser = (
             <div id="delete-user" className="pop-up">
@@ -94,7 +115,7 @@ var usersManagement = React.createClass({
                 </div>
                 <div className="dropdown-content dropdown-popup" id={deleteId}>
                     <p className="dropdown-title">Delete user</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>
+                    {alertBox}
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>
@@ -215,7 +236,8 @@ var usersManagement = React.createClass({
                         id: user.id,
                         email: user.email,
                         role: user.role,
-                        companyName: user.companyName
+                        companyName: user.companyName,
+                        companyId: user.companyId
                     };
                 });
             }

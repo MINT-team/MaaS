@@ -147,7 +147,6 @@ module.exports = {
       .end(function(error, res) {
         if(res) 
         {
-          console.log("ricevo una risposta");
            res = JSON.parse(res.text);
           if(res.error) 
           {

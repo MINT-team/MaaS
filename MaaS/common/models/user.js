@@ -871,7 +871,8 @@ module.exports = function(user) {
                         email: userEmail,
                         role: userRole,
                         id: userId,
-                        companyName: companyName 
+                        companyName: companyName,
+                        companyId: companyId
                     };   
                    //exit condition
                     if(i == (userList.length)-1) next();
