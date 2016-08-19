@@ -1429,7 +1429,7 @@ module.exports = DeleteCompany;
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
-//var SessionStore = require('../../stores/SessionStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 var DeleteUser = React.createClass({
@@ -1437,8 +1437,10 @@ var DeleteUser = React.createClass({
 
 
     getInitialState: function getInitialState() {
+
         return {
             id: UserStore.getId(),
+            type: SessionStore.whoIam(),
             errors: []
         };
     },
@@ -1467,6 +1469,7 @@ var DeleteUser = React.createClass({
     },
 
     confirmDelete: function confirmDelete(event) {
+
         event.preventDefault();
         var email = this.props.email;
         var id = this.state.id;
@@ -1557,7 +1560,7 @@ var DeleteUser = React.createClass({
 
 module.exports = DeleteUser;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/UserStore.react.jsx":59,"react":370}],20:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370}],20:[function(require,module,exports){
 'use strict';
 
 // Name: {ExternalDatabase.react.jsx}
@@ -2475,7 +2478,10 @@ function getState() {
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
-        data: DSLStore.getDSLData(),
+        definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
+        data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
+        label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+        type: DSLStore.getDSLData() ? DSLStore.getDSLData().type : null,
         queried: true
     };
 }
@@ -2488,18 +2494,19 @@ var ExecuteDSL = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
+            definitonId: this.props.params.definitionId,
             data: null,
             queried: false
         };
     },
 
     componentWillMount: function componentWillMount() {
-        DSLStore.addChangeListener(this._onChange);
-        RequestDSLActionCreator.executeDefinition(this.props.params.definitionId);
+        DSLStore.addExecuteListener(this._onChange);
+        RequestDSLActionCreator.executeDefinition(this.state.definitonId);
     },
 
     componentWillUnmount: function componentWillUnmount() {
-        DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeExecuteListener(this._onChange);
     },
 
     _onChange: function _onChange() {
@@ -2513,48 +2520,48 @@ var ExecuteDSL = React.createClass({
         var content, errors, title;
         var data = [];
 
-        /*data = [
-            {
-                id: 0,
-                name: "ciao",
-                type: "lol"
-            },
-            {
-                id: 1,
-                name: "ciao2",
-                type: "lol"
-            },
-            {
-                id: 2,
-                name: "ciao3",
-                type: "qwe"
-            }
-        ];*/
-
+        var options = {
+            hideSizePerPage: true
+        };
+        console.log(this.state.data);
         if (this.state.data && this.state.queried) {
             title = React.createElement(
                 'p',
                 { className: 'container-title' },
-                'DSL Title'
+                this.state.label
             );
             //console.log(this.state.data);
             var columns = [];
-            if (this.state.data.length > 0) {
-                alert("data.length > 0    : " + data.length);
-                data = this.state.data;
-                columns = Object.keys(data[0]);
-            } else {
-                columns = Object.keys(this.state.data);
-                data.push(this.state.data);
-            }
+
+            if (this.state.data.length > 0) // Array of table data with at least one element
+                {
+                    data = this.state.data;
+                    columns = Object.keys(data[0]);
+                }
+            // else  // Array of table data empty
+            // {
+            //     columns = Object.keys(this.state.data);
+            //     data.push(this.state.data);
+            // }
+
             //console.log(columns);
+            /*
+            sizePerPageList : Array
+            You can change the dropdown list for size per page if you enable pagination.
+            sizePerPage : Number
+            Means the size per page you want to locate as default.
+            paginationSize : Number
+            To define the pagination bar length, default is 5.
+            hideSizePerPage : Bool
+            Enable to hide the dropdown list for size per page, default is false.
+            */
 
             content = React.createElement(
                 'div',
                 { id: 'dsl-data-table' },
                 React.createElement(
                     BootstrapTable,
-                    { ref: 'table', data: data, pagination: true, striped: true, hover: true, keyField: columns[0] },
+                    { ref: 'table', data: data, ignoreSinglePage: true, pagination: true, striped: true, hover: true, options: options, keyField: columns[0] },
                     columns.map(function (column) {
                         return React.createElement(
                             TableHeaderColumn,
@@ -2571,13 +2578,16 @@ var ExecuteDSL = React.createClass({
                     errors = React.createElement(
                         'div',
                         { id: 'errors' },
-                        this.state.errors.map(function (error) {
-                            return React.createElement(
-                                'p',
-                                { key: error, className: 'error-item' },
-                                error
-                            );
-                        })
+                        React.createElement(
+                            'p',
+                            { className: 'error-item container-title' },
+                            'Compilation errors'
+                        ),
+                        React.createElement(
+                            Link,
+                            { className: 'button container-description', to: "/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit" },
+                            'Check definiton source'
+                        )
                     );
                 } else {
                     content = React.createElement(
@@ -2975,6 +2985,7 @@ var ManageDSL = React.createClass({
             };
 
             var sidebarData = [all, dashboards, collections, documents, cells];
+
             if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
                 this.state.DSL_LIST.forEach(function (DSL, i) {
                     data[i] = {
@@ -2985,6 +2996,7 @@ var ManageDSL = React.createClass({
                     };
                 });
             }
+
             var options = {
                 noDataText: "There are no DSL definitions to display"
             };
@@ -3571,10 +3583,10 @@ var ManageDSLSource = React.createClass({
             return React.createElement(AuthorizationRequired, null);
         }
         var content,
-            errors = [];
+            log = [];
         if (this.state.errors.length > 0) {
             //id="errors"className="error-item"
-            errors = React.createElement(
+            log = React.createElement(
                 'div',
                 null,
                 this.state.errors.map(function (error, i) {
@@ -3710,7 +3722,7 @@ var ManageDSLSource = React.createClass({
             React.createElement(
                 'div',
                 { id: 'editor-errors' },
-                errors
+                log
             )
         );
 
@@ -7144,6 +7156,7 @@ var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -7201,14 +7214,58 @@ var usersManagement = React.createClass({
         var onClickDelete = function onClickDelete() {
             if (instance.state.errors.length > 0) {
                 document.getElementById(errorId).classList.toggle("dropdown-show");
-            } else {
-                document.getElementById(deleteId).classList.toggle("dropdown-show");
-            }
+            } else //////////
+                {
+                    document.getElementById(deleteId).classList.toggle("dropdown-show");
+                }
         };
 
         var confirmDelete = function confirmDelete() {
-            RequestUserActionCreator.deleteUser(row.email, row.id);
+            if (row.role != "Owner") RequestUserActionCreator.deleteUser(row.email, row.id);else {
+                RequestCompanyActionCreator.deleteCompany(row.companyId, row.email);
+            }
         };
+
+        var alertBox;
+        if (row.role != 'Owner') {
+            alertBox = React.createElement(
+                'p',
+                { className: 'dropdown-description' },
+                'Are you sure you want to delete ',
+                React.createElement(
+                    'span',
+                    { id: 'successful-email' },
+                    row.email
+                ),
+                ' ?'
+            );
+        } else {
+            alertBox = React.createElement(
+                'div',
+                null,
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    'Are you sure you want to delete ',
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        row.email
+                    ),
+                    ' ?'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    ' ',
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        ' This will delete the entire company!'
+                    )
+                )
+            );
+        }
 
         var deleteUser = React.createElement(
             'div',
@@ -7249,17 +7306,7 @@ var usersManagement = React.createClass({
                     { className: 'dropdown-title' },
                     'Delete user'
                 ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    'Are you sure you want to delete ',
-                    React.createElement(
-                        'span',
-                        { id: 'successful-email' },
-                        row.email
-                    ),
-                    ' ?'
-                ),
+                alertBox,
                 React.createElement(
                     'div',
                     { className: 'dropdown-buttons' },
@@ -7408,7 +7455,8 @@ var usersManagement = React.createClass({
                         id: user.id,
                         email: user.email,
                         role: user.role,
-                        companyName: user.companyName
+                        companyName: user.companyName,
+                        companyId: user.companyId
                     };
                 });
             }
@@ -7473,7 +7521,7 @@ var usersManagement = React.createClass({
 
 module.exports = usersManagement;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],51:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],51:[function(require,module,exports){
 "use strict";
 
 // Name: {Constants.js}
@@ -7527,7 +7575,7 @@ module.exports = {
     CHANGE_EDITOR_CONFIG_RESPONSE: null,
     CHANGE_ROLE_RESPONSE: null,
     GET_ALL_USERS: null,
-    CHANGE_USER_EMAIL: null, // add thomas 17 agosto
+    CHANGE_USER_EMAIL: null,
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
@@ -8212,7 +8260,15 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
 
         case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
             if (action.errors) {
-                _errors.push(action.errors);
+                _errors = [];
+                if (typeof action.errors == 'string') {
+                    _errors.push(action.errors);
+                } else {
+                    var messages = Object.keys(action.errors);
+                    messages.forEach(function (error) {
+                        _errors.push(action.errors[error]);
+                    });
+                }
             } else if (action.data) {
                 _errors = [];
                 _DSL_DATA = action.data;
@@ -9138,7 +9194,7 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          ResponseDSLActionCreator.responseExecuteDefinition(res.error.message, null);
+          ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
         } else {
           ResponseDSLActionCreator.responseExecuteDefinition(null, res.data);
         }
@@ -9548,7 +9604,6 @@ module.exports = {
       email: email
     }).end(function (error, res) {
       if (res) {
-        console.log("ricevo una risposta");
         res = JSON.parse(res.text);
         if (res.error) {
           // res.error.message: errori di loopback e error definito dal remote method

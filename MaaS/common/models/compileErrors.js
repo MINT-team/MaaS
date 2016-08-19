@@ -43,7 +43,7 @@ module.exports = {
     },
     
     transformationError: function(transformation) {
-        return "Transformation error: " + transformation + "is not a function";
+        return "Transformation error: " + transformation + " is not a function";
     },
     
     typeMismatchError: function(type) {

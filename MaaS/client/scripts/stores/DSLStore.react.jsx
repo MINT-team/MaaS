@@ -338,7 +338,18 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
         case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
             if(action.errors)
             {
-                _errors.push(action.errors);
+                _errors = [];
+                if(typeof action.errors == 'string')
+                {
+                    _errors.push(action.errors);
+                }
+                else
+                {
+                    var messages = Object.keys(action.errors);
+                    messages.forEach(function(error) {
+                       _errors.push(action.errors[error]);
+                    });
+                }
             }
             else if(action.data)
             {

@@ -303,7 +303,7 @@ module.exports = function(DSL) {
                             return cb(null, err);
                         }
                         conn.disconnect();
-                        console.log('> Compilation processed successfully');
+                        console.log('> DSL compilation processed successfully');
                         return cb(null, null);
                     };
                     eval(expanded);     //  DSL.compileCell({...}, callback)
@@ -374,16 +374,33 @@ module.exports = function(DSL) {
                         if(err)
                         {
                             conn.disconnect();
+                            console.log("> DSL execution stopped: compilation errors");
                             return cb(null, err, null);
                         }
-                        conn.disconnect();
-                        switch(DSLInstance.type)
+                        else
                         {
-                            case "Cell":
-                                DSL.executeCell(identity, body, conn, function(){
+                            switch(DSLInstance.type)
+                            {
+                                case "Cell":
+                                    DSL.executeCell(identity, body, conn, function(error, data){
+                                        conn.disconnect();
+                                        if(error)
+                                        {
+                                            console.log("> DSL execution error:", error);
+                                            return cb(null, error, null);
+                                        }
+                                        else
+                                        {
+                                            console.log("> DSL execution processed successfully");
+                                            if(!data.label)
+                                                data.label = DSLInstance.name;
+                                            data.DefinitionType = DSLInstance.type;
+                                            return cb(null, null, data);
+                                        }
+                                    });
+                                    break;
                                     
-                                });
-                                break;
+                            }
                         }
                     };
                     eval(expanded); // DSL.compileCell({...})
@@ -408,7 +425,6 @@ module.exports = function(DSL) {
     );
     
     DSL.compile = function(dsl, cb) {
-        console.log('compile');
         var intepreterFile = __dirname + "/macro.sjs";
         var expanded;
         fs.readFile(intepreterFile, function(err, macro) {
@@ -477,14 +493,6 @@ module.exports = function(DSL) {
     );
     
     DSL.compileCell = function(identity, body, cb) {
-        /*
-        Compilation errors:     - missing required attributes
-                                - wrong type keyword
-                                - wrong order keyword
-        
-        Default values:         - type -> string
-                                - order -> asc
-                                
         
         /*
         Two types of cell:
@@ -542,18 +550,15 @@ module.exports = function(DSL) {
                                                     return keyword value errors
                                                 else // all keyword values are ok
                                                     return identity and body objects
-                                            
-                                            
                                     else // cell without value
                                     
         */
-        
     
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
             AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
                 AttributesReader.readRequiredAttributes(body, ['value'], function(missingRequiredBodyAttributesError) {
-                    AttributesReader.readRequiredAttributes(identity, ['type'], function(missingRequiredIdentityAttributesError) {
+                    AttributesReader.readRequiredAttributes(identity, ['type', 'columnLabel'], function(missingRequiredIdentityAttributesError) {
                         AttributesReader.checkCellKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
                             var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
                             if(Object.getOwnPropertyNames(error).length !== 0)
@@ -592,7 +597,7 @@ module.exports = function(DSL) {
                         }
                         else
                         {
-                            return cb(null, identity, null);
+                            return cb(null, identity, body);
                         }
                     });
                 });
@@ -618,31 +623,132 @@ module.exports = function(DSL) {
         
     );
     
-    
     /*
-    Cell (table: 'users', name: 'level', query: {'email': 'admin@example.com'})
-    
-    */
+            
+            2) Cell without value:
+            Identity:
+                name | required
+                table | required
+                label | optional
+                transformation | optional
+                columnLabel | optional
+                type | required
+                sortby | optional
+                order | optional | "asc"
+                query | optional
+            Body:
+                empty
+            
+            */
     
     DSL.executeCell = function(identity, body, conn, cb) {
-        var errors = DSL.compileCell(identity, body);
-        if (!errors)
+        var data = {};
+        if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
         {
             var collection = conn.model(identity.table, DocumentSchema);
-            var query;
+            var mongoose_query = collection.find({}, { _id: 0});
+            mongoose_query.setOptions({lean: true});
+            mongoose_query.select(identity.name);
+            if(identity.query)
+            {
+                mongoose_query.where(identity.query);
+            }
+            
+            if(identity.order)
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                }
+                else
+                {
+                    mongoose_query.sort({[identity.name]: identity.order == "asc" ? 1 : -1});
+                }
+            }
+            else
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            mongoose_query.limit(1);
+            mongoose_query.exec(function(err, result) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                console.log("> Cell execution result: ", result);
+                var keywordsValue = {
+                  type: identity.type,
+                  value: result[0][identity.name]
+                };
+                
+                AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                    if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                    {
+                        return cb(keywordValueError, null);
+                    }
+                    else
+                    {
+                        
+                        if (identity.columnLabel)
+                        {
+                            data.result = [
+                                {
+                                   [identity.columnLabel]: result[0][identity.name]
+                                }
+                            ];
+                        }
+                        else
+                        {
+                            data.result = result;
+                        }
+                        console.log("data:", data);
+                        return cb(null, data);
+                    }
+                });
+            });
+            
+            
+            
             // if(identity.query)
             //     query = identity.query;
             // else if(identity.sortby)
             //     query = {identity.query, sortby: identity.sortby}
-            var mongoose_query = collection.findOne(query, identity.name, function(err, result) {
-                if (err)
+            /*
+            {
+                tableData: [
+                    {
+                        colonna: valore
+                    },
+                    {
+                        
+                    }
+                ],
+                label: valore
+            }
+            */
+        }
+        else    // cell with value
+        {
+            var columnLabel = identity.columnLabel;
+            var value = body.value;
+            data.result = [
                 {
-                    console.log(err);
-                    return cb(err);
+                   [columnLabel]: value
                 }
-                console.log("> Cell result: ", result);
-                return cb(null, result);
-            });
+            ];
+            if(identity.label)
+            {
+                data.label = identity.label;
+            }
+            if(identity.transformation)
+            {
+                data.transformation = identity.transformation;
+            }
+            data.type = identity.type;
+            return cb(null, data);
         }
     };
     

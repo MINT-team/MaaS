@@ -1318,14 +1318,21 @@ input {
     text-align: center;
     box-shadow: black 1px 1px 4px;
     overflow: auto;
+    font-family: 'Lucida Console';
+    text-align: left;
+}
+
+#editor-errors p, span {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
 }
 
 #editor-errors p {
-    font-family: 'Lucida Console';
-    text-align: left;
     color: red;
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
+}
+
+#editor-errors span {
+    color: #333;
 }
 
 @media (max-width: 1400px) {

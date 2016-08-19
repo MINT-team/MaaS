@@ -249,7 +249,7 @@ module.exports = {
             res=JSON.parse(res.text);
             if(res.error) 
             {
-              ResponseDSLActionCreator.responseExecuteDefinition(res.error.message, null);
+              ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
             }
             else
             {

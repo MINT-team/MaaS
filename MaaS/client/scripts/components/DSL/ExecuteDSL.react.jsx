@@ -21,7 +21,10 @@ function getState() {
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            data: DSLStore.getDSLData(),
+            definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
+            data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
+            label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+            type: DSLStore.getDSLData() ? DSLStore.getDSLData().type : null,
             queried: true
     };
 }
@@ -32,18 +35,19 @@ var ExecuteDSL = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
+            definitonId: this.props.params.definitionId,
             data: null,
             queried: false
         };
     },
     
     componentWillMount: function() {
-        DSLStore.addChangeListener(this._onChange);
-        RequestDSLActionCreator.executeDefinition(this.props.params.definitionId);
+        DSLStore.addExecuteListener(this._onChange);
+        RequestDSLActionCreator.executeDefinition(this.state.definitonId);
     },
     
     componentWillUnmount: function() {
-        DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeExecuteListener(this._onChange);
     },
     
     _onChange: function() {
@@ -60,47 +64,43 @@ var ExecuteDSL = React.createClass({
         var content, errors, title;
         var data = [];
         
-        /*data = [
-            {
-                id: 0,
-                name: "ciao",
-                type: "lol"
-            },
-            {
-                id: 1,
-                name: "ciao2",
-                type: "lol"
-            },
-            {
-                id: 2,
-                name: "ciao3",
-                type: "qwe"
-            }
-        ];*/
-        
-        
+        var options = {
+            hideSizePerPage : true
+        };
+        console.log(this.state.data);
         if(this.state.data && this.state.queried)
         {
-            title = (<p className="container-title">DSL Title</p>);
+            title = (<p className="container-title">{this.state.label}</p>);
             //console.log(this.state.data);
             var columns = [];
-            if(this.state.data.length > 0)
+            
+            if(this.state.data.length > 0)  // Array of table data with at least one element
             {
-                alert("data.length > 0    : "+data.length);
                 data = this.state.data;
                 columns = Object.keys(data[0]);
             }
-            else
-            {
-                columns = Object.keys(this.state.data);
-                data.push(this.state.data);
-            }
+            // else  // Array of table data empty
+            // {
+            //     columns = Object.keys(this.state.data);
+            //     data.push(this.state.data);
+            // }
+            
             //console.log(columns);
+            /*
+            sizePerPageList : Array
+            You can change the dropdown list for size per page if you enable pagination.
+            sizePerPage : Number
+            Means the size per page you want to locate as default.
+            paginationSize : Number
+            To define the pagination bar length, default is 5.
+            hideSizePerPage : Bool
+            Enable to hide the dropdown list for size per page, default is false.
+            */
     
             content = (
                 
                 <div id="dsl-data-table">
-                    <BootstrapTable ref="table" data={data} pagination={true} striped={true} hover={true} keyField={columns[0]}>
+                    <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
                         {columns.map((column) => 
                             <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
                         )}
@@ -115,7 +115,12 @@ var ExecuteDSL = React.createClass({
             {
                 if(this.state.errors.length > 0) 
                 {
-                    errors = ( <div id="errors">{this.state.errors.map((error) => <p key={error} className="error-item">{error}</p>)}</div> );
+                    errors = (
+                                <div id="errors">
+                                    <p className="error-item container-title">Compilation errors</p>
+                                    <Link className="button container-description" to={"/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit"}>Check definiton source</Link>
+                                    
+                                </div> );
                 }
                 else
                 {

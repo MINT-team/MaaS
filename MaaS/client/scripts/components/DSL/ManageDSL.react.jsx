@@ -246,6 +246,7 @@ var ManageDSL = React.createClass({
             };
             
             var sidebarData = [all, dashboards, collections, documents, cells];
+            
             if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
             {
                 this.state.DSL_LIST.forEach(function(DSL, i) {
@@ -257,6 +258,7 @@ var ManageDSL = React.createClass({
                     };
                 });
             }
+            
             var options = {
                 noDataText: "There are no DSL definitions to display"
             };

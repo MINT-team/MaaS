@@ -230,10 +230,10 @@ var ManageDSLSource = React.createClass({
                 <AuthorizationRequired />
             );
         }
-        var content, errors = [];
+        var content, log = [];
         if(this.state.errors.length > 0) 
         {//id="errors"className="error-item"
-            errors = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
+            log = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
         }
         
         content = (
@@ -279,7 +279,7 @@ var ManageDSLSource = React.createClass({
                     <Editor />
                 </div>
                 <div id="editor-errors">
-                    {errors}
+                    {log}
                 </div>
             </div>
         );
