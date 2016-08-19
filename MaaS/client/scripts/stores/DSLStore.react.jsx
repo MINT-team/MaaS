@@ -339,6 +339,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             if(action.errors)
             {
                 _errors = [];
+                _DSL_DATA = null;
                 if(typeof action.errors == 'string')
                 {
                     _errors.push(action.errors);

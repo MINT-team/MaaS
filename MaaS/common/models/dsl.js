@@ -306,7 +306,16 @@ module.exports = function(DSL) {
                         console.log('> DSL compilation processed successfully');
                         return cb(null, null);
                     };
-                    eval(expanded);     //  DSL.compileCell({...}, callback)
+                    try
+                    {
+                        eval(expanded); // DSL.compileCell({...})
+                    }
+                    catch(err)
+                    {
+                        conn.disconnect();
+                        console.log("> DSL compilation error:", err);
+                        return cb(null, err.toString());
+                    }
                 });
             });
         });
@@ -403,7 +412,16 @@ module.exports = function(DSL) {
                             }
                         }
                     };
-                    eval(expanded); // DSL.compileCell({...})
+                    try
+                    {
+                        eval(expanded); // DSL.compileCell({...})
+                    }
+                    catch(err)
+                    {
+                        conn.disconnect();
+                        console.log("> DSL execution stopped:", err);
+                        return cb(null, err.toString(), null);
+                    }
                 });
             });
         });
@@ -460,6 +478,10 @@ module.exports = function(DSL) {
                                 message = "Unexpected syntax: \"[\". Wrong use of parenthesis";
                             if(err.toString().match(/List \[ \(/g))
                                 message = "Unexpected syntax: \"(\". Wrong use of parenthesis";
+                        }
+                        if(err.toString().match(/expecting a : punctuator/g))
+                        {
+                            message = "Syntax error: missing \":\"";
                         }
                     }
                     else
@@ -627,14 +649,14 @@ module.exports = function(DSL) {
             
             2) Cell without value:
             Identity:
-                name | required
-                table | required
-                label | optional
+                name | required             ok
+                table | required             ok
+                label | optional            ok
                 transformation | optional
-                columnLabel | optional
-                type | required
-                sortby | optional
-                order | optional | "asc"
+                columnLabel | optional     ok
+                type | required             ok
+                sortby | optional           ok
+                order | optional | "asc"     ok
                 query | optional
             Body:
                 empty
@@ -646,14 +668,18 @@ module.exports = function(DSL) {
         if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
         {
             var collection = conn.model(identity.table, DocumentSchema);
-            var mongoose_query = collection.find({}, { _id: 0});
-            mongoose_query.setOptions({lean: true});
-            mongoose_query.select(identity.name);
+            var mongoose_query;
             if(identity.query)
             {
-                mongoose_query.where(identity.query);
+                console.log(identity.query);
+                mongoose_query = collection.find(identity.query, { _id: 0});
             }
-            
+            else
+            {
+                mongoose_query = collection.find({}, { _id: 0});
+            }
+            mongoose_query.setOptions({lean: true});
+            mongoose_query.select(identity.name);
             if(identity.order)
             {
                 if(identity.sortby)
@@ -678,77 +704,91 @@ module.exports = function(DSL) {
                 {
                     return cb(err, null);
                 }
-                console.log("> Cell execution result: ", result);
-                var keywordsValue = {
-                  type: identity.type,
-                  value: result[0][identity.name]
-                };
-                
-                AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                if(result.length > 0)
+                {
+                    var keywordsValue = {
+                      type: identity.type,
+                      value: result[0][identity.name]
+                    };
+                    
+                    AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                        if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                        {
+                            return cb(keywordValueError, null);
+                        }
+                        else
+                        {
+                            if(identity.label)
+                            {
+                                data.label = identity.label;
+                            }
+                            if (identity.columnLabel)
+                            {
+                                data.result = [
+                                    {
+                                       [identity.columnLabel]: result[0][identity.name]
+                                    }
+                                ];
+                            }
+                            else
+                            {
+                                data.result = result;
+                            }
+                            return cb(null, data);
+                        }
+                    });
+                }
+                else
+                {
+                    return cb(null, data);
+                }
+            });
+        }
+        else    // cell with value
+        {
+            var columnLabel = identity.columnLabel;
+            var value = body.value;
+            if(identity.label)
+            {
+                data.label = identity.label;
+            }
+            data.type = identity.type;
+            if(identity.transformation)
+            {
+                var transformedValue;
+                try
+                {
+                    transformedValue = identity.transformation(value);
+                }
+                catch(err)
+                {
+                    return cb(err, null);
+                }
+                AttributesReader.checkCellKeywordValue({ type: identity.type, value: transformedValue }, function(keywordValueError) {
                     if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
                     {
                         return cb(keywordValueError, null);
                     }
                     else
                     {
-                        
-                        if (identity.columnLabel)
-                        {
-                            data.result = [
-                                {
-                                   [identity.columnLabel]: result[0][identity.name]
-                                }
-                            ];
-                        }
-                        else
-                        {
-                            data.result = result;
-                        }
-                        console.log("data:", data);
+                        data.result = [
+                            {
+                               [columnLabel]: transformedValue
+                            }
+                        ];
                         return cb(null, data);
                     }
                 });
-            });
-            
-            
-            
-            // if(identity.query)
-            //     query = identity.query;
-            // else if(identity.sortby)
-            //     query = {identity.query, sortby: identity.sortby}
-            /*
+            }
+            else
             {
-                tableData: [
+                data.result = [
                     {
-                        colonna: valore
-                    },
-                    {
-                        
+                       [columnLabel]: value
                     }
-                ],
-                label: valore
+                ];
+                return cb(null, data);
             }
-            */
-        }
-        else    // cell with value
-        {
-            var columnLabel = identity.columnLabel;
-            var value = body.value;
-            data.result = [
-                {
-                   [columnLabel]: value
-                }
-            ];
-            if(identity.label)
-            {
-                data.label = identity.label;
-            }
-            if(identity.transformation)
-            {
-                data.transformation = identity.transformation;
-            }
-            data.type = identity.type;
-            return cb(null, data);
         }
     };
     

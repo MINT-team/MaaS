@@ -12,7 +12,12 @@ syntax Cell = function (ctx) {
     for(let item of params)
     {
         params.next();      // salta ':'
-        identity = identity.concat(#`${item}: ${params.next('expr').value}`);
+        if(item.val() == 'transformation')
+        {
+            identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
+        }
+        else
+            identity = identity.concat(#`${item}: ${params.next().value}`);
         params.next(); // salta ','
     }
     

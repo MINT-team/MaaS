@@ -67,10 +67,10 @@ var ExecuteDSL = React.createClass({
         var options = {
             hideSizePerPage : true
         };
-        console.log(this.state.data);
+        if(this.state.label)
+            title = (<p className="container-title">{this.state.label}</p>);
         if(this.state.data && this.state.queried)
         {
-            title = (<p className="container-title">{this.state.label}</p>);
             //console.log(this.state.data);
             var columns = [];
             
@@ -102,7 +102,7 @@ var ExecuteDSL = React.createClass({
                 <div id="dsl-data-table">
                     <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
                         {columns.map((column) => 
-                            <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                            <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
                         )}
                     </BootstrapTable>
                 </div>
@@ -116,11 +116,15 @@ var ExecuteDSL = React.createClass({
                 if(this.state.errors.length > 0) 
                 {
                     errors = (
-                                <div id="errors">
-                                    <p className="error-item container-title">Compilation errors</p>
-                                    <Link className="button container-description" to={"/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit"}>Check definiton source</Link>
-                                    
-                                </div> );
+                                <div>
+                                    <p className="error-item container-title">Error</p>
+                                    <p className="container-description">There are some errors in your DSL definiton:</p>
+                                    <div id="errors">
+                                        {this.state.errors.map((error) => <p>{error}</p>)}
+                                    </div>
+                                    <Link className="button " to={"/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit"}>Check definition source</Link>
+                                </div>
+                            );
                 }
                 else
                 {

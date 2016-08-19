@@ -2523,13 +2523,12 @@ var ExecuteDSL = React.createClass({
         var options = {
             hideSizePerPage: true
         };
-        console.log(this.state.data);
+        if (this.state.label) title = React.createElement(
+            'p',
+            { className: 'container-title' },
+            this.state.label
+        );
         if (this.state.data && this.state.queried) {
-            title = React.createElement(
-                'p',
-                { className: 'container-title' },
-                this.state.label
-            );
             //console.log(this.state.data);
             var columns = [];
 
@@ -2566,7 +2565,7 @@ var ExecuteDSL = React.createClass({
                         return React.createElement(
                             TableHeaderColumn,
                             { key: column, dataField: column, dataSort: true },
-                            column.charAt(0).toUpperCase() + column.slice(1)
+                            column
                         );
                     } //column.charAt(0).toUpperCase() + column.slice(1)
                     )
@@ -2577,16 +2576,32 @@ var ExecuteDSL = React.createClass({
                 if (this.state.errors.length > 0) {
                     errors = React.createElement(
                         'div',
-                        { id: 'errors' },
+                        null,
                         React.createElement(
                             'p',
                             { className: 'error-item container-title' },
-                            'Compilation errors'
+                            'Error'
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'container-description' },
+                            'There are some errors in your DSL definiton:'
+                        ),
+                        React.createElement(
+                            'div',
+                            { id: 'errors' },
+                            this.state.errors.map(function (error) {
+                                return React.createElement(
+                                    'p',
+                                    null,
+                                    error
+                                );
+                            })
                         ),
                         React.createElement(
                             Link,
-                            { className: 'button container-description', to: "/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit" },
-                            'Check definiton source'
+                            { className: 'button ', to: "/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit" },
+                            'Check definition source'
                         )
                     );
                 } else {
@@ -8261,6 +8276,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
         case ActionTypes.EXECUTE_DEFINITION_RESPONSE:
             if (action.errors) {
                 _errors = [];
+                _DSL_DATA = null;
                 if (typeof action.errors == 'string') {
                     _errors.push(action.errors);
                 } else {
