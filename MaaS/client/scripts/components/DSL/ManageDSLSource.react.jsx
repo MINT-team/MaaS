@@ -139,6 +139,7 @@ var ManageDSLSource = React.createClass({
         {
             this.refs.build.classList.toggle("loader-small");
             this.setState({building: false});
+            this.scrollToBottom();
         }
     },
     
@@ -203,8 +204,6 @@ var ManageDSLSource = React.createClass({
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
         }
-        else
-            alert("aspetta");
     },
     
     onRun: function() {
@@ -217,6 +216,11 @@ var ManageDSLSource = React.createClass({
 	
 	emptyErrors: function() {
 	    this.setState({ errors: [] });
+	},
+	
+	scrollToBottom: function() {
+	    var errorConsole = document.getElementById("editor-errors");
+        errorConsole.scrollTop = errorConsole.scrollHeight;  
 	},
     
     render: function() {

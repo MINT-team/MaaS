@@ -263,7 +263,6 @@ module.exports = function(DSL) {
     );
     
     DSL.compileDefinition = function(id, cb) {
-        console.log('compileDefinition');
         var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
@@ -304,6 +303,7 @@ module.exports = function(DSL) {
                             return cb(null, err);
                         }
                         conn.disconnect();
+                        console.log('> Compilation processed successfully');
                         return cb(null, null);
                     };
                     eval(expanded);     //  DSL.compileCell({...}, callback)
@@ -430,9 +430,20 @@ module.exports = function(DSL) {
                     var message;
                     if(!err.description)
                     {
+                        //Default message
+                        message = "DSL compilation error";
                         if(err.toString().match(/replacement values for syntax template must not be null or undefined/g))
                         {
-                            message = "Syntax error. For example some commas are missing";
+                            message = "Syntax error. Unknown keyword or missing comma";
+                        }
+                        if(err.toString().match(/Unexpected syntax/g))
+                        {
+                            if(err.toString().match(/List \[ {/g))
+                                message = "Unexpected syntax: \"{\". Wrong use of parenthesis";
+                            if(err.toString().match(/List \[ \[/g))
+                                message = "Unexpected syntax: \"[\". Wrong use of parenthesis";
+                            if(err.toString().match(/List \[ \(/g))
+                                message = "Unexpected syntax: \"(\". Wrong use of parenthesis";
                         }
                     }
                     else
@@ -475,41 +486,6 @@ module.exports = function(DSL) {
                                 - order -> asc
                                 
         
-        Structure:              read identity optional attributes
-                                read identity required attributes
-                                if !identity required attributes
-                                    if !body
-                                        return only missing identity attributes error
-                                    else
-                                        read body required attributes
-                                        if !body required attributes
-                                            return both identity and body missing attributes error
-                                        else
-                                            return only missing identity attributes error
-                                else
-                                    check type keyword and store error if exist
-                                    merge identity required and optional attributes
-                                    if !body
-                                        return only identity object
-                                    else
-                                        read body required attributes
-                                        if !body required attributes
-                                            if wrong type keyword
-                                                return body missing attributes error and wrong type error
-                                            else
-                                                return body missing attributes error
-                                        else
-                                            if wrong type keyword
-                                                return wrong type error
-                                            else
-                                                return identity and body objects
-                                    if wrong type keyword
-                                        return wrong type error
-                                    else
-                                        return identity object
-        */
-        
-        
         /*
         Two types of cell:
         
@@ -539,7 +515,9 @@ module.exports = function(DSL) {
         */
         
         /*
-        Alternative structure:      if body // cell with value
+        Alternative structure:      
+                                    if body // cell with value
+                                        check supported attributes['type', 'label', 'columnLabel', 'transformation', 'value']
                                         read body required attributes ['value']
                                         read identity optional attributes ['label','transformation','columnLabel']
                                         read identity required attribute ['type']
@@ -568,116 +546,58 @@ module.exports = function(DSL) {
                                             
                                     else // cell without value
                                     
-                                        
-        
         */
         
-        
-        console.log('compileCell');
-        AttributesReader.readOptionalAttributes(identity, ['sortby', 'order', 'label', 'query', 'transformation', 'columnLabel'], function(identityOptionalAttributes) {
-            AttributesReader.readRequiredAttributes(identity, ['name', 'table'], function(identityMissing, identityRequiredAttributes) {
-                if(identityMissing)
-                {
-                    console.log("--> identityMissing: ",identityMissing);
-                    if(Object.getOwnPropertyNames(body).length !== 0)
-                    {
-                        console.log("oggetto pieno");
-                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
-                            if(bodyMissing)
+    
+        if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
+        {
+            AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
+                AttributesReader.readRequiredAttributes(body, ['value'], function(missingRequiredBodyAttributesError) {
+                    AttributesReader.readRequiredAttributes(identity, ['type'], function(missingRequiredIdentityAttributesError) {
+                        AttributesReader.checkCellKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
+                            var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
+                            if(Object.getOwnPropertyNames(error).length !== 0)
                             {
-                                var missing = [];
-                                identityMissing.forEach(function(attr, i) {
-                                    missing.push(attr);
-                                });
-                                bodyMissing.forEach(function(attr, i) {
-                                    missing.push(attr);
-                                });
-                                CompileErrors.missingRequiredAttributes(missing, function(error) {
-                                    console.log("> DSL compilation error:", error);
-                                    return cb(error, null, null); // return errors of both identity and body
-                                });
+                                return cb(error, null, null);
                             }
                             else
                             {
-                                CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
-                                    console.log("> DSL compilation error:", identityError);
-                                    return cb(identityError, null, null); // return only errors of identity
-                                });
+                                return cb(null, identity, body);
                             }
                         });
-                    }
-                    else
-                    {
-                        console.log("oggetto vuoto");
-                        CompileErrors.missingRequiredAttributes(identityMissing, function(identityError) {
-                            console.log("> DSL compilation error:", identityError);
-                            return cb(identityError, null, null); // return only errors of identity
-                        });
-                    }
-                }
-                else
-                {
-                    var typeError;
-                    var type = identityRequiredAttributes.type;
-                    if (type != 'string' || type != 'image' || type != 'number' || type != 'link' || type != 'date')
-                    {
-                        CompileErrors.wrongTypeError(type, function(identityError) {
-                            console.log("> DSL compilation error:", identityError);
-                            typeError = identityError;
-                        });
-                    }
-                    var identityAttributes = Object.assign(identityRequiredAttributes, identityOptionalAttributes);
-                    console.log("identityAttributes: ", identityAttributes);
-                    
-                    if(Object.getOwnPropertyNames(body).length !== 0)
-                    {
-                        AttributesReader.readRequiredAttributes(body, ['value'], function(bodyMissing, bodyRequiredAttributes) {
-                            if(bodyMissing)
-                            {
-                                CompileErrors.missingRequiredAttributes(bodyMissing, function(bodyError) {
-                                    console.log("> DSL compilation error:", bodyError);
-                                    if (typeError)
-                                    {
-                                        var error  = Object.assign(typeError, bodyError);
-                                        return cb(error, null, null); // return body and type errors
-                                    }
-                                    return cb(bodyError, null, null); // return only body errors
-                                });
-                            }
-                            else
-                            {
-                                if (typeError)
-                                {
-                                    return cb(typeError, null, null);
-                                }
-                                console.log("bodyAttributes: ", bodyRequiredAttributes);
-                                return cb(null, identityAttributes, bodyRequiredAttributes); // return both identity and body attributes
-                            }
-                        });
-                    }
-                    else
-                    {
-                        var orderError;
-                        if (identityOptionalAttributes.order != 'asc' || identityOptionalAttributes != 'desc')
+                    });
+                });
+            });
+        }
+        else    // Cell without a value
+        {
+            AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['name', 'table', 'label', 'columnLabel', 'transformation', 'type', 'sortby', 'order', 'query'], function(unsupportedAttributesError) {
+                AttributesReader.readRequiredAttributes(identity, ['type', 'name', 'table'], function(missingRequiredIdentityAttributesError) {
+                    var keywordsValue = {
+                        type: identity.type, 
+                        transformation: identity.transformation, 
+                        order: identity.order, 
+                        query: identity.query,
+                        name: identity.name,
+                        columnLabel: identity.columnLabel,
+                        table: identity.table,
+                        sortby: identity.sortby,
+                        label: identity.label
+                    };
+                    AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                        var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
+                        if(Object.getOwnPropertyNames(error).length !== 0)
                         {
-                            CompileErrors.orderError(identityOptionalAttributes.order, function(identityError) {
-                                console.log("> DSL compilation error:", identityError);
-                                orderError = identityError;
-                                
-                            });
-                        }
-                        if (typeError || orderError)
-                        {
-                            var error = Object.assign(orderError, typeError);
-                            //return cb(typeError, null, null);
                             return cb(error, null, null);
                         }
-                        
-                        return cb(null, identityAttributes, null); // return only identity attributes
-                    }
-                }
+                        else
+                        {
+                            return cb(null, identity, null);
+                        }
+                    });
+                });
             });
-        });
+        }
     };
     
     DSL.remoteMethod(
@@ -709,7 +629,12 @@ module.exports = function(DSL) {
         if (!errors)
         {
             var collection = conn.model(identity.table, DocumentSchema);
-            var query = collection.findOne(identity.query, identity.name, function(err, result) {
+            var query;
+            // if(identity.query)
+            //     query = identity.query;
+            // else if(identity.sortby)
+            //     query = {identity.query, sortby: identity.sortby}
+            var mongoose_query = collection.findOne(query, identity.name, function(err, result) {
                 if (err)
                 {
                     console.log(err);
