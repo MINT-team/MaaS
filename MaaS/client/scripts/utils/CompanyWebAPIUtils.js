@@ -64,7 +64,7 @@ module.exports = {
             // res.error.message: errori di loopback e error definito dal remote method
             ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
           } else {
-            ResponseCompanyActionCreator.responseDeleteCompany(res.name, null);
+            ResponseCompanyActionCreator.responseDeleteCompany(res.id, null);
           }
         } 
       });

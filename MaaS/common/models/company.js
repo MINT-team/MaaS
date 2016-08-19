@@ -12,10 +12,8 @@ var mongoose = require('mongoose');
 module.exports = function(Company) {
     
     // Elimino l'azienda e i relativi utenti
-    Company.deleteCompany = function(id, email, cb) {       ///database
-        console.log("> delete company");
+    Company.deleteCompany = function(id, email, cb) {      
         Company.findById(id, function(err, company) {
-            console.log(">if findID");
             if(err || !company)
                 return cb(err);
             var user = app.models.user;
@@ -23,7 +21,6 @@ module.exports = function(Company) {
                 if(err || !userInstance)
                     return cb(err);
                 if(userInstance.role != "Owner" && company.owner == userInstance) {
-                    console.log(">non sono un Admin");
                     var error = {
                         message: 'You haven\'t the rights to delete this company'
                     };
@@ -33,20 +30,28 @@ module.exports = function(Company) {
                 userInstance.dsl.destroyAll( function(err) {
                     if (err)
                     {
-                        console.log(err);
+                        console.log("> error deleting dsl: ",err);
                         return cb(err);
                     }
-                    console.log("tutto ok");
-                    
                 });
-                
+           
+               //Remove databases of the company
+                company.externalDatabases.destroyAll(function(err) {
+                    if (err)
+                    {
+                        console.log("> error deleting databases: ",err);
+                        return cb(err);
+                    }
+                    console.log("> databases deleted");
+                });
+          
                 //Remove Users of the company
                 company.users.destroyAll(function(err) {
                     if(err)
                         return cb(err);
                     Company.deleteById(company.id, function(err) {
                         if(err) console.log("> error deleting company:", company.name);
-                        console.log("> company deleted:", company.name);
+                        console.log("> company deleted:", company.id);
                         return cb(null, null, company.id);
                     });
                 });
@@ -54,6 +59,22 @@ module.exports = function(Company) {
         });
         
     };
+    
+     Company.remoteMethod(
+        'deleteCompany',
+        {
+            description: 'Delete Company by passing id to delete and email of the user making the request.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Company id to delete'},
+                { arg: 'email', type: 'string', required: true, description: 'User email making request'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'id', type: 'String'}
+            ],
+            http: { verb: 'delete', path: '/deleteCompany/:id' }
+        }
+    );
                 
                 /*
                
@@ -106,21 +127,7 @@ module.exports = function(Company) {
                 
                 
 
-    Company.remoteMethod(
-        'deleteCompany',
-        {
-            description: 'Delete Company by passing id to delete and email of the user making the request.',
-            accepts: [
-                { arg: 'id', type: 'string', required: true, description: 'Company id to delete'},
-                { arg: 'email', type: 'string', required: true, description: 'User email making request'}
-            ],
-            returns: [
-                {arg: 'error', type: 'Object'},
-                {arg: 'name', type: 'String'}
-            ],
-            http: { verb: 'delete', path: '/deleteCompany/:id' }
-        }
-    );
+   
     
     //checks if the connection string points to a real mongodb database
     Company.beforeRemote('__create__externalDatabases', function(context, extDbInstance, next){

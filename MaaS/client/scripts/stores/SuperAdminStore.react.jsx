@@ -15,7 +15,7 @@ var SessionStore = require('./SessionStore.react.jsx');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
-
+var LOGIN_SA_EVENT = 'login';
 
 var _superAdmin = {
     id: SessionStore.getUserId(),
@@ -30,6 +30,10 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     emitChange: function() {
         this.emit(CHANGE_EVENT);
     },
+    
+    emitLoginSA: function() {
+        this.emit(LOGIN_SA_EVENT);
+    },
 
     addChangeListener: function(callback) {
         this.on(CHANGE_EVENT, callback);
@@ -38,17 +42,25 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
+    
+    addLoginSAListener: function(callback) {
+        this.on(LOGIN_SA_EVENT, callback);
+    },
+    
+    removeLoginSAListener: function(callback) {
+        this.removeListener(LOGIN_SA_EVENT, callback);
+    },
 
     getId: function() {
         return _superAdmin.id;
    },
 
     getEmail: function() {
-        return _superAdmin.email;
-  },
+      return _superAdmin.email;
+   },
  
-  getErrors: function() {
-    return _errors;
+    getErrors: function() {
+      return _errors;
   }
   
 });
@@ -69,6 +81,7 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function(payload) {
               _superAdmin.id = action.json.userId;
             }
             SuperAdminStore.emitChange();
+            SuperAdminStore.emitLoginSA();
             break;
 
         case ActionTypes.LOGOUT:

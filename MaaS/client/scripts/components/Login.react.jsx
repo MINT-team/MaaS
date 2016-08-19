@@ -10,6 +10,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
+var SuperAdminStore = require('../stores/SuperAdminStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
@@ -37,28 +38,38 @@ var Login = React.createClass({
     componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
       UserStore.addUserLoadListener(this._onUserLoad);
+      SuperAdminStore.addLoginSAListener(this._onUserLoad);
+
     },
 
     componentWillUnmount: function() {
       SessionStore.removeChangeListener(this._onChange);
       UserStore.removeUserLoadListener(this._onUserLoad);
+      SuperAdminStore.removeLoginSAListener(this._onUserLoad);
     },
     
     handleRedirect: function() {
+      
       if(this.state.isLogged)
       {
-        const { router } = this.context;
-        if (this.state.activeDashboard == "default")
+        if(this.state.userType == "commonUser")
         {
-          router.push('/manageDSL');   // redirect to Dashboard page
-        }
-        else
+          const { router } = this.context;
+          if (this.state.activeDashboard == "default")
+          {
+            router.push('/manageDSL');   // redirect to Dashboard page
+          }
+          else
+          {
+            //Redirect to active dashboard
+          }
+          //router.push('/');
+        }else //redirect for Super Admin
         {
-          //Redirect to active dashboard
+          const { router } = this.context;
+          router.push('/dashboardSuperAdmin');   // redirect to Super Admin Dashboard page
         }
-        
-        //router.push('/');
-      }
+    }
     },
 
     _onChange: function() {

@@ -127,7 +127,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = [];
                 var i = 0;
                 //removal of the deleted company from the list of the companies
-                while(_companies[i].id != action.name && i < _companies.length )
+                console.log(action);
+                while(_companies[i].id != action.id && i < _companies.length )
                     i++;
                 _companies.splice(i, 1);
             }

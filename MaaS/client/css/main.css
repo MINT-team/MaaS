@@ -1719,7 +1719,7 @@ input {
 }
 
 
-/*------------------------------------------------ DASHBOARD SUPERADMIN ---------------------------------------------------------*/
+/*------------------------------------------------ SUPERADMIN ---------------------------------------------------------*/
 
 .dashCont{
     width: 100%;
@@ -1771,3 +1771,80 @@ input {
     color: lightgreen;   
   }
 
+/*------------------------------------------------ SUPERADMIN ---------------------------------------------------------*/
+
+.dashCont{
+    width: 100%;
+    text-align:center;
+}
+
+.dashElement {
+    display: inline-block;
+    vertical-align: middle;
+    width: 30%;
+    height: 15em;
+    margin: auto;
+    margin-left:1em;
+    -moz-border-radius: 5px;
+    border-radius: 10px;
+    border: 2px solid lightgrey;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-align: center;
+	font-size:16px;
+	font-weight:700;
+	text-shadow: black 1px 1px 2px;
+    text-decoration: none;
+	color: white;
+	background-color: #333;
+	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+}
+.dashElement:hover{
+    border: 2px solid lightgreen;
+}
+
+.material-icons-dashboard{
+      font-family: 'Material Icons';
+      clear:both;
+      width:100%;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 10em;  /* Preferred icon size */
+      display: inline-block;
+      line-height: 1;
+      text-align:center;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+}
+   
+.dashCont a:hover {
+    color: lightgreen;   
+  }
+
+.dropdown-popup-SA {
+    width: 33%;
+    height: 32%;
+    overflow: auto;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+.delUser{
+    width: 35%;
+    height: 37%;
+}
+
+.emailColumn{
+   width: 20em;
+}
+
+.roleColumn{
+    width: 9em;
+}
+
+.buttonColumn{
+     width: 10em;
+}

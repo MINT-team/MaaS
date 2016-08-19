@@ -73,7 +73,7 @@ var usersManagement = React.createClass({
     		    {
     		      document.getElementById(errorId).classList.toggle("dropdown-show");
     		    }
-    		    else //////////
+    		    else
     		    {
     		      document.getElementById(deleteId).classList.toggle("dropdown-show");
     		    }
@@ -91,12 +91,24 @@ var usersManagement = React.createClass({
         var alertBox;
         if(row.role != 'Owner')
         {
-            alertBox = ( <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>);
+            alertBox = ( 
+                <div>
+                    <p className="dropdown-description">Are you sure you want to delete</p>
+                    <p className="dropdown-description"> 
+                        <span id="successful-email">{row.email}</span> 
+                    </p>
+                    <p className="dropdown-description">?</p>
+                </div>
+                    );
         }
         else
         {
             alertBox = ( <div>
-                            <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.email}</span> ?</p>
+                            <p className="dropdown-description">Are you sure you want to delete </p>
+                            <p className="dropdown-description"> 
+                                <span id="successful-email">{row.email}</span> 
+                            </p>
+                            <p className="dropdown-description">?</p>
                             <p className="dropdown-description"> <span id="successful-email"> This will delete the entire company!</span></p>
                         </div>
                         );
@@ -106,14 +118,14 @@ var usersManagement = React.createClass({
         var deleteUser = (
             <div id="delete-user" className="pop-up">
                 <i onClick={onClickDelete} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
-                <div className="dropdown-content dropdown-popup" id={errorId}>
+                <div className="dropdown-content dropdown-popup-SA delUser" id={errorId}>
                     <p className="dropdown-title">Error</p>
                     <p className="dropdown-description">{errors}</p>
                     <div className="dropdown-buttons">
                         <button className="button">Ok</button>
                     </div>
                 </div>
-                <div className="dropdown-content dropdown-popup" id={deleteId}>
+                <div className="dropdown-content dropdown-popup-SA delUser" id={deleteId}>
                     <p className="dropdown-title">Delete user</p>
                     {alertBox}
                     <div className="dropdown-buttons">
@@ -128,7 +140,7 @@ var usersManagement = React.createClass({
             buttons = (
             <div>
                 {deleteUser}
-                <Link to={"/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/"+ row.id +"/"+ row.email} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
+                <Link to={"/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/"+ row.id} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
             );
         
@@ -172,6 +184,8 @@ var usersManagement = React.createClass({
         });
         this.setState({type: "Guest"});
     },
+    
+    
     
     render: function() {
   
@@ -242,6 +256,7 @@ var usersManagement = React.createClass({
                 });
             }
             
+            
             title = "Manage users";
             content = (
                 <div id="manage-dsl">
@@ -255,10 +270,10 @@ var usersManagement = React.createClass({
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
-                                <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
-                                <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
+                                <TableHeaderColumn dataField="email" dataSort={true} columnClassName="emailColumn" >Email</TableHeaderColumn>
+                                <TableHeaderColumn dataField="role" dataSort={true} columnClassName="roleColumn">Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>
-                                <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                                <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter} columnClassName="buttonColumn"></TableHeaderColumn>
                             </BootstrapTable>
                         </div>
                     </div>

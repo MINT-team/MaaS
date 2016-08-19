@@ -82,7 +82,7 @@ var Routes = React.createClass({
                 <Route path="changeCompanyName/:companyId/:companyName" component={ChangeCompanyName} />
               </Route>
               <Route path="usersManagement" component={UsersManagement} >
-                <Route path="changeUserPersonalData/:userId/:userEmail" component={ChangeUserPersonalData} />
+                <Route path="changeUserPersonalData/:userId" component={ChangeUserPersonalData} />
               </Route>
             </Route>
             <Route path="impersonateUser" component={ImpersonateUser} />

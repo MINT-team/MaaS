@@ -56,11 +56,6 @@ var CompaniesManagement = React.createClass({
       this.setState(getState());
   },
   
-  
-  /*deleteAllSelected: function() {
-    alert(this.refs.table.state.selectedRowKeys);
-  },*/
-  
   buttonFormatter: function(cell, row) {
         var buttons;
         var errors;
@@ -93,16 +88,18 @@ var CompaniesManagement = React.createClass({
         var deleteCompany = (
             <div id="delete-user" className="pop-up">
                 <i onClick={onClickDelete} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
-                <div className="dropdown-content dropdown-popup" id={errorId}>
+                <div className="dropdown-content dropdown-popup-SA" id={errorId}>
                     <p className="dropdown-title">Error</p>
                     <p className="dropdown-description">{errors}</p>
                     <div className="dropdown-buttons">
                         <button className="button">Ok</button>
                     </div>
                 </div>
-                <div className="dropdown-content dropdown-popup" id={deleteId}>
+                <div className="dropdown-content dropdown-popup-SA" id={deleteId}>
                     <p className="dropdown-title">Delete company</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> company?</p>
+                    <p className="dropdown-description">Are you sure you want to delete </p> 
+                    <p className="dropdown-description"> <span id="successful-email">{row.name}</span> </p> 
+                    <p className="dropdown-description">?</p>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>

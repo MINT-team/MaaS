@@ -33,7 +33,6 @@ var ChangeUserPersonalData = React.createClass({
           userId: this.props.params.userId,
           errors: [],
           first: "true",
-          email: this.props.params.userEmail
       };
   },
     
@@ -41,10 +40,6 @@ var ChangeUserPersonalData = React.createClass({
       UserStore.addChangeListener(this._onChange);
   },
   
- componentDidMount: function() {
-   this.refs.email.value = this.state.email;
- },
- 
   componentWillUnmount: function() {
       UserStore.removeChangeListener(this._onChange);
   },

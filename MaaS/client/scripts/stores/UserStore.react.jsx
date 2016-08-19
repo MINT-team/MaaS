@@ -325,6 +325,26 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         }
         UserStore.emitChange();  
       break;
+      
+      case ActionTypes.DELETE_COMPANY:
+        if(action.errors) {
+          _errors = action.errors;
+        }
+        else
+        {
+          _errors = [];
+          var j = 0;
+          while(j < _users.length)
+          {
+            if(_users[j].companyId == action.id)
+            {
+              _users.splice(j, 1); 
+              j--; 
+            }
+            j++;
+          }
+        }
+        UserStore.emitChange(); 
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });
