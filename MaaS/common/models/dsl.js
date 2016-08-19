@@ -324,7 +324,7 @@ module.exports = function(DSL) {
     DSL.remoteMethod(
         'compileDefinition',
         {
-            description: "Change the permissions for one specific DSL definition",
+            description: "Compile a DSL definition",
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' }
             ],
@@ -408,7 +408,21 @@ module.exports = function(DSL) {
                                         }
                                     });
                                     break;
-                                    
+                                case "Document":
+                                    DSL.executeDocument(identity, body, conn, function(error, data) {
+                                        if (error)
+                                        {
+                                            console.log("> DSL execution error:", error);
+                                            return cb(null, error, null);
+                                        }
+                                        else
+                                        {
+                                            console.log("> DSL execution processed successfully");
+                                            
+                                            return cb(null, null, data);
+                                        }
+                                    });
+                                    break;
                             }
                         }
                     };
@@ -430,7 +444,7 @@ module.exports = function(DSL) {
     DSL.remoteMethod(
         'executeDefinition',
         {
-            description: "Change the permissions for one specific DSL definition",
+            description: "Execute a DSL definition",
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' }
             ],
@@ -515,7 +529,6 @@ module.exports = function(DSL) {
     );
     
     DSL.compileCell = function(identity, body, cb) {
-        
         /*
         Two types of cell:
         
@@ -543,39 +556,6 @@ module.exports = function(DSL) {
                 empty
         
         */
-        
-        /*
-        Alternative structure:      
-                                    if body // cell with value
-                                        check supported attributes['type', 'label', 'columnLabel', 'transformation', 'value']
-                                        read body required attributes ['value']
-                                        read identity optional attributes ['label','transformation','columnLabel']
-                                        read identity required attribute ['type']
-        
-                                        if !body required attributes
-                                            if !identity required attributes
-                                                keyword value errors = wrongCellKeywordValueError(transformation)
-                                                error = missing body attributes error + keyword value errors + missing identity attributes error
-                                                return error
-                                            else
-                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
-                                                error = missing body attributes error + keyword value errors
-                                                return error
-                                        else // there is body
-                                            if !identity required attributes
-                                                keyword value errors = wrongCellKeywordValueError(transformation)
-                                                error = keyword value errors + missing identity attributes error
-                                                return error
-                                            else // there are body and identity
-                                                keyword value errors = wrongCellKeywordValueError(type, transformation)
-                                                if keyword value errors
-                                                    return keyword value errors
-                                                else // all keyword values are ok
-                                                    return identity and body objects
-                                    else // cell without value
-                                    
-        */
-    
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
             AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
@@ -644,24 +624,6 @@ module.exports = function(DSL) {
         }
         
     );
-    
-    /*
-            
-            2) Cell without value:
-            Identity:
-                name | required             ok
-                table | required             ok
-                label | optional            ok
-                transformation | optional
-                columnLabel | optional     ok
-                type | required             ok
-                sortby | optional           ok
-                order | optional | "asc"     ok
-                query | optional
-            Body:
-                empty
-            
-            */
     
     DSL.executeCell = function(identity, body, conn, cb) {
         var data = {};
@@ -806,6 +768,91 @@ module.exports = function(DSL) {
                 { arg: 'data', type: 'Object' }
             ]
         }
+    );
+    /*
+    Document( 
+        table: 'Users',
+        label: 'Users',
+        sortby: 'surname',
+        order: 'asc',
+        query: {age : { $lt : 40}}
     
+    ) {
+        row(
+            name: 'surname',
+            label: 'Surname'
+        )
+        row(
+            name: 'name',
+            label: 'Name'
+        )
+        row(
+            name: 'orders',
+            label: 'Orders',
+            transformation: function(val) { return val.length; }
+        )
+        
+    }
+    
+    
+    Document:
+    
+        Identity:
+            table | required
+            label | optional
+            sortby | optional
+            order | optional | asc
+            query | optional
+        Body:
+            row
+    Row:
+        Identity:
+            name | required
+            label | optional
+            transformation | optional
+        Body:
+            
+    
+    */
+    
+    DSL.compileDocument = function(identity, body, cb) {
+        
+    };
+    
+    DSL.remoteMethod(
+        'compileDocument',
+        {
+            description: "Compile a Document macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Document identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Document body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'identity', type: 'Object' },
+                { arg: 'body', type: 'Object' }
+            ]
+        }
+    );
+    
+    DSL.executeDocument = function(identity, body, conn, cb) {
+        
+    };
+    
+    DSL.remoteMethod(
+        'executeDocument',
+        {
+            description: "Execute a Document macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Document identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Document body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ]
+        }
     );
 };

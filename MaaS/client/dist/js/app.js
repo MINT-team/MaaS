@@ -297,10 +297,10 @@ var ResponseCompanyActionCreator = {
         });
     },
 
-    responseDeleteCompany: function responseDeleteCompany(name, errors) {
+    responseDeleteCompany: function responseDeleteCompany(id, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_COMPANY,
-            name: name,
+            id: id,
             errors: errors
         });
     },
@@ -4708,6 +4708,7 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
+var SuperAdminStore = require('../stores/SuperAdminStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
 
@@ -4737,24 +4738,33 @@ var Login = React.createClass({
   componentDidMount: function componentDidMount() {
     SessionStore.addChangeListener(this._onChange);
     UserStore.addUserLoadListener(this._onUserLoad);
+    SuperAdminStore.addLoginSAListener(this._onUserLoad);
   },
 
   componentWillUnmount: function componentWillUnmount() {
     SessionStore.removeChangeListener(this._onChange);
     UserStore.removeUserLoadListener(this._onUserLoad);
+    SuperAdminStore.removeLoginSAListener(this._onUserLoad);
   },
 
   handleRedirect: function handleRedirect() {
+
     if (this.state.isLogged) {
-      var router = this.context.router;
+      if (this.state.userType == "commonUser") {
+        var router = this.context.router;
 
-      if (this.state.activeDashboard == "default") {
-        router.push('/manageDSL'); // redirect to Dashboard page
-      } else {}
-        //Redirect to active dashboard
+        if (this.state.activeDashboard == "default") {
+          router.push('/manageDSL'); // redirect to Dashboard page
+        } else {}
+          //Redirect to active dashboard
 
+          //router.push('/');
+      } else //redirect for Super Admin
+        {
+          var _router = this.context.router;
 
-        //router.push('/');
+          _router.push('/dashboardSuperAdmin'); // redirect to Super Admin Dashboard page
+        }
     }
   },
 
@@ -4862,7 +4872,7 @@ var Login = React.createClass({
 
 module.exports = Login;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],34:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/SuperAdminStore.react.jsx":58,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],34:[function(require,module,exports){
 'use strict';
 
 // Name: {MaaSApp.react.jsx}
@@ -6540,17 +6550,12 @@ var ChangeUserPersonalData = React.createClass({
       accessToken: SessionStore.getAccessToken() || this.props.location.query.access_token,
       userId: this.props.params.userId,
       errors: [],
-      first: "true",
-      email: this.props.params.userEmail
+      first: "true"
     };
   },
 
   componentWillMount: function componentWillMount() {
     UserStore.addChangeListener(this._onChange);
-  },
-
-  componentDidMount: function componentDidMount() {
-    this.refs.email.value = this.state.email;
   },
 
   componentWillUnmount: function componentWillUnmount() {
@@ -6743,10 +6748,6 @@ var CompaniesManagement = React.createClass({
         this.setState(getState());
     },
 
-    /*deleteAllSelected: function() {
-      alert(this.refs.table.state.selectedRowKeys);
-    },*/
-
     buttonFormatter: function buttonFormatter(cell, row) {
         var buttons;
         var errors;
@@ -6785,7 +6786,7 @@ var CompaniesManagement = React.createClass({
             ),
             React.createElement(
                 'div',
-                { className: 'dropdown-content dropdown-popup', id: errorId },
+                { className: 'dropdown-content dropdown-popup-SA', id: errorId },
                 React.createElement(
                     'p',
                     { className: 'dropdown-title' },
@@ -6808,7 +6809,7 @@ var CompaniesManagement = React.createClass({
             ),
             React.createElement(
                 'div',
-                { className: 'dropdown-content dropdown-popup', id: deleteId },
+                { className: 'dropdown-content dropdown-popup-SA', id: deleteId },
                 React.createElement(
                     'p',
                     { className: 'dropdown-title' },
@@ -6817,13 +6818,23 @@ var CompaniesManagement = React.createClass({
                 React.createElement(
                     'p',
                     { className: 'dropdown-description' },
-                    'Are you sure you want to delete ',
+                    'Are you sure you want to delete '
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    ' ',
                     React.createElement(
                         'span',
                         { id: 'successful-email' },
                         row.name
                     ),
-                    ' company?'
+                    ' '
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    '?'
                 ),
                 React.createElement(
                     'div',
@@ -7229,10 +7240,9 @@ var usersManagement = React.createClass({
         var onClickDelete = function onClickDelete() {
             if (instance.state.errors.length > 0) {
                 document.getElementById(errorId).classList.toggle("dropdown-show");
-            } else //////////
-                {
-                    document.getElementById(deleteId).classList.toggle("dropdown-show");
-                }
+            } else {
+                document.getElementById(deleteId).classList.toggle("dropdown-show");
+            }
         };
 
         var confirmDelete = function confirmDelete() {
@@ -7244,15 +7254,27 @@ var usersManagement = React.createClass({
         var alertBox;
         if (row.role != 'Owner') {
             alertBox = React.createElement(
-                'p',
-                { className: 'dropdown-description' },
-                'Are you sure you want to delete ',
+                'div',
+                null,
                 React.createElement(
-                    'span',
-                    { id: 'successful-email' },
-                    row.email
+                    'p',
+                    { className: 'dropdown-description' },
+                    'Are you sure you want to delete'
                 ),
-                ' ?'
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    React.createElement(
+                        'span',
+                        { id: 'successful-email' },
+                        row.email
+                    )
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    '?'
+                )
             );
         } else {
             alertBox = React.createElement(
@@ -7261,13 +7283,21 @@ var usersManagement = React.createClass({
                 React.createElement(
                     'p',
                     { className: 'dropdown-description' },
-                    'Are you sure you want to delete ',
+                    'Are you sure you want to delete '
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
                     React.createElement(
                         'span',
                         { id: 'successful-email' },
                         row.email
-                    ),
-                    ' ?'
+                    )
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-description' },
+                    '?'
                 ),
                 React.createElement(
                     'p',
@@ -7292,7 +7322,7 @@ var usersManagement = React.createClass({
             ),
             React.createElement(
                 'div',
-                { className: 'dropdown-content dropdown-popup', id: errorId },
+                { className: 'dropdown-content dropdown-popup-SA delUser', id: errorId },
                 React.createElement(
                     'p',
                     { className: 'dropdown-title' },
@@ -7315,7 +7345,7 @@ var usersManagement = React.createClass({
             ),
             React.createElement(
                 'div',
-                { className: 'dropdown-content dropdown-popup', id: deleteId },
+                { className: 'dropdown-content dropdown-popup-SA delUser', id: deleteId },
                 React.createElement(
                     'p',
                     { className: 'dropdown-title' },
@@ -7345,7 +7375,7 @@ var usersManagement = React.createClass({
             deleteUser,
             React.createElement(
                 Link,
-                { to: "/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/" + row.id + "/" + row.email },
+                { to: "/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/" + row.id },
                 React.createElement(
                     'i',
                     { id: 'modify-button', className: 'material-icons md-24' },
@@ -7507,12 +7537,12 @@ var usersManagement = React.createClass({
                                 search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
-                                { dataField: 'email', dataSort: true },
+                                { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
                                 'Email'
                             ),
                             React.createElement(
                                 TableHeaderColumn,
-                                { dataField: 'role', dataSort: true },
+                                { dataField: 'role', dataSort: true, columnClassName: 'roleColumn' },
                                 'Role'
                             ),
                             React.createElement(
@@ -7520,7 +7550,7 @@ var usersManagement = React.createClass({
                                 { dataField: 'companyName', dataSort: true },
                                 'Company'
                             ),
-                            React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+                            React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter, columnClassName: 'buttonColumn' })
                         )
                     )
                 )
@@ -7790,7 +7820,7 @@ var Routes = React.createClass({
             React.createElement(
               Route,
               { path: 'usersManagement', component: UsersManagement },
-              React.createElement(Route, { path: 'changeUserPersonalData/:userId/:userEmail', component: ChangeUserPersonalData })
+              React.createElement(Route, { path: 'changeUserPersonalData/:userId', component: ChangeUserPersonalData })
             )
           ),
           React.createElement(Route, { path: 'impersonateUser', component: ImpersonateUser })
@@ -7935,7 +7965,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
                 var i = 0;
                 //removal of the deleted company from the list of the companies
-                while (_companies[i].id != action.name && i < _companies.length) {
+                console.log(action);
+                while (_companies[i].id != action.id && i < _companies.length) {
                     i++;
                 }_companies.splice(i, 1);
             }
@@ -8556,6 +8587,7 @@ var SessionStore = require('./SessionStore.react.jsx');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
+var LOGIN_SA_EVENT = 'login';
 
 var _superAdmin = {
     id: SessionStore.getUserId(),
@@ -8570,12 +8602,24 @@ var SuperAdminStore = assign({}, EventEmitter.prototype, {
         this.emit(CHANGE_EVENT);
     },
 
+    emitLoginSA: function emitLoginSA() {
+        this.emit(LOGIN_SA_EVENT);
+    },
+
     addChangeListener: function addChangeListener(callback) {
         this.on(CHANGE_EVENT, callback);
     },
 
     removeChangeListener: function removeChangeListener(callback) {
         this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    addLoginSAListener: function addLoginSAListener(callback) {
+        this.on(LOGIN_SA_EVENT, callback);
+    },
+
+    removeLoginSAListener: function removeLoginSAListener(callback) {
+        this.removeListener(LOGIN_SA_EVENT, callback);
     },
 
     getId: function getId() {
@@ -8604,6 +8648,7 @@ SuperAdminStore.dispatchToken = Dispatcher.register(function (payload) {
                 _superAdmin.id = action.json.userId;
             }
             SuperAdminStore.emitChange();
+            SuperAdminStore.emitLoginSA();
             break;
 
         case ActionTypes.LOGOUT:
@@ -8928,6 +8973,22 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       }
       UserStore.emitChange();
       break;
+
+    case ActionTypes.DELETE_COMPANY:
+      if (action.errors) {
+        _errors = action.errors;
+      } else {
+        _errors = [];
+        var j = 0;
+        while (j < _users.length) {
+          if (_users[j].companyId == action.id) {
+            _users.splice(j, 1);
+            j--;
+          }
+          j++;
+        }
+      }
+      UserStore.emitChange();
   }
   return true; // richiesto dal Promise nel Dispatcher
 });
@@ -8993,7 +9054,7 @@ module.exports = {
           // res.error.message: errori di loopback e error definito dal remote method
           ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
         } else {
-          ResponseCompanyActionCreator.responseDeleteCompany(res.name, null);
+          ResponseCompanyActionCreator.responseDeleteCompany(res.id, null);
         }
       }
     });
