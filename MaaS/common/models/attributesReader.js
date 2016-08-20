@@ -139,5 +139,9 @@ module.exports = {
         	}
         }
         return cb(error);
+    },
+    
+    checkDocumentKeywordValue: function(keywords, cb) {
+        
     }
 };

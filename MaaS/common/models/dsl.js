@@ -554,7 +554,6 @@ module.exports = function(DSL) {
                 query | optional
             Body:
                 empty
-        
         */
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
@@ -770,32 +769,82 @@ module.exports = function(DSL) {
         }
     );
     /*
-    Document( 
-        table: 'Users',
+    Collection(
+    
+    ) {
+        Index (
+        
+        
+        ) {
+            column (
+            
+            )
+            column (
+            
+            )
+        }
+        Document() {
+            
+            row (
+            
+            )
+            row (
+            
+            )
+        }
+    }
+    
+    
+    compileCollection(identity, body, cb) {
+        
+        
+        {DSL.compileDocument()}
+    }
+    
+    compileDocument(identity, body, cb) {
+        
+        body == [{row1}, {row2}]
+        body.forEach(function(row){
+            AtrrRead.check(row, function(err) {
+                
+            })
+        })
+    }
+    
+    */
+    
+    
+    
+    /*
+   Document ( 
+        table: 'users',
         label: 'Users',
         sortby: 'surname',
         order: 'asc',
         query: {age : { $lt : 40}}
-    
     ) {
         row(
             name: 'surname',
-            label: 'Surname'
+            label: 'Surname',
+            type: 'string'
         )
         row(
             name: 'name',
-            label: 'Name'
+            label: 'Name',
+            type: 'string'
         )
         row(
             name: 'orders',
             label: 'Orders',
+            type: 'number',
             transformation: function(val) { return val.length; }
         )
-        
     }
     
     
-    Document:
+    two types of independent Document:
+    
+    1)
     
         Identity:
             table | required
@@ -810,13 +859,136 @@ module.exports = function(DSL) {
             name | required
             label | optional
             transformation | optional
+            type | required
+    
+    2)
+    
+        Identity:
+            table | required
+            label | optional
+            sortby | optional
+            order | optional | asc
+            query | optional
         Body:
+            empty
             
+    two types of Document inside Collection:
+    
+    1)
+        Identity:
+            populate | optional
+        Body:
+            row
+    Row:
+        Identity:
+            name | required
+            label | optional
+            transformation | optional
+            type | required
+            
+    2)
+    
+        Identity:
+            populate | optional
+        Body:
+            empty
+    
+        
     
     */
     
     DSL.compileDocument = function(identity, body, cb) {
         
+            AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
+                AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
+                    var keywords = {
+                        table: identity.table,
+                        label: identity.label,
+                        sortby: identity.sortby,
+                        order: identity.order,
+                        query: identity.query
+                    };
+                    AttributesReader.checkDocumentKeywordValue(keywords, function(identityKeywordValueError) {
+                        if(body.length !== 0)   // Document with rows
+                        {
+                            body.forEach(function(row) {
+                                AttributesReader.checkSupportedAttributes(row, ['name', 'label', 'transformation', 'type'], function(unsupportedRowAttributesError) {
+                                    AttributesReader.readRequiredAttributes(row, ['name', 'type'], function(missingRequiredRowAttributesError) {
+                                        var keywords = {
+                                            name: row.name,
+                                            label: row.label,
+                                            transformation: row.transformation,
+                                            type: row.type
+                                        };
+                                        AttributesReader.checkDocumentKeywordValue(keywords, function(rowKeywordValueError) {
+                                            var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, 
+                                            identityKeywordValueError, unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                            if(Object.getOwnPropertyNames(error).length !== 0)
+                                            {
+                                                return cb(error, null, null);
+                                            }
+                                            else
+                                            {
+                                                return cb(null, identity, body);
+                                            }
+                                        });
+                                    });
+                                });
+                            });
+                        }
+                        else    //Document without rows
+                        {
+                            var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError);
+                            if(Object.getOwnPropertyNames(error).length !== 0)
+                            {
+                                return cb(error, null, null);
+                            }
+                            else
+                            {
+                                return cb(null, identity, body);
+                            }
+                            
+                        }
+                    });
+                });
+            });
+        }
+        /*
+        body == [{row1}, {row2}]
+        body.forEach(function(row){
+            AtrrRead.check(row, function(err) {
+                
+            })
+        })
+        
+        */
+        
+        
+        
+        /*
+        
+        if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
+        {
+            AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
+                AttributesReader.readRequiredAttributes(body, ['value'], function(missingRequiredBodyAttributesError) {
+                    AttributesReader.readRequiredAttributes(identity, ['type', 'columnLabel'], function(missingRequiredIdentityAttributesError) {
+                        AttributesReader.checkCellKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
+                            var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
+                            if(Object.getOwnPropertyNames(error).length !== 0)
+                            {
+                                return cb(error, null, null);
+                            }
+                            else
+                            {
+                                return cb(null, identity, body);
+                            }
+                        });
+                    });
+                });
+            });
+        }
+        
+        */
     };
     
     DSL.remoteMethod(
