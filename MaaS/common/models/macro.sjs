@@ -91,12 +91,33 @@ syntax Document = function (ctx) {
         if(!ctxItem.isBraces())     // check for braces
             throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
         params = ctxItem.inner();
+        let items = ctxItem.inner();
+        for(let item of items)
+        {            
+            if(item.isIdentifier('row'))
+            {
+                let expr = params.expand('expr');
+                body = body.concat(#`${expr.value}`);
+                items.next();
+            }
+            else
+            {
+                throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
+                //params.next();                
+            }
+        }
+        
+        /*
         let expr = params.expand('expr');
-        while(expr && expr.done == false)
-        {
-            body = body.concat(#`${expr.value}`);
+        let item = items.next().value;
+        while(expr && expr.done == false && item.isIdentifier("row"))
+        {   
+            body = body.concat(#`${expr.value}`);            
             expr = params.expand('expr');
-        }        
+            item = items.next().value;
+            return #`${item}`;
+        }
+        */
     }
     tot = #`DSL.compileDocument({${identity}}, [${body}], callback)`;
     return tot;

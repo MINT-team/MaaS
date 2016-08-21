@@ -24,7 +24,6 @@ function getState() {
             definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
             data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
             label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
-            type: DSLStore.getDSLData() ? DSLStore.getDSLData().type : null,
             queried: true
     };
 }
@@ -73,7 +72,6 @@ var ExecuteDSL = React.createClass({
         {
             //console.log(this.state.data);
             var columns = [];
-            
             if(this.state.data.length > 0)  // Array of table data with at least one element
             {
                 data = this.state.data;
@@ -85,7 +83,7 @@ var ExecuteDSL = React.createClass({
             //     data.push(this.state.data);
             // }
             
-            //console.log(columns);
+            console.log(columns);
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -97,17 +95,39 @@ var ExecuteDSL = React.createClass({
             Enable to hide the dropdown list for size per page, default is false.
             */
     
-            content = (
-                
-                <div id="dsl-data-table">
-                    <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
-                        {columns.map((column) => 
-                            <TableHeaderColumn key={column} dataField={column} dataSort={true}>{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
-                        )}
-                    </BootstrapTable>
-                </div>
-                
-            );
+            //alert(this.state.definitionType);
+            var definitionType = this.state.definitionType;
+            if(definitionType == "Cell" || definitionType == "Collection")
+            {
+                content = (
+                    <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
+                        <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
+                            {columns.map((column) => 
+                                <TableHeaderColumn key={column} dataField={column} dataSort={true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                            )}
+                        </BootstrapTable>
+                    </div>
+                    
+                );
+            }
+            if(definitionType == "Document")
+            {
+                console.log(data[0]);
+                content = (
+                    <div id="dsl-data-table" className="document-table-view">
+                        <table className="table table-striped table-bordered table-hover">
+                            <tbody>
+                                {columns.map((column) => <tr className="short-column">
+                                                            <th key={column} className="">{column}</th> 
+                                                            <td className="react-bs-container-body">{data[0][column]}</td>
+                                                         </tr>  
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                );
+            }
         }
         else
         {
