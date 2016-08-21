@@ -249,7 +249,7 @@ syntax Collection = function (ctx) {
             {
                 if(afterDocument == true && item.isBraces())
                     items.next();
-                else                
+                else
                     throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);             
             }
         }        
@@ -259,4 +259,40 @@ syntax Collection = function (ctx) {
     else
         tot = #`DSL.compileCollection({${identity}}, [${columns}], ${document}, {}, callback)`;
     return tot;
+}
+
+
+Collection(
+    name: "customers",
+    label: "JuniorCustomers",
+    id: "Junior",
+    Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+) {
+    column(
+        name: "3"
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    column(
+        name: "4"
+    )
+    Document(
+        table: "prova"
+    ){
+        row(
+            name: "asd"
+        )
+        action(
+            SendEmail: "true"
+        )
+    }
+    column(
+        name: "4"
+    )
 }

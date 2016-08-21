@@ -277,9 +277,16 @@ module.exports = function(DSL) {
         
     );
     
+    /*
+    DSL.compileCollection({name: "customers", label: "JuniorCustomers", id: "Junior", Weight: "0", perpage: "20", sortby: "surname", order: "asc", query: {age: {$lt: 40}}}, 
+    [], DSL.compileDocument({table: "prova"}, [{name: "asd"}], {SendEmail: "true"}, callback), {Export: "true", SendEmail: "true"}, callback);
+    
+    */
+    
+    
+    
     DSL.compileDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
-        var Company = app.models.Company;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
             {
@@ -904,7 +911,7 @@ module.exports = function(DSL) {
                             {
                                 var returned = false;
                                 var i = 0;
-                                while(i < rows.length && !returned)     // body.forEach(function(row, i) {
+                                while(!returned && i < rows.length)     // body.forEach(function(row, i) {
                                 {
                                     var row = rows[i];
                                     AttributesReader.checkSupportedAttributes(row, ['name', 'label', 'type', 'transformation'], function(unsupportedRowAttributesError) {
@@ -945,6 +952,7 @@ module.exports = function(DSL) {
                                                         i++;
                                                     }
                                                 }
+                                                
                                             });
                                         });
                                     });
@@ -1204,12 +1212,185 @@ module.exports = function(DSL) {
         }
     );
     
+    /*
+    two types of Collection:
+    
+    1)
+    
+        Identity:
+            table | required
+            label | optional
+            sortby | optional
+            query | optional
+            order | optional
+            perpage | optional
+        Body:
+            action | optional
+            column | optional
+        
+        Column:
+            name | required
+            selectable | optional
+            label | optional
+            transformation | optional
+    2)
+    
+        Identity:
+            table | required
+            label | optional
+            sortby | optional
+            query | optional
+            order | optional
+            perpage | optional
+        Body:
+            action | optional
+            column | optional
+            document
+        
+    */
+    /*
+    Collection(
+    name: "customers",
+    label: "JuniorCustomers",
+    id: "Junior",
+    Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+) {
+    column(
+        name: "name",
+        label: "Nome",
+        sortable: false,
+        selectable: false
+        transformation: function(val) {
+            return val.lenght;
+        }
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    Document(
+
+    ) {
+        row(
+            name: "name",
+            label: "Nome"
+        )
+    }
+}
+    
+    */
     DSL.compileCollection = function(identity, columns, document, action, cb) {
+        var body = {};
+        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'query', 'sortby', 'perpage', 'order'], function(unsupportedIdentityAttributesError) {
+            AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
+                var keywords = {
+                    table: identity.table,
+                    label: identity.label,
+                    sortby: identity.sortby,
+                    order: identity.order,
+                    query: identity.query,
+                    perpage: identity.perpage
+                };
+                AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
+                    AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
+                        AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
+                            var stop = false;
+                            for (var i = 0; !stop && i< columns.length; i++)
+                            {
+                                var column = columns[i];
+                                AttributesReader.checkSupportedAttributes(column, ['name', 'label', 'selectable', 'transformation'], function(unsupportedColumnAttributesError) {
+                                    AttributesReader.readRequiredAttributes(column, ['name'], function(missingRequiredColumnAttributesError) {
+                                        var keywords = {
+                                            name: column.name,
+                                            label: column.label,
+                                            selectable: column.selectable,
+                                            transformation: column.transformation
+                                        };
+                                        AttributesReader.checkKeywordValue(keywords, function(columnKeywordValueError) {
+                                            var columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
+                                            var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError);
+                                            if(Object.getOwnPropertyNames(columnError).length !== 0)
+                                            {
+                                                stop = true;
+                                                return cb(error, null, null);   // return the errors occurred in the first wrong column
+                                            }
+                                            else
+                                            {
+                                                if (i == columns.length-1)
+                                                {
+                                                    if(Object.getOwnPropertyNames(columnError).length !== 0)
+                                                    {
+                                                        stop = true;
+                                                        return cb(error, null, null);   // return the errors occurred in the first wrong column
+                                                    }
+                                                    else
+                                                    {
+                                                        if(Object.getOwnPropertyNames(document).length === 0)
+                                                        {
+                                                            body = { action: action, columns: columns };
+                                                            stop = true;
+                                                            return cb(null, identity, body);
+                                                        }
+                                                        else    // collection with explicit document
+                                                        {
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            /*
+                                                            
+                                                            var collectionCB = function() {
         
-        
-        
-        //document obj
-        // columns array
+                                                            }
+    
+                                                            var callback = function() {     // document cb
+                                                                    
+                                                                }
+                                                            
+                                                            => DSL.compileCollection({}, [], DSL.compileDocument({}, [], callback), collectionCB )
+                                                            
+                                                            DSL.compileCollection(identity, body, documentCompile, cb)
+                                                            {
+                                                                
+                                                                
+                                                                eval(documentCompile);
+                                                                
+                                                                return documentCB();
+                                                            }
+                                                            
+                                                            compileDocument(identity, body, cb)
+                                                            {
+                                                                
+                                                                
+                                                                
+                                                            }
+                                                            
+                                                            
+                                                            */
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        });
     };
     
     DSL.remoteMethod(
