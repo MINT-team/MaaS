@@ -18,8 +18,9 @@ var RequestSessionActionCreator = {
     WebAPIUtils.signup(company, email, password, confirmation);
   },
 
-  login: function(email, password) {
-    WebAPIUtils.login(email, password);
+  login: function(email, password, impersonate = "false") {
+    window.alert("mandata action di impersonificazione");
+    WebAPIUtils.login(email, password, impersonate);
   },
 
   invite: function(sender, company, role, email) {

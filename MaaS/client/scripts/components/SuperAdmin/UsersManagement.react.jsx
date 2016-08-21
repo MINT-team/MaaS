@@ -66,7 +66,7 @@ var usersManagement = React.createClass({
               <span id="errors">{this.state.errors}</span>
             );
         }
-        // funzioni utili all'eliminazione di una company
+        // funzioni utili all'eliminazione di un utente
         var instance = this;
         var onClickDelete = function() {
             if(instance.state.errors.length > 0)

@@ -1848,3 +1848,8 @@ input {
 .buttonColumn{
      width: 10em;
 }
+
+#impersonate-button:hover {
+    color: lightgreen;
+    cursor: pointer;
+}
