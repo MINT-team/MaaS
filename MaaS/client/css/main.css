@@ -1443,6 +1443,27 @@ input {
     margin: auto;
 }
 
+.cell-table-view {
+    max-width: 20em;
+    margin: auto;
+    text-align: center;
+}
+
+.document-table-view {
+    border: 1px solid #ddd;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.document-table-view th, .document-table-view td {
+    overflow: auto;
+    white-space: nowrap;
+    /*text-overflow: string;*/
+    max-width: 10em;
+    min-width: 8em;
+}
+
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/
 @-moz-keyframes fadeIn {
     0% { opacity: 0; }
@@ -1467,6 +1488,7 @@ input {
     width: 6em;
     text-align: center !important;
     font-size: 0.9em;
+    text-indent: 0 !important;
     margin-left: -2em;
     padding: 0.2em 0.5em 0.3em 0.5em;
     -moz-border-radius: 5px;

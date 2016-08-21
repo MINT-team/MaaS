@@ -403,13 +403,14 @@ module.exports = function(DSL) {
                                             console.log("> DSL execution processed successfully");
                                             if(!data.label)
                                                 data.label = DSLInstance.name;
-                                            data.DefinitionType = DSLInstance.type;
+                                            data.definitionType = DSLInstance.type;
                                             return cb(null, null, data);
                                         }
                                     });
                                     break;
                                 case "Document":
                                     DSL.executeDocument(identity, body, conn, function(error, data) {
+                                        conn.disconnect();
                                         if (error)
                                         {
                                             console.log("> DSL execution error:", error);
@@ -418,7 +419,9 @@ module.exports = function(DSL) {
                                         else
                                         {
                                             console.log("> DSL execution processed successfully");
-                                            
+                                            if(!data.label)
+                                                data.label = DSLInstance.name;
+                                            data.definitionType = DSLInstance.type;
                                             return cb(null, null, data);
                                         }
                                     });
@@ -428,7 +431,7 @@ module.exports = function(DSL) {
                     };
                     try
                     {
-                        eval(expanded); // DSL.compileCell({...})
+                        eval(expanded); // DSL.compile...
                     }
                     catch(err)
                     {
@@ -468,32 +471,52 @@ module.exports = function(DSL) {
             else
             {
                 macro = macro.toString();
+                var macroLines = macro.split("\n").length;
                 try
                 {
                     expanded = sweet.compile(macro + dsl);
                 }
                 catch(err)
                 {
-                    console.log("CATCH:", err);
+                    console.log("Sweetjs error:", err);
                     var message;
                     if(!err.description)
                     {
                         //Default message
                         message = "DSL compilation error";
-                        if(err.toString().match(/replacement values for syntax template must not be null or undefined/g))
+                        var error = err.toString();
+                        if(error.match(/replacement values for syntax template must not be null or undefined/g))
                         {
                             message = "Syntax error. Unknown keyword or missing comma";
                         }
-                        if(err.toString().match(/Unexpected syntax/g))
+                        if(error.match(/Unexpected syntax/g))
                         {
-                            if(err.toString().match(/List \[ {/g))
+                            if(error.match(/List \[ {/g))
                                 message = "Unexpected syntax: \"{\". Wrong use of parenthesis";
-                            if(err.toString().match(/List \[ \[/g))
+                            else if(error.match(/List \[ \[/g))
                                 message = "Unexpected syntax: \"[\". Wrong use of parenthesis";
-                            if(err.toString().match(/List \[ \(/g))
+                            else if(error.match(/List \[ \(/g))
                                 message = "Unexpected syntax: \"(\". Wrong use of parenthesis";
+                            else
+                            {
+                                var start = "List [ ";
+                                var end = " ] at:";
+                                var startIndex = error.indexOf(start, 0) + start.length;
+                                var endIndex = error.indexOf(end, 0);
+                                var unexpected = error.substring(startIndex, endIndex);
+                                startIndex = error.indexOf(start, endIndex) + start.length;
+                                endIndex = error.length - 2;
+                                var line = error.substring(startIndex, endIndex);
+                                line = (parseInt(line) - macroLines) + 1;
+                                
+                                message = "Unexpected syntax";
+                                if(unexpected)
+                                    message += ": \"" + unexpected + "\"";
+                                if(!isNaN(line))
+                                    message += " at line " + line;
+                            }
                         }
-                        if(err.toString().match(/expecting a : punctuator/g))
+                        if(error.match(/expecting a : punctuator/g))
                         {
                             message = "Syntax error: missing \":\"";
                         }
@@ -529,8 +552,10 @@ module.exports = function(DSL) {
     );
     
     DSL.compileCell = function(identity, body, cb) {
-        /*
-        Two types of cell:
+        
+    /* -------------------------------- CELL -------------------------------- 
+    
+    Two types of cell:
         
         1) Cell with value:
             Identity:
@@ -553,15 +578,14 @@ module.exports = function(DSL) {
                 order | optional | "asc"
                 query | optional
             Body:
-                empty
+                empty                       */
         
-        */
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
             AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
                 AttributesReader.readRequiredAttributes(body, ['value'], function(missingRequiredBodyAttributesError) {
                     AttributesReader.readRequiredAttributes(identity, ['type', 'columnLabel'], function(missingRequiredIdentityAttributesError) {
-                        AttributesReader.checkCellKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
+                        AttributesReader.checkKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
                             var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
                             if(Object.getOwnPropertyNames(error).length !== 0)
                             {
@@ -591,7 +615,7 @@ module.exports = function(DSL) {
                         sortby: identity.sortby,
                         label: identity.label
                     };
-                    AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                    AttributesReader.checkKeywordValue(keywordsValue, function(keywordValueError) {
                         var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
                         if(Object.getOwnPropertyNames(error).length !== 0)
                         {
@@ -633,7 +657,6 @@ module.exports = function(DSL) {
             var mongoose_query;
             if(identity.query)
             {
-                console.log(identity.query);
                 mongoose_query = collection.find(identity.query, { _id: 0});
             }
             else
@@ -673,7 +696,7 @@ module.exports = function(DSL) {
                       value: result[0][identity.name]
                     };
                     
-                    AttributesReader.checkCellKeywordValue(keywordsValue, function(keywordValueError) {
+                    AttributesReader.checkKeywordValue(keywordsValue, function(keywordValueError) {
                         if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
                         {
                             return cb(keywordValueError, null);
@@ -726,7 +749,7 @@ module.exports = function(DSL) {
                 {
                     return cb(err, null);
                 }
-                AttributesReader.checkCellKeywordValue({ type: identity.type, value: transformedValue }, function(keywordValueError) {
+                AttributesReader.checkKeywordValue({ type: identity.type, value: transformedValue }, function(keywordValueError) {
                     if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
                     {
                         return cb(keywordValueError, null);
@@ -769,34 +792,37 @@ module.exports = function(DSL) {
             ]
         }
     );
-    /*
-    Document( 
-        table: 'Users',
+    
+    /* -------------------------------- DOCUMENT -------------------------------- 
+    
+    Document ( 
+        table: 'users',
         label: 'Users',
         sortby: 'surname',
         order: 'asc',
         query: {age : { $lt : 40}}
-    
     ) {
         row(
             name: 'surname',
-            label: 'Surname'
+            label: 'Surname',
+            type: 'string'
         )
         row(
             name: 'name',
-            label: 'Name'
+            label: 'Name',
+            type: 'string'
         )
         row(
             name: 'orders',
             label: 'Orders',
+            type: 'number',
             transformation: function(val) { return val.length; }
         )
-        
     }
     
+    two types of independent Document:
     
-    Document:
-    
+    1)
         Identity:
             table | required
             label | optional
@@ -810,13 +836,114 @@ module.exports = function(DSL) {
             name | required
             label | optional
             transformation | optional
-        Body:
-            
+            type | required
     
+    2)
+        Identity:
+            table | required
+            label | optional
+            sortby | optional
+            order | optional | asc
+            query | optional
+        Body:
+            empty
+            
+    two types of Document inside Collection:
+    
+    1)
+        Identity:
+            populate | optional
+        Body:
+            row
+    Row:
+        Identity:
+            name | required
+            label | optional
+            transformation | optional
+            type | required
+            
+    2)
+        Identity:
+            populate | optional
+        Body:
+            empty
     */
     
     DSL.compileDocument = function(identity, body, cb) {
-        
+        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
+            AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
+                var keywords = {
+                    table: identity.table,
+                    label: identity.label,
+                    sortby: identity.sortby,
+                    order: identity.order,
+                    query: identity.query
+                };
+                AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
+                    if(body.length !== 0)   // Document with rows
+                    {
+                        var returned = false;
+                        var i = 0;
+                        while(i < body.length && !returned)     // body.forEach(function(row, i) {
+                        {
+                            var row = body[i];
+                            AttributesReader.checkSupportedAttributes(row, ['name', 'label', 'type', 'transformation'], function(unsupportedRowAttributesError) {
+                                AttributesReader.readRequiredAttributes(row, ['name', 'type'], function(missingRequiredRowAttributesError) {
+                                    var keywords = {
+                                        name: row.name,
+                                        label: row.label,
+                                        type: row.type,
+                                        transformation: row.transformation
+                                    };
+                                    AttributesReader.checkKeywordValue(keywords, function(rowKeywordValueError) {
+                                        var rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                        var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, 
+                                                                  identityKeywordValueError, rowError);
+                                        if(Object.getOwnPropertyNames(rowError).length !== 0)
+                                        {
+                                            returned = true;
+                                            return cb(error, null, null);   // return the errors occurred in the first wrong row
+                                        }
+                                        else
+                                        {
+                                            if(i == body.length-1)  // last row in body, all rows are ok
+                                            {
+                                                if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
+                                                {
+                                                    returned = true;
+                                                    return cb(error, null, null);
+                                                }
+                                                else 
+                                                {
+                                                    returned = true;
+                                                    return cb(null, identity, body);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                i++;
+                                            }
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    }
+                    else    //Document without rows
+                    {
+                        var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError);
+                        if(Object.getOwnPropertyNames(error).length !== 0)
+                        {
+                            return cb(error, null, null);
+                        }
+                        else
+                        {
+                            return cb(null, identity, body);
+                        }
+                    }
+                });
+            });
+        });
     };
     
     DSL.remoteMethod(
@@ -837,7 +964,205 @@ module.exports = function(DSL) {
     );
     
     DSL.executeDocument = function(identity, body, conn, cb) {
-        
+        var data = {};
+        if(body.length == 0)   // Document without rows
+        {
+            var collection = conn.model(identity.table, DocumentSchema);
+            var mongoose_query;
+            if(identity.query)
+            {
+                mongoose_query = collection.find(identity.query, { _id: 0});
+            }
+            else
+            {
+                mongoose_query = collection.find({}, { _id: 0});
+            }
+            mongoose_query.setOptions({lean: true});
+            var names = "";
+            body.forEach(function(row) {
+                names += " " + row.name;
+            });
+            mongoose_query.select(names);
+            if(identity.order)
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                }
+                else
+                {
+                    mongoose_query.sort({[body[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first attribute
+                }
+            }
+            else
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            mongoose_query.limit(1);    // take only one document
+            mongoose_query.exec(function(err, result) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                //console.log(result);
+                if(result.length > 0)
+                {
+                    data.result = result;   // initialize the object to be filled with results
+                    if(identity.label)
+                    {
+                        data.label = identity.label;
+                    }
+                    
+                    return cb(null, data);
+                }
+                else
+                {
+                    return cb(null, data);
+                }
+            });
+        }
+        else    //Document with rows
+        {
+            var collection = conn.model(identity.table, DocumentSchema);
+            var mongoose_query;
+            if(identity.query)
+            {
+                mongoose_query = collection.find(identity.query, { _id: 0});
+            }
+            else
+            {
+                mongoose_query = collection.find({}, { _id: 0});
+            }
+            mongoose_query.setOptions({lean: true});
+            var names = "";
+            body.forEach(function(row) {
+                names += " " + row.name;
+            });
+            mongoose_query.select(names);
+            if(identity.order)
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                }
+                else
+                {
+                    mongoose_query.sort({[body[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first attribute
+                }
+            }
+            else
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            mongoose_query.limit(1);    // take only one document
+            mongoose_query.exec(function(err, result) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                //console.log(result);
+                if(result.length > 0)
+                {
+                    data.result = [ {} ];   // initialize the object to be filled with results matching rows values
+                    if(identity.label)
+                    {
+                        data.label = identity.label;
+                    }
+                    var i = 0;
+                    var returned = false;
+                    while(i < body.length && !returned)
+                    {
+                        var row = body[i];
+                        var rowValue = result[0][row.name];
+                        
+                        if(row.transformation)
+                        {
+                            var transformedValue;
+                            try
+                            {
+                                transformedValue = row.transformation(rowValue);
+                            }
+                            catch(err)
+                            {
+                                returned = true;
+                                return cb(err, null);
+                            }
+                            AttributesReader.checkKeywordValue({ type: row.type, value: transformedValue }, function(keywordValueError) {
+                                if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                                {
+                                    returned = true;
+                                    return cb(keywordValueError, null);
+                                }
+                                else
+                                {
+                                    if(row.label)
+                                    {
+                                        data.result[0][row.label] = transformedValue;
+                                    }
+                                    else
+                                    {
+                                        data.result[0][row.name] = transformedValue;
+                                    }
+                                    
+                                    if(i == body.length-1)  // if all rows are checked then returns
+                                    {
+                                        //console.log(data)
+                                        returned = true;
+                                        return cb(null, data);
+                                    }
+                                    else    // if there are other rows to check
+                                    {
+                                        i++;
+                                    }
+                                }
+                            });
+                        }
+                        else
+                        {
+                            AttributesReader.checkKeywordValue({ type: row.type, value: rowValue }, function(keywordValueError) {
+                                if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                                {
+                                    returned = true;
+                                    return cb(keywordValueError, null);
+                                }
+                                else
+                                {
+                                    if(row.label)
+                                    {
+                                        data.result[0][row.label] = rowValue;
+                                    }
+                                    else
+                                    {
+                                        data.result[0][row.name] = rowValue;
+                                    }
+                                    
+                                    if(i == body.length-1)  // if all rows are checked then returns
+                                    {
+                                        //console.log(data)
+                                        returned = true;
+                                        return cb(null, data);
+                                    }
+                                    else    // if there are other rows to check
+                                    {
+                                        i++;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    return cb(null, data);
+                }
+            });
+        }
     };
     
     DSL.remoteMethod(
@@ -855,4 +1180,26 @@ module.exports = function(DSL) {
             ]
         }
     );
+    
+    /* -------------------------------- COLLECTION -------------------------------- 
+    
+    Collection(
+    
+    ) {
+        Index (
+        
+        ) {
+            column (
+            
+            )
+            column (
+            
+            )
+        }
+        Document() {
+            row ()
+            row ()
+        }
+    }
+    */
 };

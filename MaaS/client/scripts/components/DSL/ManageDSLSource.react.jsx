@@ -31,11 +31,13 @@ var ManageDSLSource = React.createClass({
     getInitialState: function() {
         return {
                 errors: [],
+                saveErrors: [],
                 isLogged: SessionStore.isLogged(),
                 definitionId: this.props.params.definitionId,
                 definitionName: null,
                 definitionSource: DSLStore.getSource(),
-                saved: this.props.params.definitionId ? true : false
+                saved: this.props.params.definitionId ? true : false,
+                building: false
         };
     },
 
@@ -120,7 +122,10 @@ var ManageDSLSource = React.createClass({
         var dslId = this.state.definitionId;
         var userId = SessionStore.getUserId();
         if(!overwrite)
+        {
             RequestDSLActionCreator.loadDSLAccess(dslId, userId);   // Load the new object to be visualized in the ManageDSL's table
+            this.setState({definitionId: DSLStore.getId()});        // get DSL id of the new definition saved
+        }
         if(this.state.saved == false)
         {
             this.setState({ saved: true });
@@ -182,10 +187,13 @@ var ManageDSLSource = React.createClass({
                         RequestDSLActionCreator.saveDSLDefinition(SessionStore.getUserId(), definitionType, definitionName, definitionSource, this.props.location.query.databaseID);
                     }
                 }
+                return true;
             }
             if(errors.length > 0)
             {
-                this.setState({ errors: errors });
+                this.setState({ saveErrors: errors });
+                this.toggleErrorPopUp();
+                return false;
             }
         }
     },
@@ -197,7 +205,12 @@ var ManageDSLSource = React.createClass({
             this.refs.build.classList.toggle("loader-small");
             if(this.state.saved == false)
             {
-                this.onSave();  // first save definition
+                var saved = this.onSave();  // save definition first
+                if(!saved)
+                {
+                    this.setState({building: false});
+                    this.refs.build.classList.toggle("loader-small");
+                }
             }
             else
             {
@@ -210,12 +223,12 @@ var ManageDSLSource = React.createClass({
         
     },
     
-//     toggleErrorPopUp: function() {
-// 		this.refs.error.classList.toggle("dropdown-show");
-// 	},
+    toggleErrorPopUp: function() {
+		this.refs.error.classList.toggle("dropdown-show");
+	},
 	
-	emptyErrors: function() {
-	    this.setState({ errors: [] });
+	emptySaveErrors: function() {
+	    this.setState({ saveErrors: [] });
 	},
 	
 	scrollToBottom: function() {
@@ -230,10 +243,14 @@ var ManageDSLSource = React.createClass({
                 <AuthorizationRequired />
             );
         }
-        var content, log = [];
+        var content, log = [], errors;
         if(this.state.errors.length > 0) 
         {//id="errors"className="error-item"
             log = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
+        }
+        if(this.state.saveErrors.length > 0)
+        {
+            errors = ( <div id="errors">{this.state.saveErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
         }
         
         content = (
@@ -254,7 +271,7 @@ var ManageDSLSource = React.createClass({
                                 <i onClick={this.onSave} id="save-button" accessKey="s" className="material-icons md-36 dropdown-button" ref="save">&#xE161;</i>
                             </div>
                             <div className="tooltip tooltip-top" ref="build">
-                                <p className="tooltip-text tooltip-text-long">Build [Alt + B]</p>
+                                <p className="tooltip-text tooltip-text-long" ref="buildTooltip">Build [Alt + B]</p>
                                 <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button">&#xE869;</i>
                             </div>
                             <div className="tooltip tooltip-top">
@@ -281,16 +298,17 @@ var ManageDSLSource = React.createClass({
                 <div id="editor-errors">
                     {log}
                 </div>
+                <div className="dropdown-content dropdown-popup" ref="error">
+                    <p className="dropdown-title">Error</p>
+                    <div className="dropdown-description">{errors}</div>
+                    <div className="dropdown-buttons">
+                        <button onClick={this.emptySaveErrors} className="button">Ok</button>
+                    </div>
+                </div>
             </div>
         );
         
-        // <div className="dropdown-content dropdown-popup" ref="error">
-        //             <p className="dropdown-title">Error</p>
-        //             <div className="dropdown-description">{errors}</div>
-        //             <div className="dropdown-buttons">
-        //                 <button onClick={this.emptyErrors} className="button">Ok</button>
-        //             </div>
-        //         </div>
+        
         
         return (
             <div id="dsl-definition">

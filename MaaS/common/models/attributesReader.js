@@ -48,7 +48,7 @@ module.exports = {
         });
     },
     
-    checkCellKeywordValue: function(keywords, cb) {
+    checkKeywordValue: function(keywords, cb) {
     	var type = keywords.type;
     	var order = keywords.order;
     	var transformation = keywords.transformation;
@@ -83,7 +83,7 @@ module.exports = {
         
         if(columnLabel && (typeof columnLabel !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
+        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(col);
         }
         
         if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date') )
@@ -139,5 +139,9 @@ module.exports = {
         	}
         }
         return cb(error);
+    },
+    
+    checkDocumentKeywordValue: function(keywords, cb) {
+        
     }
 };
