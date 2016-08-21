@@ -279,6 +279,7 @@ module.exports = function(DSL) {
     
     DSL.compileDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
+        var Company = app.models.Company;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
             {
@@ -292,45 +293,57 @@ module.exports = function(DSL) {
                    console.log("> Error finding database of dsl");
                    return cb(err);
                 }
-               
-                var conn = mongoose.connect(database.connString, function(err) {
+                database.company(function(err, company) {
                     if (err)
                     {
-                        var error = {
-                            message: "Failed connecting database"
-                        };
-                        console.log('> Failed connecting database.');
-                        return cb(null, error, null);
+                        console.log("> Error finding company of database");
+                        return cb(err);
                     }
-                });
-               
-                DSL.compile(DSLInstance.source, function(err, expanded) {
-                    if(err)
-                    {
-                        console.log("> DSL compilation error:", err);
-                        conn.disconnect();
-                        return cb(null, err);
-                    }
-                    var callback = function(err, identity, body) {
-                        if(err)
+                    company.users.count(function(err, usersCount) {
+                        if (err)
                         {
-                            conn.disconnect();
-                            return cb(null, err);
+                            console.log("> Error finding number of users in a company");
+                            return cb(err);
                         }
-                        conn.disconnect();
-                        console.log('> DSL compilation processed successfully');
-                        return cb(null, null);
-                    };
-                    try
-                    {
-                        eval(expanded); // DSL.compileCell({...})
-                    }
-                    catch(err)
-                    {
-                        conn.disconnect();
-                        console.log("> DSL compilation error:", err);
-                        return cb(null, err.toString());
-                    }
+                        var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
+                            if (err)
+                            {
+                                var error = {
+                                    message: "Failed connecting database"
+                                };
+                                console.log('> Failed connecting database:', err);
+                                return cb(null, error, null);
+                            }
+                        });
+                        DSL.compile(DSLInstance.source, function(err, expanded) {
+                            if(err)
+                            {
+                                console.log("> DSL compilation error:", err);
+                                conn.close();
+                                return cb(null, err);
+                            }
+                            var callback = function(err, identity, body) {
+                                if(err)
+                                {
+                                    conn.close();
+                                    return cb(null, err);
+                                }
+                                conn.close();
+                                console.log('> DSL compilation processed successfully');
+                                return cb(null, null);
+                            };
+                            try
+                            {
+                                eval(expanded); // DSL.compileCell({...})
+                            }
+                            catch(err)
+                            {
+                                conn.close();
+                                console.log("> DSL compilation error:", err);
+                                return cb(null, err.toString());
+                            }
+                        });
+                    });
                 });
             });
         });
@@ -349,15 +362,6 @@ module.exports = function(DSL) {
             http: { verb: 'post', path: '/:id/compileDefinition' }
         }
     );
-    
-    /*
-    
-    Compilo -> compileDefinition -> compile -> macro -> compileXXX -> err / null
-    
-    Eseguo -> executeDefinition -> compile -> macro -> compileXXX -> err / null
-                                -> executeXXX -> err / result
-                                                    
-    */
     
     DSL.executeDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
@@ -390,14 +394,14 @@ module.exports = function(DSL) {
                     if(err)
                     {
                         console.log("> DSL compilation error:", err);
-                        conn.disconnect();
+                        conn.close();
                         return cb(null, err, null);
                     }
                     
                     var callback = function(err, identity, body) {
                         if(err)
                         {
-                            conn.disconnect();
+                            conn.close();
                             console.log("> DSL execution stopped: compilation errors");
                             return cb(null, err, null);
                         }
@@ -407,7 +411,7 @@ module.exports = function(DSL) {
                             {
                                 case "Cell":
                                     DSL.executeCell(identity, body, conn, function(error, data){
-                                        conn.disconnect();
+                                        conn.close();
                                         if(error)
                                         {
                                             console.log("> DSL execution error:", error);
@@ -425,7 +429,7 @@ module.exports = function(DSL) {
                                     break;
                                 case "Document":
                                     DSL.executeDocument(identity, body, conn, function(error, data) {
-                                        conn.disconnect();
+                                        conn.close();
                                         if (error)
                                         {
                                             console.log("> DSL execution error:", error);
@@ -450,7 +454,7 @@ module.exports = function(DSL) {
                     }
                     catch(err)
                     {
-                        conn.disconnect();
+                        conn.close();
                         console.log("> DSL execution stopped:", err);
                         return cb(null, err.toString(), null);
                     }
@@ -494,6 +498,10 @@ module.exports = function(DSL) {
                 if(error.match(/Action/g))
                 {
                     message = "Action must define at least \"Export\" or \"SendEmail\"";
+                }
+                if(error.match(/Multiple actions/g))
+                {
+                    message = "Multiple actions defined, action must be unique";
                 }
                 if(error.match(/replacement values for syntax template must not be null or undefined/g))
                 {
@@ -970,7 +978,7 @@ module.exports = function(DSL) {
             isStatic: true,
             accepts : [
                 { arg: 'identity', type: 'object', required: true, description: 'Document identity' },
-                { arg: 'rows', type: 'object', required: true, description: 'Document body' },
+                { arg: 'rows', type: 'object', required: true, description: 'Document rows' },
                 { arg: 'action', type: 'object', required: true, description: 'Document action'}
             ],
             returns: [
@@ -987,10 +995,10 @@ module.exports = function(DSL) {
         {
             data.action = body.action;
         }
+        var collection = conn.model(identity.table, DocumentSchema);
+        var mongoose_query;
         if(body.rows.length == 0)   // Document without rows
         {
-            var collection = conn.model(identity.table, DocumentSchema);
-            var mongoose_query;
             if(identity.query)
             {
                 mongoose_query = collection.find(identity.query, { _id: 0});
@@ -1043,8 +1051,6 @@ module.exports = function(DSL) {
         }
         else    //Document with rows
         {
-            var collection = conn.model(identity.table, DocumentSchema);
-            var mongoose_query;
             if(identity.query)
             {
                 mongoose_query = collection.find(identity.query, { _id: 0});
@@ -1197,6 +1203,64 @@ module.exports = function(DSL) {
             ]
         }
     );
+    
+    DSL.compileCollection = function(identity, columns, document, action, cb) {
+        
+        
+        
+        //document obj
+        // columns array
+    };
+    
+    DSL.remoteMethod(
+        'compileCollection',
+        {
+            description: "Compile a Collection macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Collection identity' },
+                { arg: 'columns', type: 'object', required: true, description: 'Collection columns' },
+                { arg: 'document', type: 'object', required: true, description: 'Collection document' },
+                { arg: 'action', type: 'object', required: true, description: 'Collection action'}
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'identity', type: 'Object' },
+                { arg: 'body', type: 'Object' }
+            ]
+        }
+    );
+    
+    DSL.executeCollection = function(identity, body, conn, cb) {
+        
+        
+        
+        
+    };
+    
+    DSL.remoteMethod(
+        'executeCollection',
+        {
+            description: "Execute a Collection macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'object', required: true, description: 'Collection identity' },
+                { arg: 'body', type: 'object', required: true, description: 'Collection body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ]
+        }
+    );
+    
+    
+    
+    
+    
+    
+    
+    
     
     /* -------------------------------- COLLECTION -------------------------------- 
     

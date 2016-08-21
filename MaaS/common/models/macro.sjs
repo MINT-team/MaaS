@@ -188,3 +188,75 @@ syntax column = function (ctx) {
     tot = #`{${identity}}`;
     return tot;
 }
+
+syntax Collection = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
+        throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+    let columns = #``;
+    let action = #``;
+    let document = #``;
+    
+    // read itentity
+    for(let item of params)
+    {
+        params.next();      // salta ':'
+        identity = identity.concat(#`${item}: ${params.next().value}`);
+        params.next(); // salta ','
+    }
+    
+    // read body
+    ctxItem = ctx.next();
+    if(ctxItem.done == false)
+    {
+        ctxItem = ctxItem.value;
+        if(!ctxItem.isBraces())     // check for braces
+            throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+        params = ctxItem.inner();
+        let items = ctxItem.inner();
+        let found = false;
+        let afterDocument = false;
+        for(let item of items)
+        {
+            let expr = params.expand('expr');
+            if(item.isIdentifier('column'))
+            {
+                columns = columns.concat(#`${expr.value}`);
+                items.next();
+            }
+            else if(item.isIdentifier('Document'))
+            {
+                document = document.concat(#`${expr.value}`);
+                items.next();
+                afterDocument = true;
+            }
+            else if(item.isIdentifier('action'))
+            {
+                if(!found)
+                {
+                    action = action.concat(#`${expr.value}`);
+                    items.next();
+                    found = true;
+                }
+                else
+                    throw new Error('Multiple actions defined, action must be unique');
+            }
+            else
+            {
+                if(afterDocument == true && item.isBraces())
+                    items.next();
+                else                
+                    throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);             
+            }
+        }        
+    }
+    if(action != #``)
+        tot = #`DSL.compileCollection({${identity}}, [${columns}], ${document}, ${action}, callback)`;
+    else
+        tot = #`DSL.compileCollection({${identity}}, [${columns}], ${document}, {}, callback)`;
+    return tot;
+}
