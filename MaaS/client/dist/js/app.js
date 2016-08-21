@@ -168,7 +168,10 @@ var RequestSessionActionCreator = {
   },
 
   login: function login(email, password) {
-    WebAPIUtils.login(email, password);
+    var impersonate = arguments.length <= 2 || arguments[2] === undefined ? "false" : arguments[2];
+
+    window.alert("mandata action di impersonificazione");
+    WebAPIUtils.login(email, password, impersonate);
   },
 
   invite: function invite(sender, company, role, email) {
@@ -2481,6 +2484,7 @@ function getState() {
         definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
         data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
         label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+        action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
         queried: true
     };
 }
@@ -2574,6 +2578,7 @@ var ExecuteDSL = React.createClass({
                 );
             }
             if (definitionType == "Document") {
+                console.log(this.state.action);
                 console.log(data[0]);
                 content = React.createElement(
                     'div',
@@ -7216,25 +7221,256 @@ module.exports = DatabaseManagement;
 // ==========================================
 
 var React = require('react');
+var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+
+var ReactBSTable = require('react-bootstrap-table');
+var BootstrapTable = ReactBSTable.BootstrapTable;
+var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
+
+function getState() {
+    return {
+        users: UserStore.getAllUsers(),
+        errors: UserStore.getErrors(),
+        isLogged: SessionStore.isLogged(),
+        type: "All"
+    };
+}
 
 var ImpersonateUser = React.createClass({
-  displayName: 'ImpersonateUser',
+    displayName: 'ImpersonateUser',
 
-  render: function render() {
-    //       <div id="dashButton"> Internal database management </div>
-    //       <div id="dashButton"> Impersonate other users </div>
-    return React.createElement(
-      'div',
-      null,
-      'IMPERSONATE'
-    );
-  }
+
+    getInitialState: function getInitialState() {
+        return getState();
+    },
+
+    componentWillMount: function componentWillMount() {
+        RequestUserActionCreator.getUsers(); //Recovery all the users
+        UserStore.addChangeListener(this._onChange);
+        UserStore.addDeleteListener(this._onChange);
+        UserStore.addUserLoadListener(this._onChange);
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        UserStore.removeChangeListener(this._onChange);
+        UserStore.removeDeleteListener(this._onChange);
+        UserStore.removeUserLoadListener(this._onChange);
+    },
+
+    _onChange: function _onChange() {
+        this.setState(getState());
+    },
+
+    buttonFormatter: function buttonFormatter(cell, row) {
+        var errors;
+        if (this.state.errors.length > 0) {
+            errors = React.createElement(
+                'span',
+                { id: 'errors' },
+                this.state.errors
+            );
+        }
+
+        var onClickImpersonate = function onClickImpersonate() {
+            window.alert(row.password);
+            RequestSessionActionCreator.logout(localStorage.getItem('accessToken'));
+            RequestSessionActionCreator.login(row.email, row.password, "true");
+        };
+
+        return React.createElement(
+            'div',
+            { className: 'table-buttons' },
+            React.createElement(
+                'i',
+                { onClick: onClickImpersonate, id: 'impersonate-button', className: 'material-icons md-24' },
+                ''
+            )
+        );
+    },
+
+    onAllClick: function onAllClick() {
+        this.refs.table.handleFilterData({});
+        this.setState({ type: "All" });
+    },
+
+    onOwnersClick: function onOwnersClick() {
+        this.refs.table.handleFilterData({
+            role: 'Owner'
+        });
+        this.setState({ type: "Owner" });
+    },
+
+    onAdministratorsClick: function onAdministratorsClick() {
+        this.refs.table.handleFilterData({
+            role: 'Administrator'
+        });
+        this.setState({ type: "Administrator" });
+    },
+
+    onMembersClick: function onMembersClick() {
+        this.refs.table.handleFilterData({
+            role: 'Member'
+        });
+        this.setState({ type: "Member" });
+    },
+
+    onGuestsClick: function onGuestsClick() {
+        this.refs.table.handleFilterData({
+            role: 'Guest'
+        });
+        this.setState({ type: "Guest" });
+    },
+
+    render: function render() {
+
+        if (!this.state.isLogged) {
+            return React.createElement(AuthorizationRequired, null);
+        }
+        var title, content;
+        if (this.props.children) {
+            content = this.props.children;
+        } else {
+            // SideBar initialization
+            var all = {
+                label: "All",
+                onClick: this.onAllClick,
+                icon: React.createElement(
+                    'i',
+                    { className: 'material-icons md-24' },
+                    ''
+                )
+            };
+
+            var owner = {
+                label: "Owners",
+                onClick: this.onOwnersClick,
+                icon: React.createElement(
+                    'i',
+                    { className: 'material-icons md-24' },
+                    ''
+                )
+            };
+
+            var administrators = {
+                label: "Administrators",
+                onClick: this.onAdministratorsClick,
+                icon: React.createElement(
+                    'i',
+                    { className: 'material-icons md-24' },
+                    ''
+                )
+            };
+            var members = {
+                label: "Members",
+                onClick: this.onMembersClick,
+                icon: React.createElement(
+                    'i',
+                    { className: 'material-icons md-24' },
+                    ''
+                )
+            };
+            var guests = {
+                label: "Guests",
+                onClick: this.onGuestsClick,
+                icon: React.createElement(
+                    'i',
+                    { className: 'material-icons md-24' },
+                    ''
+                )
+            };
+
+            var data = [];
+            var selectRowProp = {
+                mode: "checkbox",
+                clickToSelect: true,
+                bgColor: "rgba(144, 238, 144, 0.42)"
+            };
+
+            var options = {
+                noDataText: "There are no users to display"
+            };
+
+            var sidebarData = [all, owner, administrators, members, guests];
+            if (this.state.users && this.state.users.length > 0) {
+                this.state.users.forEach(function (user, i) {
+                    data[i] = {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role,
+                        companyName: user.companyName,
+                        companyId: user.companyId,
+                        password: user.password
+                    };
+                });
+            }
+
+            title = "Manage users";
+            content = React.createElement(
+                'div',
+                { id: 'manage-dsl' },
+                React.createElement(Sidebar, { title: 'Users filter', data: sidebarData }),
+                React.createElement(
+                    'div',
+                    { className: 'container sidebar-container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        title
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'table-top' },
+                        React.createElement(
+                            'p',
+                            { id: 'filter-type' },
+                            this.state.type
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'table' },
+                        React.createElement(
+                            BootstrapTable,
+                            { ref: 'table', data: data, pagination: true,
+                                search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
+                            React.createElement(
+                                TableHeaderColumn,
+                                { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
+                                'Email'
+                            ),
+                            React.createElement(
+                                TableHeaderColumn,
+                                { dataField: 'role', dataSort: true, columnClassName: 'roleColumn' },
+                                'Role'
+                            ),
+                            React.createElement(
+                                TableHeaderColumn,
+                                { dataField: 'companyName', dataSort: true },
+                                'Company'
+                            ),
+                            React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter, columnClassName: 'buttonColumn' })
+                        )
+                    )
+                )
+            );
+        }
+        return React.createElement(
+            'div',
+            { id: 'dsl' },
+            content
+        );
+    }
 });
 
 module.exports = ImpersonateUser;
 
-},{"../Sidebar.react.jsx":43,"react":370}],50:[function(require,module,exports){
+},{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],50:[function(require,module,exports){
 'use strict';
 
 // Name: {UsersManagement.react.jsx}
@@ -7309,7 +7545,7 @@ var usersManagement = React.createClass({
                 this.state.errors
             );
         }
-        // funzioni utili all'eliminazione di una company
+        // funzioni utili all'eliminazione di un utente
         var instance = this;
         var onClickDelete = function onClickDelete() {
             if (instance.state.errors.length > 0) {

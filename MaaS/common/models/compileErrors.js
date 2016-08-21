@@ -52,5 +52,9 @@ module.exports = {
     
     notStringError: function(value) {
         return "Type error: " + value + "must be a string";
+    },
+    
+    wrongActionTypeError: function(type) {
+        return "Action error: "+ type + "is unknown. It must be 'csv', 'json', 'true' or 'false'";
     }
 };

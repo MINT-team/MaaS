@@ -65,6 +65,30 @@ syntax row = function (ctx) {
     return tot;
 }
 
+syntax action = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
+        throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+    let empty = true;   
+        
+    // read itentity
+    for(let item of params)
+    {      
+        empty = false;
+        params.next();      // salta ':'
+        identity = identity.concat(#`${item}: ${params.next().value}`);
+        params.next(); // salta ','
+    }
+    if(empty)
+        throw new Error("Action must define at least \"Export\" or \"SendEmail\"");
+    tot = #`{${identity}}`;
+    return tot;
+}
+
 syntax Document = function (ctx) {
     let ctxItem = ctx.next().value;
     if (!ctxItem.isParens()) // check for parens
@@ -73,7 +97,8 @@ syntax Document = function (ctx) {
     
     let tot = #``;
     let identity = #``;
-    let body = #``;
+    let rows = #``;
+    let action = #``;
     
     // read itentity
     for(let item of params)
@@ -92,13 +117,25 @@ syntax Document = function (ctx) {
             throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
         params = ctxItem.inner();
         let items = ctxItem.inner();
+        let found = false;
         for(let item of items)
-        {            
+        { 
+            let expr = params.expand('expr');
             if(item.isIdentifier('row'))
             {
-                let expr = params.expand('expr');
-                body = body.concat(#`${expr.value}`);
+                rows = rows.concat(#`${expr.value}`);
                 items.next();
+            }
+            else if(item.isIdentifier('action'))
+            {
+                if(!found)
+                {
+                    action = action.concat(#`${expr.value}`);
+                    items.next();
+                    found = true;
+                }
+                else
+                    throw new Error('Multiple actions defined, action must be unique');
             }
             else
             {
@@ -119,6 +156,35 @@ syntax Document = function (ctx) {
         }
         */
     }
-    tot = #`DSL.compileDocument({${identity}}, [${body}], callback)`;
+    if(action != #``)
+        tot = #`DSL.compileDocument({${identity}}, [${rows}], ${action}, callback)`;
+    else
+        tot = #`DSL.compileDocument({${identity}}, [${rows}], {}, callback)`;
+    return tot;
+}
+
+syntax column = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
+        throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+    let body = #``;
+    
+    // read itentity
+    for(let item of params)
+    {
+        params.next();      // salta ':'
+        if(item.val() == 'transformation')
+        {
+            identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
+        }
+        else
+            identity = identity.concat(#`${item}: ${params.next().value}`);
+        params.next(); // salta ','
+    }
+    tot = #`{${identity}}`;
     return tot;
 }

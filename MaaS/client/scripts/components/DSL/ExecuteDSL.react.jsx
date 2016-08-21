@@ -24,6 +24,7 @@ function getState() {
             definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
             data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
             label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+            action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
             queried: true
     };
 }
@@ -112,6 +113,7 @@ var ExecuteDSL = React.createClass({
             }
             if(definitionType == "Document")
             {
+                console.log(this.state.action);
                 console.log(data[0]);
                 content = (
                     <div id="dsl-data-table" className="document-table-view">

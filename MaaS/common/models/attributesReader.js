@@ -59,6 +59,8 @@ module.exports = {
     	var sortby = keywords.sortby;
     	var table = keywords.table;
     	var columnLabel = keywords.columnLabel;
+    	var Export = keywords.Export;
+    	var SendEmail = keywords.SendEmail;
     	
         var error = {};
         if(name && (typeof name !== 'string'))
@@ -83,7 +85,7 @@ module.exports = {
         
         if(columnLabel && (typeof columnLabel !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(col);
+        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
         }
         
         if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date') )
@@ -104,6 +106,15 @@ module.exports = {
         if(query && (typeof query !== 'object') )
         {
             error.wrongQueryErrorMessage = CompileErrors.queryError(query);
+        }
+        
+        if (Export && (Export != "csv" && Export != "json" && Export !== true && Export !== false))
+        {
+            error.wrongExportTypeErrorMessage = CompileErrors.wrongActionTypeError(Export);
+        }
+        if (SendEmail && (SendEmail != "csv" && SendEmail != "json" && SendEmail !== true && SendEmail != false))
+        {
+            error.wrongSendEmailTypeErrorMessage = CompileErrors.wrongActionTypeError(SendEmail);
         }
         
         if(value)
@@ -139,9 +150,5 @@ module.exports = {
         	}
         }
         return cb(error);
-    },
-    
-    checkDocumentKeywordValue: function(keywords, cb) {
-        
     }
 };
