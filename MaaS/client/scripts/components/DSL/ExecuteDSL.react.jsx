@@ -24,6 +24,7 @@ function getState() {
             definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
             data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
             label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+            types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
             action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
             queried: true
     };
@@ -37,7 +38,8 @@ var ExecuteDSL = React.createClass({
             isLogged: SessionStore.isLogged(),
             definitonId: this.props.params.definitionId,
             data: null,
-            queried: false
+            queried: false,
+            indexTypes: 0
         };
     },
     
@@ -52,6 +54,35 @@ var ExecuteDSL = React.createClass({
     
     _onChange: function() {
         this.setState(getState());
+        this.setState({indexTypes: this.state.types.length});
+    },
+    
+    dataFormatter: function(cell, row) {
+        var content;
+        /*
+        if ( == "string")
+        {
+            
+        }
+        else if(row.type == "image")
+        {
+            
+        }
+        else if (row.type == "link")
+        {
+            
+        }
+        else if (row.type == "date")
+        {
+            
+        }
+        else if (row.type == "number")
+        {
+            
+        }
+        */
+        return cell;
+        
     },
     
     render: function() {
@@ -84,7 +115,23 @@ var ExecuteDSL = React.createClass({
             //     data.push(this.state.data);
             // }
             
-            console.log(columns);
+            /*
+            [
+                {
+                    type: string
+                    label: value
+                },
+                {
+                    
+                }
+            
+            ]
+            
+            
+            */
+            
+            
+            //console.log(columns);
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -104,11 +151,10 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
                         <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
                             {columns.map((column) => 
-                                <TableHeaderColumn key={column} dataField={column} dataSort={definitionType == "Cell" ? false : true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} dataSort={definitionType == "Cell" ? false : true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
                             )}
                         </BootstrapTable>
                     </div>
-                    
                 );
             }
             if(definitionType == "Document")

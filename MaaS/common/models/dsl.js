@@ -647,7 +647,7 @@ module.exports = function(DSL) {
                 AttributesReader.readRequiredAttributes(identity, ['type', 'name', 'table'], function(missingRequiredIdentityAttributesError) {
                     var keywordsValue = {
                         type: identity.type, 
-                        transformation: identity.transformation, 
+                        transformation: identity.transformation,
                         order: identity.order, 
                         query: identity.query,
                         name: identity.name,
@@ -748,6 +748,7 @@ module.exports = function(DSL) {
                             {
                                 data.label = identity.label;
                             }
+                            data.types = [identity.type];
                             if (identity.columnLabel)
                             {
                                 data.result = [
@@ -778,7 +779,7 @@ module.exports = function(DSL) {
             {
                 data.label = identity.label;
             }
-            data.type = identity.type;
+            data.types = [identity.type];
             if(identity.transformation)
             {
                 var transformedValue;

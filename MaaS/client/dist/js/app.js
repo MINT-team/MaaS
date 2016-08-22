@@ -2510,6 +2510,7 @@ function getState() {
         definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
         data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
         label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
+        types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
         action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
         queried: true
     };
@@ -2525,7 +2526,8 @@ var ExecuteDSL = React.createClass({
             isLogged: SessionStore.isLogged(),
             definitonId: this.props.params.definitionId,
             data: null,
-            queried: false
+            queried: false,
+            indexTypes: 0
         };
     },
 
@@ -2540,9 +2542,39 @@ var ExecuteDSL = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
+        this.setState({ indexTypes: this.state.types.length });
+    },
+
+    dataFormatter: function dataFormatter(cell, row) {
+        var content;
+        /*
+        if ( == "string")
+        {
+            
+        }
+        else if(row.type == "image")
+        {
+            
+        }
+        else if (row.type == "link")
+        {
+            
+        }
+        else if (row.type == "date")
+        {
+            
+        }
+        else if (row.type == "number")
+        {
+            
+        }
+        */
+        return cell;
     },
 
     render: function render() {
+        var _this = this;
+
         if (!this.state.isLogged) {
             return React.createElement(AuthorizationRequired, null);
         }
@@ -2571,7 +2603,22 @@ var ExecuteDSL = React.createClass({
             //     data.push(this.state.data);
             // }
 
-            console.log(columns);
+            /*
+            [
+                {
+                    type: string
+                    label: value
+                },
+                {
+                    
+                }
+            
+            ]
+            
+            
+            */
+
+            //console.log(columns);
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -2595,7 +2642,7 @@ var ExecuteDSL = React.createClass({
                         columns.map(function (column) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: column, dataField: column, dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
+                                { key: column, dataField: column, dataFormat: _this.dataFormatter, dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
                                 column
                             );
                         } //column.charAt(0).toUpperCase() + column.slice(1)
