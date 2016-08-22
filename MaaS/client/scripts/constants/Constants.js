@@ -55,6 +55,7 @@ module.exports = {
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
     CHANGE_COMPANY_NAME_RESPONSE: null,
+    GET_DATABASES_COUNT: null,
     
     // Super Admin
     

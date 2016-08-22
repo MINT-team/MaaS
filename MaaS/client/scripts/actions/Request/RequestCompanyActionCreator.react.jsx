@@ -25,10 +25,13 @@ var RequestCompanyActionCreator = {
         WebAPIUtils.getCompanies();
     },
     
-    changeCompanyName: function(companyId, name){
+    changeCompanyName: function(companyId, name) {
         WebAPIUtils.changeCompanyName(companyId, name);
-    }
+    },
     
+    getDatabasesCount: function(companyId) {
+        WebAPIUtils.getDatabasesCount(companyId);
+    }
 };
 
 module.exports = RequestCompanyActionCreator;

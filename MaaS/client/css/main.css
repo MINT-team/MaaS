@@ -1711,6 +1711,13 @@ input {
 .externaldb-form #string{
     margin-left: 1%;
     width: 90%;
+    margin-top: 1%;
+    margin-bottom: 3%;
+}
+
+.externaldb-form #name{
+    margin-left: 1%;
+    margin-top: 5%;
 }
 
 

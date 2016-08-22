@@ -108,11 +108,11 @@ module.exports = {
             error.wrongQueryErrorMessage = CompileErrors.queryError(query);
         }
         
-        if (Export && (Export != "csv" && Export != "json" && Export !== true && Export !== false))
+        if (Export && (Export != "csv" && Export != "json" && Export !== "true" && Export !== "false" && Export !== true && Export !== false))
         {
             error.wrongExportTypeErrorMessage = CompileErrors.wrongActionTypeError(Export);
         }
-        if (SendEmail && (SendEmail != "csv" && SendEmail != "json" && SendEmail !== true && SendEmail != false))
+        if (SendEmail && (SendEmail != "csv" && SendEmail != "json" && SendEmail !== "true" && SendEmail != "false" && SendEmail !== true && SendEmail != false))
         {
             error.wrongSendEmailTypeErrorMessage = CompileErrors.wrongActionTypeError(SendEmail);
         }

@@ -84,6 +84,12 @@
       "principalId": "Administrator",
       "permission": "ALLOW",
       "property": "__updateById__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "__count__externalDatabases"
     }
   ],
   "methods": {}

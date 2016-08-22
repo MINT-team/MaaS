@@ -113,37 +113,49 @@ syntax Document = function (ctx) {
     if(ctxItem.done == false)
     {
         ctxItem = ctxItem.value;
-        if(!ctxItem.isBraces())     // check for braces
+        if(!ctxItem.isBraces() && (ctxItem.isParens() || ctxItem.isBrackets()))     // check for braces
             throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
-        params = ctxItem.inner();
-        let items = ctxItem.inner();
-        let found = false;
-        for(let item of items)
-        { 
-            let expr = params.expand('expr');
-            if(item.isIdentifier('row'))
-            {
-                rows = rows.concat(#`${expr.value}`);
-                items.next();
-            }
-            else if(item.isIdentifier('action'))
-            {
-                if(!found)
+        else if(ctxItem.isBraces())
+        {
+            params = ctxItem.inner();
+            let items = ctxItem.inner();
+            let found = false;
+            for(let item of items)
+            { 
+                if(item.isIdentifier('row'))
                 {
-                    action = action.concat(#`${expr.value}`);
+                    let expr = params.expand('expr');
+                    rows = rows.concat(#`${expr.value}`);
                     items.next();
-                    found = true;
+                }
+                else if(item.isIdentifier('action'))
+                {
+                    if(!found)
+                    {
+                        let expr = params.expand('expr');
+                        action = action.concat(#`${expr.value}`);
+                        items.next();
+                        found = true;
+                    }
+                    else
+                        throw new Error('Multiple actions defined, action must be unique');
                 }
                 else
-                    throw new Error('Multiple actions defined, action must be unique');
-            }
-            else
-            {
-                throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
-                //params.next();                
+                {
+                    throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
+                    //params.next();                
+                }
             }
         }
-        
+        //throw new Error('loga: ' + #`${rows}`);
+        //return #`DSL.compileDocument({${identity}}, [${rows}], ${action}, callback)`;
+        /*let count = 0;
+        while(!ctxItem.done)
+        {
+            count++;
+            ctxItem = ctx.next();
+        }*/
+        //throw count;
         /*
         let expr = params.expand('expr');
         let item = items.next().value;
@@ -156,14 +168,15 @@ syntax Document = function (ctx) {
         }
         */
     }
+    
     if(action != #``)
-        tot = #`DSL.compileDocument({${identity}}, [${rows}], ${action}, callback)`;
+        tot = #`DSL.compileDocument({${identity}}, [${rows}], ${action}, callback);`;
     else
-        tot = #`DSL.compileDocument({${identity}}, [${rows}], {}, callback)`;
+        tot = #`DSL.compileDocument({${identity}}, [${rows}], {}, callback);`;
     return tot;
 }
 
-syntax column = function (ctx) {
+syntax column = function (ctx) { 
     let ctxItem = ctx.next().value;
     if (!ctxItem.isParens()) // check for parens
         throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
@@ -219,12 +232,16 @@ syntax Collection = function (ctx) {
         params = ctxItem.inner();
         let items = ctxItem.inner();
         let found = false;
-        let afterDocument = false;
+        let afterDocument = false;let passed = false;
         for(let item of items)
         {
             let expr = params.expand('expr');
+            if(passed)   
+                return #`${expr.value}`;
+            
             if(item.isIdentifier('column'))
             {
+            
                 columns = columns.concat(#`${expr.value}`);
                 items.next();
             }
@@ -248,8 +265,11 @@ syntax Collection = function (ctx) {
             else
             {
                 if(afterDocument == true && item.isBraces())
-                    items.next();
-                else
+                {
+                    afterDocument = false;
+                    passed = true;
+                }
+                else                
                     throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);             
             }
         }        
@@ -259,40 +279,5 @@ syntax Collection = function (ctx) {
     else
         tot = #`DSL.compileCollection({${identity}}, [${columns}], ${document}, {}, callback)`;
     return tot;
-}
-
-
-Collection(
-    name: "customers",
-    label: "JuniorCustomers",
-    id: "Junior",
-    Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-) {
-    column(
-        name: "3"
-    )
-    action(
-        Export: "true",
-        SendEmail: "true"
-    )
-    column(
-        name: "4"
-    )
-    Document(
-        table: "prova"
-    ){
-        row(
-            name: "asd"
-        )
-        action(
-            SendEmail: "true"
-        )
-    }
-    column(
-        name: "4"
-    )
+    
 }

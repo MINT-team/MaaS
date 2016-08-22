@@ -37,20 +37,21 @@ var Company = React.createClass({
           role: UserStore.getRole()
       };
   },
-
-  componentDidMount: function() {
-      SessionStore.addChangeListener(this._onChange);
-      CompanyStore.addChangeListener(this._onChange);
-      RequestCompanyActionCreator.getUsers(this.state.id);
+  
+  componentWillMount: function() {
+    SessionStore.addChangeListener(this._onChange);
+    CompanyStore.addChangeListener(this._onChange);
+    RequestCompanyActionCreator.getUsers(this.state.id);
+    RequestCompanyActionCreator.getDatabasesCount(this.state.id);
   },
 
   componentWillUnmount: function() {
-      SessionStore.removeChangeListener(this._onChange);
-      CompanyStore.removeChangeListener(this._onChange);
+    SessionStore.removeChangeListener(this._onChange);
+    CompanyStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function() {
-      this.setState(getState());
+    this.setState(getState());
   },
 
   render: function() {

@@ -12,12 +12,14 @@ var request = require('superagent');
 
 function _getErrors(json) {
   var error, message;
-    if(json.message) {
-        message = json.message;
-        // Other cases
-        if(!error) {
-            error = message;
-        }
+    if(json.message)
+    {
+      message = json.message;
+      // Other cases
+      if(!error)
+      {
+        error = message;
+      }
     }
     return error;
 }
@@ -32,17 +34,18 @@ module.exports = {
       .set('Accept', 'application/json')
       .set('Authorization', localStorage.getItem('accessToken'))
       .send({ id: id })
-      .end(function(err, res){
-        if(res) {
-            if(res.error) {
-                var errors = _getErrors(res.body.error);
-                ResponseCompanyActionCreator.responseCompanyUsers(null, errors);
-            } else {
-                ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
-            }
-        }
-        if(err){
-          //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+      .end(function(err, res) {
+        if(res)
+        {
+          if(res.error)
+          {
+            var errors = _getErrors(res.body.error);
+            ResponseCompanyActionCreator.responseCompanyUsers(null, errors);
+          }
+          else
+          {
+            ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
+          }
         }
       });
   },
@@ -57,16 +60,20 @@ module.exports = {
       .send({
         email: email
       })
-      .end(function(error, res){
-        if(res) {
-           res = JSON.parse(res.text);
-          if(res.error) {
+      .end(function(error, res) {
+        if(res)
+        {
+          res = JSON.parse(res.text);
+          if(res.error)
+          {
             // res.error.message: errori di loopback e error definito dal remote method
             ResponseCompanyActionCreator.responseDeleteCompany(null, res.error.message);
-          } else {
+          }
+          else
+          {
             ResponseCompanyActionCreator.responseDeleteCompany(res.id, null);
           }
-        } 
+        }
       });
   },
   
@@ -81,20 +88,24 @@ module.exports = {
               }
         })
       .end(function(err, res){
-        if(res) {
+        if(res)
+        {
           console.log(res);
-            if(res.error) {
-                var errors = _getErrors(res.body.error);
-                ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
-            } else {
-                ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
-            }
+          if(res.error)
+          {
+            var errors = _getErrors(res.body.error);
+            ResponseCompanyActionCreator.responseGetCompanies(null, errors);
+          }
+          else
+          {
+            ResponseCompanyActionCreator.responseGetCompanies(res.body, null);
+          }
         }
       });
   },
   
   //change the name of the company wich has id = companyId
-  changeCompanyName: function(companyId, name){
+  changeCompanyName: function(companyId, name) {
      request
       .put(APIEndpoints.COMPANIES + '/' + companyId + '/changeCompanyName')
       .set('Accept','application/json')
@@ -117,9 +128,27 @@ module.exports = {
           }
         }
       });
-
+  },
+  
+  getDatabasesCount: function(companyId) {
+    request
+      .get(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/count')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .end(function(err, res){
+        if(res)
+        {
+          res = JSON.parse(res.text);
+          console.log(res);
+          if(res.error)
+          {
+            ResponseCompanyActionCreator.responseGetDatabasesCount(null, res.error.message);
+          }
+          else
+          {
+            ResponseCompanyActionCreator.responseGetDatabasesCount(res.count, null);
+          }
+        }
+      });
   }
-  
-  
-  
 };

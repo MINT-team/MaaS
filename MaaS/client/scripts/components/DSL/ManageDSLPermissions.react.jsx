@@ -40,7 +40,7 @@ var ManageDSLPermissions = React.createClass({
         };
     },
     
-    componentDidMount: function() {
+    componentWillMount: function() {
         DSLStore.addChangeListener(this._onChange);
         RequestDSLActionCreator.loadUserList(this.props.params.definitionId, CompanyStore.getId());
     },

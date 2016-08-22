@@ -28,7 +28,7 @@ var ResponseCompanyActionCreator = {
         });
     },
     
-    responseCompanyCompanies: function(json, errors) {
+    responseGetCompanies: function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.COMPANIES,
           json: json,
@@ -42,7 +42,15 @@ var ResponseCompanyActionCreator = {
             data: data,
             errors: errors
         });
-    }
+    },
+    
+    responseGetDatabasesCount: function(count, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_DATABASES_COUNT,
+            data: count,
+            errors: errors
+        });
+    },
     
 };
 

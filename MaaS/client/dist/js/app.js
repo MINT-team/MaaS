@@ -30,8 +30,11 @@ var RequestCompanyActionCreator = {
 
     changeCompanyName: function changeCompanyName(companyId, name) {
         WebAPIUtils.changeCompanyName(companyId, name);
-    }
+    },
 
+    getDatabasesCount: function getDatabasesCount(companyId) {
+        WebAPIUtils.getDatabasesCount(companyId);
+    }
 };
 
 module.exports = RequestCompanyActionCreator;
@@ -308,7 +311,7 @@ var ResponseCompanyActionCreator = {
         });
     },
 
-    responseCompanyCompanies: function responseCompanyCompanies(json, errors) {
+    responseGetCompanies: function responseGetCompanies(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.COMPANIES,
             json: json,
@@ -320,6 +323,14 @@ var ResponseCompanyActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_COMPANY_NAME_RESPONSE,
             data: data,
+            errors: errors
+        });
+    },
+
+    responseGetDatabasesCount: function responseGetDatabasesCount(count, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_DATABASES_COUNT,
+            data: count,
             errors: errors
         });
     }
@@ -1058,10 +1069,11 @@ var Company = React.createClass({
     };
   },
 
-  componentDidMount: function componentDidMount() {
+  componentWillMount: function componentWillMount() {
     SessionStore.addChangeListener(this._onChange);
     CompanyStore.addChangeListener(this._onChange);
     RequestCompanyActionCreator.getUsers(this.state.id);
+    RequestCompanyActionCreator.getDatabasesCount(this.state.id);
   },
 
   componentWillUnmount: function componentWillUnmount() {
@@ -2569,7 +2581,7 @@ var ExecuteDSL = React.createClass({
                         columns.map(function (column) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: column, dataField: column, dataSort: true, dataAlign: 'center' },
+                                { key: column, dataField: column, dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
                                 column
                             );
                         } //column.charAt(0).toUpperCase() + column.slice(1)
@@ -3190,7 +3202,7 @@ var ManageDSLPermissions = React.createClass({
         };
     },
 
-    componentDidMount: function componentDidMount() {
+    componentWillMount: function componentWillMount() {
         DSLStore.addChangeListener(this._onChange);
         RequestDSLActionCreator.loadUserList(this.props.params.definitionId, CompanyStore.getId());
     },
@@ -4275,17 +4287,12 @@ var Footer = React.createClass({
 						{ className: 'footer-links' },
 						React.createElement(
 							Link,
-							{ to: '/', id: 'home' },
-							' Home '
-						),
-						React.createElement(
-							Link,
 							{ to: '/company' },
 							'Company'
 						),
 						React.createElement(
 							Link,
-							{ to: '/company/externalDatabases' },
+							{ to: '/externalDatabases' },
 							'Database'
 						),
 						React.createElement(
@@ -4318,11 +4325,6 @@ var Footer = React.createClass({
 					React.createElement(
 						'p',
 						{ className: 'footer-links' },
-						React.createElement(
-							Link,
-							{ to: '/', id: 'home' },
-							' Home '
-						),
 						React.createElement(
 							Link,
 							{ to: '/dashboardSuperAdmin' },
@@ -4359,11 +4361,6 @@ var Footer = React.createClass({
 				React.createElement(
 					'p',
 					{ className: 'footer-links' },
-					React.createElement(
-						Link,
-						{ to: '/', id: 'home' },
-						' Home '
-					),
 					React.createElement(
 						Link,
 						{ to: '/login', id: 'login' },
@@ -7936,6 +7933,7 @@ module.exports = {
     DELETE_COMPANY: null,
     GET_COMPANIES: null,
     CHANGE_COMPANY_NAME_RESPONSE: null,
+    GET_DATABASES_COUNT: null,
 
     // Super Admin
 
@@ -8172,6 +8170,7 @@ var _company = {
 };
 var _users = []; // users of the company
 var _companies = JSON.parse(localStorage.getItem('companies')); //all companies in the system
+var databasesCount = localStorage.getItem('databasesCount');
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -8306,7 +8305,12 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             CompanyStore.emitChange();
             break;
-
+        case ActionTypes.GET_DATABASES_COUNT:
+            if (action.errors) _errors = action.errors;else if (action.count) {
+                _errors = [];
+            }
+            CompanyStore.emitChange();
+            break;
     }
 
     return true; // richiesto dal Promise nel Dispatcher
@@ -9346,9 +9350,6 @@ module.exports = {
           ResponseCompanyActionCreator.responseCompanyUsers(res.body, null);
         }
       }
-      if (err) {
-        //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
-      }
     });
   },
 
@@ -9381,9 +9382,9 @@ module.exports = {
         console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
-          ResponseCompanyActionCreator.responseCompanyCompanies(null, errors);
+          ResponseCompanyActionCreator.responseGetCompanies(null, errors);
         } else {
-          ResponseCompanyActionCreator.responseCompanyCompanies(res.body, null);
+          ResponseCompanyActionCreator.responseGetCompanies(res.body, null);
         }
       }
     });
@@ -9404,8 +9405,21 @@ module.exports = {
         }
       }
     });
-  }
+  },
 
+  getDatabasesCount: function getDatabasesCount(companyId) {
+    request.get(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/count').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        console.log(res);
+        if (res.error) {
+          ResponseCompanyActionCreator.responseGetDatabasesCount(null, res.error.message);
+        } else {
+          ResponseCompanyActionCreator.responseGetDatabasesCount(res.count, null);
+        }
+      }
+    });
+  }
 };
 
 },{"../actions/Response/ResponseCompanyActionCreator.react.jsx":7,"../constants/Constants.js":51,"superagent":371}],61:[function(require,module,exports){

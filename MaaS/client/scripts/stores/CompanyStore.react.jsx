@@ -24,6 +24,7 @@ var _company = {
 };
 var _users = [];    // users of the company
 var _companies = JSON.parse(localStorage.getItem('companies')); //all companies in the system
+var databasesCount = localStorage.getItem('databasesCount');
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -80,9 +81,12 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
     switch(action.type) {
 
         case ActionTypes.GET_COMPANY:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else if(action.json) {
+            }
+            else if(action.json)
+            {
                 _errors = []; // empty old errors
                 // set company data
                 _company.id = action.json.id;
@@ -94,9 +98,12 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
 
         case ActionTypes.GET_USERS:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else if(action.json) {
+            }
+            else if(action.json)
+            {
                 _errors = []; // empty old errors
                 // set users of the company
                 _users = action.json;
@@ -105,13 +112,17 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.DELETE_USER:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else {
+            }
+            else
+            {
                 var email = action.email;
                 var index;
                 _users.forEach(function(user, i) {
-                    if(user.email == email) {
+                    if(user.email == email)
+                    {
                         index = i;
                     }
                 });
@@ -123,7 +134,9 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
         case ActionTypes.DELETE_COMPANY:
             if(action.errors) {
                 _errors = action.errors;
-            } else {
+            }
+            else
+            {
                 _errors = [];
                 var i = 0;
                 //removal of the deleted company from the list of the companies
@@ -136,9 +149,12 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.COMPANIES:     //get companies
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
-            } else if(action.json) {
+            }
+            else if(action.json)
+            {
                 _errors = []; // empty old errors
                 _companies = action.json;
                 localStorage.setItem('companies', JSON.stringify(_companies));
@@ -160,7 +176,17 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             CompanyStore.emitChange();
             break;
-            
+        case ActionTypes.GET_DATABASES_COUNT:
+            if (action.errors)
+                _errors = action.errors;
+            else if(action.count)
+            {
+                _errors = [];
+                
+                
+            }
+            CompanyStore.emitChange();
+            break;
     }
 
     return true;  // richiesto dal Promise nel Dispatcher

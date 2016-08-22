@@ -17,7 +17,7 @@ fs.readFile(intepreterFile, function(err, result) {
     else
     {
         macro = result;
-        console.log("> Macro definitions file read correctly.");
+        console.log("> DSL configuration file read correctly");
     }
 });
 
@@ -347,7 +347,11 @@ module.exports = function(DSL) {
                             {
                                 conn.close();
                                 console.log("> DSL compilation error:", err);
-                                return cb(null, err.toString());
+                                var error = err.toString();
+                                if(error.match(/ReferenceError/g) && error.match(/is not defined/g))
+                                    return cb(null, "Syntax error: missing comma before transformation");
+                                else
+                                    return cb(null, error);
                             }
                         });
                     });
@@ -385,86 +389,100 @@ module.exports = function(DSL) {
                    console.log("> Error finding database of dsl");
                    return cb(err);
                 }
-               
-                var conn = mongoose.connect(database.connString, function(err) {
+                database.company(function(err, company) {
                     if (err)
                     {
-                        var error = {
-                            message: "Failed connecting database"
-                        };
-                        console.log('> Failed connecting database.');
-                        return cb(null, error, null);
+                        console.log("> Error finding company of database");
+                        return cb(err);
                     }
-                });
-                
-                DSL.compile(DSLInstance.source, function(err, expanded) {
-                    if(err)
-                    {
-                        console.log("> DSL compilation error:", err);
-                        conn.close();
-                        return cb(null, err, null);
-                    }
-                    
-                    var callback = function(err, identity, body) {
-                        if(err)
+                    company.users.count(function(err, usersCount) {
+                        if (err)
                         {
-                            conn.close();
-                            console.log("> DSL execution stopped: compilation errors");
-                            return cb(null, err, null);
+                            console.log("> Error finding number of users in a company");
+                            return cb(err);
                         }
-                        else
-                        {
-                            switch(DSLInstance.type)
+               
+                        var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
+                            if (err)
                             {
-                                case "Cell":
-                                    DSL.executeCell(identity, body, conn, function(error, data){
-                                        conn.close();
-                                        if(error)
-                                        {
-                                            console.log("> DSL execution error:", error);
-                                            return cb(null, error, null);
-                                        }
-                                        else
-                                        {
-                                            console.log("> DSL execution processed successfully");
-                                            if(!data.label)
-                                                data.label = DSLInstance.name;
-                                            data.definitionType = DSLInstance.type;
-                                            return cb(null, null, data);
-                                        }
-                                    });
-                                    break;
-                                case "Document":
-                                    DSL.executeDocument(identity, body, conn, function(error, data) {
-                                        conn.close();
-                                        if (error)
-                                        {
-                                            console.log("> DSL execution error:", error);
-                                            return cb(null, error, null);
-                                        }
-                                        else
-                                        {
-                                            console.log("> DSL execution processed successfully");
-                                            if(!data.label)
-                                                data.label = DSLInstance.name;
-                                            data.definitionType = DSLInstance.type;
-                                            return cb(null, null, data);
-                                        }
-                                    });
-                                    break;
+                                var error = {
+                                    message: "Failed connecting database"
+                                };
+                                console.log('> Failed connecting database:', err);
+                                return cb(null, error, null);
                             }
-                        }
-                    };
-                    try
-                    {
-                        eval(expanded); // DSL.compile...
-                    }
-                    catch(err)
-                    {
-                        conn.close();
-                        console.log("> DSL execution stopped:", err);
-                        return cb(null, err.toString(), null);
-                    }
+                        });
+                
+                        DSL.compile(DSLInstance.source, function(err, expanded) {
+                            if(err)
+                            {
+                                console.log("> DSL compilation error:", err);
+                                conn.close();
+                                return cb(null, err, null);
+                            }
+                            
+                            var callback = function(err, identity, body) {
+                                if(err)
+                                {
+                                    conn.close();
+                                    console.log("> DSL execution stopped: compilation errors");
+                                    return cb(null, err, null);
+                                }
+                                else
+                                {
+                                    switch(DSLInstance.type)
+                                    {
+                                        case "Cell":
+                                            DSL.executeCell(identity, body, conn, function(error, data){
+                                                conn.close();
+                                                if(error)
+                                                {
+                                                    console.log("> DSL execution error:", error);
+                                                    return cb(null, error, null);
+                                                }
+                                                else
+                                                {
+                                                    console.log("> DSL execution processed successfully");
+                                                    if(!data.label)
+                                                        data.label = DSLInstance.name;
+                                                    data.definitionType = DSLInstance.type;
+                                                    return cb(null, null, data);
+                                                }
+                                            });
+                                            break;
+                                        case "Document":
+                                            DSL.executeDocument(identity, body, conn, function(error, data) {
+                                                conn.close();
+                                                if (error)
+                                                {
+                                                    console.log("> DSL execution error:", error);
+                                                    return cb(null, error, null);
+                                                }
+                                                else
+                                                {
+                                                    console.log("> DSL execution processed successfully");
+                                                    if(!data.label)
+                                                        data.label = DSLInstance.name;
+                                                    data.definitionType = DSLInstance.type;
+                                                    return cb(null, null, data);
+                                                }
+                                            });
+                                            break;
+                                    }
+                                }
+                            };
+                            try
+                            {
+                                eval(expanded); // DSL.compile...
+                            }
+                            catch(err)
+                            {
+                                conn.close();
+                                console.log("> DSL execution stopped:", err);
+                                return cb(null, err.toString(), null);
+                            }
+                        });
+                    });
                 });
             });
         });
@@ -512,7 +530,7 @@ module.exports = function(DSL) {
                 }
                 if(error.match(/replacement values for syntax template must not be null or undefined/g))
                 {
-                    message = "Syntax error. Unknown keyword or missing comma";
+                    message = "Syntax error: unknown keyword or missing comma";
                 }
                 if(error.match(/Unexpected syntax/g))
                 {
@@ -1005,7 +1023,7 @@ module.exports = function(DSL) {
         }
         var collection = conn.model(identity.table, DocumentSchema);
         var mongoose_query;
-        if(body.rows.length == 0)   // Document without rows
+        if(!body.rows || (body.rows && body.rows.length == 0) )   // Document without rows
         {
             if(identity.query)
             {
@@ -1057,7 +1075,7 @@ module.exports = function(DSL) {
                 }
             });
         }
-        else    //Document with rows
+        else if(body.rows && body.rows.length > 0)    //Document with rows
         {
             if(identity.query)
             {

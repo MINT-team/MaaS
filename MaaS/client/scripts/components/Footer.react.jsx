@@ -27,9 +27,8 @@ var Footer = React.createClass({
 	    			<div className="footer-centerLooged">
 						<Link to="/company" id="header-title">{this.props.companyName}</Link>
 						<p className="footer-links">
-							<Link to="/" id="home"> Home </Link>
 							<Link to="/company">Company</Link>
-							<Link to="/company/externalDatabases">Database</Link>
+							<Link to="/externalDatabases">Database</Link>
 							<Link to="/manageDSL">DSL</Link>
 							<Link onClick={this.logout} to="">Logout</Link>
 						</p>
@@ -41,7 +40,6 @@ var Footer = React.createClass({
 	    			<div className="footer-centerLooged">
 						<Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
 						<p className="footer-links">
-							<Link to="/" id="home"> Home </Link>
 							<Link to="/dashboardSuperAdmin">Dashboard</Link>
 							<Link onClick={this.logout} to="">Logout</Link>
 						</p>
@@ -56,7 +54,6 @@ var Footer = React.createClass({
 					<Link to="/" id="header-title">MaaS</Link>
 					<p id="header-description">MongoDB as an Admin Service</p>
 					<p className="footer-links">
-						<Link to="/" id="home"> Home </Link>
 						<Link to="/login" id="login"> Login </Link>
 						<Link to="/register" id="register"> Sign Up </Link>
 					</p>
