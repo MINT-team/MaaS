@@ -34,6 +34,10 @@ var RequestCompanyActionCreator = {
 
     getDatabasesCount: function getDatabasesCount(companyId) {
         WebAPIUtils.getDatabasesCount(companyId);
+    },
+
+    getDSLDefinitionsCount: function getDSLDefinitionsCount(companyId) {
+        WebAPIUtils.getDSLDefinitionsCount(companyId);
     }
 };
 
@@ -333,8 +337,15 @@ var ResponseCompanyActionCreator = {
             data: count,
             errors: errors
         });
-    }
+    },
 
+    responseGetDSLDefinitionsCount: function responseGetDSLDefinitionsCount(data, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_DSLDEFINITION_COUNT,
+            data: data,
+            errors: errors
+        });
+    }
 };
 
 module.exports = ResponseCompanyActionCreator;
@@ -1050,7 +1061,9 @@ function getState() {
     users: CompanyStore.getUsers(),
     errors: CompanyStore.getErrors(),
     isLogged: SessionStore.isLogged(),
-    role: UserStore.getRole()
+    role: UserStore.getRole(),
+    databasesCount: CompanyStore.getDatabasesCount(),
+    DSLDefinitionsCount: CompanyStore.getDSLDefinitionCount()
   };
 }
 
@@ -1074,6 +1087,7 @@ var Company = React.createClass({
     CompanyStore.addChangeListener(this._onChange);
     RequestCompanyActionCreator.getUsers(this.state.id);
     RequestCompanyActionCreator.getDatabasesCount(this.state.id);
+    RequestCompanyActionCreator.getDSLDefinitionsCount(this.state.id);
   },
 
   componentWillUnmount: function componentWillUnmount() {
@@ -1122,8 +1136,8 @@ var Company = React.createClass({
     } else {
       var name = this.state.name;
       var numberOfUsers = this.state.users.length;
-      var numberOfDatabases;
-      var numberOfDSL;
+      var numberOfDatabases = this.state.databasesCount;
+      var numberOfDSL = this.state.DSLDefinitionsCount;
       content = React.createElement(
         'div',
         { className: 'container sidebar-container' },
@@ -7934,6 +7948,7 @@ module.exports = {
     GET_COMPANIES: null,
     CHANGE_COMPANY_NAME_RESPONSE: null,
     GET_DATABASES_COUNT: null,
+    GET_DSLDEFINITION_COUNT: null,
 
     // Super Admin
 
@@ -8171,6 +8186,7 @@ var _company = {
 var _users = []; // users of the company
 var _companies = JSON.parse(localStorage.getItem('companies')); //all companies in the system
 var databasesCount = localStorage.getItem('databasesCount');
+var DSLDefinitionsCount = localStorage.getItem('DSLDefinitionsCount');
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -8217,6 +8233,14 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
 
     getErrors: function getErrors() {
         return _errors;
+    },
+
+    getDatabasesCount: function getDatabasesCount() {
+        return databasesCount;
+    },
+
+    getDSLDefinitionCount: function getDSLDefinitionCount() {
+        return DSLDefinitionsCount;
     }
 
 });
@@ -8295,7 +8319,9 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
 
         case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
-            if (action.errors) _errors = action.errors;else {
+            if (action.errors) {
+                _errors = action.errors;
+            } else {
                 _errors = [];
                 //Correction of the list containing the System companies
                 var i = 0;
@@ -8306,8 +8332,22 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             CompanyStore.emitChange();
             break;
         case ActionTypes.GET_DATABASES_COUNT:
-            if (action.errors) _errors = action.errors;else if (action.count) {
+            if (action.errors) {
+                _errors = action.errors;
+            } else if (action.data) {
                 _errors = [];
+                databasesCount = action.data;
+                localStorage.setItem('databasesCount', databasesCount);
+            }
+            CompanyStore.emitChange();
+            break;
+        case ActionTypes.GET_DSLDEFINITION_COUNT:
+            if (action.errors) {
+                _errors = action.errors;
+            } else if (action.data) {
+                _errors = [];
+                DSLDefinitionsCount = action.data.count;
+                localStorage.setItem('DSLDefinitionsCount', DSLDefinitionsCount);
             }
             CompanyStore.emitChange();
             break;
@@ -9411,11 +9451,22 @@ module.exports = {
     request.get(APIEndpoints.COMPANIES + '/' + companyId + '/externalDatabases/count').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
       if (res) {
         res = JSON.parse(res.text);
-        console.log(res);
         if (res.error) {
           ResponseCompanyActionCreator.responseGetDatabasesCount(null, res.error.message);
         } else {
           ResponseCompanyActionCreator.responseGetDatabasesCount(res.count, null);
+        }
+      }
+    });
+  },
+
+  getDSLDefinitionsCount: function getDSLDefinitionsCount(companyId) {
+    request.get(APIEndpoints.COMPANIES + '/' + companyId + '/getDSLDefinitionsCount').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
+      if (res) {
+        if (res.error) {
+          ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(null, res.error.message);
+        } else {
+          ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.body, null);
         }
       }
     });

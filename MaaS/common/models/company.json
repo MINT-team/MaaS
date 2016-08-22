@@ -90,6 +90,36 @@
       "principalId": "Administrator",
       "permission": "ALLOW",
       "property": "__count__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Member",
+      "permission": "ALLOW",
+      "property": "__count__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Guest",
+      "permission": "ALLOW",
+      "property": "__count__externalDatabases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "getDSLDefinitionsCount"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Guest",
+      "permission": "ALLOW",
+      "property": "getDSLDefinitionsCount"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Member",
+      "permission": "ALLOW",
+      "property": "getDSLDefinitionsCount"
     }
   ],
   "methods": {}

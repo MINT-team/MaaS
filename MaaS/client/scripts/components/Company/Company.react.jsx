@@ -21,7 +21,9 @@ function getState() {
           users: CompanyStore.getUsers(),
           errors: CompanyStore.getErrors(),
           isLogged: SessionStore.isLogged(),
-          role: UserStore.getRole()
+          role: UserStore.getRole(),
+          databasesCount: CompanyStore.getDatabasesCount(),
+          DSLDefinitionsCount: CompanyStore.getDSLDefinitionCount()
       };
 }
 
@@ -43,6 +45,7 @@ var Company = React.createClass({
     CompanyStore.addChangeListener(this._onChange);
     RequestCompanyActionCreator.getUsers(this.state.id);
     RequestCompanyActionCreator.getDatabasesCount(this.state.id);
+    RequestCompanyActionCreator.getDSLDefinitionsCount(this.state.id);
   },
 
   componentWillUnmount: function() {
@@ -80,8 +83,8 @@ var Company = React.createClass({
     {
       var name = this.state.name;
       var numberOfUsers = this.state.users.length;
-      var numberOfDatabases;
-      var numberOfDSL;
+      var numberOfDatabases = this.state.databasesCount;
+      var numberOfDSL = this.state.DSLDefinitionsCount;
       content = (
         <div className="container sidebar-container">
           <p className="container-title">{name}</p>

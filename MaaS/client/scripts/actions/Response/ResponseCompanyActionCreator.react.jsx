@@ -52,6 +52,13 @@ var ResponseCompanyActionCreator = {
         });
     },
     
+    responseGetDSLDefinitionsCount: function(data, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.GET_DSLDEFINITION_COUNT,
+            data: data,
+            errors: errors
+        });
+    }
 };
 
 module.exports = ResponseCompanyActionCreator;

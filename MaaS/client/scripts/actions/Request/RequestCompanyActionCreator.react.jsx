@@ -31,6 +31,10 @@ var RequestCompanyActionCreator = {
     
     getDatabasesCount: function(companyId) {
         WebAPIUtils.getDatabasesCount(companyId);
+    },
+    
+    getDSLDefinitionsCount: function(companyId) {
+        WebAPIUtils.getDSLDefinitionsCount(companyId);
     }
 };
 

@@ -7,11 +7,9 @@
 // ==========================================
 
 var app = require('../../server/server.js');
-var mongoose = require('mongoose');
 
 module.exports = function(Company) {
     
-    // Elimino l'azienda e i relativi utenti
     Company.deleteCompany = function(id, email, cb) {      
         Company.findById(id, function(err, company) {
             if(err || !company)
@@ -75,72 +73,8 @@ module.exports = function(Company) {
             http: { verb: 'delete', path: '/deleteCompany/:id' }
         }
     );
-                
-                /*
-               
-                
-                
-                // Remove DSL of the company
-                var DSL = app.models.DSL;
-                userInstance.dsl({ where: {} }, function(err, DSLList) {
-                    if(err || !DSLList)
-                    {
-                        return cb(err);
-                    }
-                    // Remove DSL accesses
-                    DSLList.forEach(function(DSLInstance, i) {
-                        
-                        DSLInstance.users({ where: {} }, function(err, users) {
-                            if(err)
-                            {
-                                return cb(err, null);
-                            }
-                            
-                        users.forEach(function(user, i) {
-                         // QUESTO NON FUNZIONA  ==> NON ENTRA QUI   
-                            DSLInstance.users.remove(user, function(err) {
-                                if(err) 
-                                {
-                                    console.log("> Error deleting DSL definition");
-                                    return cb(err, null);
-                                }
-                                 console.log(">eliminazione dei permessi");
-                            });
-                            
-                        });
     
-                            DSL.destroyById(DSLInstance.id, function(err) {
-                                console.log("> sto per distruggere un dsl");
-                                if(err) 
-                                {
-                                    return cb(err, null);
-                                }
-                                console.log("> DSL definition deleted:", id);
-                                //return cb(null, null);
-                            });
-                        });
-                    });
-                });
-                
-                
-                */
-                
-                
-
-   
-    
-    //checks if the connection string points to a real mongodb database
-    Company.beforeRemote('__create__externalDatabases', function(context, extDbInstance, next){
-        var connString = context.args.data.connString;
-        console.log('> connection string: ', connString);
-        mongoose.connect(connString);
-        var db = mongoose.connection;
-        db.on('error', function(){
-            console.log('> connection error for the connection string: ', connString);
-            context.args.data.connected = "false";
-        });
-    });
-    //change name of a company wich as companyId= id 
+    //change name of a company wich as companyId= id
     Company.changeCompanyName = function(id, name, cb){
         Company.findById(id, function(err, company) {
             if(err)
@@ -168,7 +102,7 @@ module.exports = function(Company) {
         });
     };
     
-Company.remoteMethod(
+    Company.remoteMethod(
         'changeCompanyName',
         {
             description: "Change the name of a company",
@@ -182,6 +116,46 @@ Company.remoteMethod(
                 { arg: 'data', type: 'Object'},
             ],
             http: { verb: 'put', path: '/:id/changeCompanyName' }
+        }
+    );
+    
+    Company.getDSLDefinitionsCount = function(companyId, cb) {
+        Company.findById(companyId, function(err, company) {
+            if (err)
+            {
+                console.log('Failed retrieving company by id', err);
+                return cb(err);
+            }
+            
+            company.owner(function(err, owner) {
+                if (err)
+                {
+                    console.log('Failed retrieving owner of the company', err);
+                    return cb(err);
+                }
+                owner.dsl(function(err, DSLDefinitions) {
+                    if (err)
+                    {
+                        console.log('Failed retrieving DSL definitions of the company', err);
+                        return cb(err);
+                    }
+                    return cb(null, DSLDefinitions.length);
+                });
+            });
+        });
+    };
+    
+    Company.remoteMethod(
+        'getDSLDefinitionsCount',
+        {
+            description: "Get the number of DSL definitions of a company",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Company id' },
+            ],
+            returns: [
+                { arg: 'count', type: 'Number'}
+            ],
+            http: { verb: 'get', path: '/:id/getDSLDefinitionsCount' }
         }
     );
 

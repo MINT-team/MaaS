@@ -25,6 +25,7 @@ var _company = {
 var _users = [];    // users of the company
 var _companies = JSON.parse(localStorage.getItem('companies')); //all companies in the system
 var databasesCount = localStorage.getItem('databasesCount');
+var DSLDefinitionsCount = localStorage.getItem('DSLDefinitionsCount');
 var _errors = [];
 
 var CompanyStore = assign({}, EventEmitter.prototype, {
@@ -71,6 +72,14 @@ var CompanyStore = assign({}, EventEmitter.prototype, {
 
     getErrors: function() {
         return _errors;
+    },
+    
+    getDatabasesCount: function() {
+        return databasesCount;
+    },
+    
+    getDSLDefinitionCount: function() {
+        return DSLDefinitionsCount;
     }
 
 });
@@ -132,7 +141,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
             
         case ActionTypes.DELETE_COMPANY:
-            if(action.errors) {
+            if(action.errors)
+            {
                 _errors = action.errors;
             }
             else
@@ -164,7 +174,9 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
         
         case ActionTypes.CHANGE_COMPANY_NAME_RESPONSE:
             if(action.errors)
+            {
                 _errors = action.errors;
+            }
             else
             {
                 _errors = [];
@@ -178,12 +190,27 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
         case ActionTypes.GET_DATABASES_COUNT:
             if (action.errors)
+            {
                 _errors = action.errors;
-            else if(action.count)
+            }
+            else if(action.data)
             {
                 _errors = [];
-                
-                
+                databasesCount = action.data;
+                localStorage.setItem('databasesCount', databasesCount);
+            }
+            CompanyStore.emitChange();
+            break;
+        case ActionTypes.GET_DSLDEFINITION_COUNT:
+            if (action.errors)
+            {
+                _errors = action.errors;
+            }
+            else if(action.data)
+            {
+                _errors = [];
+                DSLDefinitionsCount = action.data.count;
+                localStorage.setItem('DSLDefinitionsCount', DSLDefinitionsCount);
             }
             CompanyStore.emitChange();
             break;

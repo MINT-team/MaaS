@@ -139,7 +139,6 @@ module.exports = {
         if(res)
         {
           res = JSON.parse(res.text);
-          console.log(res);
           if(res.error)
           {
             ResponseCompanyActionCreator.responseGetDatabasesCount(null, res.error.message);
@@ -148,6 +147,27 @@ module.exports = {
           {
             ResponseCompanyActionCreator.responseGetDatabasesCount(res.count, null);
           }
+        }
+      });
+  },
+  
+  getDSLDefinitionsCount: function(companyId) {
+    request
+      .get(APIEndpoints.COMPANIES + '/' + companyId + '/getDSLDefinitionsCount')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .end(function(err, res){
+        if(res)
+        { 
+          if(res.error)
+          {
+            ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(null, res.error.message);
+          }
+          else
+          {
+            ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.body, null);
+          }
+          
         }
       });
   }
