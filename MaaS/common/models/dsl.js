@@ -1736,14 +1736,15 @@ Collection(
                     mongoose_query.sort({[identity.sortby]: 1});
                 }
             }
-            mongoose_query.exec(function(err, result) {
+            mongoose_query.exec(function(err, results) {
                 if (err)
                 {
                     return cb(err, null);
                 }
-                if(result.length > 0)
+                if(results.length > 0)
                 {
-                    data.result = result;   // initialize the object to be filled with results
+                    data.rawData = true;
+                    data.result = results;   // initialize the object to be filled with results
                     if(identity.label)
                     {
                         data.label = identity.label;
@@ -1758,6 +1759,53 @@ Collection(
         }
         else if(body.columns && body.columns.length > 0)    // Collection with columns
         {
+            var found = false;
+            for(var i = 0; !found && i < body.columns.length; i++)
+            {
+                if(body.columns[i].selectable && body.columns[i].selectable == true)
+                {
+                    found = true;
+                }
+            }
+            if(found)   // found selectables in body
+            {
+                var raw_query;
+                if(identity.query)
+                {
+                    raw_query = collection.find(identity.query, { _id: 0});
+                }
+                else
+                {
+                    raw_query = collection.find({}, { _id: 0});
+                }
+                raw_query.setOptions({lean: true});
+                if(identity.order)
+                {
+                    if(identity.sortby)
+                    {
+                        raw_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                    }
+                    else
+                    {
+                        raw_query.sort({[body.columns[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first column attribute
+                    }
+                }
+                else
+                {
+                    if(identity.sortby)
+                    {
+                        raw_query.sort({[identity.sortby]: 1});
+                    }
+                }
+                raw_query.exec(function(err, rawResults) {
+                    if (err)
+                    {
+                        return cb(err, null);
+                    }
+                    data.rawData = rawResults;
+                });
+            }
+            
             if(identity.query)
             {
                 mongoose_query = collection.find(identity.query, { _id: 0});
@@ -1791,7 +1839,7 @@ Collection(
                 }
             }
             mongoose_query.exec(function(err, results) {
-                if (err)
+                if(err)
                 {
                     return cb(err, null);
                 }
@@ -1893,8 +1941,6 @@ Collection(
                         if(x == results.length-1)
                         {
                             returned = true;
-                            if(data.selectables.length > 0)
-                                data.rawData = results;
                             return cb(null, data);
                         }
                     }

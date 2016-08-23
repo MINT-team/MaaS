@@ -9783,6 +9783,8 @@ module.exports = {
     request.post(APIEndpoints.DSL + '/' + id + '/executeDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
         res = JSON.parse(res.text);
+        console.log(res);
+        console.log("dopo res");
         if (res.error) {
           ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
         } else {

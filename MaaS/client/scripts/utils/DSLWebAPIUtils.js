@@ -247,6 +247,8 @@ module.exports = {
           if(res)
           {
             res=JSON.parse(res.text);
+            console.log(res);
+            console.log("dopo res");
             if(res.error) 
             {
               ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
