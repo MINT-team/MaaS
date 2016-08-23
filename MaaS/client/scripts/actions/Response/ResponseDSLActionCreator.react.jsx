@@ -94,6 +94,14 @@ var ResponseDSLActionCreator = {
             errors: errors,
             data: data
         });
+    },
+    
+    responseExecuteNestedDocument: function(errors, data) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EXECUTE_NESTED_DOCUMENT_RESPONSE,
+            errors: errors,
+            data: data
+        });
     }
 };
 

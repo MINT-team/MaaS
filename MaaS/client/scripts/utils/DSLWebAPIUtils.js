@@ -257,5 +257,33 @@ module.exports = {
             }
           }
         });
-    }
+    },
+    
+    executeNestedDocument: function(id, row, identity, body) {
+      request
+        .post(APIEndpoints.DSL + '/' + id + '/executeNestedDocument')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send(
+          {
+            result: row,
+            identity: identity,
+            body: body
+          }
+          )
+        .end(function(error, res) {
+          if(res)
+          {
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseExecuteNestedDocument(res.error, null);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseExecuteNestedDocument(null, res.data);
+            }
+          }
+        });
+    },
 };

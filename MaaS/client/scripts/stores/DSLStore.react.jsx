@@ -22,6 +22,7 @@ var CHANGE_EVENT = 'change';
 var SAVE_EVENT = 'save';
 var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
+var NESTED_EXECUTE_EVENT = 'nested_execute';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -36,6 +37,7 @@ var _DSL = {
 var _USER_LIST = []; // Member and Guest list
 
 var _DSL_DATA; // Data results from DSL execution
+var _DSL_NESTED_DATA;
 
 var _errors = [];
 
@@ -88,6 +90,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(EXECUTE_EVENT, callback);
     },
     
+    emitNestedExecute: function() {
+        this.emit(NESTED_EXECUTE_EVENT);
+    },
+
+    addNestedExecuteListener: function(callback) {
+        this.on(NESTED_EXECUTE_EVENT, callback);
+    },
+
+    removeNestedExecuteListener: function(callback) {
+        this.removeListener(NESTED_EXECUTE_EVENT, callback);
+    },
+    
     getErrors: function() {
         return _errors;
     },
@@ -118,13 +132,16 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getDSLData: function() {
         return _DSL_DATA;
+    },
+    
+    getDSLNestedData: function() {
+        return _DSL_NESTED_DATA;
     }
 });
 
 DSLStore.dispatchToken = Dispatcher.register(function(payload) {
     var action = payload.action;
-    var user_list_loaded = false;
-    var permissions_list_loaded = false;
+    var messages;
     
     switch (action.type) {
         case ActionTypes.LOAD_DSL_RESPONSE:
@@ -215,7 +232,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 {
                     _DSL.name = action.definition.name;
                     let trovato = false;
-                    for (var i = 0; !trovato && i<_DSL_LIST.length; i++)
+                    for (let i = 0; !trovato && i<_DSL_LIST.length; i++)
                     {
                         if (action.definition.id == _DSL_LIST[i].dsl.id)
                         {
@@ -243,7 +260,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = [];
                 
                 let trovato = false;
-                for (var i = 0; !trovato && i<_DSL_LIST.length; i++)
+                for (let i = 0; !trovato && i<_DSL_LIST.length; i++)
                 {
                     if (_DSL_LIST[i].dsl.id == action.id)
                     {
@@ -264,7 +281,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 var USER_LIST = action.userList;
                 var PERMISSION_LIST = action.permissionList;
-                var i = 0, j = 0;
+                let i = 0, j = 0;
                 // Add permission field to users
                 while(j < USER_LIST.length && i < PERMISSION_LIST.length)
                 {
@@ -321,7 +338,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 }
                 else
                 {
-                    var messages = Object.keys(action.errors);
+                    messages = Object.keys(action.errors);
                     messages.forEach(function(error) {
                        _errors.push(action.errors[error]);
                     });
@@ -346,7 +363,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 }
                 else
                 {
-                    var messages = Object.keys(action.errors);
+                    messages = Object.keys(action.errors);
                     messages.forEach(function(error) {
                        _errors.push(action.errors[error]);
                     });
@@ -359,6 +376,32 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             //DSLStore.emitChange();
             DSLStore.emitExecute();
+            break;
+            
+        case ActionTypes.EXECUTE_NESTED_DOCUMENT_RESPONSE:
+            if(action.errors)
+            {
+                _errors = [];
+                _DSL_NESTED_DATA = null;
+                if(typeof action.errors == 'string')
+                {
+                    _errors.push(action.errors);
+                }
+                else
+                {
+                    messages = Object.keys(action.errors);
+                    messages.forEach(function(error) {
+                       _errors.push(action.errors[error]);
+                    });
+                }
+            }
+            else if(action.data)
+            {
+                _errors = [];
+                _DSL_NESTED_DATA = action.data;
+            }
+            //DSLStore.emitChange();
+            DSLStore.emitNestedExecute();
             break;
     }
     

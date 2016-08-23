@@ -161,7 +161,7 @@ syntax Document = function (ctx) {
     if(nested)
         tot = #`{identity: {${identity}}, rows: [${rows}], action: ${action}}`;
     else
-        tot = #`DSL.compileDocument({${identity}}, [${rows}], ${action}, callback)`;
+        tot = #`DSL.compileDocument({${identity}}, [${rows}], ${action}, false, callback)`;
     return tot;
 }
 

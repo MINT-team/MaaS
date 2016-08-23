@@ -57,6 +57,10 @@ var RequestDSLActionCreator = {
     
     executeDefinition: function(id) {
         WebAPIUtils.executeDefinition(id);
+    },
+    
+    executeNestedDocument: function(id, row, identity, body) {
+        WebAPIUtils.executeNestedDocument(id, row, identity, body);
     }
 };
 

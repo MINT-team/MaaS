@@ -105,6 +105,10 @@ var RequestDSLActionCreator = {
 
     executeDefinition: function executeDefinition(id) {
         WebAPIUtils.executeDefinition(id);
+    },
+
+    executeNestedDocument: function executeNestedDocument(id, row, identity, body) {
+        WebAPIUtils.executeNestedDocument(id, row, identity, body);
     }
 };
 
@@ -444,6 +448,14 @@ var ResponseDSLActionCreator = {
     responseExecuteDefinition: function responseExecuteDefinition(errors, data) {
         Dispatcher.handleServerAction({
             type: ActionTypes.EXECUTE_DEFINITION_RESPONSE,
+            errors: errors,
+            data: data
+        });
+    },
+
+    responseExecuteNestedDocument: function responseExecuteNestedDocument(errors, data) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.EXECUTE_NESTED_DOCUMENT_RESPONSE,
             errors: errors,
             data: data
         });
@@ -2503,16 +2515,32 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
+    var data = DSLStore.getDSLData();
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
-        definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
-        data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
-        label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
-        types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
-        action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
-        sortables: DSLStore.getDSLData() ? DSLStore.getDSLData().sortables : null,
-        selectables: DSLStore.getDSLData() ? DSLStore.getDSLData().selectables : null,
+
+        definitionType: data ? data.definitionType : null,
+        data: data ? data.result : null,
+        label: data ? data.label : null,
+        perpage: data ? data.perpage : null,
+        action: data ? data.action : null,
+        nestedDocument: data ? data.document : null,
+        types: data ? data.types : null,
+        sortables: data ? data.sortables : null,
+        selectables: data ? data.selectables : null,
+        rawData: data ? data.rawData : null,
+        queried: true
+    };
+}
+
+function getNestedState() {
+    var data = DSLStore.getDSLNestedData();
+    return {
+        definitionType: data ? data.definitionType : null,
+        data: data ? data.result : null,
+        action: data ? data.action : null,
+        types: data ? data.types : null,
         queried: true
     };
 }
@@ -2527,55 +2555,73 @@ var ExecuteDSL = React.createClass({
             isLogged: SessionStore.isLogged(),
             definitonId: this.props.params.definitionId,
             data: null,
-            queried: false,
-            index: 0
+            queried: false
         };
     },
 
     componentWillMount: function componentWillMount() {
         DSLStore.addExecuteListener(this._onChange);
+        DSLStore.addNestedExecuteListener(this._onNestedChange);
         RequestDSLActionCreator.executeDefinition(this.state.definitonId);
     },
 
     componentWillUnmount: function componentWillUnmount() {
         DSLStore.removeExecuteListener(this._onChange);
+        DSLStore.removeNestedExecuteListener(this._onNestedChange);
     },
 
     _onChange: function _onChange() {
         this.setState(getState());
     },
 
-    dataFormatter: function dataFormatter(cell, row, formatExtraData) {
-        // console.log(cell);
-        // console.log(formatExtraData);
-        if (this.state.types) {
-            var content;
+    _onNestedChange: function _onNestedChange() {
+        this.setState(getNestedState());
+    },
 
-            if (this.state.types[this.state.index] == "string") {
-                return cell.toString();
-            }
-            /*
-            else if(row.type == "image")
-            {
-                
-            }
-            else if (row.type == "link")
-            {
-                
-            }
-            else if (row.type == "date")
-            {
-                
-            }
-            else if (row.type == "number")
-            {
-                
-            }
-            */
-            this.setState({ index: this.state.index + 1 });
-        } else {
-            return cell;
+    dataFormatter: function dataFormatter(cell, row, formatExtraData) {
+        if (formatExtraData.type == "string") {
+            cell = cell.toString();
         }
+
+        /*
+        else if(formatExtraData.type == "image")
+        {
+            
+        }
+        else if (formatExtraData.type == "link")
+        {
+            
+        }
+        else if (formatExtraData.type == "date")
+        {
+            
+        }
+        else if (formatExtraData.type == "number")
+        {
+            
+        }
+        ..
+        array
+        object
+        */
+
+        if (formatExtraData.selectable) {
+            var instance = this;
+            var showDocument = function showDocument() {
+                instance.setState({ label: "Document " + cell.props.children });
+                console.log("raw");
+                console.log(instance.state.rawData[row.index]);
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row.index], instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+            };
+
+            cell = React.createElement(
+                'span',
+                { className: 'selectable', onClick: showDocument },
+                cell
+            );
+        }
+
+        return cell;
     },
 
     render: function render() {
@@ -2587,44 +2633,28 @@ var ExecuteDSL = React.createClass({
         var content, errors, title;
         var data = [];
 
-        var options = {
-            hideSizePerPage: true
-        };
         if (this.state.label) title = React.createElement(
             'p',
             { className: 'container-title' },
             this.state.label
         );
+
         if (this.state.data && this.state.queried) {
-            console.log(this.state.data);
             var columns = [];
             if (this.state.data.length > 0) // Array of table data with at least one element
                 {
                     data = this.state.data;
                     columns = Object.keys(data[0]);
-                }
-            // else  // Array of table data empty
-            // {
-            //     columns = Object.keys(this.state.data);
-            //     data.push(this.state.data);
-            // }
-
-            /*
-            [
+                } else // Array of table data empty
                 {
-                    type: string
-                    label: value
-                },
-                {
-                    
+                    // for a single object
+                    //     columns = Object.keys(this.state.data);  
+                    //     data.push(this.state.data);
                 }
-            
-            ]
-            
-            
-            */
-
-            //console.log(columns);
+            console.log(columns);
+            data.forEach(function (x, i) {
+                data[i].index = i;
+            });
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -2635,22 +2665,37 @@ var ExecuteDSL = React.createClass({
             hideSizePerPage : Bool
             Enable to hide the dropdown list for size per page, default is false.
             */
-
-            //alert(this.state.definitionType);
             var definitionType = this.state.definitionType;
+            var perpage = this.state.perpage;
+            var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
+            var showTotal = function showTotal(start, to, total) {
+                return React.createElement(
+                    'span',
+                    { id: 'total-lines' },
+                    "Lines in Collection: " + total
+                );
+            };
             if (definitionType == "Cell" || definitionType == "Collection") {
+                var options = {
+                    hideSizePerPage: false, //definitionType=="Cell" ? true : false,
+                    sizePerPage: perpage ? perpage : 10,
+                    sizePerPageList: perpageList,
+                    paginationShowsTotal: showTotal
+                    //,onSizePerPageList: function(size) {alert("changed to: "+size);}
+                };
                 content = React.createElement(
                     'div',
                     { id: 'dsl-data-table', className: definitionType == "Cell" ? "cell-table-view" : definitionType == "Collection" ? "collection-table-view" : "" },
                     React.createElement(
                         BootstrapTable,
-                        { ref: 'table', data: data, ignoreSinglePage: true, pagination: true, striped: true, hover: true, options: options, keyField: columns[0] },
+                        { ref: 'table', data: data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: columns[0] },
                         columns.map(function (column, i) {
                             return React.createElement(
                                 TableHeaderColumn,
                                 { key: column, dataField: column, dataFormat: _this.dataFormatter,
-                                    formatExtraData: { type: _this.state.types[i], sortable: _this.state.sortables[i], selectable: _this.state.selectables[i] },
-                                    dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
+                                    formatExtraData: { type: _this.state.types[i], selectable: _this.state.selectables ? _this.state.selectables[i] : false },
+                                    dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables[i] == true ? true : false : false,
+                                    dataAlign: 'center' },
                                 column
                             );
                         } //column.charAt(0).toUpperCase() + column.slice(1)
@@ -2659,8 +2704,8 @@ var ExecuteDSL = React.createClass({
                 );
             }
             if (definitionType == "Document") {
-                console.log(this.state.action);
-                console.log(data[0]);
+                //console.log(this.state.action);
+                //console.log(data[0]);
                 content = React.createElement(
                     'div',
                     { id: 'dsl-data-table', className: 'document-table-view' },
@@ -8024,6 +8069,7 @@ module.exports = {
     CHANGE_DSL_PERMISSION_RESPONSE: null,
     COMPILE_DEFINITION_RESPONSE: null,
     EXECUTE_DEFINITION_RESPONSE: null,
+    EXECUTE_NESTED_DOCUMENT_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -8440,6 +8486,7 @@ var CHANGE_EVENT = 'change';
 var SAVE_EVENT = 'save';
 var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
+var NESTED_EXECUTE_EVENT = 'nested_execute';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -8453,6 +8500,7 @@ var _DSL = {
 var _USER_LIST = []; // Member and Guest list
 
 var _DSL_DATA; // Data results from DSL execution
+var _DSL_NESTED_DATA;
 
 var _errors = [];
 
@@ -8505,6 +8553,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(EXECUTE_EVENT, callback);
     },
 
+    emitNestedExecute: function emitNestedExecute() {
+        this.emit(NESTED_EXECUTE_EVENT);
+    },
+
+    addNestedExecuteListener: function addNestedExecuteListener(callback) {
+        this.on(NESTED_EXECUTE_EVENT, callback);
+    },
+
+    removeNestedExecuteListener: function removeNestedExecuteListener(callback) {
+        this.removeListener(NESTED_EXECUTE_EVENT, callback);
+    },
+
     getErrors: function getErrors() {
         return _errors;
     },
@@ -8535,13 +8595,16 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getDSLData: function getDSLData() {
         return _DSL_DATA;
+    },
+
+    getDSLNestedData: function getDSLNestedData() {
+        return _DSL_NESTED_DATA;
     }
 });
 
 DSLStore.dispatchToken = Dispatcher.register(function (payload) {
     var action = payload.action;
-    var user_list_loaded = false;
-    var permissions_list_loaded = false;
+    var messages;
 
     switch (action.type) {
         case ActionTypes.LOAD_DSL_RESPONSE:
@@ -8641,10 +8704,10 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
 
                 var _trovato = false;
-                for (var i = 0; !_trovato && i < _DSL_LIST.length; i++) {
-                    if (_DSL_LIST[i].dsl.id == action.id) {
+                for (var _i = 0; !_trovato && _i < _DSL_LIST.length; _i++) {
+                    if (_DSL_LIST[_i].dsl.id == action.id) {
                         _trovato = true;
-                        _DSL_LIST.splice(i, 1);
+                        _DSL_LIST.splice(_i, 1);
                     }
                 }
                 localStorage.removeItem('DSLId');
@@ -8659,15 +8722,15 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             if (action.userList && action.permissionList) {
                 var USER_LIST = action.userList;
                 var PERMISSION_LIST = action.permissionList;
-                var i = 0,
+                var _i2 = 0,
                     j = 0;
                 // Add permission field to users
-                while (j < USER_LIST.length && i < PERMISSION_LIST.length) {
-                    if (PERMISSION_LIST[i].userId == USER_LIST[j].id) {
-                        USER_LIST[j].permission = PERMISSION_LIST[i].permission;
+                while (j < USER_LIST.length && _i2 < PERMISSION_LIST.length) {
+                    if (PERMISSION_LIST[_i2].userId == USER_LIST[j].id) {
+                        USER_LIST[j].permission = PERMISSION_LIST[_i2].permission;
                         j++;
                     }
-                    i++;
+                    _i2++;
                 }
                 _USER_LIST = USER_LIST;
             }
@@ -8701,7 +8764,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 if (typeof action.errors == 'string') {
                     _errors.push(action.errors);
                 } else {
-                    var messages = Object.keys(action.errors);
+                    messages = Object.keys(action.errors);
                     messages.forEach(function (error) {
                         _errors.push(action.errors[error]);
                     });
@@ -8720,7 +8783,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 if (typeof action.errors == 'string') {
                     _errors.push(action.errors);
                 } else {
-                    var messages = Object.keys(action.errors);
+                    messages = Object.keys(action.errors);
                     messages.forEach(function (error) {
                         _errors.push(action.errors[error]);
                     });
@@ -8731,6 +8794,26 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             //DSLStore.emitChange();
             DSLStore.emitExecute();
+            break;
+
+        case ActionTypes.EXECUTE_NESTED_DOCUMENT_RESPONSE:
+            if (action.errors) {
+                _errors = [];
+                _DSL_NESTED_DATA = null;
+                if (typeof action.errors == 'string') {
+                    _errors.push(action.errors);
+                } else {
+                    messages = Object.keys(action.errors);
+                    messages.forEach(function (error) {
+                        _errors.push(action.errors[error]);
+                    });
+                }
+            } else if (action.data) {
+                _errors = [];
+                _DSL_NESTED_DATA = action.data;
+            }
+            //DSLStore.emitChange();
+            DSLStore.emitNestedExecute();
             break;
     }
 });
@@ -9704,6 +9787,23 @@ module.exports = {
           ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
         } else {
           ResponseDSLActionCreator.responseExecuteDefinition(null, res.data);
+        }
+      }
+    });
+  },
+
+  executeNestedDocument: function executeNestedDocument(id, row, identity, body) {
+    request.post(APIEndpoints.DSL + '/' + id + '/executeNestedDocument').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      result: row,
+      identity: identity,
+      body: body
+    }).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          ResponseDSLActionCreator.responseExecuteNestedDocument(res.error, null);
+        } else {
+          ResponseDSLActionCreator.responseExecuteNestedDocument(null, res.data);
         }
       }
     });

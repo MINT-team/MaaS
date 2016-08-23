@@ -283,7 +283,94 @@ module.exports = function(DSL) {
     
     */
     
+    DSL.compile = function(dsl, cb) {
+        var expanded;
+        macro = macro.toString();
+        var macroLines = macro.split("\n").length;
+        try
+        {
+            expanded = sweet.compile(macro + dsl);
+        }
+        catch(err)
+        {
+            console.log("Sweetjs error:", err);
+            var message;
+            if(!err.description)
+            {
+                //Default message
+                message = "DSL compilation error";
+                var error = err.toString();
+                if(error.match(/Action/g))
+                {
+                    message = "Action must define at least \"Export\" or \"SendEmail\"";
+                }
+                if(error.match(/Multiple actions/g))
+                {
+                    message = "Multiple actions defined, action must be unique";
+                }
+                if(error.match(/replacement values for syntax template must not be null or undefined/g))
+                {
+                    message = "Syntax error: unknown keyword or missing comma";
+                }
+                if(error.match(/Unexpected syntax/g))
+                {
+                    if(error.match(/List \[ {/g))
+                        message = "Unexpected syntax: \"{\". Wrong use of parenthesis";
+                    else if(error.match(/List \[ \[/g))
+                        message = "Unexpected syntax: \"[\". Wrong use of parenthesis";
+                    else if(error.match(/List \[ \(/g))
+                        message = "Unexpected syntax: \"(\". Wrong use of parenthesis";
+                    else
+                    {
+                        var start = "List [ ";
+                        var end = " ] at:";
+                        var startIndex = error.indexOf(start, 0) + start.length;
+                        var endIndex = error.indexOf(end, 0);
+                        var unexpected = error.substring(startIndex, endIndex);
+                        startIndex = error.indexOf(start, endIndex) + start.length;
+                        endIndex = error.length - 2;
+                        var line = error.substring(startIndex, endIndex);
+                        line = (parseInt(line) - macroLines) + 1;
+                        
+                        message = "Unexpected syntax";
+                        if(unexpected)
+                            message += ": \"" + unexpected + "\"";
+                        if(!isNaN(line))
+                            message += " at line " + line;
+                    }
+                }
+                if(error.match(/expecting a : punctuator/g))
+                {
+                    message = "Syntax error: missing \":\"";
+                }
+            }
+            else
+            {
+                message = err.description;
+            }
+            
+            return cb(message, null);
+            // errore virgole: [Error: replacement values for syntax template must not be null or undefined] 
+        }
+        return cb(null, expanded.code);
+    };
     
+    
+    DSL.remoteMethod(
+        'compile',
+        {
+            description: "Compile one DSL definition",
+            accepts: [
+                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
+            ],
+            returns: [
+                { arg: 'err', type: 'string' },
+                { arg: 'expanded', type: 'string' }
+                
+            ],
+            isStatic: true
+        }
+    );
     
     DSL.compileDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
@@ -375,67 +462,117 @@ module.exports = function(DSL) {
         }
     );
     
-    DSL.executeNestedDocument = function(id, label, identity, body, cb) {
-        var ExternalDatabase = app.models.ExternalDatabase;
-        DSL.findById(id, function(err, DSLInstance) {
-            if(err)
-            {
-                console.log(err);
-                return cb(err);
-            }
+    DSL.executeNestedDocument = function(id, result, identity, body, cb) {
+        var data = {};
+        data.types = [];
+        data.result = [{}];
+        if(identity.populate)
+        {
+            //.....
+        }
             
-            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
-                if(err)
+            
+        // DSL.executeDocument(identity, body, conn, function(error, data) {
+        //     conn.close();
+        //     if (error)
+        //     {
+        //         console.log("> DSL execution error:", error);
+        //         return cb(null, error, null);
+        //     }
+        //     else
+        //     {
+        //         console.log("> DSL execution processed successfully");
+        //         if(!data.label)
+        //             data.label = "Document " + label;
+        //         data.definitionType = "Document";
+        //         return cb(null, null, data);
+        //     }
+        // });
+        
+        
+        if(body && body.rows && body.rows.length > 0)   // document with rows
+        {
+            data.result = [ {} ];   // initialize the object to be filled with results matching rows values
+            var returned = false;
+            for(var i=0; !returned && i < body.rows.length; i++)
+            {
+                var row = body.rows[i];
+                var rowValue = result[row.name];
+                
+                data.types.push(row.type);
+                
+                if(row.transformation)
                 {
-                   console.log("> Error finding database of dsl");
-                   return cb(err);
-                }
-                database.company(function(err, company) {
-                    if (err)
+                    var transformedValue;
+                    try
                     {
-                        console.log("> Error finding company of database");
-                        return cb(err);
+                        transformedValue = row.transformation(rowValue);
                     }
-                    company.users.count(function(err, usersCount) {
-                        if (err)
+                    catch(err)
+                    {
+                        returned = true;
+                        return cb(null, err, null);
+                    }
+                    AttributesReader.checkKeywordValue({ type: row.type, value: transformedValue }, function(keywordValueError) {
+                        if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
                         {
-                            console.log("> Error finding number of users in a company");
-                            return cb(err);
+                            returned = true;
+                            return cb(null, keywordValueError, null);
                         }
-                        
-                        var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
-                            if (err)
+                        else
+                        {
+                            if(row.label)
                             {
-                                var error = {
-                                    message: "Failed connecting database"
-                                };
-                                console.log('> Failed connecting database:', err);
-                                return cb(null, error, null);
+                                data.result[0][row.label] = transformedValue;
                             }
                             else
                             {
-                                DSL.executeDocument(identity, body, conn, function(error, data) {
-                                    conn.close();
-                                    if (error)
-                                    {
-                                        console.log("> DSL execution error:", error);
-                                        return cb(null, error, null);
-                                    }
-                                    else
-                                    {
-                                        console.log("> DSL execution processed successfully");
-                                        if(!data.label)
-                                            data.label = "Document " + label;
-                                        data.definitionType = "Document";
-                                        return cb(null, null, data);
-                                    }
-                                });
+                                data.result[0][row.name] = transformedValue;
                             }
-                        });
+                            
+                            if(i == body.rows.length-1)  // if all rows are checked then returns
+                            {
+                                //console.log(data)
+                                returned = true;
+                                return cb(null, null, data);
+                            }
+                        }
                     });
-                });
-            });
-        });
+                }
+                else
+                {
+                    AttributesReader.checkKeywordValue({ type: row.type, value: rowValue }, function(keywordValueError) {
+                        if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                        {
+                            returned = true;
+                            return cb(keywordValueError, null);
+                        }
+                        else
+                        {
+                            if(row.label)
+                            {
+                                data.result[0][row.label] = rowValue;
+                            }
+                            else
+                            {
+                                data.result[0][row.name] = rowValue;
+                            }
+                            
+                            if(i == body.rows.length-1)  // if all rows are checked then returns
+                            {
+                                returned = true;
+                                return cb(null, null, data);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        else
+        {
+            data.result[0] = result;
+            return cb(null, null, data);
+        }
     };
      
     DSL.remoteMethod(
@@ -443,6 +580,8 @@ module.exports = function(DSL) {
         {
             description: "Execute a nested Document definition",
             accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Collection id' },
+                { arg: 'result', type: 'Object', required: true, description: 'Raw object' },
                 { arg: 'identity', type: 'Object', required: true, description: 'Document identity' },
                 { arg: 'body', type: 'Object', required: true, description: 'Document body' }
             ],
@@ -494,7 +633,7 @@ module.exports = function(DSL) {
                                 return cb(null, error, null);
                             }
                         });
-                
+                        
                         DSL.compile(DSLInstance.source, function(err, expanded) {
                             if(err)
                             {
@@ -565,6 +704,7 @@ module.exports = function(DSL) {
                                                     if(!data.label)
                                                         data.label = DSLInstance.name;
                                                     data.definitionType = DSLInstance.type;
+                                                    data.document = body.document;
                                                     return cb(null, null, data);
                                                 }
                                             });
@@ -601,95 +741,6 @@ module.exports = function(DSL) {
                 { arg: 'data', type: 'Object' }
             ],
             http: { verb: 'post', path: '/:id/executeDefinition' }
-        }
-    );
-    
-    DSL.compile = function(dsl, cb) {
-        var expanded;
-        macro = macro.toString();
-        var macroLines = macro.split("\n").length;
-        try
-        {
-            expanded = sweet.compile(macro + dsl);
-        }
-        catch(err)
-        {
-            console.log("Sweetjs error:", err);
-            var message;
-            if(!err.description)
-            {
-                //Default message
-                message = "DSL compilation error";
-                var error = err.toString();
-                if(error.match(/Action/g))
-                {
-                    message = "Action must define at least \"Export\" or \"SendEmail\"";
-                }
-                if(error.match(/Multiple actions/g))
-                {
-                    message = "Multiple actions defined, action must be unique";
-                }
-                if(error.match(/replacement values for syntax template must not be null or undefined/g))
-                {
-                    message = "Syntax error: unknown keyword or missing comma";
-                }
-                if(error.match(/Unexpected syntax/g))
-                {
-                    if(error.match(/List \[ {/g))
-                        message = "Unexpected syntax: \"{\". Wrong use of parenthesis";
-                    else if(error.match(/List \[ \[/g))
-                        message = "Unexpected syntax: \"[\". Wrong use of parenthesis";
-                    else if(error.match(/List \[ \(/g))
-                        message = "Unexpected syntax: \"(\". Wrong use of parenthesis";
-                    else
-                    {
-                        var start = "List [ ";
-                        var end = " ] at:";
-                        var startIndex = error.indexOf(start, 0) + start.length;
-                        var endIndex = error.indexOf(end, 0);
-                        var unexpected = error.substring(startIndex, endIndex);
-                        startIndex = error.indexOf(start, endIndex) + start.length;
-                        endIndex = error.length - 2;
-                        var line = error.substring(startIndex, endIndex);
-                        line = (parseInt(line) - macroLines) + 1;
-                        
-                        message = "Unexpected syntax";
-                        if(unexpected)
-                            message += ": \"" + unexpected + "\"";
-                        if(!isNaN(line))
-                            message += " at line " + line;
-                    }
-                }
-                if(error.match(/expecting a : punctuator/g))
-                {
-                    message = "Syntax error: missing \":\"";
-                }
-            }
-            else
-            {
-                message = err.description;
-            }
-            
-            return cb(message, null);
-            // errore virgole: [Error: replacement values for syntax template must not be null or undefined] 
-        }
-        return cb(null, expanded.code);
-    };
-    
-    
-    DSL.remoteMethod(
-        'compile',
-        {
-            description: "Compile one DSL definition",
-            accepts: [
-                { arg: 'source', type: 'string', required: true, description: 'Definition source' }
-            ],
-            returns: [
-                { arg: 'err', type: 'string' },
-                { arg: 'expanded', type: 'string' }
-                
-            ],
-            isStatic: true
         }
     );
     
@@ -995,25 +1046,98 @@ module.exports = function(DSL) {
             
     */
     
-    DSL.compileDocument = function(identity, rows, action, cb) {
+    DSL.compileDocument = function(identity, rows, action, nested, cb) {
         var body = {};
-        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
-            AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
-                var keywords = {
-                    table: identity.table,
-                    label: identity.label,
-                    sortby: identity.sortby,
-                    order: identity.order,
-                    query: identity.query
-                };
-                AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
+        if(!nested)
+        {
+            AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
+                AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
+                    var keywords = {
+                        table: identity.table,
+                        label: identity.label,
+                        sortby: identity.sortby,
+                        order: identity.order,
+                        query: identity.query
+                    };
+                    AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
+                        AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
+                            AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
+                                if(rows.length !== 0)   // Document with rows
+                                {
+                                    var returned = false;
+                                    
+                                    for(var i = 0; !returned && i < rows.length; i++)     // body.forEach(function(row, i) {
+                                    {
+                                        var row = rows[i];
+                                        AttributesReader.checkSupportedAttributes(row, ['name', 'label', 'type', 'transformation'], function(unsupportedRowAttributesError) {
+                                            AttributesReader.readRequiredAttributes(row, ['name', 'type'], function(missingRequiredRowAttributesError) {
+                                                var keywords = {
+                                                    name: row.name,
+                                                    label: row.label,
+                                                    type: row.type,
+                                                    transformation: row.transformation
+                                                };
+                                                AttributesReader.checkKeywordValue(keywords, function(rowKeywordValueError) {
+                                                    var rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                                    var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, 
+                                                                              identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError, rowError);
+                                                    if(Object.getOwnPropertyNames(rowError).length !== 0)
+                                                    {
+                                                        returned = true;
+                                                        return cb(error, null, null);   // return the errors occurred in the first wrong row
+                                                    }
+                                                    else
+                                                    {
+                                                        if(i == rows.length-1)  // last row in body, all rows are ok
+                                                        {
+                                                            if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
+                                                            {
+                                                                returned = true;
+                                                                return cb(error, null, null);
+                                                            }
+                                                            else 
+                                                            {
+                                                                body = { action: action, rows: rows };
+                                                                returned = true;
+                                                                return cb(null, identity, body);
+                                                            }
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    }
+                                }
+                                else    //Document without rows
+                                {
+                                    body = { action: action };
+                                    var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError, 
+                                    unsupportedActionAttributesError, actionKeywordValueError);
+                                    if(Object.getOwnPropertyNames(error).length !== 0)
+                                    {
+                                        return cb(error, null, null);
+                                    }
+                                    else
+                                    {
+                                        return cb(null, identity, body);
+                                    }
+                                }
+                            });
+                        });
+                    });
+                });
+            });
+        }
+        else    // document inside a collection
+        {
+            AttributesReader.checkSupportedAttributes(identity, ['populate'], function(unsupportedIdentityAttributesError) {
+                AttributesReader.checkKeywordValue({populate: identity.populate}, function(identityKeywordValueError) {
                     AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
                         AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
                             if(rows.length !== 0)   // Document with rows
                             {
                                 var returned = false;
-                                var i = 0;
-                                while(!returned && i < rows.length)     // body.forEach(function(row, i) {
+                                for(var i = 0; !returned && i < rows.length; i++)     // body.forEach(function(row, i) {
                                 {
                                     var row = rows[i];
                                     AttributesReader.checkSupportedAttributes(row, ['name', 'label', 'type', 'transformation'], function(unsupportedRowAttributesError) {
@@ -1026,8 +1150,8 @@ module.exports = function(DSL) {
                                             };
                                             AttributesReader.checkKeywordValue(keywords, function(rowKeywordValueError) {
                                                 var rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
-                                                var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, 
-                                                                          identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError, rowError);
+                                                var error = Object.assign(unsupportedIdentityAttributesError, identityKeywordValueError, 
+                                                unsupportedActionAttributesError, actionKeywordValueError, rowError);
                                                 if(Object.getOwnPropertyNames(rowError).length !== 0)
                                                 {
                                                     returned = true;
@@ -1049,12 +1173,7 @@ module.exports = function(DSL) {
                                                             return cb(null, identity, body);
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        i++;
-                                                    }
                                                 }
-                                                
                                             });
                                         });
                                     });
@@ -1063,7 +1182,7 @@ module.exports = function(DSL) {
                             else    //Document without rows
                             {
                                 body = { action: action };
-                                var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError, 
+                                var error = Object.assign(unsupportedIdentityAttributesError, identityKeywordValueError, 
                                 unsupportedActionAttributesError, actionKeywordValueError);
                                 if(Object.getOwnPropertyNames(error).length !== 0)
                                 {
@@ -1078,7 +1197,7 @@ module.exports = function(DSL) {
                     });
                 });
             });
-        });
+        }
     };
     
     DSL.remoteMethod(
@@ -1425,75 +1544,130 @@ Collection(
                 AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
                     AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
                         AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
-                            var stop = false;
-                            for (var i = 0; !stop && i< columns.length; i++)
+                            if(columns.length > 0)
                             {
-                                var column = columns[i];
-                                AttributesReader.checkSupportedAttributes(column, ['name', 'label', 'type', 'selectable', 'sortable', 'transformation'], function(unsupportedColumnAttributesError) {
-                                    AttributesReader.readRequiredAttributes(column, ['name', 'type'], function(missingRequiredColumnAttributesError) {
-                                        var keywords = {
-                                            name: column.name,
-                                            label: column.label,
-                                            selectable: column.selectable,
-                                            sortable: column.sortable,
-                                            transformation: column.transformation
-                                        };
-                                        AttributesReader.checkKeywordValue(keywords, function(columnKeywordValueError) {
-                                            var columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
-                                            var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError,
-                                            identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError);
-                                            if(Object.getOwnPropertyNames(columnError).length !== 0)
-                                            {
-                                                stop = true;
-                                                return cb(error, null, null);   // return the errors occurred in the first wrong column
-                                            }
-                                            else    // no column error
-                                            {
-                                                if (i == columns.length-1)
+                                var stop = false;
+                                for (var i = 0; !stop && i< columns.length; i++)
+                                {
+                                    var column = columns[i];
+                                    AttributesReader.checkSupportedAttributes(column, ['name', 'label', 'type', 'selectable', 'sortable', 'transformation'], function(unsupportedColumnAttributesError) {
+                                        AttributesReader.readRequiredAttributes(column, ['name', 'type'], function(missingRequiredColumnAttributesError) {
+                                            var keywords = {
+                                                name: column.name,
+                                                label: column.label,
+                                                selectable: column.selectable,
+                                                sortable: column.sortable,
+                                                transformation: column.transformation
+                                            };
+                                            AttributesReader.checkKeywordValue(keywords, function(columnKeywordValueError) {
+                                                var columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
+                                                var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError,
+                                                identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError);
+                                                if(Object.getOwnPropertyNames(columnError).length !== 0)
                                                 {
-                                                    if(Object.getOwnPropertyNames(document).length === 0)   // collection without explicit document
+                                                    stop = true;
+                                                    return cb(error, null, null);   // return the errors occurred in the first wrong column
+                                                }
+                                                else    // no column error
+                                                {
+                                                    if (i == columns.length-1)
                                                     {
-                                                        if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
+                                                        if(Object.getOwnPropertyNames(document).length === 0)   // collection without explicit document
                                                         {
-                                                            stop = true;
-                                                            return cb(error, null, null);
-                                                        }
-                                                        else 
-                                                        {
-                                                            body = { action: action, columns: columns };
-                                                            stop = true;
-                                                            return cb(null, identity, body);
-                                                        }
-                                                    }
-                                                    else    // collection with explicit document
-                                                    {
-                                                        DSL.compileDocument(document.identity, document.rows, document.action, function(documentCompileError, documentIdentity, documentBody) {
-                                                            error = Object.assign(error, documentCompileError); // general errors from above + document errors
-                                                            if(Object.getOwnPropertyNames(error).length !== 0)
+                                                            if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
                                                             {
                                                                 stop = true;
                                                                 return cb(error, null, null);
                                                             }
                                                             else 
                                                             {
-                                                                body = { 
+                                                                body = {
                                                                     action: action,
                                                                     columns: columns,
-                                                                    document: {
-                                                                        identity: documentIdentity,
-                                                                        body: documentBody
-                                                                    }
+                                                                    document: {}
                                                                 };
                                                                 stop = true;
                                                                 return cb(null, identity, body);
                                                             }
-                                                        });
+                                                        }
+                                                        else    // collection with explicit document
+                                                        {
+                                                            DSL.compileDocument(document.identity, document.rows, document.action, true, function(documentCompileError, documentIdentity, documentBody) {
+                                                                error = Object.assign(error, documentCompileError); // general errors from above + document errors
+                                                                if(Object.getOwnPropertyNames(error).length !== 0)
+                                                                {
+                                                                    stop = true;
+                                                                    return cb(error, null, null);
+                                                                }
+                                                                else 
+                                                                {
+                                                                    body = { 
+                                                                        action: action,
+                                                                        columns: columns,
+                                                                        document: {
+                                                                            identity: documentIdentity,
+                                                                            body: documentBody
+                                                                        }
+                                                                    };
+                                                                    stop = true;
+                                                                    return cb(null, identity, body);
+                                                                }
+                                                            });
+                                                        }
                                                     }
                                                 }
-                                            }
+                                            });
                                         });
                                     });
-                                });
+                                }
+                            }
+                            else
+                            {
+                                var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError,
+                                                identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError);
+                                                
+                                if(Object.getOwnPropertyNames(document).length === 0)   // collection without explicit document
+                                {
+                                    if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
+                                    {
+                                        stop = true;
+                                        return cb(error, null, null);
+                                    }
+                                    else 
+                                    {
+                                        body = {
+                                            action: action,
+                                            columns: columns,
+                                            document: {}
+                                        };
+                                        stop = true;
+                                        return cb(null, identity, body);
+                                    }
+                                }
+                                else    // collection with explicit document
+                                {
+                                    DSL.compileDocument(document.identity, document.rows, document.action, true, function(documentCompileError, documentIdentity, documentBody) {
+                                        error = Object.assign(error, documentCompileError); // general errors from above + document errors
+                                        if(Object.getOwnPropertyNames(error).length !== 0)
+                                        {
+                                            stop = true;
+                                            return cb(error, null, null);
+                                        }
+                                        else 
+                                        {
+                                            body = { 
+                                                action: action,
+                                                columns: columns,
+                                                document: {
+                                                    identity: documentIdentity,
+                                                    body: documentBody
+                                                }
+                                            };
+                                            stop = true;
+                                            return cb(null, identity, body);
+                                        }
+                                    });
+                                }
                             }
                         });
                     });
@@ -1523,6 +1697,7 @@ Collection(
     
     DSL.executeCollection = function(identity, body, conn, cb) {
         var data = {};
+        data.perpage = identity.perpage;
         data.types = [];
         data.selectables = [];
         data.sortables = [];
@@ -1573,7 +1748,6 @@ Collection(
                     {
                         data.label = identity.label;
                     }
-                    
                     return cb(null, data);
                 }
                 else
@@ -1629,9 +1803,10 @@ Collection(
                         data.label = identity.label;
                     }
                     
+                    var column;
                     for(var i = 0; i < body.columns.length; i++)
                     {
-                        var column = body.columns[i];
+                        column = body.columns[i];
                         data.types.push(column.type);
                             
                         if(column.sortable)
@@ -1659,7 +1834,7 @@ Collection(
                         data.result[x] = {};
                         for(var i = 0; !returned && i < body.columns.length; i++)
                         {
-                            var column = body.columns[i];
+                            column = body.columns[i];
                             var columnValue = results[x][column.name];
                             
                             if(column.transformation)
@@ -1718,6 +1893,8 @@ Collection(
                         if(x == results.length-1)
                         {
                             returned = true;
+                            if(data.selectables.length > 0)
+                                data.rawData = results;
                             return cb(null, data);
                         }
                     }

@@ -1439,8 +1439,13 @@ input {
 }
 
 #dsl-data-table {
-    width: 70%;
+    width: 90%;
     margin: auto;
+}
+
+#total-lines {
+    position: absolute;
+    margin-left: -25%;
 }
 
 .cell-table-view {
@@ -1460,8 +1465,52 @@ input {
     overflow: auto;
     white-space: nowrap;
     /*text-overflow: string;*/
-    max-width: 10em;
+    max-width: 15em;
     min-width: 8em;
+}
+
+.collection-table-view th, .collection-table-view td {
+    overflow: auto !important;
+    white-space: nowrap;
+    /*max-width: 35em !important;*/
+    /*min-width: 8em !important;*/
+}
+
+.collection-table-view .selectable {
+    cursor: pointer;
+    color: #60D42E;
+}
+
+.collection-table-view .selectable:hover {
+    color: darkgreen;
+}
+
+.cell-table-view th::-webkit-scrollbar-track, .cell-table-view td::-webkit-scrollbar-track,
+.document-table-view th::-webkit-scrollbar-track, .document-table-view td::-webkit-scrollbar-track,
+.collection-table-view th::-webkit-scrollbar-track, .collection-table-view td::-webkit-scrollbar-track,
+.dashboard-table-view th::-webkit-scrollbar-track, .dashboard-table-view td::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: rgba(0,0,0,0);
+}
+
+.cell-table-view th::-webkit-scrollbar, .cell-table-view td::-webkit-scrollbar,
+.document-table-view th::-webkit-scrollbar, .document-table-view td::-webkit-scrollbar,
+.collection-table-view th::-webkit-scrollbar, .collection-table-view td::-webkit-scrollbar,
+.dashboard-table-view th::-webkit-scrollbar, .dashboard-table-view td::-webkit-scrollbar
+{
+    height: 4px;
+	width: 4px;
+	background-color: rgba(0,0,0,0);
+}
+
+.cell-table-view th::-webkit-scrollbar-thumb, .cell-table-view td::-webkit-scrollbar-thumb,
+.document-table-view th::-webkit-scrollbar-thumb, .document-table-view td::-webkit-scrollbar-thumb,
+.collection-table-view th::-webkit-scrollbar-thumb, .collection-table-view td::-webkit-scrollbar-thumb,
+.dashboard-table-view th::-webkit-scrollbar-thumb, .dashboard-table-view td::-webkit-scrollbar-thumb
+{
+    border-radius: 2px;
+	background-color: darkgrey;
 }
 
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/

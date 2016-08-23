@@ -64,31 +64,32 @@ module.exports = {
     	var SendEmail = keywords.SendEmail;
     	var selectable = keywords.selectable;
     	var sortable = keywords.sortable;
+    	var populate = keywords.populate;
     	
         var error = {};
         if(name && (typeof name !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(name);
+        	error.wrongNameErrorMessage = CompileErrors.notStringErrorMessage(name);
         }
         
         if(label && (typeof label !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(label);
+        	error.wrongLabelErrorMessage = CompileErrors.notStringErrorMessage(label);
         }
         
         if(sortby && (typeof sortby !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(sortby);
+        	error.wrongSortbyErrorMessage = CompileErrors.notStringErrorMessage(sortby);
         }
         
         if(table && (typeof table !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(table);
+        	error.wrongTableErrorMessage = CompileErrors.notStringErrorMessage(table);
         }
         
         if(columnLabel && (typeof columnLabel !== 'string'))
         {
-        	error.notStringErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
+        	error.wrongColumnLabelErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
         }
         
         if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date') )
@@ -134,6 +135,11 @@ module.exports = {
         if (SendEmail && (SendEmail != "csv" && SendEmail != "json" && SendEmail !== "true" && SendEmail != "false" && SendEmail !== true && SendEmail != false))
         {
             error.wrongSendEmailTypeErrorMessage = CompileErrors.wrongActionTypeError(SendEmail);
+        }
+        
+        if (populate && (typeof populate !== 'string'))
+        {
+            error.wrongPopulateErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
         }
         
         if(value)

@@ -18,17 +18,33 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
+    var data = DSLStore.getDSLData();
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            definitionType: DSLStore.getDSLData() ? DSLStore.getDSLData().definitionType : null,
-            data: DSLStore.getDSLData() ? DSLStore.getDSLData().result : null,
-            label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
-            types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
-            action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
-            sortables: DSLStore.getDSLData() ? DSLStore.getDSLData().sortables : null,
-            selectables: DSLStore.getDSLData() ? DSLStore.getDSLData().selectables : null,
+            
+            definitionType: data ? data.definitionType : null,
+            data: data ? data.result : null,
+            label: data ? data.label : null,
+            perpage: data ? data.perpage : null,
+            action: data ? data.action : null,
+            nestedDocument: data ? data.document : null,
+            types: data ? data.types : null,
+            sortables: data ? data.sortables : null,
+            selectables: data ? data.selectables : null,
+            rawData: data ? data.rawData : null,
             queried: true
+    };
+}
+
+function getNestedState() {
+    var data = DSLStore.getDSLNestedData();
+    return {
+        definitionType: data ? data.definitionType : null,
+        data: data ? data.result : null,
+        action: data ? data.action : null,
+        types: data ? data.types : null,
+        queried: true
     };
 }
 
@@ -40,59 +56,72 @@ var ExecuteDSL = React.createClass({
             isLogged: SessionStore.isLogged(),
             definitonId: this.props.params.definitionId,
             data: null,
-            queried: false,
-            index: 0
+            queried: false
         };
     },
     
     componentWillMount: function() {
         DSLStore.addExecuteListener(this._onChange);
+        DSLStore.addNestedExecuteListener(this._onNestedChange);
         RequestDSLActionCreator.executeDefinition(this.state.definitonId);
     },
     
     componentWillUnmount: function() {
         DSLStore.removeExecuteListener(this._onChange);
+        DSLStore.removeNestedExecuteListener(this._onNestedChange);
     },
     
     _onChange: function() {
         this.setState(getState());
     },
     
+    _onNestedChange: function() {
+        this.setState(getNestedState());
+    },
+    
     dataFormatter: function(cell, row, formatExtraData) {
-        // console.log(cell);
-        // console.log(formatExtraData);
-        if(this.state.types)
+        if (formatExtraData.type == "string")
         {
-            var content;
+            cell = cell.toString();
+        }
+        
+        /*
+        else if(formatExtraData.type == "image")
+        {
             
-            if (this.state.types[this.state.index]== "string")
-            {
-                return cell.toString();
-            }
-            /*
-            else if(row.type == "image")
-            {
-                
-            }
-            else if (row.type == "link")
-            {
-                
-            }
-            else if (row.type == "date")
-            {
-                
-            }
-            else if (row.type == "number")
-            {
-                
-            }
-            */
-            this.setState({index: this.state.index+1});
         }
-        else
+        else if (formatExtraData.type == "link")
         {
-            return cell;
+            
         }
+        else if (formatExtraData.type == "date")
+        {
+            
+        }
+        else if (formatExtraData.type == "number")
+        {
+            
+        }
+        ..
+        array
+        object
+        */
+        
+        if(formatExtraData.selectable)
+        {
+            var instance = this;
+            var showDocument = function() {
+                instance.setState({ label: "Document " + cell.props.children});
+                console.log("raw");
+                console.log(instance.state.rawData[row.index]);
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row.index], 
+                instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+            };
+            
+            cell = <span className="selectable" onClick={showDocument}>{cell}</span>;
+        }
+        
+        return cell;
     },
     
     render: function() {
@@ -105,43 +134,28 @@ var ExecuteDSL = React.createClass({
         var content, errors, title;
         var data = [];
         
-        var options = {
-            hideSizePerPage : true
-        };
+        
         if(this.state.label)
             title = (<p className="container-title">{this.state.label}</p>);
+        
         if(this.state.data && this.state.queried)
         {
-            console.log(this.state.data);
             var columns = [];
             if(this.state.data.length > 0)  // Array of table data with at least one element
             {
                 data = this.state.data;
                 columns = Object.keys(data[0]);
             }
-            // else  // Array of table data empty
-            // {
-            //     columns = Object.keys(this.state.data);
-            //     data.push(this.state.data);
-            // }
-            
-            /*
-            [
-                {
-                    type: string
-                    label: value
-                },
-                {
-                    
-                }
-            
-            ]
-            
-            
-            */
-            
-            
-            //console.log(columns);
+            else  // Array of table data empty
+            {
+                // for a single object
+                //     columns = Object.keys(this.state.data);  
+                //     data.push(this.state.data);
+            }
+            console.log(columns);
+            data.forEach(function(x, i) {
+                data[i].index = i;
+            });
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -152,18 +166,30 @@ var ExecuteDSL = React.createClass({
             hideSizePerPage : Bool
             Enable to hide the dropdown list for size per page, default is false.
             */
-    
-            //alert(this.state.definitionType);
             var definitionType = this.state.definitionType;
+            var perpage = this.state.perpage;
+            var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
+            var showTotal = function(start, to, total) { return <span id="total-lines">{"Lines in Collection: " + total}</span> };
             if(definitionType == "Cell" || definitionType == "Collection")
             {
+                var options = {
+                    hideSizePerPage : false, //definitionType=="Cell" ? true : false,
+                    sizePerPage: perpage ? perpage : 10,
+                    sizePerPageList: perpageList,
+                    paginationShowsTotal: showTotal
+                    //,onSizePerPageList: function(size) {alert("changed to: "+size);}
+                };
                 content = (
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
-                        <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
+                        <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
                             {columns.map((column, i) =>
                                 <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} 
-                                formatExtraData={{type: this.state.types[i], sortable: this.state.sortables[i], selectable: this.state.selectables[i]}}
-                                dataSort={definitionType == "Cell" ? false : true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                                formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
+                                dataSort={definitionType == "Cell" ? false : 
+                                            definitionType == "Collection" ? 
+                                                this.state.sortables[i] == true ? true : false
+                                                : false }
+                                dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
                             )}
                         </BootstrapTable>
                     </div>
@@ -171,8 +197,8 @@ var ExecuteDSL = React.createClass({
             }
             if(definitionType == "Document")
             {
-                console.log(this.state.action);
-                console.log(data[0]);
+                //console.log(this.state.action);
+                //console.log(data[0]);
                 content = (
                     <div id="dsl-data-table" className="document-table-view">
                         <table className="table table-striped table-bordered table-hover">

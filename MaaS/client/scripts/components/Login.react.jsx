@@ -75,15 +75,14 @@ var Login = React.createClass({
     _onChange: function() {
       this.setState(getState());
       if(this.state.isLogged)
-      {     
-            if(this.state.userType == "commonUser")
-            {
-              // loads data to the session
-                RequestUserActionCreator.getUser(SessionStore.getUserId());
-                RequestUserActionCreator.getCompany(SessionStore.getUserId());
-                RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
-            }
-            
+      {
+          if(this.state.userType == "commonUser")
+          {
+            // loads data to the session
+              RequestUserActionCreator.getUser(SessionStore.getUserId());
+              RequestUserActionCreator.getCompany(SessionStore.getUserId());
+              RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+          }
       }
     },
     
