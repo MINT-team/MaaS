@@ -177,7 +177,6 @@ var RequestSessionActionCreator = {
   login: function login(email, password) {
     var impersonate = arguments.length <= 2 || arguments[2] === undefined ? "false" : arguments[2];
 
-    window.alert("mandata action di impersonificazione");
     WebAPIUtils.login(email, password, impersonate);
   },
 
@@ -2512,6 +2511,8 @@ function getState() {
         label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
         types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
         action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
+        sortables: DSLStore.getDSLData() ? DSLStore.getDSLData().sortables : null,
+        selectables: DSLStore.getDSLData() ? DSLStore.getDSLData().selectables : null,
         queried: true
     };
 }
@@ -2527,7 +2528,7 @@ var ExecuteDSL = React.createClass({
             definitonId: this.props.params.definitionId,
             data: null,
             queried: false,
-            indexTypes: 0
+            index: 0
         };
     },
 
@@ -2542,34 +2543,39 @@ var ExecuteDSL = React.createClass({
 
     _onChange: function _onChange() {
         this.setState(getState());
-        this.setState({ indexTypes: this.state.types.length });
     },
 
-    dataFormatter: function dataFormatter(cell, row) {
-        var content;
-        /*
-        if ( == "string")
-        {
-            
+    dataFormatter: function dataFormatter(cell, row, formatExtraData) {
+        // console.log(cell);
+        // console.log(formatExtraData);
+        if (this.state.types) {
+            var content;
+
+            if (this.state.types[this.state.index] == "string") {
+                return cell.toString();
+            }
+            /*
+            else if(row.type == "image")
+            {
+                
+            }
+            else if (row.type == "link")
+            {
+                
+            }
+            else if (row.type == "date")
+            {
+                
+            }
+            else if (row.type == "number")
+            {
+                
+            }
+            */
+            this.setState({ index: this.state.index + 1 });
+        } else {
+            return cell;
         }
-        else if(row.type == "image")
-        {
-            
-        }
-        else if (row.type == "link")
-        {
-            
-        }
-        else if (row.type == "date")
-        {
-            
-        }
-        else if (row.type == "number")
-        {
-            
-        }
-        */
-        return cell;
     },
 
     render: function render() {
@@ -2590,7 +2596,7 @@ var ExecuteDSL = React.createClass({
             this.state.label
         );
         if (this.state.data && this.state.queried) {
-            //console.log(this.state.data);
+            console.log(this.state.data);
             var columns = [];
             if (this.state.data.length > 0) // Array of table data with at least one element
                 {
@@ -2639,10 +2645,12 @@ var ExecuteDSL = React.createClass({
                     React.createElement(
                         BootstrapTable,
                         { ref: 'table', data: data, ignoreSinglePage: true, pagination: true, striped: true, hover: true, options: options, keyField: columns[0] },
-                        columns.map(function (column) {
+                        columns.map(function (column, i) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: column, dataField: column, dataFormat: _this.dataFormatter, dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
+                                { key: column, dataField: column, dataFormat: _this.dataFormatter,
+                                    formatExtraData: { type: _this.state.types[i], sortable: _this.state.sortables[i], selectable: _this.state.selectables[i] },
+                                    dataSort: definitionType == "Cell" ? false : true, dataAlign: 'center' },
                                 column
                             );
                         } //column.charAt(0).toUpperCase() + column.slice(1)
@@ -2665,7 +2673,7 @@ var ExecuteDSL = React.createClass({
                             columns.map(function (column) {
                                 return React.createElement(
                                     'tr',
-                                    { className: 'short-column' },
+                                    { key: column, className: 'short-column' },
                                     React.createElement(
                                         'th',
                                         { key: column, className: '' },

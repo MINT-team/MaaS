@@ -332,6 +332,7 @@ module.exports = function(DSL) {
                             var callback = function(err, identity, body) {
                                 if(err)
                                 {
+                                    console.log("> DSL compilation error:", err);
                                     conn.close();
                                     return cb(null, err);
                                 }
@@ -374,6 +375,87 @@ module.exports = function(DSL) {
         }
     );
     
+    DSL.executeNestedDocument = function(id, label, identity, body, cb) {
+        var ExternalDatabase = app.models.ExternalDatabase;
+        DSL.findById(id, function(err, DSLInstance) {
+            if(err)
+            {
+                console.log(err);
+                return cb(err);
+            }
+            
+            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
+                if(err)
+                {
+                   console.log("> Error finding database of dsl");
+                   return cb(err);
+                }
+                database.company(function(err, company) {
+                    if (err)
+                    {
+                        console.log("> Error finding company of database");
+                        return cb(err);
+                    }
+                    company.users.count(function(err, usersCount) {
+                        if (err)
+                        {
+                            console.log("> Error finding number of users in a company");
+                            return cb(err);
+                        }
+                        
+                        var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
+                            if (err)
+                            {
+                                var error = {
+                                    message: "Failed connecting database"
+                                };
+                                console.log('> Failed connecting database:', err);
+                                return cb(null, error, null);
+                            }
+                            else
+                            {
+                                DSL.executeDocument(identity, body, conn, function(error, data) {
+                                    conn.close();
+                                    if (error)
+                                    {
+                                        console.log("> DSL execution error:", error);
+                                        return cb(null, error, null);
+                                    }
+                                    else
+                                    {
+                                        console.log("> DSL execution processed successfully");
+                                        if(!data.label)
+                                            data.label = "Document " + label;
+                                        data.definitionType = "Document";
+                                        return cb(null, null, data);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    };
+     
+    DSL.remoteMethod(
+        'executeNestedDocument',
+        {
+            description: "Execute a nested Document definition",
+            accepts: [
+                { arg: 'identity', type: 'Object', required: true, description: 'Document identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Document body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ],
+            http: { verb: 'post', path: '/:id/executeNestedDocument' }
+        }
+    );
+    
+    
+    
     DSL.executeDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
@@ -401,7 +483,7 @@ module.exports = function(DSL) {
                             console.log("> Error finding number of users in a company");
                             return cb(err);
                         }
-               
+                        
                         var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
                             if (err)
                             {
@@ -428,7 +510,7 @@ module.exports = function(DSL) {
                                     console.log("> DSL execution stopped: compilation errors");
                                     return cb(null, err, null);
                                 }
-                                else
+                                else    // compilation successful
                                 {
                                     switch(DSLInstance.type)
                                     {
@@ -452,6 +534,25 @@ module.exports = function(DSL) {
                                             break;
                                         case "Document":
                                             DSL.executeDocument(identity, body, conn, function(error, data) {
+                                                conn.close();
+                                                if (error)
+                                                {
+                                                    console.log("> DSL execution error:", error);
+                                                    return cb(null, error, null);
+                                                }
+                                                else
+                                                {
+                                                    console.log("> DSL execution processed successfully");
+                                                    if(!data.label)
+                                                        data.label = DSLInstance.name;
+                                                    data.definitionType = DSLInstance.type;
+                                                    return cb(null, null, data);
+                                                }
+                                            });
+                                            break;
+                                            
+                                        case "Collection":
+                                            DSL.executeCollection(identity, body, conn, function(error, data) {
                                                 conn.close();
                                                 if (error)
                                                 {
@@ -692,6 +793,7 @@ module.exports = function(DSL) {
     
     DSL.executeCell = function(identity, body, conn, cb) {
         var data = {};
+        data.types = [];
         if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
         {
             var collection = conn.model(identity.table, DocumentSchema);
@@ -748,7 +850,7 @@ module.exports = function(DSL) {
                             {
                                 data.label = identity.label;
                             }
-                            data.types = [identity.type];
+                            data.types.push(identity.type);
                             if (identity.columnLabel)
                             {
                                 data.result = [
@@ -779,7 +881,7 @@ module.exports = function(DSL) {
             {
                 data.label = identity.label;
             }
-            data.types = [identity.type];
+            data.types.push(identity.type);
             if(identity.transformation)
             {
                 var transformedValue;
@@ -891,25 +993,6 @@ module.exports = function(DSL) {
         Body:
             action | optional
             
-    two types of Document inside Collection:
-    
-    1)
-        Identity:
-            populate | optional
-        Body:
-            row
-    Row:
-        Identity:
-            name | required
-            label | optional
-            transformation | optional
-            type | required
-            
-    2)
-        Identity:
-            populate | optional
-        Body:
-            empty
     */
     
     DSL.compileDocument = function(identity, rows, action, cb) {
@@ -1018,6 +1101,7 @@ module.exports = function(DSL) {
     
     DSL.executeDocument = function(identity, body, conn, cb) {
         var data = {};
+        data.types = [];
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
             data.action = body.action;
@@ -1043,7 +1127,7 @@ module.exports = function(DSL) {
                 }
                 else
                 {
-                    mongoose_query.sort({[body[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first attribute
+                    // if not specified we don't know how to order
                 }
             }
             else
@@ -1100,7 +1184,7 @@ module.exports = function(DSL) {
                 }
                 else
                 {
-                    mongoose_query.sort({[body[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first attribute
+                    mongoose_query.sort({[body.rows[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first row attribute
                 }
             }
             else
@@ -1116,7 +1200,6 @@ module.exports = function(DSL) {
                 {
                     return cb(err, null);
                 }
-                //console.log(result);
                 if(result.length > 0)
                 {
                     data.result = [ {} ];   // initialize the object to be filled with results matching rows values
@@ -1130,6 +1213,8 @@ module.exports = function(DSL) {
                     {
                         var row = body.rows[i];
                         var rowValue = result[0][row.name];
+                        
+                        data.types.push(row.type);
                         
                         if(row.transformation)
                         {
@@ -1231,11 +1316,11 @@ module.exports = function(DSL) {
         }
     );
     
-    /*
-    two types of Collection:
+    /* -------------------------------- COLLECTION --------------------------------
+    
+    Two types of Collection:
     
     1)
-    
         Identity:
             table | required
             label | optional
@@ -1247,13 +1332,7 @@ module.exports = function(DSL) {
             action | optional
             column | optional
         
-        Column:
-            name | required
-            selectable | optional
-            label | optional
-            transformation | optional
     2)
-    
         Identity:
             table | required
             label | optional
@@ -1265,46 +1344,75 @@ module.exports = function(DSL) {
             action | optional
             column | optional
             document
+            
+        Column:
+            name | required
+            selectable | optional | false
+            sortable | optional | false
+            type | required | false
+            label | optional
+            transformation | optional
+            
+    Two types of Document inside Collection (if defined):
+    
+    1)
+        Identity:
+            populate | optional
+        Body:
+            row
+    Row:
+        Identity:
+            name | required
+            label | optional
+            transformation | optional
+            type | required
+            
+    2)
+        Identity:
+            populate | optional
+        Body:
+            empty
         
     */
-    /*
-    Collection(
-    name: "customers",
+/*
+Collection(
+    table: "customers",
     label: "JuniorCustomers",
-    id: "Junior",
-    Weight:"0",
+    ---------id: "Junior",
+    ---------Weight:"0",
     perpage: "20",
     sortby: "surname",
     order: "asc",
     query: {age: {$lt: 40}}
 ) {
     column(
-        name: "name",
-        label: "Nome",
-        sortable: false,
-        selectable: false
-        transformation: function(val) {
-            return val.lenght;
-        }
+        name: "3"
     )
     action(
         Export: "true",
         SendEmail: "true"
     )
+    column(
+        name: "4"
+    )
     Document(
-
-    ) {
+        table: "prova"
+    ){
         row(
-            name: "name",
-            label: "Nome"
+            name: "asd"
         )
-    }
+        action(
+            SendEmail: "true"
+        )
+    }   
+    column(
+        name: "5"
+    )
 }
-    
-    */
+*/
     DSL.compileCollection = function(identity, columns, document, action, cb) {
         var body = {};
-        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'query', 'sortby', 'perpage', 'order'], function(unsupportedIdentityAttributesError) {
+        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'order', 'query', 'perpage'], function(unsupportedIdentityAttributesError) {
             AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
                 var keywords = {
                     table: identity.table,
@@ -1321,83 +1429,65 @@ module.exports = function(DSL) {
                             for (var i = 0; !stop && i< columns.length; i++)
                             {
                                 var column = columns[i];
-                                AttributesReader.checkSupportedAttributes(column, ['name', 'label', 'selectable', 'transformation'], function(unsupportedColumnAttributesError) {
-                                    AttributesReader.readRequiredAttributes(column, ['name'], function(missingRequiredColumnAttributesError) {
+                                AttributesReader.checkSupportedAttributes(column, ['name', 'label', 'type', 'selectable', 'sortable', 'transformation'], function(unsupportedColumnAttributesError) {
+                                    AttributesReader.readRequiredAttributes(column, ['name', 'type'], function(missingRequiredColumnAttributesError) {
                                         var keywords = {
                                             name: column.name,
                                             label: column.label,
                                             selectable: column.selectable,
+                                            sortable: column.sortable,
                                             transformation: column.transformation
                                         };
                                         AttributesReader.checkKeywordValue(keywords, function(columnKeywordValueError) {
                                             var columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
-                                            var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError);
+                                            var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError,
+                                            identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError);
                                             if(Object.getOwnPropertyNames(columnError).length !== 0)
                                             {
                                                 stop = true;
                                                 return cb(error, null, null);   // return the errors occurred in the first wrong column
                                             }
-                                            else
+                                            else    // no column error
                                             {
                                                 if (i == columns.length-1)
                                                 {
-                                                    if(Object.getOwnPropertyNames(columnError).length !== 0)
+                                                    if(Object.getOwnPropertyNames(document).length === 0)   // collection without explicit document
                                                     {
-                                                        stop = true;
-                                                        return cb(error, null, null);   // return the errors occurred in the first wrong column
-                                                    }
-                                                    else
-                                                    {
-                                                        if(Object.getOwnPropertyNames(document).length === 0)
+                                                        if(Object.getOwnPropertyNames(error).length !== 0)    // general errors from above
+                                                        {
+                                                            stop = true;
+                                                            return cb(error, null, null);
+                                                        }
+                                                        else 
                                                         {
                                                             body = { action: action, columns: columns };
                                                             stop = true;
                                                             return cb(null, identity, body);
                                                         }
-                                                        else    // collection with explicit document
-                                                        {
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            /*
-                                                            
-                                                            var collectionCB = function() {
-        
-                                                            }
-    
-                                                            var callback = function() {     // document cb
-                                                                    
-                                                                }
-                                                            
-                                                            => DSL.compileCollection({}, [], DSL.compileDocument({}, [], callback), collectionCB )
-                                                            
-                                                            DSL.compileCollection(identity, body, documentCompile, cb)
+                                                    }
+                                                    else    // collection with explicit document
+                                                    {
+                                                        DSL.compileDocument(document.identity, document.rows, document.action, function(documentCompileError, documentIdentity, documentBody) {
+                                                            error = Object.assign(error, documentCompileError); // general errors from above + document errors
+                                                            if(Object.getOwnPropertyNames(error).length !== 0)
                                                             {
-                                                                
-                                                                
-                                                                eval(documentCompile);
-                                                                
-                                                                return documentCB();
+                                                                stop = true;
+                                                                return cb(error, null, null);
                                                             }
-                                                            
-                                                            compileDocument(identity, body, cb)
+                                                            else 
                                                             {
-                                                                
-                                                                
-                                                                
+                                                                body = { 
+                                                                    action: action,
+                                                                    columns: columns,
+                                                                    document: {
+                                                                        identity: documentIdentity,
+                                                                        body: documentBody
+                                                                    }
+                                                                };
+                                                                stop = true;
+                                                                return cb(null, identity, body);
                                                             }
-                                                            
-                                                            
-                                                            */
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            
-                                                        }
+                                                        });
                                                     }
                                                 }
                                             }
@@ -1432,10 +1522,212 @@ module.exports = function(DSL) {
     );
     
     DSL.executeCollection = function(identity, body, conn, cb) {
-        
-        
-        
-        
+        var data = {};
+        data.types = [];
+        data.selectables = [];
+        data.sortables = [];
+        if(Object.getOwnPropertyNames(body.action).length !== 0)
+        {
+            data.action = body.action;
+        }
+        var collection = conn.model(identity.table, DocumentSchema);
+        var mongoose_query;
+        if(!body.columns || (body.columns && body.columns.length == 0) )   // Collection without columns
+        {
+            if(identity.query)
+            {
+                mongoose_query = collection.find(identity.query, { _id: 0});
+            }
+            else
+            {
+                mongoose_query = collection.find({}, { _id: 0});
+            }
+            mongoose_query.setOptions({lean: true});
+            if(identity.order)
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                }
+                else
+                {
+                    // if not specified we don't know how to order
+                }
+            }
+            else
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            mongoose_query.exec(function(err, result) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                if(result.length > 0)
+                {
+                    data.result = result;   // initialize the object to be filled with results
+                    if(identity.label)
+                    {
+                        data.label = identity.label;
+                    }
+                    
+                    return cb(null, data);
+                }
+                else
+                {
+                    return cb(null, data);
+                }
+            });
+        }
+        else if(body.columns && body.columns.length > 0)    // Collection with columns
+        {
+            if(identity.query)
+            {
+                mongoose_query = collection.find(identity.query, { _id: 0});
+            }
+            else
+            {
+                mongoose_query = collection.find({}, { _id: 0});
+            }
+            mongoose_query.setOptions({lean: true});
+            var names = "";
+            body.columns.forEach(function(column) {
+                names += " " + column.name;
+            });
+            mongoose_query.select(names);
+            if(identity.order)
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: identity.order == "asc" ? 1 : -1});
+                }
+                else
+                {
+                    mongoose_query.sort({[body.columns[0].name]: identity.order == "asc" ? 1 : -1});    // if not specified, sort by the first column attribute
+                }
+            }
+            else
+            {
+                if(identity.sortby)
+                {
+                    mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            mongoose_query.exec(function(err, results) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                if(results.length > 0)
+                {
+                    data.result = [ {} ];   // initialize the object to be filled with results matching rows values
+                    if(identity.label)
+                    {
+                        data.label = identity.label;
+                    }
+                    
+                    for(var i = 0; i < body.columns.length; i++)
+                    {
+                        var column = body.columns[i];
+                        data.types.push(column.type);
+                            
+                        if(column.sortable)
+                        {
+                            data.sortables.push(column.sortable);
+                        }
+                        else
+                        {
+                            data.sortables.push(false);
+                        }
+                        
+                        if(column.selectable)
+                        {
+                            data.selectables.push(column.selectable);
+                        }
+                        else
+                        {
+                            data.selectables.push(false);
+                        }
+                    }
+                    
+                    var returned = false;
+                    for(var x = 0; !returned && x < results.length; x++)   // check all documents resulted form query
+                    {
+                        data.result[x] = {};
+                        for(var i = 0; !returned && i < body.columns.length; i++)
+                        {
+                            var column = body.columns[i];
+                            var columnValue = results[x][column.name];
+                            
+                            if(column.transformation)
+                            {
+                                var transformedValue;
+                                try
+                                {
+                                    transformedValue = column.transformation(columnValue);
+                                }
+                                catch(err)
+                                {
+                                    returned = true;
+                                    return cb(err, null);
+                                }
+                                AttributesReader.checkKeywordValue({ type: column.type, value: transformedValue }, function(keywordValueError) {
+                                    if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                                    {
+                                        returned = true;
+                                        return cb(keywordValueError, null);
+                                    }
+                                    else
+                                    {
+                                        if(column.label)
+                                        {
+                                            data.result[x][column.label] = transformedValue;
+                                        }
+                                        else
+                                        {
+                                            data.result[x][column.name] = transformedValue;
+                                        }
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                AttributesReader.checkKeywordValue({ type: column.type, value: columnValue }, function(keywordValueError) {
+                                    if(Object.getOwnPropertyNames(keywordValueError).length !== 0)
+                                    {
+                                        returned = true;
+                                        return cb(keywordValueError, null);
+                                    }
+                                    else
+                                    {
+                                        if(column.label)
+                                        {
+                                            data.result[x][column.label] = columnValue;
+                                        }
+                                        else
+                                        {
+                                            data.result[x][column.name] = columnValue;
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        if(x == results.length-1)
+                        {
+                            returned = true;
+                            return cb(null, data);
+                        }
+                    }
+                }
+                else
+                {
+                    return cb(null, data);
+                }
+            });
+        }
     };
     
     DSL.remoteMethod(
@@ -1462,7 +1754,7 @@ module.exports = function(DSL) {
     
     
     
-    /* -------------------------------- COLLECTION -------------------------------- 
+   /* 
     
     Collection(
     

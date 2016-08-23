@@ -26,6 +26,8 @@ function getState() {
             label: DSLStore.getDSLData() ? DSLStore.getDSLData().label : null,
             types: DSLStore.getDSLData() ? DSLStore.getDSLData().types : null,
             action: DSLStore.getDSLData() ? DSLStore.getDSLData().action : null,
+            sortables: DSLStore.getDSLData() ? DSLStore.getDSLData().sortables : null,
+            selectables: DSLStore.getDSLData() ? DSLStore.getDSLData().selectables : null,
             queried: true
     };
 }
@@ -39,7 +41,7 @@ var ExecuteDSL = React.createClass({
             definitonId: this.props.params.definitionId,
             data: null,
             queried: false,
-            indexTypes: 0
+            index: 0
         };
     },
     
@@ -54,35 +56,43 @@ var ExecuteDSL = React.createClass({
     
     _onChange: function() {
         this.setState(getState());
-        this.setState({indexTypes: this.state.types.length});
     },
     
-    dataFormatter: function(cell, row) {
-        var content;
-        /*
-        if ( == "string")
+    dataFormatter: function(cell, row, formatExtraData) {
+        // console.log(cell);
+        // console.log(formatExtraData);
+        if(this.state.types)
         {
+            var content;
             
+            if (this.state.types[this.state.index]== "string")
+            {
+                return cell.toString();
+            }
+            /*
+            else if(row.type == "image")
+            {
+                
+            }
+            else if (row.type == "link")
+            {
+                
+            }
+            else if (row.type == "date")
+            {
+                
+            }
+            else if (row.type == "number")
+            {
+                
+            }
+            */
+            this.setState({index: this.state.index+1});
         }
-        else if(row.type == "image")
+        else
         {
-            
+            return cell;
         }
-        else if (row.type == "link")
-        {
-            
-        }
-        else if (row.type == "date")
-        {
-            
-        }
-        else if (row.type == "number")
-        {
-            
-        }
-        */
-        return cell;
-        
     },
     
     render: function() {
@@ -102,7 +112,7 @@ var ExecuteDSL = React.createClass({
             title = (<p className="container-title">{this.state.label}</p>);
         if(this.state.data && this.state.queried)
         {
-            //console.log(this.state.data);
+            console.log(this.state.data);
             var columns = [];
             if(this.state.data.length > 0)  // Array of table data with at least one element
             {
@@ -150,8 +160,10 @@ var ExecuteDSL = React.createClass({
                 content = (
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
                         <BootstrapTable ref="table" data={data} ignoreSinglePage={true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
-                            {columns.map((column) => 
-                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} dataSort={definitionType == "Cell" ? false : true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
+                            {columns.map((column, i) =>
+                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} 
+                                formatExtraData={{type: this.state.types[i], sortable: this.state.sortables[i], selectable: this.state.selectables[i]}}
+                                dataSort={definitionType == "Cell" ? false : true} dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
                             )}
                         </BootstrapTable>
                     </div>
@@ -165,7 +177,7 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className="document-table-view">
                         <table className="table table-striped table-bordered table-hover">
                             <tbody>
-                                {columns.map((column) => <tr className="short-column">
+                                {columns.map((column) => <tr key={column} className="short-column">
                                                             <th key={column} className="">{column}</th> 
                                                             <td className="react-bs-container-body">{data[0][column]}</td>
                                                          </tr>  

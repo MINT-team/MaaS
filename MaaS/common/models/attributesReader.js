@@ -58,9 +58,12 @@ module.exports = {
     	var label = keywords.label;
     	var sortby = keywords.sortby;
     	var table = keywords.table;
+    	var perpage = keywords.perpage;
     	var columnLabel = keywords.columnLabel;
     	var Export = keywords.Export;
     	var SendEmail = keywords.SendEmail;
+    	var selectable = keywords.selectable;
+    	var sortable = keywords.sortable;
     	
         var error = {};
         if(name && (typeof name !== 'string'))
@@ -108,10 +111,26 @@ module.exports = {
             error.wrongQueryErrorMessage = CompileErrors.queryError(query);
         }
         
+        if(perpage && (typeof perpage !== 'number'))
+        {
+            error.wrongPerpageErrorMessage = CompileErrors.perpageError(perpage);    
+        }
+        
+        if (selectable && (typeof selectable !== 'boolean'))
+        {
+            error.wrongSelectableErrorMessage = CompileErrors.selectableError(selectable);
+        }
+        
+        if (sortable && (typeof sortable !== 'boolean'))
+        {
+            error.wrongSortableErrorMessage = CompileErrors.sortableError(sortable);
+        }
+        
         if (Export && (Export != "csv" && Export != "json" && Export !== "true" && Export !== "false" && Export !== true && Export !== false))
         {
             error.wrongExportTypeErrorMessage = CompileErrors.wrongActionTypeError(Export);
         }
+        
         if (SendEmail && (SendEmail != "csv" && SendEmail != "json" && SendEmail !== "true" && SendEmail != "false" && SendEmail !== true && SendEmail != false))
         {
             error.wrongSendEmailTypeErrorMessage = CompileErrors.wrongActionTypeError(SendEmail);

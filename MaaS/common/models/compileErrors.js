@@ -42,6 +42,19 @@ module.exports = {
         return "Order error: " + order + " is not a keyword. It must be \'asc\' or \'desc\'";
     },
     
+    perpageError: function(perpage) {
+        return "Perpage error: " + perpage + " is not a number";
+    },
+    
+    sortableError: function(sortable) {
+        return "Sortable error: " + sortable + " is not boolean";
+    },
+    
+    selectableError: function(selectable)
+    {
+        return "Sortable error: " + selectable + " is not boolean";
+    },
+    
     transformationError: function(transformation) {
         return "Transformation error: " + transformation + " is not a function";
     },

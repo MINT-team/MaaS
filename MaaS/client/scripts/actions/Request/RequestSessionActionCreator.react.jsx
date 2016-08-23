@@ -19,7 +19,6 @@ var RequestSessionActionCreator = {
   },
 
   login: function(email, password, impersonate = "false") {
-    window.alert("mandata action di impersonificazione");
     WebAPIUtils.login(email, password, impersonate);
   },
 
