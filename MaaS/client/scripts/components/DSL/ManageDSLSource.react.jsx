@@ -114,11 +114,12 @@ var ManageDSLSource = React.createClass({
     },
     
     _onSave: function() {
-        this.setState({errors: DSLStore.getErrors(), definitionId: DSLStore.getId()});
+        this.setState({errors: DSLStore.getErrors()});
         var overwrite = false;
         if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
             overwrite = true; 
-        // Successful saving
+        // Successful saving  --> non c'è lo stato
+        //window.alert(this.state.definitionId);
         var dslId = this.state.definitionId;
         var userId = SessionStore.getUserId();
         if(!overwrite)

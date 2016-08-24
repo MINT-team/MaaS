@@ -1840,6 +1840,7 @@ Collection(
                 }
             }
             mongoose_query.exec(function(err, results) {
+                console.log(results);
                 if(err)
                 {
                     return cb(err, null);
@@ -1941,6 +1942,7 @@ Collection(
                         }
                         if(x == results.length-1)
                         {
+                            console.log(data);
                             returned = true;
                             return cb(null, data);
                         }

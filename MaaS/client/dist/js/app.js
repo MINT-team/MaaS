@@ -2699,11 +2699,11 @@ var ExecuteDSL = React.createClass({
                     { id: 'dsl-data-table', className: definitionType == "Cell" ? "cell-table-view" : definitionType == "Collection" ? "collection-table-view" : "" },
                     React.createElement(
                         BootstrapTable,
-                        { ref: 'table', data: data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: columns[0] },
+                        { ref: 'table', data: data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: "id_" + data[0]._DSL_ELEMENT_INDEX },
                         columns.map(function (column, i) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: column, dataField: column, dataFormat: _this.dataFormatter,
+                                { key: i, dataField: column, dataFormat: _this.dataFormatter,
                                     formatExtraData: { type: _this.state.types[i], selectable: _this.state.selectables ? _this.state.selectables[i] : false },
                                     dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables[i] == true ? true : false : false,
                                     dataAlign: 'center' },
@@ -2726,13 +2726,13 @@ var ExecuteDSL = React.createClass({
                         React.createElement(
                             'tbody',
                             null,
-                            columns.map(function (column) {
+                            columns.map(function (column, i) {
                                 return React.createElement(
                                     'tr',
-                                    { key: column, className: 'short-column' },
+                                    { key: i, className: 'short-column' },
                                     React.createElement(
                                         'th',
-                                        { key: column, className: '' },
+                                        { key: i, className: '' },
                                         column
                                     ),
                                     React.createElement(
@@ -3684,10 +3684,11 @@ var ManageDSLSource = React.createClass({
     },
 
     _onSave: function _onSave() {
-        this.setState({ errors: DSLStore.getErrors(), definitionId: DSLStore.getId() });
+        this.setState({ errors: DSLStore.getErrors() });
         var overwrite = false;
         if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
-        // Successful saving
+        // Successful saving  --> non c'è lo stato
+        //window.alert(this.state.definitionId);
         var dslId = this.state.definitionId;
         var userId = SessionStore.getUserId();
         if (!overwrite) {

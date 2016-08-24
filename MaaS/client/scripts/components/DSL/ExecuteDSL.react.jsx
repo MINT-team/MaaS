@@ -193,9 +193,9 @@ var ExecuteDSL = React.createClass({
                 };
                 content = (
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
-                        <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={columns[0]}>
+                        <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
                             {columns.map((column, i) =>
-                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} 
+                                <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
                                 formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
                                 dataSort={definitionType == "Cell" ? false : 
                                             definitionType == "Collection" ? 
@@ -215,8 +215,8 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className="document-table-view">
                         <table className="table table-striped table-bordered table-hover">
                             <tbody>
-                                {columns.map((column) => <tr key={column} className="short-column">
-                                                            <th key={column} className="">{column}</th> 
+                                {columns.map((column, i) => <tr key={i} className="short-column">
+                                                            <th key={i} className="">{column}</th> 
                                                             <td className="react-bs-container-body">{data[0][column]}</td>
                                                          </tr>  
                                 )}
