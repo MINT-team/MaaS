@@ -22,7 +22,6 @@ function getState() {
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
-            
             definitionType: data ? data.definitionType : null,
             data: data ? data.result : null,
             label: data ? data.label : null,
@@ -37,11 +36,12 @@ function getState() {
     };
 }
 
-function getNestedState() {
+function getNestedState(label) {
     var data = DSLStore.getDSLNestedData();
     return {
         definitionType: data ? data.definitionType : null,
         data: data ? data.result : null,
+        label: label,
         action: data ? data.action : null,
         types: data ? data.types : null,
         queried: true
@@ -76,7 +76,8 @@ var ExecuteDSL = React.createClass({
     },
     
     _onNestedChange: function() {
-        this.setState(getNestedState());
+        var label = this.state.nestedLabel;
+        this.setState(getNestedState(label));
     },
     
     dataFormatter: function(cell, row, formatExtraData) {
@@ -111,11 +112,15 @@ var ExecuteDSL = React.createClass({
         {
             var instance = this;
             var showDocument = function() {
-                instance.setState({ label: "Document " + cell.props.children});
-                console.log("raw");
-                console.log(instance.state.rawData[row.index]);
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row.index], 
+                instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row._DSL_ELEMENT_INDEX], 
                 instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+                var onback = function(e) {
+                    e.preventDefault();
+                    instance.setState(getState());  // back to Collection state
+                    document.getElementById('back-button').removeEventListener("click", onback);
+                };
+                document.getElementById('back-button').addEventListener("click", onback);
             };
             
             cell = <span className="selectable" onClick={showDocument}>{cell}</span>;
@@ -137,9 +142,10 @@ var ExecuteDSL = React.createClass({
         
         if(this.state.label)
             title = (<p className="container-title">{this.state.label}</p>);
-        
+            
         if(this.state.data && this.state.queried)
         {
+            //console.log(this.state.data);
             var columns = [];
             if(this.state.data.length > 0)  // Array of table data with at least one element
             {
@@ -152,10 +158,15 @@ var ExecuteDSL = React.createClass({
                 //     columns = Object.keys(this.state.data);  
                 //     data.push(this.state.data);
             }
-            console.log(columns);
+            //console.log(this.state.data);
+            // console.log(columns);
             data.forEach(function(x, i) {
-                data[i].index = i;
+                x._DSL_ELEMENT_INDEX = i;
             });
+            var index = columns.indexOf("_DSL_ELEMENT_INDEX");
+            if(index != -1)
+                columns.splice(index, 1);
+            //console.log(columns);
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -167,9 +178,10 @@ var ExecuteDSL = React.createClass({
             Enable to hide the dropdown list for size per page, default is false.
             */
             var definitionType = this.state.definitionType;
+            //console.log(definitionType);
             var perpage = this.state.perpage;
             var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
-            var showTotal = function(start, to, total) { return <span id="total-lines">{"Lines in Collection: " + total}</span> };
+            var showTotal = function(start, to, total) { return <span id="total-lines">{"Total rows: " + total}</span> };
             if(definitionType == "Cell" || definitionType == "Collection")
             {
                 var options = {
@@ -251,7 +263,7 @@ var ExecuteDSL = React.createClass({
         return (
             <div id="dsl-data-container">
                 <div className="tooltip tooltip-bottom" id="editor-back-button">
-                    <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
+                    <Link to="manageDSL" id="back-button"><i className="material-icons md-48">&#xE15E;</i></Link>
                     <p className="tooltip-text tooltip-text-short">Back</p>
                 </div>
                 {title}

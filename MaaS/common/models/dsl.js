@@ -466,6 +466,7 @@ module.exports = function(DSL) {
         var data = {};
         data.types = [];
         data.result = [{}];
+        data.definitionType = "Document";
         if(identity.populate)
         {
             //.....

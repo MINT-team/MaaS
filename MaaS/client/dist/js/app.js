@@ -2519,7 +2519,6 @@ function getState() {
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
-
         definitionType: data ? data.definitionType : null,
         data: data ? data.result : null,
         label: data ? data.label : null,
@@ -2534,11 +2533,12 @@ function getState() {
     };
 }
 
-function getNestedState() {
+function getNestedState(label) {
     var data = DSLStore.getDSLNestedData();
     return {
         definitionType: data ? data.definitionType : null,
         data: data ? data.result : null,
+        label: label,
         action: data ? data.action : null,
         types: data ? data.types : null,
         queried: true
@@ -2575,7 +2575,8 @@ var ExecuteDSL = React.createClass({
     },
 
     _onNestedChange: function _onNestedChange() {
-        this.setState(getNestedState());
+        var label = this.state.nestedLabel;
+        this.setState(getNestedState(label));
     },
 
     dataFormatter: function dataFormatter(cell, row, formatExtraData) {
@@ -2608,10 +2609,14 @@ var ExecuteDSL = React.createClass({
         if (formatExtraData.selectable) {
             var instance = this;
             var showDocument = function showDocument() {
-                instance.setState({ label: "Document " + cell.props.children });
-                console.log("raw");
-                console.log(instance.state.rawData[row.index]);
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row.index], instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+                instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row._DSL_ELEMENT_INDEX], instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+                var onback = function onback(e) {
+                    e.preventDefault();
+                    instance.setState(getState()); // back to Collection state
+                    document.getElementById('back-button').removeEventListener("click", onback);
+                };
+                document.getElementById('back-button').addEventListener("click", onback);
             };
 
             cell = React.createElement(
@@ -2640,21 +2645,26 @@ var ExecuteDSL = React.createClass({
         );
 
         if (this.state.data && this.state.queried) {
+            //console.log(this.state.data);
             var columns = [];
             if (this.state.data.length > 0) // Array of table data with at least one element
                 {
                     data = this.state.data;
                     columns = Object.keys(data[0]);
                 } else // Array of table data empty
-                {
-                    // for a single object
-                    //     columns = Object.keys(this.state.data);  
-                    //     data.push(this.state.data);
-                }
-            console.log(columns);
+                {}
+                // for a single object
+                //     columns = Object.keys(this.state.data);  
+                //     data.push(this.state.data);
+
+                //console.log(this.state.data);
+                // console.log(columns);
             data.forEach(function (x, i) {
-                data[i].index = i;
+                x._DSL_ELEMENT_INDEX = i;
             });
+            var index = columns.indexOf("_DSL_ELEMENT_INDEX");
+            if (index != -1) columns.splice(index, 1);
+            //console.log(columns);
             /*
             sizePerPageList : Array
             You can change the dropdown list for size per page if you enable pagination.
@@ -2666,13 +2676,14 @@ var ExecuteDSL = React.createClass({
             Enable to hide the dropdown list for size per page, default is false.
             */
             var definitionType = this.state.definitionType;
+            //console.log(definitionType);
             var perpage = this.state.perpage;
             var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
             var showTotal = function showTotal(start, to, total) {
                 return React.createElement(
                     'span',
                     { id: 'total-lines' },
-                    "Lines in Collection: " + total
+                    "Total rows: " + total
                 );
             };
             if (definitionType == "Cell" || definitionType == "Collection") {
@@ -2797,7 +2808,7 @@ var ExecuteDSL = React.createClass({
                 { className: 'tooltip tooltip-bottom', id: 'editor-back-button' },
                 React.createElement(
                     Link,
-                    { to: 'manageDSL' },
+                    { to: 'manageDSL', id: 'back-button' },
                     React.createElement(
                         'i',
                         { className: 'material-icons md-48' },
@@ -3673,7 +3684,7 @@ var ManageDSLSource = React.createClass({
     },
 
     _onSave: function _onSave() {
-        this.setState({ errors: DSLStore.getErrors() });
+        this.setState({ errors: DSLStore.getErrors(), definitionId: DSLStore.getId() });
         var overwrite = false;
         if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
         // Successful saving
@@ -9783,8 +9794,6 @@ module.exports = {
     request.post(APIEndpoints.DSL + '/' + id + '/executeDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
       if (res) {
         res = JSON.parse(res.text);
-        console.log(res);
-        console.log("dopo res");
         if (res.error) {
           ResponseDSLActionCreator.responseExecuteDefinition(res.error, null);
         } else {
