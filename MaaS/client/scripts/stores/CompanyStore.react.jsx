@@ -151,9 +151,13 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 var i = 0;
                 //removal of the deleted company from the list of the companies
                 console.log(action);
-                while(_companies[i].id != action.id && i < _companies.length )
-                    i++;
-                _companies.splice(i, 1);
+                console.log(_companies);
+                if(_companies)  // altrimenti la pagina di eliminazione azienda non va
+                {
+                    while(_companies[i].id != action.id && i < _companies.length )
+                        i++;
+                    _companies.splice(i, 1);
+                }
             }
             CompanyStore.emitChange();
             break;

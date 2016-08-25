@@ -223,6 +223,18 @@ var ManageDSLSource = React.createClass({
         
     },
     
+    onChangeDatabase: function() {
+        
+    },
+    
+    onDownloadSource: function() {
+        
+    },
+    
+    onUploadSource: function() {
+        
+    },
+    
     toggleErrorPopUp: function() {
 		this.refs.error.classList.toggle("dropdown-show");
 	},
@@ -291,6 +303,23 @@ var ManageDSLSource = React.createClass({
                             <option value="Cell">Cell</option>
                         </select>
                     </form>
+                    {this.props.params != "view" ?
+                    <div>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-long">Download source</p>
+                            <i onClick={this.onDownloadSource} className="material-icons md-36 dropdown-button">&#xE884;</i>
+                        </div>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-long">Upload source</p>
+                            <i onClick={this.onUploadSource} className="material-icons md-36 dropdown-button">&#xE864;</i>
+                        </div>
+                        <div className="tooltip tooltip-top">
+                            <p className="tooltip-text tooltip-text-long">Change database</p>
+                            <i onClick={this.onChangeDatabase} className="material-icons md-36 dropdown-button">&#xE1DB;</i>
+                        </div>
+                    </div>
+                    : ""
+                    }
                 </div>
                 <div id="editor-viewer">
                     <Editor />

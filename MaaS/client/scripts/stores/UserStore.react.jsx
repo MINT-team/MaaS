@@ -289,13 +289,17 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _errors = action.errors;
         } else {
             _errors = [];
-            //var email = action.email;  
-            var index;
-            _users.forEach(function(user, i) {
-                if(user.email == action.email) 
-                  index = i;
-            });
-            _users.splice(index, 1);
+            //var email = action.email;
+            
+            if(_users)  // only for superadmin
+            {
+              var index;
+              _users.forEach(function(user, i) {
+                  if(user.email == action.email) 
+                    index = i;
+              });
+              _users.splice(index, 1);
+            }
         }
         UserStore.emitDelete();
         break;
@@ -318,10 +322,14 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         else
         {
           _errors = [];
-          var i = 0;
-          while(i < _users.length && _users[i].id != action.json.id )
-              i++;
-          _users[i].email = action.json.newEmail;
+          
+          if(_users)  // only for superadmin
+          {
+            var i = 0;
+            while(i < _users.length && _users[i].id != action.json.id )
+                i++;
+            _users[i].email = action.json.newEmail;
+          }
         }
         UserStore.emitChange();  
       break;
@@ -333,15 +341,19 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         else
         {
           _errors = [];
-          var j = 0;
-          while(j < _users.length)
+          
+          if(_users)  // only for superadmin
           {
-            if(_users[j].companyId == action.id)
+            var j = 0;
+            while(j < _users.length)
             {
-              _users.splice(j, 1); 
-              j--; 
+              if(_users[j].companyId == action.id)
+              {
+                _users.splice(j, 1); 
+                j--; 
+              }
+              j++;
             }
-            j++;
           }
         }
         UserStore.emitChange(); 

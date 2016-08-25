@@ -3769,6 +3769,12 @@ var ManageDSLSource = React.createClass({
 
     onRun: function onRun() {},
 
+    onChangeDatabase: function onChangeDatabase() {},
+
+    onDownloadSource: function onDownloadSource() {},
+
+    onUploadSource: function onUploadSource() {},
+
     toggleErrorPopUp: function toggleErrorPopUp() {
         this.refs.error.classList.toggle("dropdown-show");
     },
@@ -3930,7 +3936,53 @@ var ManageDSLSource = React.createClass({
                             'Cell'
                         )
                     )
-                )
+                ),
+                this.props.params != "view" ? React.createElement(
+                    'div',
+                    null,
+                    React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-top' },
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-long' },
+                            'Download source'
+                        ),
+                        React.createElement(
+                            'i',
+                            { onClick: this.onDownloadSource, className: 'material-icons md-36 dropdown-button' },
+                            ''
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-top' },
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-long' },
+                            'Upload source'
+                        ),
+                        React.createElement(
+                            'i',
+                            { onClick: this.onUploadSource, className: 'material-icons md-36 dropdown-button' },
+                            ''
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-top' },
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-long' },
+                            'Change database'
+                        ),
+                        React.createElement(
+                            'i',
+                            { onClick: this.onChangeDatabase, className: 'material-icons md-36 dropdown-button' },
+                            ''
+                        )
+                    )
+                ) : ""
             ),
             React.createElement(
                 'div',
@@ -8413,9 +8465,13 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                 var i = 0;
                 //removal of the deleted company from the list of the companies
                 console.log(action);
-                while (_companies[i].id != action.id && i < _companies.length) {
-                    i++;
-                }_companies.splice(i, 1);
+                console.log(_companies);
+                if (_companies) // altrimenti la pagina di eliminazione azienda non va
+                    {
+                        while (_companies[i].id != action.id && i < _companies.length) {
+                            i++;
+                        }_companies.splice(i, 1);
+                    }
             }
             CompanyStore.emitChange();
             break;
@@ -9447,12 +9503,16 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else {
         _errors = [];
-        //var email = action.email;  
-        var index;
-        _users.forEach(function (user, i) {
-          if (user.email == action.email) index = i;
-        });
-        _users.splice(index, 1);
+        //var email = action.email;
+
+        if (_users) // only for superadmin
+          {
+            var index;
+            _users.forEach(function (user, i) {
+              if (user.email == action.email) index = i;
+            });
+            _users.splice(index, 1);
+          }
       }
       UserStore.emitDelete();
       break;
@@ -9473,10 +9533,14 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else {
         _errors = [];
-        var i = 0;
-        while (i < _users.length && _users[i].id != action.json.id) {
-          i++;
-        }_users[i].email = action.json.newEmail;
+
+        if (_users) // only for superadmin
+          {
+            var i = 0;
+            while (i < _users.length && _users[i].id != action.json.id) {
+              i++;
+            }_users[i].email = action.json.newEmail;
+          }
       }
       UserStore.emitChange();
       break;
@@ -9486,14 +9550,18 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _errors = action.errors;
       } else {
         _errors = [];
-        var j = 0;
-        while (j < _users.length) {
-          if (_users[j].companyId == action.id) {
-            _users.splice(j, 1);
-            j--;
+
+        if (_users) // only for superadmin
+          {
+            var j = 0;
+            while (j < _users.length) {
+              if (_users[j].companyId == action.id) {
+                _users.splice(j, 1);
+                j--;
+              }
+              j++;
+            }
           }
-          j++;
-        }
       }
       UserStore.emitChange();
   }
