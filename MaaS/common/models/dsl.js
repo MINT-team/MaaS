@@ -406,7 +406,7 @@ module.exports = function(DSL) {
                                     message: "Failed connecting database"
                                 };
                                 console.log('> Failed connecting database:', err);
-                                return cb(null, error, null);
+                                return cb(null, error);
                             }
                         });
                         DSL.compile(DSLInstance.source, function(err, expanded) {
@@ -417,11 +417,25 @@ module.exports = function(DSL) {
                                 return cb(null, err);
                             }
                             var callback = function(err, identity, body) {
+                                var definitionTypeError = {};
+                                if(DSLInstance.definitionType != body.definitionType)
+                                {
+                                    definitionTypeError.definitionTypeErrorMessage = "Definition type mismatch: your DSL definition doesn't match the selected type";
+                                }
+                                var error = null;
                                 if(err)
                                 {
-                                    console.log("> DSL compilation error:", err);
+                                    error = Object.assign(err, definitionTypeError);
+                                }
+                                else
+                                {
+                                    error = Object.getOwnPropertyNames(definitionTypeError) ? definitionTypeError : null;
+                                }
+                                if(error)
+                                {
+                                    console.log("> DSL compilation error:", error);
                                     conn.close();
-                                    return cb(null, err);
+                                    return cb(null, error);
                                 }
                                 conn.close();
                                 console.log('> DSL compilation processed successfully');
@@ -623,107 +637,133 @@ module.exports = function(DSL) {
                             console.log("> Error finding number of users in a company");
                             return cb(err);
                         }
-                        
-                        var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
-                            if (err)
-                            {
-                                var error = {
-                                    message: "Failed connecting database"
-                                };
-                                console.log('> Failed connecting database:', err);
-                                return cb(null, error, null);
-                            }
-                        });
-                        
-                        DSL.compile(DSLInstance.source, function(err, expanded) {
-                            if(err)
-                            {
-                                console.log("> DSL compilation error:", err);
-                                conn.close();
-                                return cb(null, err, null);
-                            }
+                        if(database.connected == "true")
+                        {
+                            var conn = mongoose.createConnection(database.connString, {server: {poolSize: usersCount}}, function(err) {
+                                if (err)
+                                {
+                                    var error = {
+                                        message: "Failed connecting database"
+                                    };
+                                    console.log('> Failed connecting database:', err);
+                                    return cb(null, error, null);
+                                }
+                            });
                             
-                            var callback = function(err, identity, body) {
+                            DSL.compile(DSLInstance.source, function(err, expanded) {
                                 if(err)
                                 {
+                                    console.log("> DSL compilation error:", err);
                                     conn.close();
-                                    console.log("> DSL execution stopped: compilation errors");
                                     return cb(null, err, null);
                                 }
-                                else    // compilation successful
-                                {
-                                    switch(DSLInstance.type)
+                                
+                                var callback = function(err, identity, body) {
+                                    var definitionTypeError = {};
+                                    console.log("DSLInstance.type:", DSLInstance.type);
+                                    console.log("body.definitionType:", body.definitionType);
+                                    if(DSLInstance.definitionType != body.definitionType)
                                     {
-                                        case "Cell":
-                                            DSL.executeCell(identity, body, conn, function(error, data){
-                                                conn.close();
-                                                if(error)
-                                                {
-                                                    console.log("> DSL execution error:", error);
-                                                    return cb(null, error, null);
-                                                }
-                                                else
-                                                {
-                                                    console.log("> DSL execution processed successfully");
-                                                    if(!data.label)
-                                                        data.label = DSLInstance.name;
-                                                    data.definitionType = DSLInstance.type;
-                                                    return cb(null, null, data);
-                                                }
-                                            });
-                                            break;
-                                        case "Document":
-                                            DSL.executeDocument(identity, body, conn, function(error, data) {
-                                                conn.close();
-                                                if (error)
-                                                {
-                                                    console.log("> DSL execution error:", error);
-                                                    return cb(null, error, null);
-                                                }
-                                                else
-                                                {
-                                                    console.log("> DSL execution processed successfully");
-                                                    if(!data.label)
-                                                        data.label = DSLInstance.name;
-                                                    data.definitionType = DSLInstance.type;
-                                                    return cb(null, null, data);
-                                                }
-                                            });
-                                            break;
-                                            
-                                        case "Collection":
-                                            DSL.executeCollection(identity, body, conn, function(error, data) {
-                                                conn.close();
-                                                if (error)
-                                                {
-                                                    console.log("> DSL execution error:", error);
-                                                    return cb(null, error, null);
-                                                }
-                                                else
-                                                {
-                                                    console.log("> DSL execution processed successfully");
-                                                    if(!data.label)
-                                                        data.label = DSLInstance.name;
-                                                    data.definitionType = DSLInstance.type;
-                                                    data.document = body.document;
-                                                    return cb(null, null, data);
-                                                }
-                                            });
-                                            break;
+                                        definitionTypeError.definitionTypeErrorMessage = "Definition type mismatch: your DSL definition doesn't match the selected type";
                                     }
+                                    var error = null;
+                                    if(err)
+                                    {
+                                        error = Object.assign(err, definitionTypeError);
+                                    }
+                                    else
+                                    {
+                                        error = Object.getOwnPropertyNames(definitionTypeError) ? definitionTypeError : null;
+                                    }
+                                    if(error)
+                                    {
+                                        conn.close();
+                                        console.log("> DSL execution stopped: compilation errors");
+                                        return cb(null, error, null);
+                                    }
+                                    else    // compilation successful
+                                    {
+                                        switch(DSLInstance.type)
+                                        {
+                                            case "Cell":
+                                                DSL.executeCell(identity, body, conn, function(error, data){
+                                                    conn.close();
+                                                    if(error)
+                                                    {
+                                                        console.log("> DSL execution error:", error);
+                                                        return cb(null, error, null);
+                                                    }
+                                                    else
+                                                    {
+                                                        console.log("> DSL execution processed successfully");
+                                                        if(!data.label)
+                                                            data.label = DSLInstance.name;
+                                                        data.definitionType = DSLInstance.type;
+                                                        return cb(null, null, data);
+                                                    }
+                                                });
+                                                break;
+                                            case "Document":
+                                                DSL.executeDocument(identity, body, conn, function(error, data) {
+                                                    conn.close();
+                                                    if (error)
+                                                    {
+                                                        console.log("> DSL execution error:", error);
+                                                        return cb(null, error, null);
+                                                    }
+                                                    else
+                                                    {
+                                                        console.log("> DSL execution processed successfully");
+                                                        if(!data.label)
+                                                            data.label = DSLInstance.name;
+                                                        data.definitionType = DSLInstance.type;
+                                                        return cb(null, null, data);
+                                                    }
+                                                });
+                                                break;
+                                                
+                                            case "Collection":
+                                                DSL.executeCollection(identity, body, conn, function(error, data) {
+                                                    conn.close();
+                                                    if (error)
+                                                    {
+                                                        console.log("> DSL execution error:", error);
+                                                        return cb(null, error, null);
+                                                    }
+                                                    else
+                                                    {
+                                                        console.log("> DSL execution processed successfully");
+                                                        if(!data.label)
+                                                            data.label = DSLInstance.name;
+                                                        data.definitionType = DSLInstance.type;
+                                                        data.document = body.document;
+                                                        return cb(null, null, data);
+                                                    }
+                                                });
+                                                break;
+                                        }
+                                    }
+                                };
+                                try
+                                {
+                                    eval(expanded); // DSL.compile...
                                 }
+                                catch(err)
+                                {
+                                    conn.close();
+                                    console.log("> DSL execution stopped:", err);
+                                    return cb(null, err.toString(), null);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            var error = {
+                                message: "Failed connecting: database is disconnected"
                             };
-                            try
-                            {
-                                eval(expanded); // DSL.compile...
-                            }
-                            catch(err)
-                            {
-                                conn.close();
-                                console.log("> DSL execution stopped:", err);
-                                return cb(null, err.toString(), null);
-                            }
-                        });
+                            console.log('> Failed connecting: database is disconnected');
+                            return cb(null, error, null);
+                        }
                     });
                 });
             });
@@ -745,8 +785,6 @@ module.exports = function(DSL) {
         }
     );
     
-    DSL.compileCell = function(identity, body, cb) {
-        
     /* -------------------------------- CELL -------------------------------- 
     
     Two types of cell:
@@ -773,7 +811,9 @@ module.exports = function(DSL) {
                 query | optional
             Body:
                 empty                       */
-        
+                
+    DSL.compileCell = function(identity, body, cb) {
+        body.definitionType = "Cell";
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
             AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
@@ -1099,6 +1139,7 @@ module.exports = function(DSL) {
                                                             else 
                                                             {
                                                                 body = { action: action, rows: rows };
+                                                                body.definitionType = "Document";
                                                                 returned = true;
                                                                 return cb(null, identity, body);
                                                             }
@@ -1112,6 +1153,7 @@ module.exports = function(DSL) {
                                 else    //Document without rows
                                 {
                                     body = { action: action };
+                                    body.definitionType = "Document";
                                     var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError, 
                                     unsupportedActionAttributesError, actionKeywordValueError);
                                     if(Object.getOwnPropertyNames(error).length !== 0)
@@ -1587,6 +1629,7 @@ Collection(
                                                                     columns: columns,
                                                                     document: {}
                                                                 };
+                                                                body.definitionType = "Collection";
                                                                 stop = true;
                                                                 return cb(null, identity, body);
                                                             }
@@ -1610,6 +1653,7 @@ Collection(
                                                                             body: documentBody
                                                                         }
                                                                     };
+                                                                    body.definitionType = "Collection";
                                                                     stop = true;
                                                                     return cb(null, identity, body);
                                                                 }
@@ -1641,6 +1685,7 @@ Collection(
                                             columns: columns,
                                             document: {}
                                         };
+                                        body.definitionType = "Collection";
                                         stop = true;
                                         return cb(null, identity, body);
                                     }
@@ -1664,6 +1709,7 @@ Collection(
                                                     body: documentBody
                                                 }
                                             };
+                                            body.definitionType = "Collection";
                                             stop = true;
                                             return cb(null, identity, body);
                                         }
