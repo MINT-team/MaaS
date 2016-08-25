@@ -233,9 +233,55 @@ var ManageDSL = React.createClass({
     },
     
     onUploadSource: function() {
-        var reader = new FileReader();
-        
+        var uploadDSLDefinition = document.getElementById('uploadDSLDefinition');
+        var file = uploadDSLDefinition.files[0];
+        var filename;   // da cambiare con *.dsl
+        var textType = /text.*/;    
+        //if (file.type.match(textType) && file.name.match(filename))
+        //{
+            //alert('uno');
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                // show popup success
+                var data = reader.result;
+                data = JSON.parse(data);
+                RequestDSLActionCreator.uploadDSLDefinition(data);
+            };
+            reader.readAsText(file);
+            
+            
+        //}
+        //else
+        //{
+            // show pop up error file not supported
+        //}
     },
+    
+    
+    
+//     window.onload = function() {
+// 		var fileInput = document.getElementById('fileInput');
+// 		var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+// 		fileInput.addEventListener('change', function(e) {
+// 			var file = fileInput.files[0];
+// 			var textType = /text.*/;
+
+// 			if (file.type.match(textType)) {
+// 				var reader = new FileReader();
+
+// 				reader.onload = function(e) {
+// 					fileDisplayArea.innerText = reader.result;
+// 				}
+
+// 				reader.readAsText(file);	
+// 			} else {
+// 				fileDisplayArea.innerText = "File not supported!"
+// 			}
+// 		});
+// }
+    
+    
     
     render: function() {
         if(!this.state.isLogged) 
@@ -318,7 +364,7 @@ var ManageDSL = React.createClass({
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
                                     <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
-                                    <input type="file" id="fileInput" />
+                                    <input type="file" id="uploadDSLDefinition" onChange={this.onUploadSource} />
                                     <div className="tooltip tooltip-bottom" id="deleteAll-button">
                                         <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                         <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>

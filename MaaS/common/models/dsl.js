@@ -102,7 +102,7 @@ module.exports = function(DSL) {
     DSL.remoteMethod(
         'saveDefinition',
         {
-            description: "Change user's editor configuration options",
+            description: "Save a DSL definition",
             accepts: [
                 { arg: 'userId', type: 'string', required: true, description: 'User id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
@@ -138,7 +138,7 @@ module.exports = function(DSL) {
     DSL.remoteMethod(
         'overwriteDefinition',
         {
-            description: "Change user's editor configuration options",
+            description: "Overwrite a DSL definition",
             accepts: [
                 { arg: 'id', type: 'string', required: true, description: 'Definition id' },
                 { arg: 'type', type: 'string', required: true, description: 'Definition type' },
@@ -277,11 +277,36 @@ module.exports = function(DSL) {
         
     );
     
-    /*
-    DSL.compileCollection({name: "customers", label: "JuniorCustomers", id: "Junior", Weight: "0", perpage: "20", sortby: "surname", order: "asc", query: {age: {$lt: 40}}}, 
-    [], DSL.compileDocument({table: "prova"}, [{name: "asd"}], {SendEmail: "true"}, callback), {Export: "true", SendEmail: "true"}, callback);
+    DSL.uploadDSLDefinition = function(data, cb) {
+        console.log(data.name);
+        console.log(data.dsl);
+        console.log(data.type);
+        console.log(data.database);
+        
+        if (!data.name || !data.type || data.database)
+        {
+            //error
+        }
+        else
+        {
+            
+        }
+    };
     
-    */
+    DSL.remoteMethod(
+        'uploadDSLDefinition',
+        {
+            description: "Upload a DSL definition",
+            accepts: [
+                { arg: 'data', type: 'Object', required: true, description: 'Definition data' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'definition', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/uploadDSLDefinition' }
+        }
+    );
     
     DSL.compile = function(dsl, cb) {
         var expanded;

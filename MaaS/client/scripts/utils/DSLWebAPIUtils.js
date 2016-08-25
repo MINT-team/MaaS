@@ -270,7 +270,7 @@ module.exports = {
             identity: identity,
             body: body
           }
-          )
+        )
         .end(function(error, res) {
           if(res)
           {
@@ -286,4 +286,26 @@ module.exports = {
           }
         });
     },
+    
+    uploadDSLDefinition: function(data) {
+      request
+        .post(APIEndpoints.DSL + '/uploadDSLDefinition')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send(
+          {
+            data: data
+          }
+        )
+        .end(function(error, res) {
+          if(res)
+          {
+            
+          }
+          else
+          {
+            
+          }
+      });
+    }
 };

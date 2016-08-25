@@ -109,6 +109,10 @@ var RequestDSLActionCreator = {
 
     executeNestedDocument: function executeNestedDocument(id, row, identity, body) {
         WebAPIUtils.executeNestedDocument(id, row, identity, body);
+    },
+
+    uploadDSLDefinition: function uploadDSLDefinition(data) {
+        WebAPIUtils.uploadDSLDefinition(data);
     }
 };
 
@@ -3161,8 +3165,51 @@ var ManageDSL = React.createClass({
     },
 
     onUploadSource: function onUploadSource() {
+        var uploadDSLDefinition = document.getElementById('uploadDSLDefinition');
+        var file = uploadDSLDefinition.files[0];
+        var filename; // da cambiare con *.dsl
+        var textType = /text.*/;
+        //if (file.type.match(textType) && file.name.match(filename))
+        //{
+        //alert('uno');
         var reader = new FileReader();
+        reader.onload = function (e) {
+            // show popup success
+            var data = reader.result;
+            data = JSON.parse(data);
+            RequestDSLActionCreator.uploadDSLDefinition(data);
+        };
+        reader.readAsText(file);
+
+        //}
+        //else
+        //{
+        // show pop up error file not supported
+        //}
     },
+
+    //     window.onload = function() {
+    // 		var fileInput = document.getElementById('fileInput');
+    // 		var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+    // 		fileInput.addEventListener('change', function(e) {
+    // 			var file = fileInput.files[0];
+    // 			var textType = /text.*/;
+
+    // 			if (file.type.match(textType)) {
+    // 				var reader = new FileReader();
+
+    // 				reader.onload = function(e) {
+    // 					fileDisplayArea.innerText = reader.result;
+    // 				}
+
+    // 				reader.readAsText(file);	
+    // 			} else {
+    // 				fileDisplayArea.innerText = "File not supported!"
+    // 			}
+    // 		});
+    // }
+
 
     render: function render() {
         if (!this.state.isLogged) {
@@ -3290,7 +3337,7 @@ var ManageDSL = React.createClass({
                                 { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
                                 ''
                             ),
-                            React.createElement('input', { type: 'file', id: 'fileInput' }),
+                            React.createElement('input', { type: 'file', id: 'uploadDSLDefinition', onChange: this.onUploadSource }),
                             React.createElement(
                                 'div',
                                 { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
@@ -9921,6 +9968,14 @@ module.exports = {
           ResponseDSLActionCreator.responseExecuteNestedDocument(null, res.data);
         }
       }
+    });
+  },
+
+  uploadDSLDefinition: function uploadDSLDefinition(data) {
+    request.post(APIEndpoints.DSL + '/uploadDSLDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      data: data
+    }).end(function (error, res) {
+      if (res) {} else {}
     });
   }
 };

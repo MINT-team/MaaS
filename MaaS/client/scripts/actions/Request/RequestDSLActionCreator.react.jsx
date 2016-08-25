@@ -61,6 +61,10 @@ var RequestDSLActionCreator = {
     
     executeNestedDocument: function(id, row, identity, body) {
         WebAPIUtils.executeNestedDocument(id, row, identity, body);
+    },
+    
+    uploadDSLDefinition: function(data) {
+        WebAPIUtils.uploadDSLDefinition(data);
     }
 };
 
