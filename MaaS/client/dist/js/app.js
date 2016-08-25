@@ -2703,7 +2703,7 @@ var ExecuteDSL = React.createClass({
                         columns.map(function (column, i) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: i, dataField: column, dataFormat: _this.dataFormatter,
+                                { key: column, dataField: column, dataFormat: _this.dataFormatter,
                                     formatExtraData: { type: _this.state.types[i], selectable: _this.state.selectables ? _this.state.selectables[i] : false },
                                     dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables[i] == true ? true : false : false,
                                     dataAlign: 'center' },
@@ -2893,7 +2893,9 @@ var ManageDSL = React.createClass({
     },
 
     _onUserChange: function _onUserChange() {
-        if (this.state.role != UserStore.getRole()) alert("Your role has been changed!");
+        if (this.state.role != UserStore.getRole()) {
+            alert("Your role has been changed!");
+        }
         this.setState({
             role: UserStore.getRole(),
             userId: UserStore.getId()
@@ -3684,7 +3686,7 @@ var ManageDSLSource = React.createClass({
     },
 
     _onSave: function _onSave() {
-        this.setState({ errors: DSLStore.getErrors() });
+        this.setState({ errors: DSLStore.getErrors(), definitionId: DSLStore.getId() });
         var overwrite = false;
         if (this.props.params.mode == "edit" || this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null) overwrite = true;
         // Successful saving  --> non c'è lo stato

@@ -195,7 +195,7 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
                         <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
                             {columns.map((column, i) =>
-                                <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
+                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} 
                                 formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
                                 dataSort={definitionType == "Cell" ? false : 
                                             definitionType == "Collection" ? 

@@ -58,7 +58,9 @@ var ManageDSL = React.createClass({
     
     _onUserChange: function() {
         if(this.state.role != UserStore.getRole())
+        {
             alert("Your role has been changed!");
+        }
         this.setState({
             role: UserStore.getRole(),
             userId: UserStore.getId(),

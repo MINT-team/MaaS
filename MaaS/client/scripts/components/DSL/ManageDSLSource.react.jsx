@@ -114,7 +114,7 @@ var ManageDSLSource = React.createClass({
     },
     
     _onSave: function() {
-        this.setState({errors: DSLStore.getErrors()});
+        this.setState({errors: DSLStore.getErrors(), definitionId: DSLStore.getId()});
         var overwrite = false;
         if(this.props.params.mode == "edit" || (this.refs.definitionName.value != this.state.definitionName && this.state.definitionName != null))
             overwrite = true; 
