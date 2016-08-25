@@ -1089,6 +1089,7 @@ module.exports = function(DSL) {
     
     DSL.compileDocument = function(identity, rows, action, nested, cb) {
         var body = {};
+        body.definitionType = "Document";
         if(!nested)
         {
             AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
@@ -1138,8 +1139,8 @@ module.exports = function(DSL) {
                                                             }
                                                             else 
                                                             {
-                                                                body = { action: action, rows: rows };
-                                                                body.definitionType = "Document";
+                                                                body.action = action;
+                                                                body.rows = rows;
                                                                 returned = true;
                                                                 return cb(null, identity, body);
                                                             }
@@ -1152,8 +1153,7 @@ module.exports = function(DSL) {
                                 }
                                 else    //Document without rows
                                 {
-                                    body = { action: action };
-                                    body.definitionType = "Document";
+                                    body.action = action;
                                     var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, identityKeywordValueError, 
                                     unsupportedActionAttributesError, actionKeywordValueError);
                                     if(Object.getOwnPropertyNames(error).length !== 0)
@@ -1211,7 +1211,8 @@ module.exports = function(DSL) {
                                                         }
                                                         else 
                                                         {
-                                                            body = { action: action, rows: rows };
+                                                            body.action = action;
+                                                            body.rows = rows;
                                                             returned = true;
                                                             return cb(null, identity, body);
                                                         }
@@ -1224,7 +1225,7 @@ module.exports = function(DSL) {
                             }
                             else    //Document without rows
                             {
-                                body = { action: action };
+                                body.action = action;
                                 var error = Object.assign(unsupportedIdentityAttributesError, identityKeywordValueError, 
                                 unsupportedActionAttributesError, actionKeywordValueError);
                                 if(Object.getOwnPropertyNames(error).length !== 0)
@@ -1574,6 +1575,7 @@ Collection(
 */
     DSL.compileCollection = function(identity, columns, document, action, cb) {
         var body = {};
+        body.definitionType = "Collection";
         AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'order', 'query', 'perpage'], function(unsupportedIdentityAttributesError) {
             AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
                 var keywords = {
@@ -1624,12 +1626,9 @@ Collection(
                                                             }
                                                             else 
                                                             {
-                                                                body = {
-                                                                    action: action,
-                                                                    columns: columns,
-                                                                    document: {}
-                                                                };
-                                                                body.definitionType = "Collection";
+                                                                body.action = action;
+                                                                body.columns = columns;
+                                                                body.document = {};
                                                                 stop = true;
                                                                 return cb(null, identity, body);
                                                             }
@@ -1645,15 +1644,12 @@ Collection(
                                                                 }
                                                                 else 
                                                                 {
-                                                                    body = { 
-                                                                        action: action,
-                                                                        columns: columns,
-                                                                        document: {
-                                                                            identity: documentIdentity,
-                                                                            body: documentBody
-                                                                        }
+                                                                    body.action = action;
+                                                                    body.columns = columns;
+                                                                    body.document = {
+                                                                        identity: documentIdentity,
+                                                                        body: documentBody
                                                                     };
-                                                                    body.definitionType = "Collection";
                                                                     stop = true;
                                                                     return cb(null, identity, body);
                                                                 }
@@ -1680,12 +1676,9 @@ Collection(
                                     }
                                     else 
                                     {
-                                        body = {
-                                            action: action,
-                                            columns: columns,
-                                            document: {}
-                                        };
-                                        body.definitionType = "Collection";
+                                        body.action = action;
+                                        body.columns = columns;
+                                        body.document = {};
                                         stop = true;
                                         return cb(null, identity, body);
                                     }
@@ -1701,15 +1694,12 @@ Collection(
                                         }
                                         else 
                                         {
-                                            body = { 
-                                                action: action,
-                                                columns: columns,
-                                                document: {
-                                                    identity: documentIdentity,
-                                                    body: documentBody
-                                                }
+                                            body.action = action;
+                                            body.columns = columns;
+                                            body.document = {
+                                                identity: documentIdentity,
+                                                body: documentBody
                                             };
-                                            body.definitionType = "Collection";
                                             stop = true;
                                             return cb(null, identity, body);
                                         }

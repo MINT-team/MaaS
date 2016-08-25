@@ -47,7 +47,7 @@ var ResponseCompanyActionCreator = {
     responseGetDatabasesCount: function(count, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_DATABASES_COUNT,
-            data: count,
+            count: count,
             errors: errors
         });
     },

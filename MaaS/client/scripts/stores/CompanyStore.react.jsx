@@ -181,26 +181,28 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _errors = [];
                 //Correction of the list containing the System companies
-                var i = 0;
+                let i = 0;
                 while(i < _companies.length && _companies[i].name != action.data.oldName)
                     i++;
                 _companies[i].name = action.data.newName;
             }
             CompanyStore.emitChange();
             break;
+            
         case ActionTypes.GET_DATABASES_COUNT:
             if (action.errors)
             {
                 _errors = action.errors;
             }
-            else if(action.data)
+            else
             {
                 _errors = [];
-                databasesCount = action.data;
+                databasesCount = action.count;
                 localStorage.setItem('databasesCount', databasesCount);
             }
             CompanyStore.emitChange();
             break;
+            
         case ActionTypes.GET_DSLDEFINITION_COUNT:
             if (action.errors)
             {

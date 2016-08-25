@@ -159,6 +159,7 @@ module.exports = {
       .end(function(err, res){
         if(res)
         { 
+          res = JSON.parse(res.text);
           if(res.error)
           {
             ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(null, res.error.message);

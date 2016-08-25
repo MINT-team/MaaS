@@ -337,7 +337,7 @@ var ResponseCompanyActionCreator = {
     responseGetDatabasesCount: function responseGetDatabasesCount(count, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_DATABASES_COUNT,
-            data: count,
+            count: count,
             errors: errors
         });
     },
@@ -1171,7 +1171,7 @@ var Company = React.createClass({
             React.createElement(
               'p',
               null,
-              numberOfUsers > 0 ? numberOfUsers : ''
+              numberOfUsers > 0 ? numberOfUsers : 'Loading...'
             )
           ),
           React.createElement(
@@ -1185,7 +1185,7 @@ var Company = React.createClass({
             React.createElement(
               'p',
               null,
-              numberOfDatabases > 0 ? numberOfDatabases : ''
+              numberOfDatabases >= 0 ? numberOfDatabases : 'Loading...'
             )
           ),
           React.createElement(
@@ -1199,7 +1199,7 @@ var Company = React.createClass({
             React.createElement(
               'p',
               null,
-              numberOfDSL > 0 ? numberOfDSL : ''
+              numberOfDSL >= 0 ? numberOfDSL : 'Loading...'
             )
           )
         )
@@ -8438,23 +8438,25 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
             } else {
                 _errors = [];
                 //Correction of the list containing the System companies
-                var i = 0;
-                while (i < _companies.length && _companies[i].name != action.data.oldName) {
-                    i++;
-                }_companies[i].name = action.data.newName;
+                var _i = 0;
+                while (_i < _companies.length && _companies[_i].name != action.data.oldName) {
+                    _i++;
+                }_companies[_i].name = action.data.newName;
             }
             CompanyStore.emitChange();
             break;
+
         case ActionTypes.GET_DATABASES_COUNT:
             if (action.errors) {
                 _errors = action.errors;
-            } else if (action.data) {
+            } else {
                 _errors = [];
-                databasesCount = action.data;
+                databasesCount = action.count;
                 localStorage.setItem('databasesCount', databasesCount);
             }
             CompanyStore.emitChange();
             break;
+
         case ActionTypes.GET_DSLDEFINITION_COUNT:
             if (action.errors) {
                 _errors = action.errors;
@@ -9614,6 +9616,7 @@ module.exports = {
   getDSLDefinitionsCount: function getDSLDefinitionsCount(companyId) {
     request.get(APIEndpoints.COMPANIES + '/' + companyId + '/getDSLDefinitionsCount').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
       if (res) {
+        res = JSON.parse(res.text);
         if (res.error) {
           ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(null, res.error.message);
         } else {

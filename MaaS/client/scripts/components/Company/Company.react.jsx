@@ -91,15 +91,15 @@ var Company = React.createClass({
           <div className="form-container">
             <div className="form-field">
               <label>Users:</label>
-              <p>{numberOfUsers>0? numberOfUsers : ''}</p>
+              <p>{numberOfUsers>0? numberOfUsers : 'Loading...'}</p>
             </div>
             <div className="form-field">
               <label>Databases:</label>
-              <p>{numberOfDatabases>0? numberOfDatabases : ''}</p>
+              <p>{numberOfDatabases>=0? numberOfDatabases : 'Loading...'}</p>
             </div>
             <div className="form-field">
               <label>DSL definitions:</label>
-              <p>{numberOfDSL>0? numberOfDSL : ''}</p>
+              <p>{numberOfDSL>=0? numberOfDSL : 'Loading...'}</p>
             </div>
           </div>
         </div>
