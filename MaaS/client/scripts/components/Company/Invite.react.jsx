@@ -37,6 +37,8 @@ var Invite = React.createClass({
         this.toggleDropdown();
         RequestCompanyActionCreator.getUsers(this.state.companyId);
 		this.refs.email.value = "";
+		this.refs.inviteButton.classList.toggle("loader-small");
+		//this.refs.inviteButton.setAttribute("disabled", "false");
     },
     
     toggleDropdown: function() {
@@ -64,6 +66,8 @@ var Invite = React.createClass({
         if(email != "") {
             RequestSessionActionCreator.invite(sender, company, role, email);
             this.setState({sent: true});
+            this.refs.inviteButton.classList.toggle("loader-small");
+            //this.refs.inviteButton.setAttribute("disabled", "true");
         } else {
             this._setError("Insert an email to send invitation");
         }
@@ -94,7 +98,9 @@ var Invite = React.createClass({
                         <option value="Guest">Guest</option>
                     </select>
                     <input id="invite-email" type="email" placeholder="Email" ref="email" required />
-                    <button id="invite-button" className="inline-button dropdown-button">Invite</button>
+                    <span ref="inviteButton">
+                        <button id="invite-button" className="inline-button dropdown-button" >Invite</button>
+                    </span>
                 </form>
                 <div className="dropdown-content dropdown-popup" ref="error">
                     <p className="dropdown-title">Error</p>

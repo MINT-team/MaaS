@@ -52,10 +52,10 @@ var ResponseCompanyActionCreator = {
         });
     },
     
-    responseGetDSLDefinitionsCount: function(data, errors) {
+    responseGetDSLDefinitionsCount: function(count, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_DSLDEFINITION_COUNT,
-            data: data,
+            count: count,
             errors: errors
         });
     }

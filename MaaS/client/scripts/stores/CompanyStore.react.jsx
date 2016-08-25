@@ -150,8 +150,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 _errors = [];
                 var i = 0;
                 //removal of the deleted company from the list of the companies
-                console.log(action);
-                console.log(_companies);
+                // console.log(action);
+                // console.log(_companies);
                 if(_companies)  // altrimenti la pagina di eliminazione azienda non va
                 {
                     while(_companies[i].id != action.id && i < _companies.length )
@@ -160,6 +160,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
                 }
             }
             CompanyStore.emitChange();
+            CompanyStore.emitDelete();
             break;
             
         case ActionTypes.COMPANIES:     //get companies
@@ -212,10 +213,10 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _errors = action.errors;
             }
-            else if(action.data)
+            else
             {
                 _errors = [];
-                DSLDefinitionsCount = action.data.count;
+                DSLDefinitionsCount = action.count;
                 localStorage.setItem('DSLDefinitionsCount', DSLDefinitionsCount);
             }
             CompanyStore.emitChange();

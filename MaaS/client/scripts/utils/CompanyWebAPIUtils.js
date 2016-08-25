@@ -166,7 +166,7 @@ module.exports = {
           }
           else
           {
-            ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.body, null);
+            ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.count, null);
           }
         }
       });

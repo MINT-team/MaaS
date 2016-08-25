@@ -334,7 +334,10 @@ module.exports = function(user) {
         user.findById(id, function(err, user) {
             if(err)
                 return cb(err);
-            if(name != user.name || surname != user.surname || dateOfBirth.valueOf() || gender != user.gender) 
+                
+            if(name != user.name || surname != user.surname || gender != user.gender
+                                                            || dateOfBirth.valueOf() && !user.dateOfBirth   // a new date is present and there was no date saved
+                                                            || user.dateOfBirth && (dateOfBirth.valueOf() != user.dateOfBirth.valueOf()) )  // there is a date saved and the new date is different
             {
                 if(name) 
                 {
@@ -366,7 +369,7 @@ module.exports = function(user) {
                     user.updateAttributes({ dateOfBirth: dateOfBirth}, function() {
                         if(err) 
                         {
-                            console.log('> failed changing date of birth for: ', user.email);
+                            console.log('> Failed changing date of birth for: ', user.email);
                             return cb(err);
                         }
                     });
@@ -392,7 +395,7 @@ module.exports = function(user) {
             } 
             else 
             {
-                console.log('> No data to change for: ', user.email);
+                console.log('> No personal data to change for: ', user.email);
                 var error = {
                     message: 'No data to change'
                 };
@@ -816,14 +819,7 @@ module.exports = function(user) {
         }
     );
     
-    
-    
-    
-    
-    
-    
-    
-    // Add specifications on wich user has logged in
+    // Add specifications on which user has logged in
     user.afterRemote('login', function(ctx, remoteMethodOutput, next) {
         var ctx_ttl = ctx.result.ttl ;
         var ctx_userId = ctx.result.userId ;

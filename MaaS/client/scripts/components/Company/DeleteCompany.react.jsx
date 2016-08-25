@@ -62,7 +62,7 @@ var DeleteCompany = React.createClass({
 		}
 	},
 	
-	handleLogoutClick: function() {
+	handleLogoutClick: function() { // logout of users form the front-end platform + redirect to homepage
 	    this.logout();
 	    const { router } = this.context;
         router.push('/');   // redirect to home page

@@ -81,12 +81,16 @@ var PersonalData = React.createClass({
       var gender = this.state.radioGender;
       // call the action only if something has changed
       
+      //old checks:
       // || !(dateOfBirth!=getDateOfBirth(this.state.dateOfBirth) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
       //                           || !(dateOfBirth==getDateOfBirth(this.state.dateOfBirth) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN")) 
       
+      // || !((dateOfBirth!=getDateOfBirth(this.state.dateOfBirth)) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
+      //                           || !((dateOfBirth==getDateOfBirth(this.state.dateOfBirth)) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN"))
+      
       if( name!=this.state.name || surname!=this.state.surname || gender!=this.state.gender
-                                || !((dateOfBirth!=getDateOfBirth(this.state.dateOfBirth)) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
-                                || !((dateOfBirth==getDateOfBirth(this.state.dateOfBirth)) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN")) ) 
+                                || (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN")
+                                || (dateOfBirth && dateOfBirth!=getDateOfBirth(this.state.dateOfBirth)) ) 
       {
         RequestUserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
       } 

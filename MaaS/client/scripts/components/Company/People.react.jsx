@@ -171,7 +171,7 @@ var People = React.createClass({
                   </li>
                   <li>
                     <span className="role">Member:</span>
-                    <span className="role-description">Is possible to select wich operation are allowed.</span>
+                    <span className="role-description">Is possible to select which operation are allowed.</span>
                   </li>
                   <li>
                     <span className="role">Guest:</span>

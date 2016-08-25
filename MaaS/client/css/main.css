@@ -1354,6 +1354,11 @@ input {
         margin-left: 10%;
     }
     
+    #editor-buttons div {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+    }
+    
     #definition-type {
         margin-right: 10%;
     }
@@ -1376,8 +1381,8 @@ input {
 
 /*------------------------------------------- MANAGE DSL DEFINITION, EXTERNAL DATABASES, DSL EXECUTION --------------------------------------------------------------*/
 #table-top {
-    margin-left: 5em;
-    margin-right: 5em;
+    margin-left: 2em;
+    margin-right: 2em;
 }
 
 #table .form-control {    /* Search bar*/
@@ -1392,12 +1397,11 @@ input {
     text-align: left;
 }
 
-#top-buttons {
+.top-buttons {
     float: right;
-    margin-right: -2em;
 }
 
-#top-buttons i {
+.top-buttons i {
     color: #333;
     vertical-align: middle;
     margin-top: -0.2em;
@@ -1407,11 +1411,11 @@ input {
     padding: 0 !important;
 }
 
-#top-buttons i:hover {
+.top-buttons i:hover {
     color: lightgrey;
 }
 
-#top-buttons .tooltip-text {
+.top-buttons .tooltip-text {
     margin-left: -1.2em;
     margin-top: 0.5em;
 }
@@ -1425,16 +1429,30 @@ input {
 }
 
 .table-buttons i {
+    cursor: pointer;
     vertical-align: middle;
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: 0.6em;
+    margin-right: 0.6em;
 }
 
-#modify-button:hover {
+#manage-dsl .form-control {    /* Search bar*/
+    width: 15em;
+}
+
+#manage-dsl .top-buttons i {
+    margin-left: 0.3em;
+    margin-right: 0.3em;
+}
+
+.dsl-download:hover {
+    color: blue;
+}
+
+.modify-button:hover {
     color: orange;
 }
 
-#dsl-change-permission:hover {
+.dsl-change-permission:hover {
     color: #60D42E;
 }
 
@@ -1616,7 +1634,17 @@ input {
     animation-fill-mode: backwards;
     animation-duration: 0.3s;
 }
- 
+
+/*------------------------------------------------ COMPANY --------------------------------------------------------------*/
+
+#company .form-container {
+    width: 30%;    
+}
+
+#company .form-field > p {
+    width: 5em;
+}
+
 /*------------------------------------------------ PEOPLE --------------------------------------------------------------*/
 #role-explaination {
     list-style: none;
@@ -1738,6 +1766,17 @@ input {
     margin: auto;
     position: absolute;
     top: 0; left: 0; bottom: 25%; right: 0;
+}
+
+#invite .loader-small {
+    position: absolute;
+    /*display: inline-block;*/
+    margin-left: 2em;
+    width: 2.5em;
+    height: 0.5em;
+    margin-top: -0.3em;
+    /*vertical-align: middle;*/
+    /*min-width: 4em;*/
 }
 
 @media (max-width: 1400px) {

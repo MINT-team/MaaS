@@ -342,10 +342,10 @@ var ResponseCompanyActionCreator = {
         });
     },
 
-    responseGetDSLDefinitionsCount: function responseGetDSLDefinitionsCount(data, errors) {
+    responseGetDSLDefinitionsCount: function responseGetDSLDefinitionsCount(count, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_DSLDEFINITION_COUNT,
-            data: data,
+            count: count,
             errors: errors
         });
     }
@@ -1336,6 +1336,7 @@ var DeleteCompany = React.createClass({
     },
 
     handleLogoutClick: function handleLogoutClick() {
+        // logout of users form the front-end platform + redirect to homepage
         this.logout();
         var router = this.context.router;
 
@@ -1940,7 +1941,7 @@ var ExternalDatabases = React.createClass({
           ),
           React.createElement(
             'div',
-            { id: 'top-buttons' },
+            { className: 'top-buttons' },
             React.createElement(
               'div',
               { className: 'tooltip tooltip-bottom', id: 'add-button' },
@@ -2053,6 +2054,8 @@ var Invite = React.createClass({
         this.toggleDropdown();
         RequestCompanyActionCreator.getUsers(this.state.companyId);
         this.refs.email.value = "";
+        this.refs.inviteButton.classList.toggle("loader-small");
+        //this.refs.inviteButton.setAttribute("disabled", "false");
     },
 
     toggleDropdown: function toggleDropdown() {
@@ -2080,6 +2083,8 @@ var Invite = React.createClass({
         if (email != "") {
             RequestSessionActionCreator.invite(sender, company, role, email);
             this.setState({ sent: true });
+            this.refs.inviteButton.classList.toggle("loader-small");
+            //this.refs.inviteButton.setAttribute("disabled", "true");
         } else {
             this._setError("Insert an email to send invitation");
         }
@@ -2132,9 +2137,13 @@ var Invite = React.createClass({
                 ),
                 React.createElement('input', { id: 'invite-email', type: 'email', placeholder: 'Email', ref: 'email', required: true }),
                 React.createElement(
-                    'button',
-                    { id: 'invite-button', className: 'inline-button dropdown-button' },
-                    'Invite'
+                    'span',
+                    { ref: 'inviteButton' },
+                    React.createElement(
+                        'button',
+                        { id: 'invite-button', className: 'inline-button dropdown-button' },
+                        'Invite'
+                    )
                 )
             ),
             React.createElement(
@@ -2457,7 +2466,7 @@ var People = React.createClass({
             React.createElement(
               'span',
               { className: 'role-description' },
-              'Is possible to select wich operation are allowed.'
+              'Is possible to select which operation are allowed.'
             )
           ),
           React.createElement(
@@ -2930,6 +2939,30 @@ var ManageDSL = React.createClass({
         var confirmDelete = function confirmDelete() {
             RequestDSLActionCreator.deleteDSLDefinition(row.id);
         };
+
+        var onDownloadSource = function onDownloadSource() {
+            var data = {
+                name: row.name,
+                dsl: row.source,
+                type: row.type,
+                database: row.externalDatabaseId
+            };
+            data = JSON.stringify(data);
+            var filename = row.name + ".dsl";
+            var blob = new Blob([data], { type: 'application/json' });
+
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                window.navigator.msSaveBlob(blob, filename);
+            } else {
+                var url = window.URL.createObjectURL(blob);
+                var tempLink = document.createElement('a');
+                tempLink.href = url;
+                tempLink.setAttribute('download', filename);
+                tempLink.click();
+            }
+        };
+
         var deleteDSL = React.createElement(
             'div',
             { id: 'delete-user', className: 'pop-up' },
@@ -2996,17 +3029,29 @@ var ManageDSL = React.createClass({
                 )
             )
         );
-
+        // <div className="tooltip tooltip-top">
+        //                         <p className="tooltip-text tooltip-text-long">Download source</p>
+        //                         <i onClick={this.onDownloadSource} className="material-icons md-36 dropdown-button">&#xE884;</i>
+        //                     </div>
+        //                     <div className="tooltip tooltip-top">
+        //                         <p className="tooltip-text tooltip-text-long">Upload source</p>
+        //                         <i onClick={this.onUploadSource} className="material-icons md-36 dropdown-button">&#xE864;</i>
+        //                     </div>
         if (this.state.role == "Owner" || this.state.role == "Administrator") {
             buttons = React.createElement(
                 'div',
                 null,
                 React.createElement(
+                    'i',
+                    { onClick: onDownloadSource, className: 'dsl-download material-icons md-24 dropdown-button' },
+                    ''
+                ),
+                React.createElement(
                     Link,
                     { to: "/manageDSL/manageDSLSource/" + row.id + '/edit' },
                     React.createElement(
                         'i',
-                        { id: 'modify-button', className: 'material-icons md-24' },
+                        { className: 'modify-button material-icons md-24' },
                         ''
                     )
                 ),
@@ -3015,7 +3060,7 @@ var ManageDSL = React.createClass({
                     { to: "/manageDSL/manageDSLPermissions/" + row.id },
                     React.createElement(
                         'i',
-                        { id: 'dsl-change-permission', className: 'material-icons md-24' },
+                        { className: 'dsl-change-permission material-icons md-24' },
                         ''
                     )
                 ),
@@ -3031,7 +3076,7 @@ var ManageDSL = React.createClass({
                         { to: "/manageDSL/manageDSLSource/" + row.id + '/view' },
                         React.createElement(
                             'i',
-                            { id: 'dsl-read', className: 'material-icons md-24' },
+                            { className: 'material-icons md-24' },
                             ''
                         )
                     )
@@ -3047,7 +3092,7 @@ var ManageDSL = React.createClass({
                         { to: "/manageDSL/manageDSLSource/" + row.id + '/edit' },
                         React.createElement(
                             'i',
-                            { id: 'dsl-modify', className: 'material-icons md-24' },
+                            { className: 'material-icons md-24' },
                             ''
                         )
                     ),
@@ -3063,7 +3108,7 @@ var ManageDSL = React.createClass({
                         { to: "/manageDSL/manageDSLSource/" + row.id + '/view' },
                         React.createElement(
                             'i',
-                            { id: 'dsl-modify', className: 'material-icons md-24' },
+                            { className: 'material-icons md-24' },
                             ''
                         )
                     )
@@ -3113,6 +3158,10 @@ var ManageDSL = React.createClass({
 
     deleteAllSelected: function deleteAllSelected() {
         alert(this.refs.table.state.selectedRowKeys);
+    },
+
+    onUploadSource: function onUploadSource() {
+        var reader = new FileReader();
     },
 
     render: function render() {
@@ -3183,8 +3232,10 @@ var ManageDSL = React.createClass({
                     data[i] = {
                         id: DSL.dsl.id,
                         name: DSL.dsl.name,
+                        source: DSL.dsl.source,
                         permission: DSL.permission,
-                        type: DSL.dsl.type
+                        type: DSL.dsl.type,
+                        externalDatabaseId: DSL.dsl.externalDatabaseId
                     };
                 });
             }
@@ -3215,7 +3266,7 @@ var ManageDSL = React.createClass({
                         ),
                         this.state.role != "Guest" ? React.createElement(
                             'div',
-                            { id: 'top-buttons' },
+                            { className: 'top-buttons' },
                             React.createElement(
                                 'div',
                                 { className: 'tooltip tooltip-bottom', id: 'add-button' },
@@ -3234,6 +3285,12 @@ var ManageDSL = React.createClass({
                                     'Create new DSL definition'
                                 )
                             ),
+                            React.createElement(
+                                'i',
+                                { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
+                                ''
+                            ),
+                            React.createElement('input', { type: 'file', id: 'fileInput' }),
                             React.createElement(
                                 'div',
                                 { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
@@ -3282,6 +3339,10 @@ var ManageDSL = React.createClass({
 });
 
 module.exports = ManageDSL;
+
+/*
+<i className="material-icons md-48 dropdown-button">&#xE864;</i>
+*/
 
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],25:[function(require,module,exports){
 'use strict';
@@ -3637,6 +3698,7 @@ var ManageDSLSource = React.createClass({
         if (this.props.params.mode != "view") {
             var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
             var editorSession = editor.getSession();
+            editor.$blockScrolling = Infinity;
             editorSession.on("change", this.onEdit);
         }
     },
@@ -3771,10 +3833,6 @@ var ManageDSLSource = React.createClass({
 
     onChangeDatabase: function onChangeDatabase() {},
 
-    onDownloadSource: function onDownloadSource() {},
-
-    onUploadSource: function onUploadSource() {},
-
     toggleErrorPopUp: function toggleErrorPopUp() {
         this.refs.error.classList.toggle("dropdown-show");
     },
@@ -3901,6 +3959,20 @@ var ManageDSLSource = React.createClass({
                             { onClick: this.onRun, accessKey: 'r', className: 'material-icons md-36 dropdown-button', ref: 'run' },
                             ''
                         )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-top' },
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-long' },
+                            'Change database'
+                        ),
+                        React.createElement(
+                            'i',
+                            { onClick: this.onChangeDatabase, className: 'material-icons md-36 dropdown-button' },
+                            ''
+                        )
                     )
                 ) : "",
                 React.createElement(
@@ -3936,53 +4008,7 @@ var ManageDSLSource = React.createClass({
                             'Cell'
                         )
                     )
-                ),
-                this.props.params != "view" ? React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                        'div',
-                        { className: 'tooltip tooltip-top' },
-                        React.createElement(
-                            'p',
-                            { className: 'tooltip-text tooltip-text-long' },
-                            'Download source'
-                        ),
-                        React.createElement(
-                            'i',
-                            { onClick: this.onDownloadSource, className: 'material-icons md-36 dropdown-button' },
-                            ''
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'tooltip tooltip-top' },
-                        React.createElement(
-                            'p',
-                            { className: 'tooltip-text tooltip-text-long' },
-                            'Upload source'
-                        ),
-                        React.createElement(
-                            'i',
-                            { onClick: this.onUploadSource, className: 'material-icons md-36 dropdown-button' },
-                            ''
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'tooltip tooltip-top' },
-                        React.createElement(
-                            'p',
-                            { className: 'tooltip-text tooltip-text-long' },
-                            'Change database'
-                        ),
-                        React.createElement(
-                            'i',
-                            { onClick: this.onChangeDatabase, className: 'material-icons md-36 dropdown-button' },
-                            ''
-                        )
-                    )
-                ) : ""
+                )
             ),
             React.createElement(
                 'div',
@@ -5806,10 +5832,14 @@ var PersonalData = React.createClass({
     var gender = this.state.radioGender;
     // call the action only if something has changed
 
+    //old checks:
     // || !(dateOfBirth!=getDateOfBirth(this.state.dateOfBirth) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
     //                           || !(dateOfBirth==getDateOfBirth(this.state.dateOfBirth) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN")) 
 
-    if (name != this.state.name || surname != this.state.surname || gender != this.state.gender || !(dateOfBirth != getDateOfBirth(this.state.dateOfBirth) && !dateOfBirth && getDateOfBirth(this.state.dateOfBirth) == "NaN-NaN-NaN") || !(dateOfBirth == getDateOfBirth(this.state.dateOfBirth) && dateOfBirth && getDateOfBirth(this.state.dateOfBirth) != "NaN-NaN-NaN")) {
+    // || !((dateOfBirth!=getDateOfBirth(this.state.dateOfBirth)) && (!dateOfBirth && getDateOfBirth(this.state.dateOfBirth)=="NaN-NaN-NaN"))
+    //                           || !((dateOfBirth==getDateOfBirth(this.state.dateOfBirth)) && (dateOfBirth && getDateOfBirth(this.state.dateOfBirth)!="NaN-NaN-NaN"))
+
+    if (name != this.state.name || surname != this.state.surname || gender != this.state.gender || !dateOfBirth && getDateOfBirth(this.state.dateOfBirth) != "NaN-NaN-NaN" || dateOfBirth && dateOfBirth != getDateOfBirth(this.state.dateOfBirth)) {
       RequestUserActionCreator.changePersonalData(SessionStore.getUserId(), name, surname, dateOfBirth, gender);
     } else {
       this._setError("No changes to save");
@@ -8464,8 +8494,8 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
                 var i = 0;
                 //removal of the deleted company from the list of the companies
-                console.log(action);
-                console.log(_companies);
+                // console.log(action);
+                // console.log(_companies);
                 if (_companies) // altrimenti la pagina di eliminazione azienda non va
                     {
                         while (_companies[i].id != action.id && i < _companies.length) {
@@ -8474,6 +8504,7 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                     }
             }
             CompanyStore.emitChange();
+            CompanyStore.emitDelete();
             break;
 
         case ActionTypes.COMPANIES:
@@ -8516,9 +8547,9 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
         case ActionTypes.GET_DSLDEFINITION_COUNT:
             if (action.errors) {
                 _errors = action.errors;
-            } else if (action.data) {
+            } else {
                 _errors = [];
-                DSLDefinitionsCount = action.data.count;
+                DSLDefinitionsCount = action.count;
                 localStorage.setItem('DSLDefinitionsCount', DSLDefinitionsCount);
             }
             CompanyStore.emitChange();
@@ -9688,7 +9719,7 @@ module.exports = {
         if (res.error) {
           ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(null, res.error.message);
         } else {
-          ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.body, null);
+          ResponseCompanyActionCreator.responseGetDSLDefinitionsCount(res.count, null);
         }
       }
     });

@@ -95,6 +95,30 @@ var ManageDSL = React.createClass({
         var confirmDelete = function() {
             RequestDSLActionCreator.deleteDSLDefinition(row.id);
         };
+        
+        var onDownloadSource = function() {
+            var data = {
+                name: row.name,
+                dsl: row.source,
+                type: row.type,
+                database: row.externalDatabaseId
+            };
+            data = JSON.stringify(data);
+            var filename = row.name + ".dsl";
+            var blob = new Blob([data], {type: 'application/json'});
+            
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+            } else {
+                var url = window.URL.createObjectURL(blob);
+                var tempLink = document.createElement('a');
+                tempLink.href = url;
+                tempLink.setAttribute('download', filename);
+                tempLink.click();
+            }
+        };
+        
         var deleteDSL = (
             <div id="delete-user" className="pop-up">
                 <i onClick={onClick} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
@@ -115,13 +139,21 @@ var ManageDSL = React.createClass({
                 </div>
             </div>
         );
-        
+        // <div className="tooltip tooltip-top">
+        //                         <p className="tooltip-text tooltip-text-long">Download source</p>
+        //                         <i onClick={this.onDownloadSource} className="material-icons md-36 dropdown-button">&#xE884;</i>
+        //                     </div>
+        //                     <div className="tooltip tooltip-top">
+        //                         <p className="tooltip-text tooltip-text-long">Upload source</p>
+        //                         <i onClick={this.onUploadSource} className="material-icons md-36 dropdown-button">&#xE864;</i>
+        //                     </div>
         if(this.state.role == "Owner" || this.state.role == "Administrator")
         {
             buttons = (
                 <div>
-                    <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
-                    <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i id="dsl-change-permission" className="material-icons md-24">&#xE32A;</i></Link>
+                    <i onClick={onDownloadSource} className="dsl-download material-icons md-24 dropdown-button">&#xE884;</i>
+                    <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i className="modify-button material-icons md-24">&#xE254;</i></Link>
+                    <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i className="dsl-change-permission material-icons md-24">&#xE32A;</i></Link>
                     {deleteDSL}
                 </div>
             );
@@ -132,7 +164,7 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
-                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i id="dsl-read" className="material-icons md-24">&#xE86F;</i></Link>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i className="material-icons md-24">&#xE86F;</i></Link>
                     </div>
                 );
             }
@@ -141,7 +173,7 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
-                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i id="dsl-modify" className="material-icons md-24">&#xE254;</i></Link>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i className="material-icons md-24">&#xE254;</i></Link>
                         {deleteDSL}
                     </div>
                 );
@@ -150,7 +182,7 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
-                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i id="dsl-modify" className="material-icons md-24">&#xE86F;</i></Link>
+                        <Link to={"/manageDSL/manageDSLSource/" + row.id + '/view' }><i className="material-icons md-24">&#xE86F;</i></Link>
                     </div>
                 );
             }
@@ -198,6 +230,11 @@ var ManageDSL = React.createClass({
     
     deleteAllSelected: function() {
         alert(this.refs.table.state.selectedRowKeys);
+    },
+    
+    onUploadSource: function() {
+        var reader = new FileReader();
+        
     },
     
     render: function() {
@@ -255,8 +292,10 @@ var ManageDSL = React.createClass({
                     data[i] = {
                         id: DSL.dsl.id,
                         name: DSL.dsl.name,
+                        source: DSL.dsl.source,
                         permission: DSL.permission,
-                        type : DSL.dsl.type
+                        type : DSL.dsl.type,
+                        externalDatabaseId: DSL.dsl.externalDatabaseId
                     };
                 });
             }
@@ -273,11 +312,13 @@ var ManageDSL = React.createClass({
                         <div id="table-top">
                             <p id="filter-type">{this.state.type}</p>
                             {this.state.role != "Guest" ?
-                                <div id="top-buttons">
+                                <div className="top-buttons">
                                     <div className="tooltip tooltip-bottom" id="add-button">
                                         <Link to="/manageDSL/externalDatabases/select"><i className="material-icons md-48">&#xE147;</i></Link>
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
+                                    <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
+                                    <input type="file" id="fileInput" />
                                     <div className="tooltip tooltip-bottom" id="deleteAll-button">
                                         <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                         <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>
@@ -306,3 +347,7 @@ var ManageDSL = React.createClass({
 });
 
 module.exports = ManageDSL;
+
+/*
+<i className="material-icons md-48 dropdown-button">&#xE864;</i>
+*/

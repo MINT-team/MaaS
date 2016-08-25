@@ -259,7 +259,7 @@ var ExternalDatabases = React.createClass({
               {this.props.params.mode != "select" ?
                 <div id="table-top">
                   <p id="filter-type">{this.state.type}</p>
-                  <div id="top-buttons">
+                  <div className="top-buttons">
                     <div className="tooltip tooltip-bottom" id="add-button">
                       <AddExternalDatabase />
                       <p className="tooltip-text tooltip-text-long">Add new database</p>
