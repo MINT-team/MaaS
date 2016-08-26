@@ -102,7 +102,15 @@ var ResponseDSLActionCreator = {
             errors: errors,
             data: data
         });
-    }
+    },
+    
+    responseUploadDefinition: function(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.UPLOAD_DEFINITION_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    },
 };
 
 module.exports = ResponseDSLActionCreator;

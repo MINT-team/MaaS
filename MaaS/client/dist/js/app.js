@@ -111,8 +111,12 @@ var RequestDSLActionCreator = {
         WebAPIUtils.executeNestedDocument(id, row, identity, body);
     },
 
-    uploadDSLDefinition: function uploadDSLDefinition(data) {
-        WebAPIUtils.uploadDSLDefinition(data);
+    uploadDSLDefinition: function uploadDSLDefinition(userId, data) {
+        WebAPIUtils.uploadDefinition(userId, data);
+    },
+
+    changeDefinitionDatabase: function changeDefinitionDatabase(id, databaseId) {
+        WebAPIUtils.changeDefinitionDatabase(id, databaseId);
     }
 };
 
@@ -462,6 +466,14 @@ var ResponseDSLActionCreator = {
             type: ActionTypes.EXECUTE_NESTED_DOCUMENT_RESPONSE,
             errors: errors,
             data: data
+        });
+    },
+
+    responseUploadDefinition: function responseUploadDefinition(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.UPLOAD_DEFINITION_RESPONSE,
+            definition: definition,
+            errors: errors
         });
     }
 };
@@ -1574,15 +1586,23 @@ var DeleteUser = React.createClass({
                     'Delete user'
                 ),
                 React.createElement(
-                    'p',
+                    'div',
                     { className: 'dropdown-description' },
-                    'Are you sure you want to delete ',
                     React.createElement(
-                        'span',
-                        { id: 'successful-email' },
-                        this.props.email
+                        'p',
+                        null,
+                        'Are you sure you want to delete'
                     ),
-                    '\'s account?'
+                    React.createElement(
+                        'p',
+                        null,
+                        React.createElement(
+                            'span',
+                            { id: 'successful-email' },
+                            this.props.email
+                        ),
+                        '\'s account?'
+                    )
                 ),
                 React.createElement(
                     'div',
@@ -1623,6 +1643,7 @@ var Sidebar = require('../Sidebar.react.jsx');
 var Link = require('react-router').Link;
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
+var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var AddExternalDatabase = require('./AddExternalDatabase.react.jsx');
 
@@ -1696,30 +1717,46 @@ var ExternalDatabases = React.createClass({
     if (row.connected == 'true') {
       titleState = "Disconnect database";
       messageState = React.createElement(
-        'p',
+        'div',
         { className: 'dropdown-description' },
-        'Are you sure you want to ',
         React.createElement(
-          'span',
-          { id: 'successful-email' },
-          'disconnect ',
-          row.name
+          'p',
+          null,
+          'Are you sure you want to'
         ),
-        '?'
+        React.createElement(
+          'p',
+          null,
+          React.createElement(
+            'span',
+            { id: 'successful-email' },
+            'disconnect ',
+            row.name
+          ),
+          '?'
+        )
       );
     } else {
       titleState = "Connect database";
       messageState = React.createElement(
-        'p',
+        'div',
         { className: 'dropdown-description' },
-        'Are you sure you want to ',
         React.createElement(
-          'span',
-          { id: 'successful-email' },
-          'connect ',
-          row.name
+          'p',
+          null,
+          'Are you sure you want to'
         ),
-        '?'
+        React.createElement(
+          'p',
+          null,
+          React.createElement(
+            'span',
+            { id: 'successful-email' },
+            'connect ',
+            row.name
+          ),
+          '?'
+        )
       );
     }
 
@@ -1776,15 +1813,23 @@ var ExternalDatabases = React.createClass({
             'Delete Database'
           ),
           React.createElement(
-            'p',
+            'div',
             { className: 'dropdown-description' },
-            'Are you sure you want to delete ',
             React.createElement(
-              'span',
-              { id: 'successful-email' },
-              row.name
+              'p',
+              null,
+              'Are you sure you want to delete'
             ),
-            ' Database?'
+            React.createElement(
+              'p',
+              null,
+              React.createElement(
+                'span',
+                { id: 'successful-email' },
+                row.name
+              ),
+              ' Database?'
+            )
           ),
           React.createElement(
             'div',
@@ -1855,7 +1900,7 @@ var ExternalDatabases = React.createClass({
     if (!this.state.isLogged) {
       return React.createElement(AuthorizationRequired, null);
     }
-    if (this.props.params.mode != "select") {
+    if (this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase") {
       var all = {
         label: "All",
         onClick: this.onAllClick,
@@ -1896,12 +1941,15 @@ var ExternalDatabases = React.createClass({
     var instance = this;
     if (this.state.databases && this.state.databases.length > 0) {
       this.state.databases.forEach(function (database, i) {
-        if (instance.props.params.mode != "select" || instance.props.params.mode == "select" && database.connected == "true") data.push({
-          id: database.id,
-          name: database.name,
-          connected: database.connected,
-          connectionString: database.connString
-        });
+        if (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase" || instance.props.params.mode == "select" && database.connected == "true" || instance.props.params.mode == "changeDefinitionDatabase" && database.connected == "true" && database.id != instance.props.location.query.databaseId) {
+          alert(database.id != instance.props.location.query.databaseId);
+          data.push({
+            id: database.id,
+            name: database.name,
+            connected: database.connected,
+            connectionString: database.connString
+          });
+        }
       });
     }
 
@@ -1915,6 +1963,15 @@ var ExternalDatabases = React.createClass({
         },
         noDataText: "There are no databases to display"
       };
+    } else if (this.props.params.mode == "changeDefinitionDatabase") {
+      var instance = this;
+      options = {
+        onRowClick: function onRowClick(row) {
+          RequestDSLActionCreator.changeDefinitionDatabase(instance.props.params.definitionId, row.id);
+          //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
+        },
+        noDataText: "There are no databases to display"
+      };
     } else {
       options = {
         noDataText: "There are no databases to display"
@@ -1922,20 +1979,20 @@ var ExternalDatabases = React.createClass({
     }
 
     var title, content;
-    if (this.props.params.mode != "select") title = "Manage databases";else title = "Select one database";
+    if (this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase") title = "Manage databases";else title = "Select one database";
     content = React.createElement(
       'div',
       { id: 'manage-externalDatabases' },
-      this.props.params.mode != "select" ? React.createElement(Sidebar, { title: 'Filter databases', data: sidebarData }) : "",
+      this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase" ? React.createElement(Sidebar, { title: 'Filter databases', data: sidebarData }) : "",
       React.createElement(
         'div',
-        { className: this.props.params.mode == "select" ? "container" : "container  sidebar-container" },
+        { className: this.props.params.mode == "select" || this.props.params.mode == "changeDefinitionDatabase" ? "container" : "container  sidebar-container" },
         React.createElement(
           'p',
           { className: 'container-title' },
           title
         ),
-        this.props.params.mode != "select" ? React.createElement(
+        this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase" ? React.createElement(
           'div',
           { id: 'table-top' },
           React.createElement(
@@ -1975,7 +2032,7 @@ var ExternalDatabases = React.createClass({
         React.createElement(
           'div',
           { id: 'table' },
-          this.props.params.mode == "select" ? React.createElement(
+          this.props.params.mode == "select" || this.props.params.mode == "changeDefinitionDatabase" ? React.createElement(
             BootstrapTable,
             { ref: 'table', keyField: 'id', pagination: true, data: data,
               search: true, striped: true, hover: true, options: options },
@@ -2014,7 +2071,7 @@ var ExternalDatabases = React.createClass({
 
 module.exports = ExternalDatabases;
 
-},{"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/ExternalDatabaseStore.react.jsx":56,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./AddExternalDatabase.react.jsx":15,"react":370,"react-bootstrap-table":93,"react-router":139}],21:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/ExternalDatabaseStore.react.jsx":56,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./AddExternalDatabase.react.jsx":15,"react":370,"react-bootstrap-table":93,"react-router":139}],21:[function(require,module,exports){
 'use strict';
 
 // Name: {Invite.react.jsx}
@@ -2181,7 +2238,6 @@ var Invite = React.createClass({
                     { className: 'dropdown-title' },
                     'Invitation sent!'
                 ),
-                React.createElement('p', { className: 'dropdown-description' }),
                 React.createElement(
                     'div',
                     { className: 'dropdown-buttons' },
@@ -2884,11 +2940,14 @@ var ManageDSL = React.createClass({
 
 
     getInitialState: function getInitialState() {
-        return getState();
+        var state = getState();
+        state.uploadErrors = [];
+        return state;
     },
 
     componentWillMount: function componentWillMount() {
         DSLStore.addChangeListener(this._onChange);
+        DSLStore.addUploadListener(this._onUpload);
         UserStore.addChangeListener(this._onUserChange);
         RequestUserActionCreator.getUser(this.state.userId);
         if (!this.props.children) {
@@ -2898,6 +2957,7 @@ var ManageDSL = React.createClass({
 
     componentWillUnmount: function componentWillUnmount() {
         DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeUploadListener(this._onUpload);
         UserStore.removeChangeListener(this._onUserChange);
     },
 
@@ -2905,8 +2965,12 @@ var ManageDSL = React.createClass({
         this.setState(getState());
     },
 
+    _onUpload: function _onUpload() {
+        RequestDSLActionCreator.loadDSLAccess(DSLStore.getId(), this.state.userId); // Load the new object to be visualized in the ManageDSL's table
+    },
+
     _onUserChange: function _onUserChange() {
-        if (this.state.role != UserStore.getRole()) {
+        if (this.state.role != UserStore.getRole() && (this.state.role == "Administrator" || this.state.role == "Member" || this.state.role == "Guest")) {
             alert("Your role has been changed!");
         }
         this.setState({
@@ -3007,15 +3071,23 @@ var ManageDSL = React.createClass({
                     'Delete DSL definition'
                 ),
                 React.createElement(
-                    'p',
+                    'div',
                     { className: 'dropdown-description' },
-                    'Are you sure you want to delete ',
                     React.createElement(
-                        'span',
-                        { id: 'successful-email' },
-                        row.name
+                        'p',
+                        null,
+                        'Are you sure you want to delete'
                     ),
-                    ' DSL definition?'
+                    React.createElement(
+                        'p',
+                        null,
+                        React.createElement(
+                            'span',
+                            { id: 'successful-email' },
+                            row.name
+                        ),
+                        ' DSL definition?'
+                    )
                 ),
                 React.createElement(
                     'div',
@@ -3165,51 +3237,54 @@ var ManageDSL = React.createClass({
     },
 
     onUploadSource: function onUploadSource() {
-        var uploadDSLDefinition = document.getElementById('uploadDSLDefinition');
-        var file = uploadDSLDefinition.files[0];
-        var filename; // da cambiare con *.dsl
-        var textType = /text.*/;
-        //if (file.type.match(textType) && file.name.match(filename))
-        //{
-        //alert('uno');
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            // show popup success
-            var data = reader.result;
-            data = JSON.parse(data);
-            RequestDSLActionCreator.uploadDSLDefinition(data);
+        var instance = this;
+        var onFileSelect = function onFileSelect() {
+            var file = tempLink.files[0];
+            var size = file.size; // file size in bytes
+            alert(size);
+            //var filename = /.*\.dsl/;   // da cambiare con *.dsl
+            var textType = /text.*/;
+            if (file.name.endsWith('.dsl')) //if(file.type.match(textType) && file.name.match(filename))
+                {
+                    if (size < 1048576) // 1MB max
+                        {
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                var data = reader.result;
+                                try {
+                                    data = JSON.parse(data);
+                                } catch (error) {
+                                    //console.log(error);
+                                    instance.setState({ uploadErrors: ["Error uploading selected file.", "Your file is corrupt"] });
+                                    instance.toggleErrorPopUp();
+                                }
+                                console.log(data);
+                                RequestDSLActionCreator.uploadDSLDefinition(instance.state.userId, data);
+                            };
+                            reader.readAsText(file);
+                        } else {
+                        instance.setState({ uploadErrors: ["Selected file is too large.", "Please upload a file with size lower than 1 MB"] });
+                        instance.toggleErrorPopUp();
+                    }
+                } else {
+                instance.setState({ uploadErrors: ["Selected file doesn't corrispond to a DSL definition.", "Please upload a \'.dsl\' definition file"] });
+                instance.toggleErrorPopUp();
+            }
         };
-        reader.readAsText(file);
 
-        //}
-        //else
-        //{
-        // show pop up error file not supported
-        //}
+        var tempLink = document.createElement('input');
+        tempLink.setAttribute('type', 'file');
+        tempLink.addEventListener('change', onFileSelect);
+        tempLink.click();
     },
 
-    //     window.onload = function() {
-    // 		var fileInput = document.getElementById('fileInput');
-    // 		var fileDisplayArea = document.getElementById('fileDisplayArea');
+    toggleErrorPopUp: function toggleErrorPopUp() {
+        this.refs.error.classList.toggle("dropdown-show");
+    },
 
-    // 		fileInput.addEventListener('change', function(e) {
-    // 			var file = fileInput.files[0];
-    // 			var textType = /text.*/;
-
-    // 			if (file.type.match(textType)) {
-    // 				var reader = new FileReader();
-
-    // 				reader.onload = function(e) {
-    // 					fileDisplayArea.innerText = reader.result;
-    // 				}
-
-    // 				reader.readAsText(file);	
-    // 			} else {
-    // 				fileDisplayArea.innerText = "File not supported!"
-    // 			}
-    // 		});
-    // }
-
+    emptyUploadErrors: function emptyUploadErrors() {
+        this.setState({ uploadErrors: [] });
+    },
 
     render: function render() {
         if (!this.state.isLogged) {
@@ -3274,6 +3349,21 @@ var ManageDSL = React.createClass({
 
             var sidebarData = [all, dashboards, collections, documents, cells];
 
+            var uploadErrors;
+            if (this.state.uploadErrors.length > 0) {
+                uploadErrors = React.createElement(
+                    'div',
+                    { id: 'errors' },
+                    this.state.uploadErrors.map(function (error, i) {
+                        return React.createElement(
+                            'p',
+                            { className: 'error-item', key: i },
+                            error
+                        );
+                    })
+                );
+            }
+
             if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
                 this.state.DSL_LIST.forEach(function (DSL, i) {
                     data[i] = {
@@ -3337,7 +3427,11 @@ var ManageDSL = React.createClass({
                                 { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
                                 ''
                             ),
-                            React.createElement('input', { type: 'file', id: 'uploadDSLDefinition', onChange: this.onUploadSource }),
+                            React.createElement(
+                                'i',
+                                { onClick: this.onUploadSource, className: 'material-icons md-48 dropdown-button' },
+                                ''
+                            ),
                             React.createElement(
                                 'div',
                                 { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
@@ -3380,16 +3474,35 @@ var ManageDSL = React.createClass({
         return React.createElement(
             'div',
             { id: 'dsl' },
-            content
+            content,
+            React.createElement(
+                'div',
+                { className: 'dropdown-content dropdown-popup', ref: 'error' },
+                React.createElement(
+                    'p',
+                    { className: 'dropdown-title' },
+                    'Error'
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-description' },
+                    uploadErrors
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dropdown-buttons' },
+                    React.createElement(
+                        'button',
+                        { onClick: this.emptySaveErrors, className: 'button' },
+                        'Ok'
+                    )
+                )
+            )
         );
     }
 });
 
 module.exports = ManageDSL;
-
-/*
-<i className="material-icons md-48 dropdown-button">&#xE864;</i>
-*/
 
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],25:[function(require,module,exports){
 'use strict';
@@ -3712,7 +3825,8 @@ function getState() {
         definitionId: DSLStore.getId(),
         definitionName: DSLStore.getName(),
         definitionType: DSLStore.getType(),
-        definitionSource: DSLStore.getSource()
+        definitionSource: DSLStore.getSource(),
+        definitionDatabase: DSLStore.getDatabase()
     };
 }
 
@@ -4012,13 +4126,17 @@ var ManageDSLSource = React.createClass({
                         { className: 'tooltip tooltip-top' },
                         React.createElement(
                             'p',
-                            { className: 'tooltip-text tooltip-text-long' },
+                            { className: 'tooltip-text tooltip-text-longest' },
                             'Change database'
                         ),
                         React.createElement(
-                            'i',
-                            { onClick: this.onChangeDatabase, className: 'material-icons md-36 dropdown-button' },
-                            ''
+                            Link,
+                            { to: "/manageDSL/externalDatabases/" + this.state.definitionId + "/changeDefinitionDatabase?databaseId=" + this.state.definitionDatabase },
+                            React.createElement(
+                                'i',
+                                { onClick: this.onChangeDatabase, className: 'material-icons md-36 dropdown-button' },
+                                ''
+                            )
                         )
                     )
                 ) : "",
@@ -8212,6 +8330,7 @@ module.exports = {
     COMPILE_DEFINITION_RESPONSE: null,
     EXECUTE_DEFINITION_RESPONSE: null,
     EXECUTE_NESTED_DOCUMENT_RESPONSE: null,
+    UPLOAD_DEFINITION_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -8364,6 +8483,7 @@ var Routes = React.createClass({
           Route,
           { path: 'manageDSL', component: ManageDSL },
           React.createElement(Route, { path: 'externalDatabases/:mode', component: ExternalDatabases }),
+          React.createElement(Route, { path: 'externalDatabases/:definitionId/:mode', component: ExternalDatabases }),
           React.createElement(Route, { path: 'executeDSL/:definitionId', component: ExecuteDSL }),
           React.createElement(Route, { path: 'manageDSLSource', component: ManageDSLSource }),
           React.createElement(Route, { path: 'manageDSLSource/:definitionId/:mode', component: ManageDSLSource }),
@@ -8636,6 +8756,7 @@ var SAVE_EVENT = 'save';
 var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
+var UPLOAD_EVENT = 'upload';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -8714,6 +8835,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(NESTED_EXECUTE_EVENT, callback);
     },
 
+    emitUpload: function emitUpload() {
+        this.emit(UPLOAD_EVENT);
+    },
+
+    addUploadListener: function addUploadListener(callback) {
+        this.on(UPLOAD_EVENT, callback);
+    },
+
+    removeUploadListener: function removeUploadListener(callback) {
+        this.removeListener(UPLOAD_EVENT, callback);
+    },
+
     getErrors: function getErrors() {
         return _errors;
     },
@@ -8732,6 +8865,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getSource: function getSource() {
         return _DSL.source;
+    },
+
+    getDatabase: function getDatabase() {
+        return _DSL.database;
     },
 
     getDSLList: function getDSLList() {
@@ -8765,6 +8902,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -8783,6 +8921,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _DSL.name = action.json[0].dsl.name;
                 _DSL.type = action.json[0].dsl.type;
                 _DSL.source = action.json[0].dsl.source;
+                _DSL.database = action.json[0].dsl.externalDatabaseId;
 
                 _DSL_LIST.push(action.json[0]);
 
@@ -8810,6 +8949,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -8825,8 +8965,11 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors.push(action.errors);
             } else if (action.definition) {
                 _DSL.id = action.definition.id;
+                //_DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+
                 if (action.definition.name != _DSL.name) {
                     _DSL.name = action.definition.name;
                     var trovato = false;
@@ -8963,6 +9106,24 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             //DSLStore.emitChange();
             DSLStore.emitNestedExecute();
+            break;
+
+        case ActionTypes.UPLOAD_DEFINITION_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else if (action.definition) {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+
+                localStorage.setItem('DSLId', _DSL.id);
+                localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource', _DSL.source);
+            }
+            DSLStore.emitUpload();
             break;
     }
 });
@@ -9971,11 +10132,38 @@ module.exports = {
     });
   },
 
-  uploadDSLDefinition: function uploadDSLDefinition(data) {
-    request.post(APIEndpoints.DSL + '/uploadDSLDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+  uploadDefinition: function uploadDefinition(userId, data) {
+    request.post(APIEndpoints.DSL + '/uploadDefinition').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      userId: userId,
       data: data
     }).end(function (error, res) {
-      if (res) {} else {}
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) {
+          ResponseDSLActionCreator.responseUploadDefinition(null, res.error);
+        } else {
+          ResponseDSLActionCreator.responseUploadDefinition(res.definition, null);
+        }
+      }
+    });
+  },
+
+  changeDefinitionDatabase: function changeDefinitionDatabase(id, databaseId) {
+    console.log(id);
+    console.log(databaseId);
+    request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionDatabase').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: id,
+      externalDatabaseId: databaseId
+    }).end(function (err, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        console.log(res);
+        if (res.error) {
+          //ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
+        } else {
+            //ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
+          }
+      }
     });
   }
 };

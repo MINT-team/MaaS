@@ -23,6 +23,7 @@ var SAVE_EVENT = 'save';
 var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
+var UPLOAD_EVENT = 'upload';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -102,6 +103,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(NESTED_EXECUTE_EVENT, callback);
     },
     
+    emitUpload: function() {
+        this.emit(UPLOAD_EVENT);
+    },
+
+    addUploadListener: function(callback) {
+        this.on(UPLOAD_EVENT, callback);
+    },
+
+    removeUploadListener: function(callback) {
+        this.removeListener(UPLOAD_EVENT, callback);
+    },
+    
     getErrors: function() {
         return _errors;
     },
@@ -120,6 +133,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getSource: function() {
         return _DSL.source;
+    },
+    
+    getDatabase: function() {
+        return _DSL.database;  
     },
     
     getDSLList: function() {
@@ -156,6 +173,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
                 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -177,6 +195,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.name = action.json[0].dsl.name;
                 _DSL.type = action.json[0].dsl.type;
                 _DSL.source = action.json[0].dsl.source;
+                _DSL.database = action.json[0].dsl.externalDatabaseId;
                 
                 _DSL_LIST.push(action.json[0]);
                 
@@ -208,6 +227,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
                 
                 localStorage.setItem('DSLId',_DSL.id);
                 localStorage.setItem('DSLName',_DSL.name);
@@ -226,8 +246,11 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             else if(action.definition)
             {
                 _DSL.id = action.definition.id;
+                //_DSL.name = action.definition.name;
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+                
                 if (action.definition.name != _DSL.name)
                 {
                     _DSL.name = action.definition.name;
@@ -402,6 +425,27 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             //DSLStore.emitChange();
             DSLStore.emitNestedExecute();
+            break;
+        
+        case ActionTypes.UPLOAD_DEFINITION_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.definition)
+            {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+                
+                localStorage.setItem('DSLId',_DSL.id);
+                localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource',_DSL.source);
+            }
+            DSLStore.emitUpload();
             break;
     }
     

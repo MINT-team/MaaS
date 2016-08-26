@@ -277,36 +277,141 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.uploadDSLDefinition = function(data, cb) {
-        console.log(data.name);
-        console.log(data.dsl);
-        console.log(data.type);
-        console.log(data.database);
+    DSL.uploadDefinition = function(userId, data, cb) {
         
-        if (!data.name || !data.type || data.database)
+        function relationError(DSLInstance, err) {
+            DSL.destroyById(DSLInstance.id, function(err) {
+                if(err)
+                {
+                    return cb(err, null, null);
+                }
+            });
+            console.log("> Error creating relationship for the DSL");
+            return cb(err, null, null);
+        }
+        
+        if (!data.name || !data.type || !data.database)
         {
-            //error
+            var error = {
+                message: "Missing data for DSL creation"
+            };
+            console.log("> Upload definition error: Missing data for DSL creation, impossible to create relationship for the DSL");
+            return cb(null, error, null);
         }
         else
         {
-            
+            DSL.create({type: data.type, name: data.name, source: data.dsl, createdBy: userId, externalDatabaseId: data.database}, function(err, DSLInstance) {
+                if(err || !DSLInstance)
+                {
+                   console.log('> Failed creating DSL.');
+                   return cb(err);
+                }
+                // Define relation between user and DSL
+                var DSLAccess = app.models.DSLAccess;
+                var user = app.models.user;
+                user.findById(userId, function(err, userInstance) {
+                    if(err)
+                    {
+                        relationError(DSLInstance, err);
+                    }
+                    var Company = app.models.Company;
+                    Company.findById(userInstance.companyId, function(err, company) {
+                        if(err || !company)
+                        {
+                            return cb(err, null, null);
+                        }
+                        // Add DSL to the Admins of the company
+                        company.users({where: {role: "Administrator"}}, function(err, admins) {
+                            if(err || !admins)
+                            {
+                                return cb(err, null, null);
+                            }
+                            admins.forEach(function(admin, i) 
+                            {
+                                DSLAccess.create({userId: admin.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
+                                    if(err)
+                                    {
+                                        return relationError(DSLInstance, err);
+                                    }
+                                });
+                            });
+                        });
+                        // Add DSL to the Owner of the company
+                        company.owner(function(err, owner) {
+                            if(err)
+                            {
+                                return relationError(DSLInstance, err);
+                            }
+                            DSLAccess.create({userId: owner.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
+                                if(err)
+                                    return relationError(DSLInstance, err);
+                            });
+                        });
+                        // If user creating the DSL is not Owner or Admin add DSL to him
+                        if(userInstance.role == "Member")
+                        {
+                            DSLAccess.create({userId: userInstance.id, dslId: DSLInstance.id, permission: "write"}, function(err, accessInstance) {
+                                if(err)
+                                    return relationError(DSLInstance, err);
+                            });
+                        }
+                        console.log("> Uploaded DSL:", DSLInstance.id);
+                        return cb(null, null, DSLInstance);
+                    });
+                });
+           });
         }
     };
     
     DSL.remoteMethod(
-        'uploadDSLDefinition',
+        'uploadDefinition',
         {
             description: "Upload a DSL definition",
             accepts: [
+                { arg: 'userId', type: 'string', required: true, description: 'User id' },
                 { arg: 'data', type: 'Object', required: true, description: 'Definition data' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
                 { arg: 'definition', type: 'Object'}
             ],
-            http: { verb: 'post', path: '/uploadDSLDefinition' }
+            http: { verb: 'post', path: '/uploadDefinition' }
         }
     );
+    
+    DSL.changeDefinitionDatabase = function(id, databaseId, cb) {
+        DSL.findById(id, function(err, DSLInstance) {
+            if(err)
+            {
+                return cb(err, null, null);
+            }
+            DSLInstance.updateAttributes({externalDatabaseId: databaseId}, function(err, newDSL) {
+                if(err)
+                {
+                    return cb(err, null, null);
+                }
+                console.log("> Updated database of DSL:", newDSL.id);
+                return cb(null, null, newDSL);
+            });
+        });
+    };
+    
+    DSL.remoteMethod(
+        'changeDefinitionDatabase',
+        {
+            description: "Overwrite a DSL definition",
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' },
+                { arg: 'externalDatabaseId', type: 'string', required: true, description: 'Database id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'definition', type: 'Object'}
+            ],
+            http: { verb: 'put', path: '/:id/changeDefinitionDatabase' }
+        }
+    );
+    
     
     DSL.compile = function(dsl, cb) {
         var expanded;

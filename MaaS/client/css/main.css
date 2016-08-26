@@ -772,18 +772,23 @@ input {
     margin-top: 3%;
 }
 
+.dropdown-buttons button {
+    margin-top: 2em;
+}
+
 .dropdown-popup {
     width: 28%;
+    /*max-width: 28%;*/
     height: 22%;
-    overflow: auto;
+    /*overflow: auto;*/
     margin: auto;
-    position: absolute;
+    position: fixed;
     top: 0; left: 0; bottom: 25%; right: 0;
 }
 
 @media (max-width: 1400px) {
     .dropdown-popup {
-        width: 35%;
+        width: 38%;
         height: 30%;
     }
 }
@@ -1762,9 +1767,9 @@ input {
 #invite-dropdown {
     width: 22%;
     height: 15%;
-    overflow: auto;
+    /*overflow: auto;*/
     margin: auto;
-    position: absolute;
+    position: fixed;
     top: 0; left: 0; bottom: 25%; right: 0;
 }
 
@@ -1783,9 +1788,9 @@ input {
     #invite-dropdown {
         width: 22%;
         height: 20%;
-        overflow: auto;
+        /*overflow: auto;*/
         margin: auto;
-        position: absolute;
+        position: fixed;
         top: 0; left: 0; bottom: 25%; right: 0;
     }
 }

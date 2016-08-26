@@ -111,7 +111,6 @@ var Invite = React.createClass({
                 </div>
                 <div id="invite-dropdown" className="dropdown-content dropdown-popup" ref="invite">
                     <p className="dropdown-title">Invitation sent!</p>
-                    <p className="dropdown-description"></p>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Ok</button>
                     </div>

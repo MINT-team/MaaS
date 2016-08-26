@@ -22,7 +22,8 @@ function getState() {
             definitionId: DSLStore.getId(),
             definitionName: DSLStore.getName(),
             definitionType: DSLStore.getType(),
-            definitionSource: DSLStore.getSource()
+            definitionSource: DSLStore.getSource(),
+            definitionDatabase: DSLStore.getDatabase()
     };
 }
 
@@ -284,8 +285,8 @@ var ManageDSLSource = React.createClass({
                                 <i onClick={this.onRun} accessKey="r" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
                             </div>
                             <div className="tooltip tooltip-top">
-                                <p className="tooltip-text tooltip-text-long">Change database</p>
-                                <i onClick={this.onChangeDatabase} className="material-icons md-36 dropdown-button">&#xE1DB;</i>
+                                <p className="tooltip-text tooltip-text-longest">Change database</p>
+                                <Link to={"/manageDSL/externalDatabases/" + this.state.definitionId + "/changeDefinitionDatabase?databaseId=" + this.state.definitionDatabase }><i onClick={this.onChangeDatabase} className="material-icons md-36 dropdown-button">&#xE1DB;</i></Link>
                             </div>
                         </div>
                         : ""

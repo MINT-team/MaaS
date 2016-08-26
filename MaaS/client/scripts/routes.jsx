@@ -68,6 +68,7 @@ var Routes = React.createClass({
           <Route path="externalDatabases" component={ExternalDatabases} />
           <Route path="manageDSL" component={ManageDSL}>
             <Route path="externalDatabases/:mode" component={ExternalDatabases} />
+            <Route path="externalDatabases/:definitionId/:mode" component={ExternalDatabases} />
             <Route path="executeDSL/:definitionId" component={ExecuteDSL} />
             <Route path="manageDSLSource" component={ManageDSLSource} />
             <Route path="manageDSLSource/:definitionId/:mode" component={ManageDSLSource} />

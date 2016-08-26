@@ -13,6 +13,7 @@ var Sidebar = require('../Sidebar.react.jsx');
 var Link = require('react-router').Link;
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
+var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var AddExternalDatabase = require('./AddExternalDatabase.react.jsx');
 
@@ -88,17 +89,22 @@ var ExternalDatabases = React.createClass({
     {
       titleState="Disconnect database";
       messageState = (
-        <p className="dropdown-description">Are you sure you want to <span id="successful-email">disconnect {row.name}</span>?</p>
+        <div className="dropdown-description">
+          <p>Are you sure you want to</p>
+          <p><span id="successful-email">disconnect {row.name}</span>?</p>
+        </div>
       );
     }
     else
     {
       titleState="Connect database";
       messageState = (
-        <p className="dropdown-description">Are you sure you want to <span id="successful-email">connect {row.name}</span>?</p>
+        <div className="dropdown-description">
+          <p>Are you sure you want to</p>
+          <p><span id="successful-email">connect {row.name}</span>?</p>
+        </div>
       );
     }
-  
     
     return (
       <div className="table-buttons">
@@ -117,7 +123,10 @@ var ExternalDatabases = React.createClass({
             <i onClick={tryDel} className="material-icons md-24 dropdown-button">&#xE5C9;</i>
             <div className="dropdown-content dropdown-popup" id={delDropdown}>
 			        <p className="dropdown-title">Delete Database</p>
-			        <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> Database?</p>
+			        <div className="dropdown-description">
+			          <p>Are you sure you want to delete</p>
+			          <p><span id="successful-email">{row.name}</span> Database?</p>
+			        </div>   
               <div className="dropdown-buttons">
                 <button className="inline-button">Cancel</button>
                 <button id="delete-button" onClick={confirmDelete} className="inline-button">Delete</button>
@@ -184,7 +193,7 @@ var ExternalDatabases = React.createClass({
         <AuthorizationRequired />
       );
     }
-    if (this.props.params.mode != "select")
+    if (this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase")
     {
       var all = {
         label: "All",
@@ -215,13 +224,18 @@ var ExternalDatabases = React.createClass({
     if(this.state.databases && this.state.databases.length > 0)
     {
         this.state.databases.forEach(function(database, i) {
-          if(instance.props.params.mode != "select" || (instance.props.params.mode == "select" && database.connected == "true") )
+          if( (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase") ||
+              (instance.props.params.mode == "select" && database.connected == "true") ||
+              (instance.props.params.mode == "changeDefinitionDatabase" && (database.connected == "true" && database.id != instance.props.location.query.databaseId) ) )
+          {
+            alert(database.id != instance.props.location.query.databaseId);
             data.push({
                 id: database.id,
                 name: database.name,
                 connected: database.connected,
                 connectionString: database.connString
             });
+          }
         });
     }
     
@@ -236,6 +250,17 @@ var ExternalDatabases = React.createClass({
         noDataText: "There are no databases to display"
       };
     }
+    else if(this.props.params.mode == "changeDefinitionDatabase")
+    {
+      var instance = this;
+      options = {
+        onRowClick: function(row){
+          RequestDSLActionCreator.changeDefinitionDatabase(instance.props.params.definitionId, row.id);
+          //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
+        },
+        noDataText: "There are no databases to display"
+      };
+    }
     else
     {
       options = {
@@ -245,18 +270,18 @@ var ExternalDatabases = React.createClass({
   
     
     var title, content;
-    if(this.props.params.mode != "select")
+    if(this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase")
       title = "Manage databases";
     else
       title = "Select one database";
     content = (
           <div id="manage-externalDatabases">
-            {this.props.params.mode != "select" ?
+            {this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase" ?
               <Sidebar title="Filter databases" data={sidebarData}/>
             : "" }
-              <div className={this.props.params.mode == "select" ? "container" : "container  sidebar-container" }>
+              <div className={this.props.params.mode == "select" || this.props.params.mode == "changeDefinitionDatabase" ? "container" : "container  sidebar-container" }>
               <p className="container-title">{title}</p>
-              {this.props.params.mode != "select" ?
+              {this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase" ?
                 <div id="table-top">
                   <p id="filter-type">{this.state.type}</p>
                   <div className="top-buttons">
@@ -272,12 +297,11 @@ var ExternalDatabases = React.createClass({
                 </div>
               : "" }
               <div id="table">
-                {this.props.params.mode == "select" ?
+                {this.props.params.mode == "select" || this.props.params.mode == "changeDefinitionDatabase" ?
                   <BootstrapTable ref="table" keyField="id" pagination={true} data={data} 
                   search={true} striped={true} hover={true} options={options}>
                     <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
                   </BootstrapTable>
-                
                 : 
                   <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} 
                 search={true} striped={true} hover={true} options={options}>

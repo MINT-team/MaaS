@@ -78,6 +78,7 @@ module.exports = {
     COMPILE_DEFINITION_RESPONSE: null,
     EXECUTE_DEFINITION_RESPONSE: null,
     EXECUTE_NESTED_DOCUMENT_RESPONSE: null,
+    UPLOAD_DEFINITION_RESPONSE: null,
     
     // Databases
     ADD_EXT_DB_RESPONSE: null,

@@ -98,7 +98,7 @@ module.exports = function(app) {
         if(context.modelName == "DSL") 
         {
             // Creating a new DSL definition
-            if(context.remotingContext.req.url == '/saveDefinition') 
+            if(context.remotingContext.req.url == '/saveDefinition' || context.remotingContext.req.url == '/uploadDefinition') 
             {
                 var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
@@ -217,7 +217,7 @@ module.exports = function(app) {
         }
         if(context.modelName == "DSL") {
             // Creating a new DSL definition
-            if(context.remotingContext.req.url == '/saveDefinition')
+            if(context.remotingContext.req.url == '/saveDefinition' || context.remotingContext.req.url == '/uploadDefinition')
             {
                 var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
@@ -300,7 +300,7 @@ module.exports = function(app) {
         if(context.modelName == "DSL") 
         {
             // Creating a new DSL definition
-            if(context.remotingContext.req.url == '/saveDefinition') {
+            if(context.remotingContext.req.url == '/saveDefinition' || context.remotingContext.req.url == '/uploadDefinition') {
                 var user = app.models.user;
                 user.findById(userId, function(err, userInstance) {
                     if(err || !userInstance)

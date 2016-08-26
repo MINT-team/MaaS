@@ -287,25 +287,58 @@ module.exports = {
         });
     },
     
-    uploadDSLDefinition: function(data) {
+    uploadDefinition: function(userId, data) {
       request
-        .post(APIEndpoints.DSL + '/uploadDSLDefinition')
+        .post(APIEndpoints.DSL + '/uploadDefinition')
         .set('Accept', 'application/json')
         .set('Authorization', localStorage.getItem('accessToken'))
         .send(
           {
+            userId: userId,
             data: data
           }
         )
         .end(function(error, res) {
           if(res)
           {
-            
-          }
-          else
-          {
-            
+            res=JSON.parse(res.text);
+            if(res.error) 
+            {
+              ResponseDSLActionCreator.responseUploadDefinition(null, res.error);
+            }
+            else
+            {
+              ResponseDSLActionCreator.responseUploadDefinition(res.definition, null);
+            }
           }
       });
+    },
+    
+    changeDefinitionDatabase: function(id, databaseId) {
+      console.log(id);
+      console.log(databaseId);
+      request
+        .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionDatabase')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send({
+          id: id,
+          externalDatabaseId: databaseId
+        })
+        .end(function(err, res) {
+          if(res)
+          {
+            res = JSON.parse(res.text);
+            console.log(res);
+            if(res.error)
+            {
+              //ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
+            }
+            else
+            {
+              //ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
+            }
+          }
+        });
     }
 };

@@ -34,11 +34,14 @@ function getState() {
 var ManageDSL = React.createClass({
     
     getInitialState: function() {
-        return getState();
+        var state = getState();
+        state.uploadErrors = [];
+        return state;
     },
     
     componentWillMount: function() {
         DSLStore.addChangeListener(this._onChange);
+        DSLStore.addUploadListener(this._onUpload);
         UserStore.addChangeListener(this._onUserChange);
         RequestUserActionCreator.getUser(this.state.userId);
         if(!this.props.children)
@@ -49,6 +52,7 @@ var ManageDSL = React.createClass({
 
     componentWillUnmount: function() {
         DSLStore.removeChangeListener(this._onChange);
+        DSLStore.removeUploadListener(this._onUpload);
         UserStore.removeChangeListener(this._onUserChange);
     },
 
@@ -56,8 +60,12 @@ var ManageDSL = React.createClass({
         this.setState(getState());
     },
     
+    _onUpload: function() {
+        RequestDSLActionCreator.loadDSLAccess(DSLStore.getId(), this.state.userId);   // Load the new object to be visualized in the ManageDSL's table
+    },
+    
     _onUserChange: function() {
-        if(this.state.role != UserStore.getRole())
+        if(this.state.role != UserStore.getRole() && (this.state.role=="Administrator" || this.state.role=="Member" || this.state.role=="Guest") )
         {
             alert("Your role has been changed!");
         }
@@ -70,7 +78,6 @@ var ManageDSL = React.createClass({
     nameFormatter: function(cell, row) {
         return (
             <Link to={"/manageDSL/executeDSL/" + row.id}>{row.name}</Link>
-        
         );
     },
     
@@ -131,7 +138,10 @@ var ManageDSL = React.createClass({
                 </div>
                 <div className="dropdown-content dropdown-popup" id={deleteId}>
                     <p className="dropdown-title">Delete DSL definition</p>
-                    <p className="dropdown-description">Are you sure you want to delete <span id="successful-email">{row.name}</span> DSL definition?</p>
+                    <div className="dropdown-description">
+                        <p>Are you sure you want to delete</p>
+                        <p><span id="successful-email">{row.name}</span> DSL definition?</p>
+                    </div>
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>
@@ -231,57 +241,63 @@ var ManageDSL = React.createClass({
     deleteAllSelected: function() {
         alert(this.refs.table.state.selectedRowKeys);
     },
-    
+
     onUploadSource: function() {
-        var uploadDSLDefinition = document.getElementById('uploadDSLDefinition');
-        var file = uploadDSLDefinition.files[0];
-        var filename;   // da cambiare con *.dsl
-        var textType = /text.*/;    
-        //if (file.type.match(textType) && file.name.match(filename))
-        //{
-            //alert('uno');
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // show popup success
-                var data = reader.result;
-                data = JSON.parse(data);
-                RequestDSLActionCreator.uploadDSLDefinition(data);
-            };
-            reader.readAsText(file);
-            
-            
-        //}
-        //else
-        //{
-            // show pop up error file not supported
-        //}
+        var instance = this;
+        var onFileSelect = function() {
+            var file = tempLink.files[0];
+            var size = file.size;   // file size in bytes
+            alert(size);
+            //var filename = /.*\.dsl/;   // da cambiare con *.dsl
+            var textType = /text.*/;
+            if(file.name.endsWith('.dsl')) //if(file.type.match(textType) && file.name.match(filename))
+            {
+                if(size < 1048576)  // 1MB max
+                {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var data = reader.result;
+                        try {
+                            data = JSON.parse(data);
+                        }
+                        catch(error)
+                        {
+                            //console.log(error);
+                            instance.setState({ uploadErrors: ["Error uploading selected file.", "Your file is corrupt"]});
+                            instance.toggleErrorPopUp();
+                        }
+                        console.log(data);
+                        RequestDSLActionCreator.uploadDSLDefinition(instance.state.userId, data);
+                    };
+                    reader.readAsText(file);
+                }
+                else
+                {
+                    instance.setState({ uploadErrors: ["Selected file is too large.", "Please upload a file with size lower than 1 MB"]});
+                    instance.toggleErrorPopUp();
+                }
+            }
+            else
+            {
+                instance.setState({ uploadErrors: ["Selected file doesn't corrispond to a DSL definition.", "Please upload a \'.dsl\' definition file"]});
+                instance.toggleErrorPopUp();
+            }
+        
+        };
+        
+        var tempLink = document.createElement('input');
+        tempLink.setAttribute('type', 'file');
+        tempLink.addEventListener('change', onFileSelect);
+        tempLink.click();
     },
     
+    toggleErrorPopUp: function() {
+		this.refs.error.classList.toggle("dropdown-show");
+	},
     
-    
-//     window.onload = function() {
-// 		var fileInput = document.getElementById('fileInput');
-// 		var fileDisplayArea = document.getElementById('fileDisplayArea');
-
-// 		fileInput.addEventListener('change', function(e) {
-// 			var file = fileInput.files[0];
-// 			var textType = /text.*/;
-
-// 			if (file.type.match(textType)) {
-// 				var reader = new FileReader();
-
-// 				reader.onload = function(e) {
-// 					fileDisplayArea.innerText = reader.result;
-// 				}
-
-// 				reader.readAsText(file);	
-// 			} else {
-// 				fileDisplayArea.innerText = "File not supported!"
-// 			}
-// 		});
-// }
-    
-    
+    emptyUploadErrors: function() {
+	    this.setState({ uploadErrors: [] });
+	},
     
     render: function() {
         if(!this.state.isLogged) 
@@ -332,6 +348,12 @@ var ManageDSL = React.createClass({
             
             var sidebarData = [all, dashboards, collections, documents, cells];
             
+            var uploadErrors;
+            if(this.state.uploadErrors.length > 0)
+            {
+                uploadErrors = ( <div id="errors">{this.state.uploadErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
+            }
+            
             if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
             {
                 this.state.DSL_LIST.forEach(function(DSL, i) {
@@ -364,7 +386,7 @@ var ManageDSL = React.createClass({
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
                                     <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
-                                    <input type="file" id="uploadDSLDefinition" onChange={this.onUploadSource} />
+                                    <i onClick={this.onUploadSource} className="material-icons md-48 dropdown-button">&#xE864;</i>
                                     <div className="tooltip tooltip-bottom" id="deleteAll-button">
                                         <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                         <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>
@@ -387,13 +409,16 @@ var ManageDSL = React.createClass({
         return (
             <div id="dsl">
                 {content}
+                <div className="dropdown-content dropdown-popup" ref="error">
+                    <p className="dropdown-title">Error</p>
+                    <div className="dropdown-description">{uploadErrors}</div>
+                    <div className="dropdown-buttons">
+                        <button onClick={this.emptySaveErrors} className="button">Ok</button>
+                    </div>
+                </div>
             </div>
         );
     }
 });
 
 module.exports = ManageDSL;
-
-/*
-<i className="material-icons md-48 dropdown-button">&#xE864;</i>
-*/
