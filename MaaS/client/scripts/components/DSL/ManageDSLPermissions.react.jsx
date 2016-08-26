@@ -160,7 +160,7 @@ var ManageDSLPermissions = React.createClass({
                     <p className="container-title">{title}</p>
                     <div id="table-top">
                         <p id="filter-type">{this.state.roleFilter}</p>
-                        <div id="top-buttons">
+                        <div className="top-buttons">
                             <i onClick={this.changeAllSelected} className="material-icons md-48">&#xE32A;</i>
                         </div>
                     </div>

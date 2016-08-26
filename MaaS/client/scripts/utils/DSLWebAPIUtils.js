@@ -225,10 +225,7 @@ module.exports = {
             res=JSON.parse(res.text);
             if(res.error) 
             {
-              //if(res.error.message)   // errore nostro
-                //ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
-              if(res.error)           // errore sweet
-                ResponseDSLActionCreator.responseCompileDefinition(res.error);
+              ResponseDSLActionCreator.responseCompileDefinition(res.error);
             }
             else
             {
@@ -315,8 +312,6 @@ module.exports = {
     },
     
     changeDefinitionDatabase: function(id, databaseId) {
-      console.log(id);
-      console.log(databaseId);
       request
         .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionDatabase')
         .set('Accept', 'application/json')
@@ -329,14 +324,13 @@ module.exports = {
           if(res)
           {
             res = JSON.parse(res.text);
-            console.log(res);
             if(res.error)
             {
-              //ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
+              ResponseDSLActionCreator.responseChangeDefinitionDatabase(null, res.error.message);
             }
             else
             {
-              //ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
+              ResponseDSLActionCreator.responseChangeDefinitionDatabase(res.definition, null);
             }
           }
         });

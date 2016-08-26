@@ -12,6 +12,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 var Link = require('react-router').Link;
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
+var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -44,13 +45,20 @@ var ExternalDatabases = React.createClass({
     	this.setState(getState());
   },
   
+  _onChangeDatabase: function() {
+      const { router } = this.context;
+      router.push('/manageDSL/manageDSLSource/' + this.props.params.definitionId + '/edit');
+  },
+  
   componentWillMount: function() {
     ExternalDatabaseStore.addChangeListener(this._onChange);
+    DSLStore.addChangeDatabaseListener(this._onChangeDatabase);
     RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
   
   componentWillUnmount: function() {
     ExternalDatabaseStore.removeChangeListener(this._onChange);
+    DSLStore.removeChangeDatabaseListener(this._onChangeDatabase);
   },
   
   buttonFormatter: function(cell, row) {
@@ -186,6 +194,12 @@ var ExternalDatabases = React.createClass({
     alert(this.refs.table.state.selectedRowKeys);
   },
   
+  nameFormatter: function(cell, row) {
+        return (
+            <span className="db-link">{row.name}</span>
+        );
+    },
+  
   render: function() {
     if(!this.state.isLogged)
     {
@@ -223,7 +237,6 @@ var ExternalDatabases = React.createClass({
     var instance = this;
     if(this.state.databases && this.state.databases.length > 0)
     {
-        console.log(this.state.databases);
         this.state.databases.forEach(function(database, i) {
           if( (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase") ||
               (instance.props.params.mode == "select" && database.connected == "true") ||
@@ -256,7 +269,6 @@ var ExternalDatabases = React.createClass({
       options = {
         onRowClick: function(row){
           RequestDSLActionCreator.changeDefinitionDatabase(instance.props.params.definitionId, row.id);
-          //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
         },
         noDataText: "There are no databases to display"
       };
@@ -267,7 +279,6 @@ var ExternalDatabases = React.createClass({
         noDataText: "There are no databases to display"
       };
     }
-  
     
     var title, content;
     if(this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase")
@@ -299,8 +310,8 @@ var ExternalDatabases = React.createClass({
               <div id="table">
                 {this.props.params.mode == "select" || this.props.params.mode == "changeDefinitionDatabase" ?
                   <BootstrapTable ref="table" keyField="id" pagination={true} data={data} 
-                  search={true} striped={true} hover={true} options={options}>
-                    <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                  search={true} striped={true} hover={true} options={options} >
+                    <TableHeaderColumn dataField="name" dataSort={true} dataFormat={this.nameFormatter}>Name</TableHeaderColumn>
                   </BootstrapTable>
                 : 
                   <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data} 

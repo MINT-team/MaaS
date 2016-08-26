@@ -49,6 +49,13 @@ var ManageDSL = React.createClass({
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
     },
+    
+    componentDidUpdate: function(prevProps) {
+        if(!this.props.children && prevProps.children)
+        {
+            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        }
+    },
 
     componentWillUnmount: function() {
         DSLStore.removeChangeListener(this._onChange);
@@ -247,10 +254,7 @@ var ManageDSL = React.createClass({
         var onFileSelect = function() {
             var file = tempLink.files[0];
             var size = file.size;   // file size in bytes
-            alert(size);
-            //var filename = /.*\.dsl/;   // da cambiare con *.dsl
-            var textType = /text.*/;
-            if(file.name.endsWith('.dsl')) //if(file.type.match(textType) && file.name.match(filename))
+            if(file.name.endsWith('.dsl'))
             {
                 if(size < 1048576)  // 1MB max
                 {
@@ -259,15 +263,13 @@ var ManageDSL = React.createClass({
                         var data = reader.result;
                         try {
                             data = JSON.parse(data);
+                            RequestDSLActionCreator.uploadDSLDefinition(instance.state.userId, data);
                         }
                         catch(error)
                         {
-                            //console.log(error);
                             instance.setState({ uploadErrors: ["Error uploading selected file.", "Your file is corrupt"]});
                             instance.toggleErrorPopUp();
                         }
-                        console.log(data);
-                        RequestDSLActionCreator.uploadDSLDefinition(instance.state.userId, data);
                     };
                     reader.readAsText(file);
                 }
@@ -298,7 +300,7 @@ var ManageDSL = React.createClass({
     emptyUploadErrors: function() {
 	    this.setState({ uploadErrors: [] });
 	},
-    
+	
     render: function() {
         if(!this.state.isLogged) 
         {

@@ -475,6 +475,14 @@ var ResponseDSLActionCreator = {
             definition: definition,
             errors: errors
         });
+    },
+
+    responseChangeDefinitionDatabase: function responseChangeDefinitionDatabase(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DEFINITION_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
     }
 };
 
@@ -1642,6 +1650,7 @@ var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 var Link = require('react-router').Link;
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
+var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
@@ -1676,13 +1685,21 @@ var ExternalDatabases = React.createClass({
     this.setState(getState());
   },
 
+  _onChangeDatabase: function _onChangeDatabase() {
+    var router = this.context.router;
+
+    router.push('/manageDSL/manageDSLSource/' + this.props.params.definitionId + '/edit');
+  },
+
   componentWillMount: function componentWillMount() {
     ExternalDatabaseStore.addChangeListener(this._onChange);
+    DSLStore.addChangeDatabaseListener(this._onChangeDatabase);
     RequestExternalDatabaseActionCreator.getDbs(CompanyStore.getId());
   },
 
   componentWillUnmount: function componentWillUnmount() {
     ExternalDatabaseStore.removeChangeListener(this._onChange);
+    DSLStore.removeChangeDatabaseListener(this._onChangeDatabase);
   },
 
   buttonFormatter: function buttonFormatter(cell, row) {
@@ -1896,6 +1913,14 @@ var ExternalDatabases = React.createClass({
     alert(this.refs.table.state.selectedRowKeys);
   },
 
+  nameFormatter: function nameFormatter(cell, row) {
+    return React.createElement(
+      'span',
+      { className: 'db-link' },
+      row.name
+    );
+  },
+
   render: function render() {
     if (!this.state.isLogged) {
       return React.createElement(AuthorizationRequired, null);
@@ -1940,7 +1965,6 @@ var ExternalDatabases = React.createClass({
     var data = [];
     var instance = this;
     if (this.state.databases && this.state.databases.length > 0) {
-      console.log(this.state.databases);
       this.state.databases.forEach(function (database, i) {
         if (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase" || instance.props.params.mode == "select" && database.connected == "true" || instance.props.params.mode == "changeDefinitionDatabase" && database.connected == "true" && database.id != instance.props.location.query.databaseId) {
           data.push({
@@ -1968,7 +1992,6 @@ var ExternalDatabases = React.createClass({
       options = {
         onRowClick: function onRowClick(row) {
           RequestDSLActionCreator.changeDefinitionDatabase(instance.props.params.definitionId, row.id);
-          //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
         },
         noDataText: "There are no databases to display"
       };
@@ -2038,7 +2061,7 @@ var ExternalDatabases = React.createClass({
               search: true, striped: true, hover: true, options: options },
             React.createElement(
               TableHeaderColumn,
-              { dataField: 'name', dataSort: true },
+              { dataField: 'name', dataSort: true, dataFormat: this.nameFormatter },
               'Name'
             )
           ) : React.createElement(
@@ -2071,7 +2094,7 @@ var ExternalDatabases = React.createClass({
 
 module.exports = ExternalDatabases;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/ExternalDatabaseStore.react.jsx":56,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./AddExternalDatabase.react.jsx":15,"react":370,"react-bootstrap-table":93,"react-router":139}],21:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/DSLStore.react.jsx":55,"../../stores/ExternalDatabaseStore.react.jsx":56,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./AddExternalDatabase.react.jsx":15,"react":370,"react-bootstrap-table":93,"react-router":139}],21:[function(require,module,exports){
 'use strict';
 
 // Name: {Invite.react.jsx}
@@ -2955,6 +2978,12 @@ var ManageDSL = React.createClass({
         }
     },
 
+    componentDidUpdate: function componentDidUpdate(prevProps) {
+        if (!this.props.children && prevProps.children) {
+            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+        }
+    },
+
     componentWillUnmount: function componentWillUnmount() {
         DSLStore.removeChangeListener(this._onChange);
         DSLStore.removeUploadListener(this._onUpload);
@@ -3241,32 +3270,26 @@ var ManageDSL = React.createClass({
         var onFileSelect = function onFileSelect() {
             var file = tempLink.files[0];
             var size = file.size; // file size in bytes
-            alert(size);
-            //var filename = /.*\.dsl/;   // da cambiare con *.dsl
-            var textType = /text.*/;
-            if (file.name.endsWith('.dsl')) //if(file.type.match(textType) && file.name.match(filename))
-                {
-                    if (size < 1048576) // 1MB max
-                        {
-                            var reader = new FileReader();
-                            reader.onload = function (e) {
-                                var data = reader.result;
-                                try {
-                                    data = JSON.parse(data);
-                                } catch (error) {
-                                    //console.log(error);
-                                    instance.setState({ uploadErrors: ["Error uploading selected file.", "Your file is corrupt"] });
-                                    instance.toggleErrorPopUp();
-                                }
-                                console.log(data);
+            if (file.name.endsWith('.dsl')) {
+                if (size < 1048576) // 1MB max
+                    {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var data = reader.result;
+                            try {
+                                data = JSON.parse(data);
                                 RequestDSLActionCreator.uploadDSLDefinition(instance.state.userId, data);
-                            };
-                            reader.readAsText(file);
-                        } else {
-                        instance.setState({ uploadErrors: ["Selected file is too large.", "Please upload a file with size lower than 1 MB"] });
-                        instance.toggleErrorPopUp();
-                    }
-                } else {
+                            } catch (error) {
+                                instance.setState({ uploadErrors: ["Error uploading selected file.", "Your file is corrupt"] });
+                                instance.toggleErrorPopUp();
+                            }
+                        };
+                        reader.readAsText(file);
+                    } else {
+                    instance.setState({ uploadErrors: ["Selected file is too large.", "Please upload a file with size lower than 1 MB"] });
+                    instance.toggleErrorPopUp();
+                }
+            } else {
                 instance.setState({ uploadErrors: ["Selected file doesn't corrispond to a DSL definition.", "Please upload a \'.dsl\' definition file"] });
                 instance.toggleErrorPopUp();
             }
@@ -3728,7 +3751,7 @@ var ManageDSLPermissions = React.createClass({
                     ),
                     React.createElement(
                         'div',
-                        { id: 'top-buttons' },
+                        { className: 'top-buttons' },
                         React.createElement(
                             'i',
                             { onClick: this.changeAllSelected, className: 'material-icons md-48' },
@@ -4150,7 +4173,7 @@ var ManageDSLSource = React.createClass({
                     ),
                     React.createElement(
                         'select',
-                        { className: 'select', id: 'definitionType', ref: 'definitionType' },
+                        { onChange: this.onEdit, className: 'select', id: 'definitionType', ref: 'definitionType' },
                         React.createElement('option', { value: '' }),
                         React.createElement(
                             'option',
@@ -8331,6 +8354,7 @@ module.exports = {
     EXECUTE_DEFINITION_RESPONSE: null,
     EXECUTE_NESTED_DOCUMENT_RESPONSE: null,
     UPLOAD_DEFINITION_RESPONSE: null,
+    CHANGE_DEFINITION_RESPONSE: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -8757,6 +8781,7 @@ var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
 var UPLOAD_EVENT = 'upload';
+var CHANGE_DATABASE_EVENT = 'change_database';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -8848,6 +8873,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(UPLOAD_EVENT, callback);
     },
 
+    emitChangeDatabase: function emitChangeDatabase() {
+        this.emit(CHANGE_DATABASE_EVENT);
+    },
+
+    addChangeDatabaseListener: function addChangeDatabaseListener(callback) {
+        this.on(CHANGE_DATABASE_EVENT, callback);
+    },
+
+    removeChangeDatabaseListener: function removeChangeDatabaseListener(callback) {
+        this.removeListener(CHANGE_DATABASE_EVENT, callback);
+    },
+
     getErrors: function getErrors() {
         return _errors;
     },
@@ -8904,8 +8941,6 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
-
-                console.log("id nella store", _DSL.database);
 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -8971,17 +9006,17 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors.push(action.errors);
             } else if (action.definition) {
                 _DSL.id = action.definition.id;
-                //_DSL.name = action.definition.name;
-                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
 
-                if (action.definition.name != _DSL.name) {
+                if (action.definition.name != _DSL.name || action.definition.type != _DSL.type) {
                     _DSL.name = action.definition.name;
+                    _DSL.type = action.definition.type;
                     var trovato = false;
                     for (var i = 0; !trovato && i < _DSL_LIST.length; i++) {
                         if (action.definition.id == _DSL_LIST[i].dsl.id) {
                             _DSL_LIST[i].dsl.name = _DSL.name;
+                            _DSL_LIST[i].dsl.type = _DSL.type;
                             trovato = true;
                         }
                     }
@@ -9134,6 +9169,26 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             DSLStore.emitUpload();
             break;
+
+        case ActionTypes.CHANGE_DEFINITION_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else if (action.definition) {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+
+                localStorage.setItem('DSLId', _DSL.id);
+                localStorage.setItem('DSLName', _DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
+            }
+            DSLStore.emitChangeDatabase();
+            break;
+
     }
 });
 
@@ -10100,10 +10155,7 @@ module.exports = {
       if (res) {
         res = JSON.parse(res.text);
         if (res.error) {
-          //if(res.error.message)   // errore nostro
-          //ResponseDSLActionCreator.responseCompileDefinition(res.error.message);
-          if (res.error) // errore sweet
-            ResponseDSLActionCreator.responseCompileDefinition(res.error);
+          ResponseDSLActionCreator.responseCompileDefinition(res.error);
         } else {
           ResponseDSLActionCreator.responseCompileDefinition(null);
         }
@@ -10158,20 +10210,17 @@ module.exports = {
   },
 
   changeDefinitionDatabase: function changeDefinitionDatabase(id, databaseId) {
-    console.log(id);
-    console.log(databaseId);
     request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionDatabase').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
       externalDatabaseId: databaseId
     }).end(function (err, res) {
       if (res) {
         res = JSON.parse(res.text);
-        console.log(res);
         if (res.error) {
-          //ResponseDSLActionCreator.responseOverwriteDSLDefinition(null, res.error.message);
+          ResponseDSLActionCreator.responseChangeDefinitionDatabase(null, res.error.message);
         } else {
-            //ResponseDSLActionCreator.responseOverwriteDSLDefinition(res.definition, null);
-          }
+          ResponseDSLActionCreator.responseChangeDefinitionDatabase(res.definition, null);
+        }
       }
     });
   }

@@ -111,6 +111,14 @@ var ResponseDSLActionCreator = {
             errors: errors
         });
     },
+    
+    responseChangeDefinitionDatabase: function(definition, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_DEFINITION_RESPONSE,
+            definition: definition,
+            errors: errors
+        });
+    },
 };
 
 module.exports = ResponseDSLActionCreator;

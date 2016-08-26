@@ -293,7 +293,7 @@ var ManageDSLSource = React.createClass({
                     }
                     <form id="definition-type">
                         <label htmlFor="definitionType">Type</label>
-                        <select className="select" id="definitionType" ref="definitionType" >
+                        <select onChange={this.onEdit} className="select" id="definitionType" ref="definitionType" >
                             <option value=""></option>
                             <option value="Dashboard">Dashboard</option>
                             <option value="Collection">Collection</option>
@@ -317,8 +317,6 @@ var ManageDSLSource = React.createClass({
                 </div>
             </div>
         );
-        
-        
         
         return (
             <div id="dsl-definition">

@@ -501,7 +501,7 @@ module.exports = function(DSL) {
             isStatic: true
         }
     );
-    
+  
     DSL.compileDefinition = function(id, cb) {
         var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
@@ -548,7 +548,7 @@ module.exports = function(DSL) {
                             }
                             var callback = function(err, identity, body) {
                                 var definitionTypeError = {};
-                                if(DSLInstance.definitionType != body.definitionType)
+                                if(DSLInstance.type != body.definitionType)
                                 {
                                     definitionTypeError.definitionTypeErrorMessage = "Definition type mismatch: your DSL definition doesn't match the selected type";
                                 }
@@ -561,7 +561,7 @@ module.exports = function(DSL) {
                                 {
                                     error = Object.getOwnPropertyNames(definitionTypeError) ? definitionTypeError : null;
                                 }
-                                if(error)
+                                if(Object.getOwnPropertyNames(error).length !== 0)
                                 {
                                     console.log("> DSL compilation error:", error);
                                     conn.close();
@@ -790,9 +790,7 @@ module.exports = function(DSL) {
                                 
                                 var callback = function(err, identity, body) {
                                     var definitionTypeError = {};
-                                    console.log("DSLInstance.type:", DSLInstance.type);
-                                    console.log("body.definitionType:", body.definitionType);
-                                    if(DSLInstance.definitionType != body.definitionType)
+                                    if(DSLInstance.type != body.definitionType)
                                     {
                                         definitionTypeError.definitionTypeErrorMessage = "Definition type mismatch: your DSL definition doesn't match the selected type";
                                     }
@@ -805,7 +803,7 @@ module.exports = function(DSL) {
                                     {
                                         error = Object.getOwnPropertyNames(definitionTypeError) ? definitionTypeError : null;
                                     }
-                                    if(error)
+                                    if(Object.getOwnPropertyNames(error).length !== 0)
                                     {
                                         conn.close();
                                         console.log("> DSL execution stopped: compilation errors");
@@ -827,8 +825,12 @@ module.exports = function(DSL) {
                                                     {
                                                         console.log("> DSL execution processed successfully");
                                                         if(!data.label)
+                                                        {
                                                             data.label = DSLInstance.name;
+                                                        }
+                                                        
                                                         data.definitionType = DSLInstance.type;
+                                                        
                                                         return cb(null, null, data);
                                                     }
                                                 });
@@ -845,7 +847,9 @@ module.exports = function(DSL) {
                                                     {
                                                         console.log("> DSL execution processed successfully");
                                                         if(!data.label)
+                                                        {
                                                             data.label = DSLInstance.name;
+                                                        }
                                                         data.definitionType = DSLInstance.type;
                                                         return cb(null, null, data);
                                                     }
@@ -943,7 +947,6 @@ module.exports = function(DSL) {
                 empty                       */
                 
     DSL.compileCell = function(identity, body, cb) {
-        body.definitionType = "Cell";
         if(Object.getOwnPropertyNames(body).length !== 0)   // Cell with a value
         {
             AttributesReader.checkSupportedAttributes(Object.assign(identity, body), ['type', 'label', 'columnLabel', 'transformation', 'value'], function(unsupportedAttributesError) {
@@ -957,6 +960,7 @@ module.exports = function(DSL) {
                             }
                             else
                             {
+                                body.definitionType = "Cell";
                                 return cb(null, identity, body);
                             }
                         });
@@ -987,6 +991,7 @@ module.exports = function(DSL) {
                         }
                         else
                         {
+                            body.definitionType = "Cell";
                             return cb(null, identity, body);
                         }
                     });

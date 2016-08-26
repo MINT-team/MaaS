@@ -24,6 +24,7 @@ var COMPILE_EVENT = 'compile';
 var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
 var UPLOAD_EVENT = 'upload';
+var CHANGE_DATABASE_EVENT = 'change_database';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -116,6 +117,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(UPLOAD_EVENT, callback);
     },
     
+    emitChangeDatabase: function() {
+        this.emit(CHANGE_DATABASE_EVENT);
+    },
+
+    addChangeDatabaseListener: function(callback) {
+        this.on(CHANGE_DATABASE_EVENT, callback);
+    },
+
+    removeChangeDatabaseListener: function(callback) {
+        this.removeListener(CHANGE_DATABASE_EVENT, callback);
+    },
+    
     getErrors: function() {
         return _errors;
     },
@@ -175,8 +188,6 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
-                
-                console.log("id nella store", _DSL.database);
                 
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
@@ -252,20 +263,20 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             else if(action.definition)
             {
                 _DSL.id = action.definition.id;
-                //_DSL.name = action.definition.name;
-                _DSL.type = action.definition.type;
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
                 
-                if (action.definition.name != _DSL.name)
+                if(action.definition.name != _DSL.name || action.definition.type != _DSL.type)
                 {
                     _DSL.name = action.definition.name;
+                    _DSL.type = action.definition.type;
                     let trovato = false;
                     for (let i = 0; !trovato && i<_DSL_LIST.length; i++)
                     {
                         if (action.definition.id == _DSL_LIST[i].dsl.id)
                         {
                             _DSL_LIST[i].dsl.name = _DSL.name;
+                            _DSL_LIST[i].dsl.type = _DSL.type;
                             trovato = true;
                         }
                     }
@@ -456,6 +467,29 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             DSLStore.emitUpload();
             break;
+            
+        case ActionTypes.CHANGE_DEFINITION_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else if(action.definition)
+            {
+                _DSL.id = action.definition.id;
+                _DSL.name = action.definition.name;
+                _DSL.type = action.definition.type;
+                _DSL.source = action.definition.source;
+                _DSL.database = action.definition.externalDatabaseId;
+                
+                localStorage.setItem('DSLId',_DSL.id);
+                localStorage.setItem('DSLName',_DSL.name);
+                localStorage.setItem('DSLType', _DSL.type);
+                localStorage.setItem('DSLSource',_DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
+            }
+            DSLStore.emitChangeDatabase();
+            break;
+            
     }
     
 });
