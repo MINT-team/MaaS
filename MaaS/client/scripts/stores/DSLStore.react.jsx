@@ -32,7 +32,8 @@ var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
     source: localStorage.getItem('DSLSource'),
-    type: localStorage.getItem('DSLType')
+    type: localStorage.getItem('DSLType'),
+    database: localStorage.getItem('DSLDatabase')
 };
 
 var _USER_LIST = []; // Member and Guest list
@@ -136,7 +137,7 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     },
     
     getDatabase: function() {
-        return _DSL.database;  
+        return _DSL.database;
     },
     
     getDSLList: function() {
@@ -175,10 +176,13 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
                 
+                console.log("id nella store", _DSL.database);
+                
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             break;
@@ -203,6 +207,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             break;
@@ -233,6 +238,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLName',_DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource',_DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             //DSLStore.emitChange();
             DSLStore.emitSave();
@@ -268,6 +274,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLName',_DSL.name);
                 localStorage.setItem('DSLType',_DSL.type);
                 localStorage.setItem('DSLSource',_DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             DSLStore.emitSave();
@@ -295,6 +302,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');
                 localStorage.removeItem('DSLSource');
+                localStorage.removeItem('DSLDatabase');
             }
             DSLStore.emitChange();
             break;
@@ -444,6 +452,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.setItem('DSLName',_DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource',_DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitUpload();
             break;

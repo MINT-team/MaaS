@@ -223,12 +223,12 @@ var ExternalDatabases = React.createClass({
     var instance = this;
     if(this.state.databases && this.state.databases.length > 0)
     {
+        console.log(this.state.databases);
         this.state.databases.forEach(function(database, i) {
           if( (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase") ||
               (instance.props.params.mode == "select" && database.connected == "true") ||
               (instance.props.params.mode == "changeDefinitionDatabase" && (database.connected == "true" && database.id != instance.props.location.query.databaseId) ) )
-          {
-            alert(database.id != instance.props.location.query.databaseId);
+          { 
             data.push({
                 id: database.id,
                 name: database.name,

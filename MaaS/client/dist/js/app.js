@@ -1940,9 +1940,9 @@ var ExternalDatabases = React.createClass({
     var data = [];
     var instance = this;
     if (this.state.databases && this.state.databases.length > 0) {
+      console.log(this.state.databases);
       this.state.databases.forEach(function (database, i) {
         if (instance.props.params.mode != "select" && instance.props.params.mode != "changeDefinitionDatabase" || instance.props.params.mode == "select" && database.connected == "true" || instance.props.params.mode == "changeDefinitionDatabase" && database.connected == "true" && database.id != instance.props.location.query.databaseId) {
-          alert(database.id != instance.props.location.query.databaseId);
           data.push({
             id: database.id,
             name: database.name,
@@ -8764,7 +8764,8 @@ var _DSL = {
     id: localStorage.getItem('DSLId'),
     name: localStorage.getItem('DSLName'),
     source: localStorage.getItem('DSLSource'),
-    type: localStorage.getItem('DSLType')
+    type: localStorage.getItem('DSLType'),
+    database: localStorage.getItem('DSLDatabase')
 };
 
 var _USER_LIST = []; // Member and Guest list
@@ -8904,10 +8905,13 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _DSL.source = action.definition.source;
                 _DSL.database = action.definition.externalDatabaseId;
 
+                console.log("id nella store", _DSL.database);
+
                 localStorage.setItem('DSLId', _DSL.id);
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             break;
@@ -8929,6 +8933,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             break;
@@ -8955,6 +8960,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             //DSLStore.emitChange();
             DSLStore.emitSave();
@@ -8984,6 +8990,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitChange();
             DSLStore.emitSave();
@@ -9006,6 +9013,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');
                 localStorage.removeItem('DSLSource');
+                localStorage.removeItem('DSLDatabase');
             }
             DSLStore.emitChange();
             break;
@@ -9122,6 +9130,7 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLName', _DSL.name);
                 localStorage.setItem('DSLType', _DSL.type);
                 localStorage.setItem('DSLSource', _DSL.source);
+                localStorage.setItem('DSLDatabase', _DSL.database);
             }
             DSLStore.emitUpload();
             break;
