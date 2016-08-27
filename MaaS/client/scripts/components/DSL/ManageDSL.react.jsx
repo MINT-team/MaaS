@@ -156,14 +156,7 @@ var ManageDSL = React.createClass({
                 </div>
             </div>
         );
-        // <div className="tooltip tooltip-top">
-        //                         <p className="tooltip-text tooltip-text-long">Download source</p>
-        //                         <i onClick={this.onDownloadSource} className="material-icons md-36 dropdown-button">&#xE884;</i>
-        //                     </div>
-        //                     <div className="tooltip tooltip-top">
-        //                         <p className="tooltip-text tooltip-text-long">Upload source</p>
-        //                         <i onClick={this.onUploadSource} className="material-icons md-36 dropdown-button">&#xE864;</i>
-        //                     </div>
+        
         if(this.state.role == "Owner" || this.state.role == "Administrator")
         {
             buttons = (

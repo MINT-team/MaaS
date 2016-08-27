@@ -2294,6 +2294,7 @@ module.exports = Invite;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var Sidebar = require('../Sidebar.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -2304,6 +2305,10 @@ var Invite = require('./Invite.react.jsx');
 var DeleteUser = require('./DeleteUser.react.jsx');
 var ChangeRole = require('./ChangeRole.react.jsx');
 
+var ReactBSTable = require('react-bootstrap-table');
+var BootstrapTable = ReactBSTable.BootstrapTable;
+var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
+
 function getState() {
   return {
     id: CompanyStore.getId(),
@@ -2311,7 +2316,8 @@ function getState() {
     errors: CompanyStore.getErrors(),
     isLogged: SessionStore.isLogged(),
     role: UserStore.getRole(),
-    email: UserStore.getEmail()
+    email: UserStore.getEmail(),
+    roleFilter: "All"
   };
 }
 
@@ -2323,7 +2329,7 @@ var People = React.createClass({
     return getState();
   },
 
-  componentDidMount: function componentDidMount() {
+  componentWillMount: function componentWillMount() {
     SessionStore.addChangeListener(this._onChange);
     CompanyStore.addChangeListener(this._onChange);
     UserStore.addChangeListener(this._onChange);
@@ -2363,152 +2369,186 @@ var People = React.createClass({
     }
   },
 
+  emailFormatter: function emailFormatter(cell, row) {
+    /*
+      return (
+          <Link to={"/manageDSL/executeDSL/" + row.id}>{row.name}</Link>
+      );
+      */
+    return row.email;
+  },
+
+  buttonFormatter: function buttonFormatter(cell, row) {},
+
+  onAllClick: function onAllClick() {
+    this.refs.table.handleFilterData({});
+    this.setState({ roleFilter: "All" });
+  },
+
+  onAdministratorsClick: function onAdministratorsClick() {
+    this.refs.table.handleFilterData({
+      role: 'Administrator'
+    });
+    this.setState({ roleFilter: "Administrators" });
+  },
+
+  onMembersClick: function onMembersClick() {
+    this.refs.table.handleFilterData({
+      role: 'Member'
+    });
+    this.setState({ roleFilter: "Members" });
+  },
+
+  onGuestsClick: function onGuestsClick() {
+    this.refs.table.handleFilterData({
+      role: 'Guest'
+    });
+    this.setState({ roleFilter: "Guests" });
+  },
+
+  deleteAllSelected: function deleteAllSelected() {
+    //alert(this.refs.table.state.selectedRowKeys);
+  },
+
   render: function render() {
-    var _this = this;
 
     if (!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
       return React.createElement(AuthorizationRequired, null);
     }
 
     var title, content;
+
+    var all = {
+      label: "All",
+      onClick: this.onAllClick,
+      icon: React.createElement(
+        'i',
+        { className: 'material-icons md-24' },
+        ''
+      )
+    };
+    var administrators = {
+      label: "Administrators",
+      onClick: this.onAdministratorsClick,
+      icon: React.createElement(
+        'i',
+        { className: 'material-icons md-24' },
+        ''
+      )
+    };
+    var members = {
+      label: "Members",
+      onClick: this.onMembersClick,
+      icon: React.createElement(
+        'i',
+        { className: 'material-icons md-24' },
+        'list'
+      )
+    };
+    var guests = {
+      label: "Guests",
+      onClick: this.onGuestsClick,
+      icon: React.createElement(
+        'i',
+        { className: 'material-icons md-24' },
+        ''
+      )
+    };
+
+    var data = [];
+    var selectRowProp = {
+      mode: "checkbox",
+      bgColor: "rgba(144, 238, 144, 0.42)"
+    };
+
+    var sidebarData = [all, administrators, members, guests];
+
+    var options = {
+      noDataText: "There are no users to display"
+    };
+
+    data = [{
+      id: 1,
+      email: 'asd@gmail.com',
+      role: 'Guest',
+      name: 'Cancaro',
+      surname: 'Man'
+    }];
+
     if (this.props.users.length > 1) {
+
       title = "Users of your Company";
-      if (this.state.role == "Owner" || this.state.role == "Administrator") {
-        content = React.createElement(
+      content = React.createElement(
+        'div',
+        { id: 'manage-people' },
+        React.createElement(Sidebar, { title: 'Filter users', data: sidebarData }),
+        React.createElement(
           'div',
-          { className: 'table-content' },
+          { className: 'container sidebar-container' },
+          React.createElement(
+            'p',
+            { className: 'container-title' },
+            title
+          ),
           React.createElement(
             'div',
-            { className: 'table-header' },
-            React.createElement('span', { className: 'table-column-small' }),
+            { id: 'table-top' },
             React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Name'
+              'p',
+              { id: 'filter-role' },
+              this.state.roleFilter
             ),
-            React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Surname'
-            ),
-            React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Role'
-            ),
-            React.createElement('span', { className: 'table-spacing' }),
-            React.createElement(
-              'span',
-              { className: 'table-column-big' },
-              'Email'
-            ),
-            React.createElement('span', { className: 'table-spacing' })
-          ),
-          this.props.users.map(function (u) {
-            return React.createElement(
+            this.state.role == "Administrator" || this.state.role == "Owner" ? React.createElement(
               'div',
-              { className: 'table-row', id: _this.state.email == u.email ? "user-profile" : "" },
+              { className: 'top-buttons' },
               React.createElement(
-                'span',
-                { className: 'table-column-small' },
-                u.avatar ? React.createElement('img', { src: "../../../images/" + u.avatar }) : React.createElement(
+                'div',
+                { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+                React.createElement(
                   'i',
-                  { className: 'material-icons md-36 table-row-icon' },
-                  ''
+                  { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
+                  ''
+                ),
+                React.createElement(
+                  'p',
+                  { className: 'tooltip-text tooltip-text-long' },
+                  'Delete all selected users'
                 )
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.name
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.surname
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.role
-              ),
-              _this.isLowerGrade(u.role) ? React.createElement(ChangeRole, { email: u.email, role: u.role, companyId: _this.state.id }) : React.createElement('span', { className: 'table-spacing' }),
-              React.createElement(
-                'span',
-                { className: 'table-column-big' },
-                u.email
-              ),
-              _this.isLowerGrade(u.role) ? React.createElement(DeleteUser, { email: u.email }) : React.createElement('span', { className: 'table-spacing' })
-            );
-          }),
-          React.createElement(Invite, { companyId: this.state.id })
-        );
-      } else {
-        content = React.createElement(
-          'div',
-          { className: 'table-content' },
-          React.createElement(
-            'div',
-            { className: 'table-header' },
-            React.createElement('p', { className: 'table-column-small' }),
-            React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Name'
-            ),
-            React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Surname'
-            ),
-            React.createElement(
-              'span',
-              { className: 'table-column-normal' },
-              'Role'
-            ),
-            React.createElement(
-              'span',
-              { className: 'table-column-big' },
-              'Email'
-            )
-          ),
-          this.props.users.map(function (u) {
-            return React.createElement(
-              'div',
-              { className: 'table-row' },
-              React.createElement(
-                'span',
-                { className: 'table-column-small' },
-                u.avatar ? React.createElement('img', { src: "../../../images/" + u.avatar }) : React.createElement(
-                  'i',
-                  { className: 'material-icons md-36 table-row-icon' },
-                  ''
-                )
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.name
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.surname
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-normal' },
-                u.role
-              ),
-              React.createElement(
-                'span',
-                { className: 'table-column-big' },
-                u.email
               )
-            );
-          })
-        );
-      }
+            ) : ""
+          ),
+          React.createElement(
+            'div',
+            { id: 'table' },
+            React.createElement(
+              BootstrapTable,
+              { ref: 'table', data: data, pagination: true,
+                search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
+              React.createElement(
+                TableHeaderColumn,
+                { dataField: 'email', dataSort: true, dataFormat: this.emailFormatter },
+                'Email'
+              ),
+              React.createElement(
+                TableHeaderColumn,
+                { dataField: 'name', dataSort: true },
+                'Name'
+              ),
+              React.createElement(
+                TableHeaderColumn,
+                { dataField: 'surname', dataSort: true },
+                'Surname'
+              ),
+              React.createElement(
+                TableHeaderColumn,
+                { dataField: 'role', dataSort: true },
+                'Role'
+              ),
+              React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+            )
+          )
+        )
+      );
     } else {
       title = "Invite someone to your company";
       content = React.createElement(
@@ -2575,12 +2615,7 @@ var People = React.createClass({
     }
     return React.createElement(
       'div',
-      { className: 'container sidebar-container' },
-      React.createElement(
-        'p',
-        { className: 'container-title' },
-        title
-      ),
+      { id: 'people' },
       content
     );
   }
@@ -2588,7 +2623,86 @@ var People = React.createClass({
 
 module.exports = People;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"./ChangeRole.react.jsx":16,"./DeleteUser.react.jsx":19,"./Invite.react.jsx":21,"react":370,"react-router":139}],23:[function(require,module,exports){
+/*
+
+
+
+title = "Users of your Company";
+        if(this.state.role == "Owner" || this.state.role == "Administrator") 
+        {
+          content = (
+            <div className="table-content">
+                <div className="table-header">
+                    <span className="table-column-small"></span>
+                    <span className="table-column-normal">Name</span>
+                    <span className="table-column-normal">Surname</span>
+                    <span className="table-column-normal">Role</span>
+                    <span className="table-spacing"></span>
+                    <span className="table-column-big">Email</span>
+                    <span className="table-spacing"></span>
+                </div>
+                {this.props.users.map((u) =>
+                  <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    <img src={"../../../images/"+u.avatar} /> :
+          					    <i className="material-icons md-36 table-row-icon">&#xE851;</i>}
+          					</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role} companyId={this.state.id}/> : <span className="table-spacing"></span>}
+          					<span className="table-column-big">{u.email}</span>
+          					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
+          				</div>
+      			    )}
+			          <Invite companyId={this.state.id}/>
+            </div>
+          );
+        }
+        else
+        {
+          content = (
+            <div className="table-content">
+                <div className="table-header">
+                    <p className="table-column-small"></p>
+                    <span className="table-column-normal">Name</span>
+                    <span className="table-column-normal">Surname</span>
+                    <span className="table-column-normal">Role</span>
+                    <span className="table-column-big">Email</span>
+                </div>
+                {this.props.users.map((u) =>
+                  <div className="table-row">
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    (<img src={"../../../images/"+u.avatar} />) :
+          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
+          					</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					<span className="table-column-big">{u.email}</span>
+          				</div>
+      			    )}
+            </div>
+          );
+        }
+
+
+
+*/
+/*
+
+return (
+      <div className="container sidebar-container">
+        <p className="container-title">{title}</p>
+        {content}
+      </div>
+    );
+
+*/
+
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./ChangeRole.react.jsx":16,"./DeleteUser.react.jsx":19,"./Invite.react.jsx":21,"react":370,"react-bootstrap-table":93,"react-router":139}],23:[function(require,module,exports){
 'use strict';
 
 // Name: {ExecuteDSL.react.jsx}
@@ -3206,14 +3320,7 @@ var ManageDSL = React.createClass({
                 )
             )
         );
-        // <div className="tooltip tooltip-top">
-        //                         <p className="tooltip-text tooltip-text-long">Download source</p>
-        //                         <i onClick={this.onDownloadSource} className="material-icons md-36 dropdown-button">&#xE884;</i>
-        //                     </div>
-        //                     <div className="tooltip tooltip-top">
-        //                         <p className="tooltip-text tooltip-text-long">Upload source</p>
-        //                         <i onClick={this.onUploadSource} className="material-icons md-36 dropdown-button">&#xE864;</i>
-        //                     </div>
+
         if (this.state.role == "Owner" || this.state.role == "Administrator") {
             buttons = React.createElement(
                 'div',
