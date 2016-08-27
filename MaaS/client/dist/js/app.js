@@ -2165,10 +2165,14 @@ var Invite = React.createClass({
         var role = this.state.role;
         var email = this.refs.email.value;
         if (email != "") {
-            RequestSessionActionCreator.invite(sender, company, role, email);
-            this.setState({ sent: true });
-            this.refs.inviteButton.classList.toggle("loader-small");
-            //this.refs.inviteButton.setAttribute("disabled", "true");
+            if (email == sender) {
+                this._setError("Email is already registered in the system");
+            } else {
+                RequestSessionActionCreator.invite(sender, company, role, email);
+                this.setState({ sent: true });
+                this.refs.inviteButton.classList.toggle("loader-small");
+                //this.refs.inviteButton.setAttribute("disabled", "true");
+            }
         } else {
             this._setError("Insert an email to send invitation");
         }
@@ -2239,7 +2243,7 @@ var Invite = React.createClass({
                     'Error'
                 ),
                 React.createElement(
-                    'p',
+                    'div',
                     { className: 'dropdown-description' },
                     errors
                 ),
@@ -2727,7 +2731,7 @@ var ExecuteDSL = React.createClass({
         if (!this.state.isLogged) {
             return React.createElement(AuthorizationRequired, null);
         }
-        var content, errors, title;
+        var content, errors, title, action;
         var data = [];
 
         if (this.state.label) title = React.createElement(
@@ -2795,7 +2799,7 @@ var ExecuteDSL = React.createClass({
                         columns.map(function (column, i) {
                             return React.createElement(
                                 TableHeaderColumn,
-                                { key: column, dataField: column, dataFormat: _this.dataFormatter,
+                                { key: i, dataField: column, dataFormat: _this.dataFormatter,
                                     formatExtraData: { type: _this.state.types[i], selectable: _this.state.selectables ? _this.state.selectables[i] : false },
                                     dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables[i] == true ? true : false : false,
                                     dataAlign: 'center' },
@@ -2836,6 +2840,73 @@ var ExecuteDSL = React.createClass({
                             })
                         )
                     )
+                );
+            }
+            if (definitionType == "Dashboard") {}
+            if (this.state.action) {
+                var Export,
+                    SendEmail,
+                    instance = this;
+                if (this.state.action.Export) {
+                    var onExport = function onExport(format) {
+
+                        var exportData = JSON.stringify(data);
+                        exportData = JSON.parse(exportData);
+                        exportData.forEach(function (obj) {
+                            if (obj._DSL_ELEMENT_INDEX) {
+                                console.log("trovato");
+                                delete obj._DSL_ELEMENT_INDEX;
+                            }
+                        });
+                        exportData = JSON.stringify(data, null, 4);
+                        var filename = instance.state.label + ".json";
+                        var blob = new Blob([exportData], { type: 'application/json' });
+
+                        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                            // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                            window.navigator.msSaveBlob(blob, filename);
+                        } else {
+                            var url = window.URL.createObjectURL(blob);
+                            var tempLink = document.createElement('a');
+                            tempLink.href = url;
+                            tempLink.setAttribute('download', filename);
+                            tempLink.click();
+                        }
+                    };
+                    if (this.state.action.Export == true || this.state.action.Export == "true") {
+                        Export = React.createElement(
+                            'div',
+                            null,
+                            React.createElement(
+                                'i',
+                                { onClick: onExport, className: 'dsl-download material-icons md-36' },
+                                ''
+                            )
+                        );
+                    }
+                    if (this.state.action.Export == "json") {
+                        Export = React.createElement('div', null);
+                    }
+                    if (this.state.action.Export == "csv") {
+                        Export = React.createElement('div', null);
+                    }
+                }
+                if (this.state.action.SendEmail) {
+                    if (this.state.action.SendEmail == true || this.state.action.SendEmail == "true") {
+                        SendEmail = React.createElement('div', null);
+                    }
+                    if (this.state.action.SendEmail == "json") {
+                        SendEmail = React.createElement('div', null);
+                    }
+                    if (this.state.action.SendEmail == "csv") {
+                        SendEmail = React.createElement('div', null);
+                    }
+                }
+                action = React.createElement(
+                    'div',
+                    { id: 'dsl-action' },
+                    Export,
+                    SendEmail
                 );
             }
         } else {
@@ -2915,6 +2986,7 @@ var ExecuteDSL = React.createClass({
             ),
             title,
             content,
+            action,
             errors
         );
     }
@@ -3148,7 +3220,7 @@ var ManageDSL = React.createClass({
                 null,
                 React.createElement(
                     'i',
-                    { onClick: onDownloadSource, className: 'dsl-download material-icons md-24 dropdown-button' },
+                    { onClick: onDownloadSource, className: 'dsl-download material-icons md-24' },
                     ''
                 ),
                 React.createElement(
@@ -3192,6 +3264,11 @@ var ManageDSL = React.createClass({
                 buttons = React.createElement(
                     'div',
                     null,
+                    React.createElement(
+                        'i',
+                        { onClick: onDownloadSource, className: 'dsl-download material-icons md-24' },
+                        ''
+                    ),
                     React.createElement(
                         Link,
                         { to: "/manageDSL/manageDSLSource/" + row.id + '/edit' },

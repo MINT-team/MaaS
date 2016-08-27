@@ -42,9 +42,12 @@ var Invite = React.createClass({
     },
     
     toggleDropdown: function() {
-		if(this.state.errors.length > 0) {
+		if(this.state.errors.length > 0)
+		{
 		    this.refs.error.classList.toggle("dropdown-show");
-		} else {
+		}
+		else
+		{
 		    this.refs.invite.classList.toggle("dropdown-show");
 		}
 	},
@@ -56,19 +59,32 @@ var Invite = React.createClass({
         var sender_email = UserStore.getEmail();
         var company = CompanyStore.getName();
         var sender;
-        if(name != "" || surname != "") {
+        if(name != "" || surname != "")
+        {
             sender = name + ' ' + surname;
-        } else {
+        }
+        else
+        {
             sender = sender_email;
         }
         var role = this.state.role;
         var email = this.refs.email.value;
-        if(email != "") {
-            RequestSessionActionCreator.invite(sender, company, role, email);
-            this.setState({sent: true});
-            this.refs.inviteButton.classList.toggle("loader-small");
-            //this.refs.inviteButton.setAttribute("disabled", "true");
-        } else {
+        if(email != "")
+        {
+            if (email == sender)
+            {
+                this._setError("Email is already registered in the system");
+            }
+            else
+            {
+                RequestSessionActionCreator.invite(sender, company, role, email);
+                this.setState({sent: true});
+                this.refs.inviteButton.classList.toggle("loader-small");
+                //this.refs.inviteButton.setAttribute("disabled", "true");
+            }
+        }
+        else
+        {
             this._setError("Insert an email to send invitation");
         }
     },
@@ -104,7 +120,7 @@ var Invite = React.createClass({
                 </form>
                 <div className="dropdown-content dropdown-popup" ref="error">
                     <p className="dropdown-title">Error</p>
-                    <p className="dropdown-description">{errors}</p>
+                    <div className="dropdown-description">{errors}</div>
                     <div className="dropdown-buttons">
                         <button className="button">Ok</button>
                     </div>

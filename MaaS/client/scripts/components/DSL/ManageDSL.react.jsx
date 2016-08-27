@@ -168,7 +168,7 @@ var ManageDSL = React.createClass({
         {
             buttons = (
                 <div>
-                    <i onClick={onDownloadSource} className="dsl-download material-icons md-24 dropdown-button">&#xE884;</i>
+                    <i onClick={onDownloadSource} className="dsl-download material-icons md-24">&#xE884;</i>
                     <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i className="modify-button material-icons md-24">&#xE254;</i></Link>
                     <Link to={"/manageDSL/manageDSLPermissions/" + row.id }><i className="dsl-change-permission material-icons md-24">&#xE32A;</i></Link>
                     {deleteDSL}
@@ -190,6 +190,7 @@ var ManageDSL = React.createClass({
             {
                 buttons = (
                     <div>
+                        <i onClick={onDownloadSource} className="dsl-download material-icons md-24">&#xE884;</i>
                         <Link to={"/manageDSL/manageDSLSource/" + row.id + '/edit' }><i className="material-icons md-24">&#xE254;</i></Link>
                         {deleteDSL}
                     </div>

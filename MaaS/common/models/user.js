@@ -9,6 +9,7 @@
 var loopback = require('loopback');
 var app = require('../../server/server.js');
 var path = require('path');
+var verifier = require('email-verify');
 
 var HOST_NAME = process.env.HOST_NAME;
 var HOST_URL = process.env.HOST_URL;
@@ -21,94 +22,108 @@ module.exports = function(user) {
 
     // Registrazione proprietario - controllo credenziali
     user.signUp = function(company, email, password, confirmation, cb) {
-        if(!password || !confirmation) 
+        if(!password || !confirmation)
         {
             var error = { message: 'Insert the password and its confirmation' };
             return cb(null, error);   // callback di insuccesso
         }
-        if(password != confirmation) 
+        if(password != confirmation)
         {
             error = { message: 'Password confirmation doesn\'t match' };
             return cb(null, error);   // callback di insuccesso
         }
-        if(password.length < MIN_PASSWORD_LENGTH) 
+        if(password.length < MIN_PASSWORD_LENGTH)
         {
             error = { message: 'Password is too short, the minumum lenght is ' + MIN_PASSWORD_LENGTH + ' characters' };
             return cb(null, error);   // callback di insuccesso
         }
-        // Search for an already existing company
-        var Company = app.models.Company;
-        Company.findOne({where: {name: company}, limit: 1}, function(err, existingCompany) {
-            if(err) 
-                return cb(null, err);
-            if(!err && existingCompany) 
+        verifier.verify(email, function(err, info) {
+            if (err)
             {
-                console.log('> Company already exists:', existingCompany);
-                error = { message: 'A company with this name already exists' };
+                error = { message: 'Email doesn\'t exist' };
                 return cb(null, error);   // callback di insuccesso
             }
-            // If company does not exists search for an already existing user
-            user.findOne({where: {email: email}, limit: 1}, function(err, existingUser) {
-                if(err) 
-                    return cb(null, err);
-                if(!err && existingUser) 
-                {
-                    console.log('> User already exists:', existingUser);
-                    error = {
-                        message: 'A user with this email already exists'
-                    };
-                    return cb(null, error);   // callback di insuccesso
-                }
-                // Create the company
-                Company.create({name: company}, function(err, companyInstance) {
-                    if(err) 
+            else
+            {
+                // Search for an already existing company
+                var Company = app.models.Company;
+                Company.findOne({where: {name: company}, limit: 1}, function(err, existingCompany) {
+                    if(err)
+                    {
                         return cb(null, err);
-                    console.log('> Company created:', companyInstance);
-                    // Create the user and set the company has him
-                    user.create({companyId: companyInstance.id, email: email, password: password, role: "Owner"}, function(err, userInstance) {
-                        if(err) 
+                    }
+                    if(!err && existingCompany) 
+                    {
+                        console.log('> Company already exists:', existingCompany);
+                        error = { message: 'A company with this name already exists' };
+                        return cb(null, error);   // callback di insuccesso
+                    }
+                    // If company does not exists search for an already existing user
+                    user.findOne({where: {email: email}, limit: 1}, function(err, existingUser) {
+                        if(err)
                         {
-                            Company.destroyById(companyInstance.id, function(err) {
-                                if(err) 
-                                {
-                                    console.log("> Error destroying the company after an error occurred creating the user. Please clean your database, company id:", companyInstance.id);
-                                    return cb(null, err);
-                                }
-                            });
-                            console.log("> Error creating the user, company destroyed");
                             return cb(null, err);
                         }
-                        console.log('> User created:', userInstance);
-                        userInstance.company(companyInstance);  // Set that user created belongs to the company
-                        companyInstance.owner(userInstance);    // Set the user is the owner of the company, dynamic role $owner
-                        // Save relations in the database
-                        userInstance.save();
-                        companyInstance.save();
-                        // Send verification email after registration
-                        var options = {
-                            type: 'email',
-                            host: HOST_NAME,
-                            to: userInstance.email,
-                            from: 'noreply@maas.com',
-                            subject: 'Welcome to MaaS',
-                            text: 'Please click on the link below to verify your email address and complete your registration:',
-                            template: path.resolve(__dirname, '../../server/views/verify.ejs'),
-                            redirect: '/%23/login', // percent encoding => /#/login
-                            user: userInstance
-                        };
-                        userInstance.verify(options, function(err, response) {
+                        if(!err && existingUser) 
+                        {
+                            console.log('> User already exists:', existingUser);
+                            error = {
+                                message: 'A user with this email already exists'
+                            };
+                            return cb(null, error);   // callback di insuccesso
+                        }
+                        // Create the company
+                        Company.create({name: company}, function(err, companyInstance) {
                             if(err) 
-                            {
-                                //return next(err);
                                 return cb(null, err);
-                            }
-                            console.log('> Verification email sent:', response);
+                            console.log('> Company created:', companyInstance);
+                            // Create the user and set the company has him
+                            user.create({companyId: companyInstance.id, email: email, password: password, role: "Owner"}, function(err, userInstance) {
+                                if(err) 
+                                {
+                                    Company.destroyById(companyInstance.id, function(err) {
+                                        if(err) 
+                                        {
+                                            console.log("> Error destroying the company after an error occurred creating the user. Please clean your database, company id:", companyInstance.id);
+                                            return cb(null, err);
+                                        }
+                                    });
+                                    console.log("> Error creating the user, company destroyed");
+                                    return cb(null, err);
+                                }
+                                console.log('> User created:', userInstance);
+                                userInstance.company(companyInstance);  // Set that user created belongs to the company
+                                companyInstance.owner(userInstance);    // Set the user is the owner of the company, dynamic role $owner
+                                // Save relations in the database
+                                userInstance.save();
+                                companyInstance.save();
+                                // Send verification email after registration
+                                var options = {
+                                    type: 'email',
+                                    host: HOST_NAME,
+                                    to: userInstance.email,
+                                    from: 'noreply@maas.com',
+                                    subject: 'Welcome to MaaS',
+                                    text: 'Please click on the link below to verify your email address and complete your registration:',
+                                    template: path.resolve(__dirname, '../../server/views/verify.ejs'),
+                                    redirect: '/%23/login', // percent encoding => /#/login
+                                    user: userInstance
+                                };
+                                userInstance.verify(options, function(err, response) {
+                                    if(err) 
+                                    {
+                                        //return next(err);
+                                        return cb(null, err);
+                                    }
+                                    console.log('> Verification email sent:', response);
+                                });
+                                // Returns data to the client
+                                return cb(null, null, userInstance.email, companyInstance.name);   // callback di successo
+                            });
                         });
-                        // Returns data to the client
-                        return cb(null, null, userInstance.email, companyInstance.name);   // callback di successo
                     });
                 });
-            });
+            }
         });
     };
 

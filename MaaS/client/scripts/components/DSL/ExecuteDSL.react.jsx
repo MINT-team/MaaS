@@ -136,7 +136,7 @@ var ExecuteDSL = React.createClass({
                 <AuthorizationRequired />
             );
         }
-        var content, errors, title;
+        var content, errors, title, action;
         var data = [];
         
         
@@ -195,7 +195,7 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
                         <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
                             {columns.map((column, i) =>
-                                <TableHeaderColumn key={column} dataField={column} dataFormat={this.dataFormatter} 
+                                <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
                                 formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
                                 dataSort={definitionType == "Cell" ? false : 
                                             definitionType == "Collection" ? 
@@ -215,15 +215,105 @@ var ExecuteDSL = React.createClass({
                     <div id="dsl-data-table" className="document-table-view">
                         <table className="table table-striped table-bordered table-hover">
                             <tbody>
-                                {columns.map((column, i) => <tr key={i} className="short-column">
-                                                            <th key={i} className="">{column}</th> 
-                                                            <td className="react-bs-container-body">{data[0][column]}</td>
-                                                         </tr>  
+                                {columns.map((column, i) => 
+                                    <tr key={i} className="short-column">
+                                        <th key={i} className="">{column}</th> 
+                                        <td className="react-bs-container-body">{data[0][column]}</td>
+                                    </tr>  
                                 )}
                             </tbody>
                         </table>
                     </div>
                     
+                );
+            }
+            if(definitionType == "Dashboard")
+            {
+                
+            }
+            if(this.state.action)
+            {
+                var Export, SendEmail, instance = this;
+                if(this.state.action.Export)
+                {
+                    var onExport = function(format) {
+                        
+                        var exportData = JSON.stringify(data);
+                        exportData = JSON.parse(exportData);
+                        exportData.forEach(function(obj) {
+                            if(obj._DSL_ELEMENT_INDEX)
+                            {
+                                console.log("trovato");
+                                delete obj._DSL_ELEMENT_INDEX;
+                            }
+                        });
+                        exportData = JSON.stringify(data, null, 4);
+                        var filename = instance.state.label + ".json";
+                        var blob = new Blob([exportData], {type: 'application/json'});
+                        
+                        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                                window.navigator.msSaveBlob(blob, filename);
+                        } else {
+                            var url = window.URL.createObjectURL(blob);
+                            var tempLink = document.createElement('a');
+                            tempLink.href = url;
+                            tempLink.setAttribute('download', filename);
+                            tempLink.click();
+                        }
+                    };
+                    if(this.state.action.Export == true || this.state.action.Export == "true")
+                    {
+                        Export = (
+                            <div>
+                                <i onClick={onExport} className="dsl-download material-icons md-36">&#xE884;</i>
+                            </div>
+                        );
+                    }
+                    if(this.state.action.Export == "json")
+                    {
+                        Export = (
+                            <div>
+                            </div>
+                        );
+                    }
+                    if(this.state.action.Export == "csv")
+                    {
+                        Export = (
+                            <div>
+                            </div>    
+                        );
+                    }
+                }
+                if(this.state.action.SendEmail)
+                {
+                    if(this.state.action.SendEmail == true || this.state.action.SendEmail == "true")
+                    {
+                        SendEmail = (
+                            <div>
+                            </div>
+                        );
+                    }
+                    if(this.state.action.SendEmail == "json")
+                    {
+                        SendEmail = (
+                            <div>
+                            </div>
+                        );
+                    }
+                    if(this.state.action.SendEmail == "csv")
+                    {
+                        SendEmail = (
+                            <div>
+                            </div>
+                        );
+                    }
+                }
+                action = (
+                    <div id="dsl-action">
+                        {Export}
+                        {SendEmail}
+                    </div>
                 );
             }
         }
@@ -268,6 +358,7 @@ var ExecuteDSL = React.createClass({
                 </div>
                 {title}
                 {content}
+                {action}
                 {errors}
             </div>
         );
