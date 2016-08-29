@@ -63,6 +63,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="company" component={Company}>
             <Route path="people" component={People} />
+            <Route path=":userId/profile" component={Profile} />
             <Route path="deleteCompany" component={DeleteCompany} />
           </Route>
           <Route path="externalDatabases" component={ExternalDatabases} />

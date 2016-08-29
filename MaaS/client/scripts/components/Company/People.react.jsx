@@ -38,6 +38,10 @@ function getState() {
 
 var People = React.createClass({
 
+  contextTypes: {   // serve per utilizzare il router
+      router: React.PropTypes.object.isRequired
+  },
+    
   getInitialState: function() {
       return getState();
   },
@@ -62,16 +66,6 @@ var People = React.createClass({
       this.setState(getState());
   },
 
-    // click sull'utente per vedere il profilo?
-//   _onSubmit: function(event) {
-//       event.preventDefault();   //evita il ricaricamento della pagina da parte della form
-//       var password = this.refs.password.value;
-//       var confirmation = this.refs.confermaPassword.value;
-//       var id = this.state.userId;
-//       var accessToken = this.state.accessToken;
-//       UserActionCreator.changePassword(id, password, confirmation, accessToken);
-//   },
-
   isLowerGrade: function(role) {
       var myRole = this.state.role;
       if(myRole == "Owner") {
@@ -86,6 +80,11 @@ var People = React.createClass({
         else
           return true;
       }
+  },
+  
+  showProfile: function(id) {
+    const { router } = this.context;
+    router.push("company/" + id + "/profile");
   },
   
   emailFormatter: function(cell, row) {
@@ -188,8 +187,67 @@ var People = React.createClass({
     
     if(this.props.users.length > 1)
     {
-      
       title = "Users of your Company";
+        if(this.state.role == "Owner" || this.state.role == "Administrator") 
+        {
+          content = (
+            <div className="table-content">
+                <div className="table-header">
+                    <span className="table-column-small"></span>
+                    <span className="table-column-normal">Name</span>
+                    <span className="table-column-normal">Surname</span>
+                    <span className="table-column-normal">Role</span>
+                    <span className="table-spacing"></span>
+                    <span className="table-column-big">Email</span>
+                    <span className="table-spacing"></span>
+                </div>
+                {this.props.users.map((u) =>
+                  <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    <img className="table-row-icon" src={"../../../images/"+u.avatar} /> :
+          					    <i onClick={this.showProfile.bind(this, u.id)} className="material-icons md-36 table-row-icon">&#xE851;</i>}
+          					</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role} companyId={this.state.id}/> : <span className="table-spacing"></span>}
+          					<span className="table-column-big">{u.email}</span>
+          					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
+          				</div>
+      			    )}
+			          <Invite companyId={this.state.id}/>
+            </div>
+          );
+        }
+        else
+        {
+          content = (
+            <div className="table-content">
+                <div className="table-header">
+                    <p className="table-column-small"></p>
+                    <span className="table-column-normal">Name</span>
+                    <span className="table-column-normal">Surname</span>
+                    <span className="table-column-normal">Role</span>
+                    <span className="table-column-big">Email</span>
+                </div>
+                {this.props.users.map((u) =>
+                  <div className="table-row">
+          					<span className="table-column-small">
+          					  {u.avatar?
+          					    (<img src={"../../../images/"+u.avatar} />) :
+          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
+          					</span>
+          					<span className="table-column-normal">{u.name}</span>
+          					<span className="table-column-normal">{u.surname}</span>
+          					<span className="table-column-normal">{u.role}</span>
+          					<span className="table-column-big">{u.email}</span>
+          				</div>
+      			    )}
+            </div>
+          );
+        }
+      /*title = "Users of your Company";
       content = (
         <div id="manage-people">
             <Sidebar title="Filter users" data={sidebarData}/>
@@ -207,8 +265,13 @@ var People = React.createClass({
                     : "" }
                 </div>
                 <div id="table">
+                    <p>Ci sono due sidebar sovrapposte</p>
+                    <Link to={"company/" + this.props.users[0].id + "/profile"}>Prova profilo 1</Link>
+                    <Link to={"company/" + this.props.users[1].id + "/profile"}>Prova profilo 2</Link>
+                    <Link to={"company/" + this.props.users[2].id + "/profile"}>Prova profilo 3</Link>
                     <BootstrapTable ref="table" data={data} pagination={true} 
                     search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                        <TableHeaderColumn dataField="avatar" dataSort={true} >Avatar</TableHeaderColumn>
                         <TableHeaderColumn dataField="email" dataSort={true} dataFormat={this.emailFormatter} >Email</TableHeaderColumn>
                         <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
                         <TableHeaderColumn dataField="surname" dataSort={true}>Surname</TableHeaderColumn>
@@ -218,7 +281,7 @@ var People = React.createClass({
                 </div>
             </div>
         </div>
-      );
+      );*/
         
     }
     else
@@ -247,10 +310,17 @@ var People = React.createClass({
         );
     }
     return (
-      <div id="people">
+      <div className="container sidebar-container">
+        <p className="container-title">{title}</p>
         {content}
       </div>
     );
+    /*
+    return (
+      <div id="people">
+        {content}
+      </div>
+    );*/
   }
 });
 

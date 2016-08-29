@@ -1183,7 +1183,7 @@ var Company = React.createClass({
         ),
         React.createElement(
           'div',
-          { className: 'form-container' },
+          { id: 'company-counter', className: 'form-container' },
           React.createElement(
             'div',
             { className: 'form-field' },
@@ -2325,6 +2325,10 @@ var People = React.createClass({
   displayName: 'People',
 
 
+  contextTypes: { // serve per utilizzare il router
+    router: React.PropTypes.object.isRequired
+  },
+
   getInitialState: function getInitialState() {
     return getState();
   },
@@ -2349,16 +2353,6 @@ var People = React.createClass({
     this.setState(getState());
   },
 
-  // click sull'utente per vedere il profilo?
-  //   _onSubmit: function(event) {
-  //       event.preventDefault();   //evita il ricaricamento della pagina da parte della form
-  //       var password = this.refs.password.value;
-  //       var confirmation = this.refs.confermaPassword.value;
-  //       var id = this.state.userId;
-  //       var accessToken = this.state.accessToken;
-  //       UserActionCreator.changePassword(id, password, confirmation, accessToken);
-  //   },
-
   isLowerGrade: function isLowerGrade(role) {
     var myRole = this.state.role;
     if (myRole == "Owner") {
@@ -2367,6 +2361,12 @@ var People = React.createClass({
     if (myRole == "Administrator") {
       if (role == "Owner" || role == "Administrator") return false;else return true;
     }
+  },
+
+  showProfile: function showProfile(id) {
+    var router = this.context.router;
+
+    router.push("company/" + id + "/profile");
   },
 
   emailFormatter: function emailFormatter(cell, row) {
@@ -2411,6 +2411,7 @@ var People = React.createClass({
   },
 
   render: function render() {
+    var _this = this;
 
     if (!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) {
       return React.createElement(AuthorizationRequired, null);
@@ -2476,79 +2477,178 @@ var People = React.createClass({
     }];
 
     if (this.props.users.length > 1) {
-
       title = "Users of your Company";
-      content = React.createElement(
-        'div',
-        { id: 'manage-people' },
-        React.createElement(Sidebar, { title: 'Filter users', data: sidebarData }),
-        React.createElement(
+      if (this.state.role == "Owner" || this.state.role == "Administrator") {
+        content = React.createElement(
           'div',
-          { className: 'container sidebar-container' },
-          React.createElement(
-            'p',
-            { className: 'container-title' },
-            title
-          ),
+          { className: 'table-content' },
           React.createElement(
             'div',
-            { id: 'table-top' },
+            { className: 'table-header' },
+            React.createElement('span', { className: 'table-column-small' }),
             React.createElement(
-              'p',
-              { id: 'filter-role' },
-              this.state.roleFilter
+              'span',
+              { className: 'table-column-normal' },
+              'Name'
             ),
-            this.state.role == "Administrator" || this.state.role == "Owner" ? React.createElement(
-              'div',
-              { className: 'top-buttons' },
-              React.createElement(
-                'div',
-                { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
-                React.createElement(
-                  'i',
-                  { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
-                  ''
-                ),
-                React.createElement(
-                  'p',
-                  { className: 'tooltip-text tooltip-text-long' },
-                  'Delete all selected users'
-                )
-              )
-            ) : ""
+            React.createElement(
+              'span',
+              { className: 'table-column-normal' },
+              'Surname'
+            ),
+            React.createElement(
+              'span',
+              { className: 'table-column-normal' },
+              'Role'
+            ),
+            React.createElement('span', { className: 'table-spacing' }),
+            React.createElement(
+              'span',
+              { className: 'table-column-big' },
+              'Email'
+            ),
+            React.createElement('span', { className: 'table-spacing' })
           ),
+          this.props.users.map(function (u) {
+            return React.createElement(
+              'div',
+              { className: 'table-row', id: _this.state.email == u.email ? "user-profile" : "" },
+              React.createElement(
+                'span',
+                { className: 'table-column-small' },
+                u.avatar ? React.createElement('img', { className: 'table-row-icon', src: "../../../images/" + u.avatar }) : React.createElement(
+                  'i',
+                  { onClick: _this.showProfile.bind(_this, u.id), className: 'material-icons md-36 table-row-icon' },
+                  ''
+                )
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.name
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.surname
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.role
+              ),
+              _this.isLowerGrade(u.role) ? React.createElement(ChangeRole, { email: u.email, role: u.role, companyId: _this.state.id }) : React.createElement('span', { className: 'table-spacing' }),
+              React.createElement(
+                'span',
+                { className: 'table-column-big' },
+                u.email
+              ),
+              _this.isLowerGrade(u.role) ? React.createElement(DeleteUser, { email: u.email }) : React.createElement('span', { className: 'table-spacing' })
+            );
+          }),
+          React.createElement(Invite, { companyId: this.state.id })
+        );
+      } else {
+        content = React.createElement(
+          'div',
+          { className: 'table-content' },
           React.createElement(
             'div',
-            { id: 'table' },
+            { className: 'table-header' },
+            React.createElement('p', { className: 'table-column-small' }),
             React.createElement(
-              BootstrapTable,
-              { ref: 'table', data: data, pagination: true,
-                search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
-              React.createElement(
-                TableHeaderColumn,
-                { dataField: 'email', dataSort: true, dataFormat: this.emailFormatter },
-                'Email'
-              ),
-              React.createElement(
-                TableHeaderColumn,
-                { dataField: 'name', dataSort: true },
-                'Name'
-              ),
-              React.createElement(
-                TableHeaderColumn,
-                { dataField: 'surname', dataSort: true },
-                'Surname'
-              ),
-              React.createElement(
-                TableHeaderColumn,
-                { dataField: 'role', dataSort: true },
-                'Role'
-              ),
-              React.createElement(TableHeaderColumn, { dataField: 'buttons', dataFormat: this.buttonFormatter })
+              'span',
+              { className: 'table-column-normal' },
+              'Name'
+            ),
+            React.createElement(
+              'span',
+              { className: 'table-column-normal' },
+              'Surname'
+            ),
+            React.createElement(
+              'span',
+              { className: 'table-column-normal' },
+              'Role'
+            ),
+            React.createElement(
+              'span',
+              { className: 'table-column-big' },
+              'Email'
             )
-          )
-        )
-      );
+          ),
+          this.props.users.map(function (u) {
+            return React.createElement(
+              'div',
+              { className: 'table-row' },
+              React.createElement(
+                'span',
+                { className: 'table-column-small' },
+                u.avatar ? React.createElement('img', { src: "../../../images/" + u.avatar }) : React.createElement(
+                  'i',
+                  { className: 'material-icons md-36 table-row-icon' },
+                  ''
+                )
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.name
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.surname
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-normal' },
+                u.role
+              ),
+              React.createElement(
+                'span',
+                { className: 'table-column-big' },
+                u.email
+              )
+            );
+          })
+        );
+      }
+      /*title = "Users of your Company";
+      content = (
+        <div id="manage-people">
+            <Sidebar title="Filter users" data={sidebarData}/>
+            <div className="container sidebar-container">
+                <p className="container-title">{title}</p>
+                <div id="table-top">
+                    <p id="filter-role">{this.state.roleFilter}</p>
+                    {this.state.role == "Administrator" || this.state.role == "Owner" ?
+                        <div className="top-buttons">
+                            <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                                <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                                <p className="tooltip-text tooltip-text-long">Delete all selected users</p>
+                            </div>
+                        </div>
+                    : "" }
+                </div>
+                <div id="table">
+                    <p>Ci sono due sidebar sovrapposte</p>
+                    <Link to={"company/" + this.props.users[0].id + "/profile"}>Prova profilo 1</Link>
+                    <Link to={"company/" + this.props.users[1].id + "/profile"}>Prova profilo 2</Link>
+                    <Link to={"company/" + this.props.users[2].id + "/profile"}>Prova profilo 3</Link>
+                    <BootstrapTable ref="table" data={data} pagination={true} 
+                    search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                        <TableHeaderColumn dataField="avatar" dataSort={true} >Avatar</TableHeaderColumn>
+                        <TableHeaderColumn dataField="email" dataSort={true} dataFormat={this.emailFormatter} >Email</TableHeaderColumn>
+                        <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                        <TableHeaderColumn dataField="surname" dataSort={true}>Surname</TableHeaderColumn>
+                        <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
+                        <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                    </BootstrapTable>
+                </div>
+            </div>
+        </div>
+      );*/
     } else {
       title = "Invite someone to your company";
       content = React.createElement(
@@ -2615,9 +2715,20 @@ var People = React.createClass({
     }
     return React.createElement(
       'div',
-      { id: 'people' },
+      { className: 'container sidebar-container' },
+      React.createElement(
+        'p',
+        { className: 'container-title' },
+        title
+      ),
       content
     );
+    /*
+    return (
+      <div id="people">
+        {content}
+      </div>
+    );*/
   }
 });
 
@@ -6358,6 +6469,7 @@ function getState() {
   return {
     name: UserStore.getName(),
     surname: UserStore.getSurname(),
+    role: UserStore.getRole(),
     email: UserStore.getEmail(),
     dateOfBirth: UserStore.getDateOfBirth(),
     gender: UserStore.getGender(),
@@ -6390,98 +6502,235 @@ var Profile = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-      var name,
-          dateOfBirth,
-          gender,
-          avatar = this.state.avatar;
-      if (!this.state.name && !this.state.surname) {
-        name = "Complete your account here";
+
+      if (this.props.params.userId) {
+        var user = null;
+        for (var i = 0; !user && i < this.props.users.length; i++) {
+          if (this.props.users[i].id == this.props.params.userId) user = this.props.users[i];
+        }
+        if (user) {
+          var name,
+              dateOfBirth,
+              gender,
+              avatar = this.state.avatar;
+          if (!user.name && !user.surname) {
+            name = user.email;
+          } else {
+            name = user.name + ' ' + user.surname;
+          }
+          user.dateOfBirth = new Date(user.dateOfBirth);
+          if (!user.dateOfBirth || user.dateOfBirth.toDateString().match(/Invalid/)) {
+            dateOfBirth = "Not set";
+          } else {
+            dateOfBirth = user.dateOfBirth.toDateString();
+          }
+          if (!user.gender || user.gender == "undefined") {
+            gender = "Not set";
+          } else if (user.gender == "male") {
+            gender = "Male";
+          } else if (user.gender == "female") {
+            gender = "Female";
+          } else {
+            gender = user.gender;
+          }
+          if (!user.avatar || user.avatar == "undefined") {
+            avatar = React.createElement(
+              'i',
+              { id: 'avatar-i', className: 'material-icons' },
+              ''
+            );
+          } else {
+            avatar = React.createElement('img', { id: 'avatar', src: "../../../images/" + user.avatar }); // da cambiare col servizio esterno
+          }
+          content = React.createElement(
+            'div',
+            { className: 'container sidebar-container' },
+            React.createElement(
+              'p',
+              { className: 'container-title' },
+              name
+            ),
+            avatar,
+            React.createElement(
+              'div',
+              { className: 'form-container' },
+              React.createElement(
+                'div',
+                { className: 'form-field' },
+                React.createElement(
+                  'label',
+                  null,
+                  'Role:'
+                ),
+                React.createElement(
+                  'p',
+                  null,
+                  user.role
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'form-field' },
+                React.createElement(
+                  'label',
+                  null,
+                  'Email:'
+                ),
+                React.createElement(
+                  'p',
+                  null,
+                  user.email
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'form-field' },
+                React.createElement(
+                  'label',
+                  null,
+                  'Date of birth:'
+                ),
+                React.createElement(
+                  'p',
+                  null,
+                  dateOfBirth
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'form-field' },
+                React.createElement(
+                  'label',
+                  null,
+                  'Gender:'
+                ),
+                React.createElement(
+                  'p',
+                  null,
+                  gender
+                )
+              )
+            )
+          );
+        } else {
+          content = React.createElement(
+            'div',
+            { className: 'container sidebar-container' },
+            React.createElement(
+              'p',
+              { className: 'container-title' },
+              'User not found'
+            )
+          );
+        }
       } else {
-        name = this.state.name + ' ' + this.state.surname;
-      }
-      if (!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/)) {
-        dateOfBirth = "Not set";
-      } else {
-        dateOfBirth = this.state.dateOfBirth.toDateString();
-      }
-      if (!this.state.gender || this.state.gender == "undefined") {
-        gender = "Not set";
-      } else if (this.state.gender == "male") {
-        gender = "Male";
-      } else if (this.state.gender == "female") {
-        gender = "Female";
-      } else {
-        gender = this.state.gender;
-      }
-      if (!this.state.avatar || this.state.avatar == "undefined") {
-        avatar = React.createElement(
-          'i',
-          { id: 'avatar-i', className: 'material-icons' },
-          ''
-        );
-      } else {
-        avatar = React.createElement('img', { id: 'avatar', src: "../../../images/" + this.state.avatar }); // da cambiare col servizio esterno
-      }
-      content = React.createElement(
-        'div',
-        { className: 'container sidebar-container' },
-        React.createElement(
-          'p',
-          { className: 'container-title' },
-          name
-        ),
-        avatar,
-        React.createElement(
+        var name,
+            dateOfBirth,
+            gender,
+            avatar = this.state.avatar;
+        if (!this.state.name && !this.state.surname) {
+          name = "Complete your account here";
+        } else {
+          name = this.state.name + ' ' + this.state.surname;
+        }
+        if (!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/)) {
+          dateOfBirth = "Not set";
+        } else {
+          dateOfBirth = this.state.dateOfBirth.toDateString();
+        }
+        if (!this.state.gender || this.state.gender == "undefined") {
+          gender = "Not set";
+        } else if (this.state.gender == "male") {
+          gender = "Male";
+        } else if (this.state.gender == "female") {
+          gender = "Female";
+        } else {
+          gender = this.state.gender;
+        }
+        if (!this.state.avatar || this.state.avatar == "undefined") {
+          avatar = React.createElement(
+            'i',
+            { id: 'avatar-i', className: 'material-icons' },
+            ''
+          );
+        } else {
+          avatar = React.createElement('img', { id: 'avatar', src: "../../../images/" + this.state.avatar }); // da cambiare col servizio esterno
+        }
+        content = React.createElement(
           'div',
-          { className: 'form-container' },
+          { className: 'container sidebar-container' },
           React.createElement(
-            'div',
-            { className: 'form-field' },
-            React.createElement(
-              'label',
-              null,
-              'Email:'
-            ),
-            React.createElement(
-              'p',
-              null,
-              this.state.email
-            )
+            'p',
+            { className: 'container-title' },
+            name
           ),
+          avatar,
           React.createElement(
             'div',
-            { className: 'form-field' },
+            { className: 'form-container' },
             React.createElement(
-              'label',
-              null,
-              'Date of birth:'
+              'div',
+              { className: 'form-field' },
+              React.createElement(
+                'label',
+                null,
+                'Role:'
+              ),
+              React.createElement(
+                'p',
+                null,
+                this.state.role
+              )
             ),
             React.createElement(
-              'p',
-              null,
-              dateOfBirth
-            )
-          ),
-          React.createElement(
-            'div',
-            { className: 'form-field' },
-            React.createElement(
-              'label',
-              null,
-              'Gender:'
+              'div',
+              { className: 'form-field' },
+              React.createElement(
+                'label',
+                null,
+                'Email:'
+              ),
+              React.createElement(
+                'p',
+                null,
+                this.state.email
+              )
             ),
             React.createElement(
-              'p',
-              null,
-              gender
+              'div',
+              { className: 'form-field' },
+              React.createElement(
+                'label',
+                null,
+                'Date of birth:'
+              ),
+              React.createElement(
+                'p',
+                null,
+                dateOfBirth
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'form-field' },
+              React.createElement(
+                'label',
+                null,
+                'Gender:'
+              ),
+              React.createElement(
+                'p',
+                null,
+                gender
+              )
             )
           )
-        )
-      );
-      /*<p className="container-description">
-            <i id="left-arrow" className="material-icons md-48">&#xE5CB;</i>
-            Seleziona sulla sinistra i dati che vuoi modificare
-          </p>*/
+        );
+        /*<p className="container-description">
+              <i id="left-arrow" className="material-icons md-48">&#xE5CB;</i>
+              Seleziona sulla sinistra i dati che vuoi modificare
+            </p>*/
+      }
     }
 
     // SideBar initialization
@@ -6523,12 +6772,20 @@ var Profile = React.createClass({
     };
     var sidebarData = [avatar, personalData, password, deleteAccount];
 
-    return React.createElement(
-      'div',
-      { id: 'profile-settings' },
-      React.createElement(Sidebar, { title: 'Profile', titleLink: '/profile', data: sidebarData }),
-      content
-    );
+    if (this.props.params.userId) {
+      return React.createElement(
+        'div',
+        { id: 'profile' },
+        content
+      );
+    } else {
+      return React.createElement(
+        'div',
+        { id: 'profile-settings' },
+        React.createElement(Sidebar, { title: 'Profile', titleLink: '/profile', data: sidebarData }),
+        content
+      );
+    }
   }
 });
 
@@ -8684,6 +8941,7 @@ var Routes = React.createClass({
           Route,
           { path: 'company', component: Company },
           React.createElement(Route, { path: 'people', component: People }),
+          React.createElement(Route, { path: ':userId/profile', component: Profile }),
           React.createElement(Route, { path: 'deleteCompany', component: DeleteCompany })
         ),
         React.createElement(Route, { path: 'externalDatabases', component: ExternalDatabases }),

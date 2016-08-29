@@ -14,6 +14,7 @@ function getState() {
   return {
           name: UserStore.getName(),
           surname: UserStore.getSurname(),
+          role: UserStore.getRole(),
           email: UserStore.getEmail(),
           dateOfBirth: UserStore.getDateOfBirth(),
           gender: UserStore.getGender(),
@@ -47,71 +48,165 @@ var Profile = React.createClass({
     }
     else
     {
-      var name, dateOfBirth, gender, avatar = this.state.avatar;
-      if((!this.state.name && !this.state.surname))
+      
+      if(this.props.params.userId)
       {
-        name = "Complete your account here";
-      }
-      else
-      {
-        name = this.state.name + ' ' + this.state.surname;
-      }
-      if(!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/))
-      {
-        dateOfBirth = "Not set";
-      }
-      else
-      {
-        dateOfBirth = this.state.dateOfBirth.toDateString();
-      }
-      if(!this.state.gender || this.state.gender=="undefined")
-      {
-        gender = "Not set";
-      }
-      else if(this.state.gender == "male")
-      {
-        gender = "Male";
-      }
-      else if(this.state.gender == "female")
-      {
-        gender = "Female";
-      } 
-      else
-      {
-        gender = this.state.gender;
-      }
-      if(!this.state.avatar || this.state.avatar=="undefined")
-      {
-        avatar = (<i id="avatar-i" className="material-icons">&#xE851;</i>);
-      }
-      else
-      {
-        avatar = (<img id="avatar" src={"../../../images/"+this.state.avatar} />);  // da cambiare col servizio esterno
-      }
-      content = (
-        <div className="container sidebar-container">
-          <p className="container-title">{name}</p>
-          {avatar}
-          <div className="form-container">
-            <div className="form-field">
-              <label>Email:</label>
-              <p>{this.state.email}</p>
+        var user = null;
+        for(var i = 0; !user && i<this.props.users.length; i++  )
+        {
+          if(this.props.users[i].id == this.props.params.userId)
+            user = this.props.users[i];
+        }
+        if(user)
+        {
+          var name, dateOfBirth, gender, avatar = this.state.avatar;
+          if((!user.name && !user.surname))
+          {
+            name = user.email;
+          }
+          else
+          {
+            name = user.name + ' ' + user.surname;
+          }
+          user.dateOfBirth = new Date(user.dateOfBirth);
+          if(!user.dateOfBirth || user.dateOfBirth.toDateString().match(/Invalid/))
+          {
+            dateOfBirth = "Not set";
+          }
+          else
+          {
+            dateOfBirth = user.dateOfBirth.toDateString();
+          }
+          if(!user.gender || user.gender=="undefined")
+          {
+            gender = "Not set";
+          }
+          else if(user.gender == "male")
+          {
+            gender = "Male";
+          }
+          else if(user.gender == "female")
+          {
+            gender = "Female";
+          } 
+          else
+          {
+            gender = user.gender;
+          }
+          if(!user.avatar || user.avatar=="undefined")
+          {
+            avatar = (<i id="avatar-i" className="material-icons">&#xE851;</i>);
+          }
+          else
+          {
+            avatar = (<img id="avatar" src={"../../../images/"+user.avatar} />);  // da cambiare col servizio esterno
+          }
+          content = (
+            <div className="container sidebar-container">
+              <p className="container-title">{name}</p>
+              {avatar}
+              <div className="form-container">
+                <div className="form-field">
+                  <label>Role:</label>
+                  <p>{user.role}</p>
+                </div>
+                <div className="form-field">
+                  <label>Email:</label>
+                  <p>{user.email}</p>
+                </div>
+                <div className="form-field">
+                  <label>Date of birth:</label>
+                  <p>{dateOfBirth}</p>
+                </div>
+                <div className="form-field">
+                  <label>Gender:</label>
+                  <p>{gender}</p>
+                </div>
+              </div>
             </div>
-            <div className="form-field">
-              <label>Date of birth:</label>
-              <p>{dateOfBirth}</p>
+          );
+        }
+        else
+        {
+          content = (
+            <div className="container sidebar-container">
+              <p className="container-title">User not found</p>
             </div>
-            <div className="form-field">
-              <label>Gender:</label>
-              <p>{gender}</p>
+          );
+        }
+      }
+      else
+      {
+        var name, dateOfBirth, gender, avatar = this.state.avatar;
+        if((!this.state.name && !this.state.surname))
+        {
+          name = "Complete your account here";
+        }
+        else
+        {
+          name = this.state.name + ' ' + this.state.surname;
+        }
+        if(!this.state.dateOfBirth || this.state.dateOfBirth.toDateString().match(/Invalid/))
+        {
+          dateOfBirth = "Not set";
+        }
+        else
+        {
+          dateOfBirth = this.state.dateOfBirth.toDateString();
+        }
+        if(!this.state.gender || this.state.gender=="undefined")
+        {
+          gender = "Not set";
+        }
+        else if(this.state.gender == "male")
+        {
+          gender = "Male";
+        }
+        else if(this.state.gender == "female")
+        {
+          gender = "Female";
+        } 
+        else
+        {
+          gender = this.state.gender;
+        }
+        if(!this.state.avatar || this.state.avatar=="undefined")
+        {
+          avatar = (<i id="avatar-i" className="material-icons">&#xE851;</i>);
+        }
+        else
+        {
+          avatar = (<img id="avatar" src={"../../../images/"+this.state.avatar} />);  // da cambiare col servizio esterno
+        }
+        content = (
+          <div className="container sidebar-container">
+            <p className="container-title">{name}</p>
+            {avatar}
+            <div className="form-container">
+              <div className="form-field">
+                <label>Role:</label>
+                <p>{this.state.role}</p>
+              </div>
+              <div className="form-field">
+                <label>Email:</label>
+                <p>{this.state.email}</p>
+              </div>
+              <div className="form-field">
+                <label>Date of birth:</label>
+                <p>{dateOfBirth}</p>
+              </div>
+              <div className="form-field">
+                <label>Gender:</label>
+                <p>{gender}</p>
+              </div>
             </div>
           </div>
-        </div>
-      );
-      /*<p className="container-description">
-            <i id="left-arrow" className="material-icons md-48">&#xE5CB;</i>
-            Seleziona sulla sinistra i dati che vuoi modificare
-          </p>*/
+        );
+        /*<p className="container-description">
+              <i id="left-arrow" className="material-icons md-48">&#xE5CB;</i>
+              Seleziona sulla sinistra i dati che vuoi modificare
+            </p>*/
+      }
     }
 
     // SideBar initialization
@@ -137,12 +232,24 @@ var Profile = React.createClass({
     };
     var sidebarData = [avatar, personalData, password, deleteAccount];
 
-    return (
-      <div id="profile-settings">
-        <Sidebar title="Profile" titleLink="/profile" data={sidebarData}/>
-        {content}
-      </div>
-    );
+    if(this.props.params.userId)
+    {
+      return (
+        <div id="profile">
+          {content}
+        </div>
+      );
+    }
+    else
+    {
+      return (
+        <div id="profile-settings">
+          <Sidebar title="Profile" titleLink="/profile" data={sidebarData}/>
+          {content}
+        </div>
+      );
+    }
+    
   }
 });
 

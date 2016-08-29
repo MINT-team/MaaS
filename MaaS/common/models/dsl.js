@@ -615,25 +615,6 @@ module.exports = function(DSL) {
         {
             //.....
         }
-            
-            
-        // DSL.executeDocument(identity, body, conn, function(error, data) {
-        //     conn.close();
-        //     if (error)
-        //     {
-        //         console.log("> DSL execution error:", error);
-        //         return cb(null, error, null);
-        //     }
-        //     else
-        //     {
-        //         console.log("> DSL execution processed successfully");
-        //         if(!data.label)
-        //             data.label = "Document " + label;
-        //         data.definitionType = "Document";
-        //         return cb(null, null, data);
-        //     }
-        // });
-        
         
         if(body && body.rows && body.rows.length > 0)   // document with rows
         {
@@ -677,7 +658,6 @@ module.exports = function(DSL) {
                             
                             if(i == body.rows.length-1)  // if all rows are checked then returns
                             {
-                                //console.log(data)
                                 returned = true;
                                 return cb(null, null, data);
                             }
@@ -1441,7 +1421,6 @@ module.exports = function(DSL) {
                 {
                     return cb(err, null);
                 }
-                //console.log(result);
                 if(result.length > 0)
                 {
                     data.result = result;   // initialize the object to be filled with results
@@ -1545,7 +1524,6 @@ module.exports = function(DSL) {
                                     
                                     if(i == body.rows.length-1)  // if all rows are checked then returns
                                     {
-                                        //console.log(data)
                                         returned = true;
                                         return cb(null, data);
                                     }
@@ -1577,7 +1555,6 @@ module.exports = function(DSL) {
                                     
                                     if(i == body.rows.length-1)  // if all rows are checked then returns
                                     {
-                                        //console.log(data)
                                         returned = true;
                                         return cb(null, data);
                                     }
@@ -2011,7 +1988,6 @@ Collection(
                 }
             }
             mongoose_query.exec(function(err, results) {
-                console.log(results);
                 if(err)
                 {
                     return cb(err, null);
@@ -2113,7 +2089,6 @@ Collection(
                         }
                         if(x == results.length-1)
                         {
-                            console.log(data);
                             returned = true;
                             return cb(null, data);
                         }

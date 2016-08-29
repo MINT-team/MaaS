@@ -114,6 +114,7 @@ body {
 }
 
 .table-row-icon {
+    cursor: pointer;
     position: absolute;
     margin-left: -0.8em;
     margin-top: -0.2em;
@@ -1642,11 +1643,11 @@ input {
 
 /*------------------------------------------------ COMPANY --------------------------------------------------------------*/
 
-#company .form-container {
+#company-counter {
     width: 30%;    
 }
 
-#company .form-field > p {
+#company-counter .form-field > p {
     width: 5em;
 }
 
@@ -1699,7 +1700,7 @@ input {
 #change-role select  {
     display: block;
     margin: auto;
-    margin-bottom: 3em;
+    margin-bottom: 1em;
 }
 
 #change-role-dropdown {

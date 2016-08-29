@@ -88,7 +88,7 @@ var Company = React.createClass({
       content = (
         <div className="container sidebar-container">
           <p className="container-title">{name}</p>
-          <div className="form-container">
+          <div id="company-counter" className="form-container">
             <div className="form-field">
               <label>Users:</label>
               <p>{numberOfUsers>0? numberOfUsers : 'Loading...'}</p>
