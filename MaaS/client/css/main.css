@@ -1213,6 +1213,20 @@ input {
     box-shadow: lightgray 1px 1px 4px;
 }
 
+#dashboard-container {
+    width: 90%;
+    min-height: 35em;
+    margin: auto;
+    padding: 2em;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    background-color: white;
+    text-align: center;
+    box-shadow: lightgray 1px 1px 4px;
+}
+
 #editor-back-button {
     position: absolute;
     margin-top: -1.5em;
@@ -1247,9 +1261,9 @@ input {
     margin-right: 1em;
 }
 
-#definiton-name {
+#definition-name {
     float: left;
-    margin-left: 15%;
+    margin-left: 10%;
 }
 
 #editor-buttons {
@@ -1295,7 +1309,7 @@ input {
 
 #definition-type {
     float: right;
-    margin-right: 15%;
+    margin-right: 10%;
 }
 
 #editor-viewer {
@@ -1356,8 +1370,8 @@ input {
         box-shadow: lightgray 1px 1px 4px;
     }
     
-    #editor-controls #definiton-name {
-        margin-left: 10%;
+    #editor-controls #definition-name {
+        margin-left: 8%;
     }
     
     #editor-buttons div {
@@ -1366,7 +1380,7 @@ input {
     }
     
     #definition-type {
-        margin-right: 10%;
+        margin-right: 8%;
     }
     
     #editor-viewer {
@@ -1508,6 +1522,61 @@ input {
 
 .collection-table-view .selectable:hover {
     color: darkgreen;
+}
+
+.dashboard-table-view {
+    min-width: 90%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+	-webkit-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
+	border: 1px solid lightgray;
+}
+
+.dashboard-row {
+    display: -webkit-flex; /* Safari */
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    min-height: 5em;
+    background-color: lightgray;
+    text-align: justify;
+}
+
+.dashboard-cell {
+    -webkit-flex: 1; /* Safari 6.1+ */
+    -ms-flex: 1; /* IE 10 */ 
+    flex: 1;
+    text-align: center;
+    min-width: 20em;
+    margin: 0.04em;
+    /*border: 1px solid lightgray;*/
+    padding: 0.5em;
+    background-color: white;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.dashboard-cell:hover {
+    /*color: lightgray;*/
+    background: rgba(225, 235, 235, 0.9);
+    -moz-transition: 0.3s;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
+}
+
+.dashboard-cell p {
+    padding-top: 0.1em;
+    padding-bottom: 0.5em;
+}
+
+.dsl-thumbnail {
+    text-align: center;
+    /*-ms-transform: scale(0.5, 0.25); */
+    /*-webkit-transform: scale(0.5, 0.25);*/
+    /*transform: scale(0.5, 0.25);*/
 }
 
 .cell-table-view th::-webkit-scrollbar-track, .cell-table-view td::-webkit-scrollbar-track,

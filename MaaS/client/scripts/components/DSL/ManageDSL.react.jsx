@@ -93,7 +93,8 @@ var ManageDSL = React.createClass({
         var errors;
         var errorId ="errorDropdown"+row.id;
         var deleteId ="deleteDropdown"+row.id;
-        if(this.state.errors.length > 0) {
+        if(this.state.errors.length > 0)
+        {
             errors = (
               <span id="errors">{this.state.errors}</span>
             );
@@ -101,9 +102,13 @@ var ManageDSL = React.createClass({
         var instance = this;
         var onClick = function() {
             if(instance.state.errors.length > 0)
+            {
                 document.getElementById(errorId).classList.toggle("dropdown-show");
+            }
     		else
+    		{
     		    document.getElementById(deleteId).classList.toggle("dropdown-show");
+    		}
         };
         
         var confirmDelete = function() {
@@ -121,10 +126,13 @@ var ManageDSL = React.createClass({
             var filename = row.name + ".dsl";
             var blob = new Blob([data], {type: 'application/json'});
             
-            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            if (typeof window.navigator.msSaveBlob !== 'undefined')
+            {
                     // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
                     window.navigator.msSaveBlob(blob, filename);
-            } else {
+            }
+            else
+            {
                 var url = window.URL.createObjectURL(blob);
                 var tempLink = document.createElement('a');
                 tempLink.href = url;
@@ -309,70 +317,86 @@ var ManageDSL = React.createClass({
         }
         else
         {
-            // SideBar initialization
-            var all = {
-                label: "All",
-                onClick: this.onAllClick,
-                icon: (<i className="material-icons md-24">&#xE8EF;</i>)
-            };
-            var dashboards = {
-                label: "Dashboards",
-                onClick: this.onDashboardsClick,
-                icon: (<i className="material-icons md-24">&#xE871;</i>)
-            };
-            var collections = {
-                label: "Collections",
-                onClick: this.onCollectionsClick,
-                icon: (<i className="material-icons md-24">list</i>)
-            };
-            var documents = {
-                label: "Documents",
-                onClick: this.onDocumentsClick,
-                icon: (<i className="material-icons md-24">&#xE873;</i>)
-            };
-            var cells = {
-                label: "Cells",
-                onClick: this.onCellsClick,
-                icon: (<i className="material-icons md-24">&#xE3BC;</i>)
-            };
+            if (this.props.mode != "include")
+            {
+                // SideBar initialization
+                var all = {
+                    label: "All",
+                    onClick: this.onAllClick,
+                    icon: (<i className="material-icons md-24">&#xE8EF;</i>)
+                };
+                var dashboards = {
+                    label: "Dashboards",
+                    onClick: this.onDashboardsClick,
+                    icon: (<i className="material-icons md-24">&#xE871;</i>)
+                };
+                var collections = {
+                    label: "Collections",
+                    onClick: this.onCollectionsClick,
+                    icon: (<i className="material-icons md-24">list</i>)
+                };
+                var documents = {
+                    label: "Documents",
+                    onClick: this.onDocumentsClick,
+                    icon: (<i className="material-icons md-24">&#xE873;</i>)
+                };
+                var cells = {
+                    label: "Cells",
+                    onClick: this.onCellsClick,
+                    icon: (<i className="material-icons md-24">&#xE3BC;</i>)
+                };
+                var sidebarData = [all, dashboards, collections, documents, cells];
+                var selectRowProp = {
+                    mode: "checkbox",
+                    bgColor: "rgba(144, 238, 144, 0.42)"
+                };
+                var uploadErrors;
+                if(this.state.uploadErrors.length > 0)
+                {
+                    uploadErrors = ( <div id="errors">{this.state.uploadErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
+                }
+            }
             
             var data = [];
-            var selectRowProp = {
-                mode: "checkbox",
-                bgColor: "rgba(144, 238, 144, 0.42)"
-            };
-            
-            var sidebarData = [all, dashboards, collections, documents, cells];
-            
-            var uploadErrors;
-            if(this.state.uploadErrors.length > 0)
-            {
-                uploadErrors = ( <div id="errors">{this.state.uploadErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
-            }
-            
             if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
             {
+                var instance = this;
                 this.state.DSL_LIST.forEach(function(DSL, i) {
-                    data[i] = {
-                        id: DSL.dsl.id,
-                        name: DSL.dsl.name,
-                        source: DSL.dsl.source,
-                        permission: DSL.permission,
-                        type : DSL.dsl.type,
-                        externalDatabaseId: DSL.dsl.externalDatabaseId
-                    };
+                    if((instance.props.mode == "include" && DSL.dsl.type != "Dashboard") || instance.props.mode != "include")
+                    {
+                        data[i] = {
+                            id: DSL.dsl.id,
+                            name: DSL.dsl.name,
+                            source: DSL.dsl.source,
+                            permission: DSL.permission,
+                            type : DSL.dsl.type,
+                            externalDatabaseId: DSL.dsl.externalDatabaseId
+                        };
+                    }
                 });
             }
-            
-            var options = {
+            var options;
+            options = {
                 noDataText: "There are no DSL definitions to display"
             };
+            if (this.props.mode == "include")
+            {
+                options = {
+                    onRowClick: function(row){
+                        //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
+                    },
+                    noDataText: "There are no DSL definitions to display"
+                };
+            }
             title = "Manage your DSL definitions";
             content = (
                 <div id="manage-dsl">
-                    <Sidebar title="Filter DSL" data={sidebarData}/>
-                    <div className="container sidebar-container">
+                    {this.props.mode != "include" ?
+                        <Sidebar title="Filter DSL" data={sidebarData}/>
+                        : "" }
+                    <div className={this.props.mode == "include" ? "container" : "container  sidebar-container" }>
                         <p className="container-title">{title}</p>
+                        {this.props.mode != "include" ?
                         <div id="table-top">
                             <p id="filter-type">{this.state.type}</p>
                             {this.state.role != "Guest" ?
@@ -390,13 +414,23 @@ var ManageDSL = React.createClass({
                                 </div>
                             : "" }
                         </div>
+                        : "" }
                         <div id="table">
+                            {this.props.mode != "include" ?
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
                                 <TableHeaderColumn dataField="name" dataSort={true} dataFormat={this.nameFormatter} >Name</TableHeaderColumn>
                                 <TableHeaderColumn dataField="type" dataSort={true}>Type</TableHeaderColumn>
                                 <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
                             </BootstrapTable>
+                            :
+                            <BootstrapTable ref="table" data={data} pagination={true} 
+                            search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                                <TableHeaderColumn dataField="type" dataSort={true}>Type</TableHeaderColumn>
+                            </BootstrapTable>
+                            
+                            }
                         </div>
                     </div>
                 </div>
@@ -405,6 +439,7 @@ var ManageDSL = React.createClass({
         return (
             <div id="dsl">
                 {content}
+                {this.props.params != "include" ?
                 <div className="dropdown-content dropdown-popup" ref="error">
                     <p className="dropdown-title">Error</p>
                     <div className="dropdown-description">{uploadErrors}</div>
@@ -412,6 +447,7 @@ var ManageDSL = React.createClass({
                         <button onClick={this.emptySaveErrors} className="button">Ok</button>
                     </div>
                 </div>
+                : "" }
             </div>
         );
     }

@@ -1019,7 +1019,6 @@ module.exports = function(DSL) {
     );
     
     DSL.executeCell = function(identity, body, conn, cb) {
-        console.log('execute Cell');
         var data = {};
         data.types = [];
         if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
@@ -1399,9 +1398,12 @@ module.exports = function(DSL) {
     );
     
     DSL.executeDocument = function(identity, body, conn, cb) {
-        console.log('execute Document');
         var data = {};
         data.types = [];
+        if(identity.label)
+        {
+            data.label = identity.label;
+        }
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
             data.action = body.action;
@@ -1439,6 +1441,7 @@ module.exports = function(DSL) {
             }
             mongoose_query.limit(1);    // take only one document
             mongoose_query.exec(function(err, result) {
+                console.log("query", result);
                 if (err)
                 {
                     return cb(err, null);
@@ -1446,11 +1449,6 @@ module.exports = function(DSL) {
                 if(result.length > 0)
                 {
                     data.result = result;   // initialize the object to be filled with results
-                    if(identity.label)
-                    {
-                        data.label = identity.label;
-                    }
-                    
                     return cb(null, data);
                 }
                 else
@@ -1502,10 +1500,6 @@ module.exports = function(DSL) {
                 if(result.length > 0)
                 {
                     data.result = [ {} ];   // initialize the object to be filled with results matching rows values
-                    if(identity.label)
-                    {
-                        data.label = identity.label;
-                    }
                     var i = 0;
                     var returned = false;
                     while(i < body.rows.length && !returned)
@@ -1867,7 +1861,6 @@ Collection(
     );
     
     DSL.executeCollection = function(identity, body, conn, cb) {
-        console.log('execute Collection');
         var data = {};
         data.perpage = identity.perpage;
         data.types = [];
