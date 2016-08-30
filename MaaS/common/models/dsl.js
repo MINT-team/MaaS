@@ -2336,6 +2336,7 @@ Collection(
     
     DSL.executeDashboard = function(identity, body, conn, cb) {
         var data = {};
+        data.rows = [];
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
             data.action = body.action;
@@ -2350,23 +2351,17 @@ Collection(
         }
         else   // Dashboard with rows
         {
-            console.log("body.rows", body.rows);
-            data.rows = [];
-            var stop = false;
-            for(var i = 0; !stop && i < body.rows.length; i++)
-            {
-                var row = body.rows[i];             // each row is an array of DSL entities
-                data.rows.push([]);                 // initialize the Dashboard row 
-                var dashboardRow = data.rows[i];    // take the reference to that row
-                for(var j = 0; !stop && j < row.length; j++)
-                {
-                    var entity = row[j];
+            DSL.syncLoop(body.rows.length, function(outerLoop) {
+                var row = body.rows[outerLoop.iteration()];             // each row is an array of DSL entities
+                data.rows.push([]);                                     // initialize the Dashboard row 
+                var dashboardRow = data.rows[outerLoop.iteration()];    // take the reference to that row
+                DSL.syncLoop(row.length, function(loop) {
+                    var entity = row[loop.iteration()];
                     if(entity.type == "Cell")
                     {
                         DSL.executeCell(entity.identity, entity.body, conn, function(cellErrors, cellData) {
                             if(cellErrors)
                             {
-                                stop = true;
                                 return cb(cellErrors, null);
                             }
                             else
@@ -2378,6 +2373,7 @@ Collection(
                                     }
                                 );
                             }
+                            loop.next();
                         });
                     }
                     else if(entity.type == "Document")
@@ -2385,7 +2381,6 @@ Collection(
                         DSL.executeDocument(entity.identity, entity.body, conn, function(documentErrors, documentData) {
                             if(documentErrors)
                             {
-                                stop = true;
                                 return cb(documentErrors, null);
                             }
                             else
@@ -2397,6 +2392,7 @@ Collection(
                                     }
                                 );
                             }
+                            loop.next();
                         });
                     }
                     else if(entity.type == "Collection")
@@ -2404,7 +2400,6 @@ Collection(
                         DSL.executeCollection(entity.identity, entity.body, conn, function(collectionErrors, collectionData) {
                             if(collectionErrors)
                             {
-                                stop = true;
                                 return cb(collectionErrors, null);
                             }
                             else
@@ -2416,16 +2411,16 @@ Collection(
                                     }
                                 );
                             }
+                            loop.next();
                         });
                     }
+                }, function() {
+                    outerLoop.next();
                     
-                    if(!stop && i==body.rows.length-1 && j==row.length-1)  // last element
-                    {
-                        console.log(data);
-                        return cb(null, data);
-                    }
-                }
-            }
+                });
+            }, function() {
+                return cb(null, data);
+            });
         }
     };
     
