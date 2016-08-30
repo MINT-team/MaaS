@@ -548,7 +548,7 @@ module.exports = function(DSL) {
                             }
                             var callback = function(err, identity, body) {
                                 var definitionTypeError = {};
-                                if(DSLInstance.type != body.definitionType)
+                                if(body && DSLInstance.type != body.definitionType)
                                 {
                                     definitionTypeError.definitionTypeErrorMessage = "Definition type mismatch: your DSL definition doesn't match the selected type";
                                 }
@@ -855,6 +855,26 @@ module.exports = function(DSL) {
                                                     }
                                                 });
                                                 break;
+                                                
+                                            case "Dashboard":
+                                                DSL.executeDashboard(identity, body, conn, function(error, data) {
+                                                    conn.close();
+                                                    if (error)
+                                                    {
+                                                        console.log("> DSL execution error:", error);
+                                                        return cb(null, error, null);
+                                                    }
+                                                    else
+                                                    {
+                                                        console.log("> DSL execution processed successfully");
+                                                        if(!data.label)
+                                                            data.label = DSLInstance.name;
+                                                        data.definitionType = DSLInstance.type;
+                                                        data.document = body.document;
+                                                        return cb(null, null, data);
+                                                    }
+                                                });
+                                                break;
                                         }
                                     }
                                 };
@@ -986,8 +1006,8 @@ module.exports = function(DSL) {
             description: "Compile a Cell macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+                { arg: 'identity', type: 'Object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Cell body' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -999,6 +1019,7 @@ module.exports = function(DSL) {
     );
     
     DSL.executeCell = function(identity, body, conn, cb) {
+        console.log('execute Cell');
         var data = {};
         data.types = [];
         if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
@@ -1134,8 +1155,8 @@ module.exports = function(DSL) {
             description: "Execute a Cell macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Cell identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Cell body' }
+                { arg: 'identity', type: 'Object', required: true, description: 'Cell identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Cell body' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -1286,7 +1307,7 @@ module.exports = function(DSL) {
                 });
             });
         }
-        else    // document inside a collection
+        else    // Document inside a collection
         {
             AttributesReader.checkSupportedAttributes(identity, ['populate'], function(unsupportedIdentityAttributesError) {
                 AttributesReader.checkKeywordValue({populate: identity.populate}, function(identityKeywordValueError) {
@@ -1365,9 +1386,9 @@ module.exports = function(DSL) {
             description: "Compile a Document macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Document identity' },
-                { arg: 'rows', type: 'object', required: true, description: 'Document rows' },
-                { arg: 'action', type: 'object', required: true, description: 'Document action'}
+                { arg: 'identity', type: 'Object', required: true, description: 'Document identity' },
+                { arg: 'rows', type: 'Object', required: true, description: 'Document rows' },
+                { arg: 'action', type: 'Object', required: true, description: 'Document action'}
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -1378,6 +1399,7 @@ module.exports = function(DSL) {
     );
     
     DSL.executeDocument = function(identity, body, conn, cb) {
+        console.log('execute Document');
         var data = {};
         data.types = [];
         if(Object.getOwnPropertyNames(body.action).length !== 0)
@@ -1581,8 +1603,8 @@ module.exports = function(DSL) {
             description: "Execute a Document macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Document identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Document body' }
+                { arg: 'identity', type: 'Object', required: true, description: 'Document identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Document body' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -1831,10 +1853,10 @@ Collection(
             description: "Compile a Collection macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Collection identity' },
-                { arg: 'columns', type: 'object', required: true, description: 'Collection columns' },
-                { arg: 'document', type: 'object', required: true, description: 'Collection document' },
-                { arg: 'action', type: 'object', required: true, description: 'Collection action'}
+                { arg: 'identity', type: 'Object', required: true, description: 'Collection identity' },
+                { arg: 'columns', type: 'Object', required: true, description: 'Collection columns' },
+                { arg: 'document', type: 'Object', required: true, description: 'Collection document' },
+                { arg: 'action', type: 'Object', required: true, description: 'Collection action'}
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -1845,6 +1867,7 @@ Collection(
     );
     
     DSL.executeCollection = function(identity, body, conn, cb) {
+        console.log('execute Collection');
         var data = {};
         data.perpage = identity.perpage;
         data.types = [];
@@ -2108,8 +2131,8 @@ Collection(
             description: "Execute a Collection macro",
             isStatic: true,
             accepts : [
-                { arg: 'identity', type: 'object', required: true, description: 'Collection identity' },
-                { arg: 'body', type: 'object', required: true, description: 'Collection body' }
+                { arg: 'identity', type: 'Object', required: true, description: 'Collection identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Collection body' }
             ],
             returns: [
                 { arg: 'error', type: 'Object' },
@@ -2118,103 +2141,356 @@ Collection(
         }
     );
     
+    /* -------------------------------- DASHBOARD --------------------------------
     
+    Dashboard structure:
     
-    
-    
-    
-    
-    
-    
-   /* 
-    
-    Collection(
-    
-    ) {
-        column (
-            
-        )
-        column (
-            
-        )
-        Document(
-        ) {
-            row ()              => DSL.compileDocument()            
-            row ()
-        }
+    Dashboard(
+        label | optional
+    ){
+        row | optional
     }
     
-    // compile definition
-    
-    var collectionCB = function() {
-        
-    }
-    
-    var callback = function() {     // document cb
-            
-        }
-    
-    => DSL.compileCollection({}, [], DSL.compileDocument({}, [], callback), collectionCB )
-    
-    DSL.compileCollection(identity, body, documentCompile, cb)
-    {
-        
-        
-        eval(documentCompile);
-        
-        return documentCB();
-    }
-    
-    compileDocument(identity, body, cb)
-    {
-        
-        
-        
-    }
-    
-    function(asd, asd) {
-        asdasd
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-Collection(
-    name: "customers",
-    label: "JuniorCustomers",
-    id: "Junior",
-    Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-) {
-    column(
-        name: "name",
-        label: "Nome",
-        sortable: false,
-        selectable: false
-        transformation: function(val) {
-            return val.lenght;
-        }
+    Row(
+        Cell() | optional
+        Document() | optional
+        Collection() | optional
     )
-    action(
-        Export: "true",
-        SendEmail: "true"
+    
+    Example:
+    
+    Dashboard(
+        label: "Dashboard"
     )
-    Document(
-
-    ) {
+    {
         row(
-            name: "name",
-            label: "Nome"
+            Document(
+                table: "prova"
+            )
+            {
+                row(
+                    name: "email",
+                    type: "string",
+                    label: "Email"
+                )
+            }
+            Document(
+                table: "prova"
+            ){
+            }
+        )
+        row(
+            Document(
+                table: "prova"
+            ){
+            }
+            Collection(
+                table: "users"
+            ){
+            }
+            Cell(
+                type: "string"
+            ){
+            }
+        )
+        action(
+            Export: "json"
         )
     }
-}
-    
     */
+    
+    DSL.compileDashboard = function(identity, rows, action, cb) {
+        var body = {};
+        body.definitionType = "Dashboard";
+        body.rows = [];
+        AttributesReader.checkSupportedAttributes(identity, ['label'], function(unsupportedIdentityAttributesError) {
+            AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
+                AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
+                    var error = Object.assign(unsupportedIdentityAttributesError, unsupportedActionAttributesError, actionKeywordValueError);
+                    if(rows.length > 0)     // Dashboard with rows
+                    {
+                        var stop = false;
+                        for(var i = 0; !stop && i < rows.length; i++)
+                        {
+                            var row = rows[i];      // each row is an array of DSL entities
+                            body.rows.push([]);     // initialize the Dashboard row 
+                            var dashboardRow = body.rows[i];    // take the reference to that row
+                            for(var j = 0; !stop && j < row.length; j++)
+                            {
+                                var entity = row[j];
+                                if(entity.type == "Cell")
+                                {
+                                    DSL.compileCell(entity.identity, entity.body, function(cellCompileErrors, identity, body) {
+                                        if(cellCompileErrors)
+                                        {
+                                            stop = true;
+                                            error = Object.assign(error, cellCompileErrors);    // merge errors
+                                            return cb(error, null, null);
+                                        }
+                                        else
+                                        {
+                                            dashboardRow.push(
+                                                {
+                                                    type: "Cell",
+                                                    identity: identity,
+                                                    body: body
+                                                }
+                                            );
+                                        }
+                                    });
+                                }
+                                else if(entity.type == "Document")
+                                {
+                                    DSL.compileDocument(entity.identity, entity.rows, entity.action, false, function(documentCompileErrors, identity, body) {
+                                        if(documentCompileErrors)
+                                        {
+                                            stop = true;
+                                            error = Object.assign(error, documentCompileErrors);    // merge errors
+                                            return cb(error, null, null);
+                                        }
+                                        else
+                                        {
+                                            dashboardRow.push(
+                                                {
+                                                    type: "Document",
+                                                    identity: identity,
+                                                    body: body
+                                                }
+                                            );
+                                        }
+                                    });
+                                }
+                                else if(entity.type == "Collection")
+                                {
+                                    DSL.compileCollection(entity.identity, entity.columns, entity.document, entity.action, function(collectionCompileErrors, identity, body) {
+                                        if(collectionCompileErrors)
+                                        {
+                                            stop = true;
+                                            error = Object.assign(error, collectionCompileErrors);    // merge errors
+                                            return cb(error, null, null);
+                                        }
+                                        else
+                                        {
+                                            dashboardRow.push(
+                                                {
+                                                    type: "Collection",
+                                                    identity: identity,
+                                                    body: body
+                                                }
+                                            );
+                                        }
+                                    });
+                                }
+                                if(!stop && i==rows.length-1 && j==row.length-1)  // last element
+                                {
+                                    if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
+                                    {
+                                        stop = true;
+                                        return cb(error, null, null);
+                                    }
+                                    else 
+                                    {
+                                        body.action = action;
+                                        stop = true;
+                                        return cb(null, identity, body);
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                    else     // Dashboard without rows
+                    {
+                        if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
+                        {
+                            return cb(error, null, null);
+                        }
+                        else 
+                        {
+                            body.action = action;
+                            return cb(null, identity, body);
+                        }
+                    }
+                });
+            });
+        });
+    };
+    
+    DSL.remoteMethod(
+        'compileDashboard',
+        {
+            description: "Compile a Dashboard macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'Object', required: true, description: 'Dashboard identity' },
+                { arg: 'rows', type: 'Object', required: true, description: 'Dashboard rows' },
+                { arg: 'action', type: 'Object', required: true, description: 'Dashboard action'}
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'identity', type: 'Object' },
+                { arg: 'body', type: 'Object' }
+            ]
+        }
+    );
+    
+    DSL.executeDashboard = function(identity, body, conn, cb) {
+        var data = {};
+        if(Object.getOwnPropertyNames(body.action).length !== 0)
+        {
+            data.action = body.action;
+        }
+        if(identity.label)
+        {
+            data.label = identity.label;
+        }
+        if(!body.rows || (body.rows && body.rows.length == 0) )   // Dashboard without rows
+        {
+            return cb(null, data);
+        }
+        else   // Dashboard with rows
+        {
+            console.log("body.rows", body.rows);
+            data.rows = [];
+            var stop = false;
+            for(var i = 0; !stop && i < body.rows.length; i++)
+            {
+                var row = body.rows[i];             // each row is an array of DSL entities
+                data.rows.push([]);                 // initialize the Dashboard row 
+                var dashboardRow = data.rows[i];    // take the reference to that row
+                for(var j = 0; !stop && j < row.length; j++)
+                {
+                    var entity = row[j];
+                    if(entity.type == "Cell")
+                    {
+                        DSL.executeCell(entity.identity, entity.body, conn, function(cellErrors, cellData) {
+                            if(cellErrors)
+                            {
+                                stop = true;
+                                return cb(cellErrors, null);
+                            }
+                            else
+                            {
+                                dashboardRow.push(
+                                    {
+                                        type: "Cell",
+                                        data: cellData
+                                    }
+                                );
+                            }
+                        });
+                    }
+                    else if(entity.type == "Document")
+                    {
+                        DSL.executeDocument(entity.identity, entity.body, conn, function(documentErrors, documentData) {
+                            if(documentErrors)
+                            {
+                                stop = true;
+                                return cb(documentErrors, null);
+                            }
+                            else
+                            {
+                                dashboardRow.push(
+                                    {
+                                        type: "Document",
+                                        data: documentData
+                                    }
+                                );
+                            }
+                        });
+                    }
+                    else if(entity.type == "Collection")
+                    {
+                        DSL.executeCollection(entity.identity, entity.body, conn, function(collectionErrors, collectionData) {
+                            if(collectionErrors)
+                            {
+                                stop = true;
+                                return cb(collectionErrors, null);
+                            }
+                            else
+                            {
+                                dashboardRow.push(
+                                    {
+                                        type: "Collection",
+                                        data: collectionData
+                                    }
+                                );
+                            }
+                        });
+                    }
+                    
+                    if(!stop && i==body.rows.length-1 && j==row.length-1)  // last element
+                    {
+                        console.log(data);
+                        return cb(null, data);
+                    }
+                }
+            }
+        }
+    };
+    
+    DSL.remoteMethod(
+        'executeDashboard',
+        {
+            description: "Execute a Dashboard macro",
+            isStatic: true,
+            accepts : [
+                { arg: 'identity', type: 'Object', required: true, description: 'Dashboard identity' },
+                { arg: 'body', type: 'Object', required: true, description: 'Dashboard body' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'data', type: 'Object' }
+            ]
+        }
+    );
+    
+    DSL.syncLoop = function syncLoop(iterations, process, exit){  
+        var index = 0,
+            done = false,
+            shouldExit = false;
+        var loop = {
+            next:function(){
+                if(done){
+                    if(shouldExit && exit){
+                        return exit();  // Exit if we're done
+                    }
+                }
+                if(index < iterations){
+                    index++;            // Increment our index
+                    process(loop);      // Run our process, pass in the loop
+                } else {
+                    done = true;        // Make sure we say we're done
+                    if(exit) exit();    // Call the callback on exit
+                }
+            },
+            iteration:function(){
+                return index - 1;       // Return the loop number we're on
+            },
+            break:function(end){
+                done = true;            // End the loop
+                shouldExit = end;       // Passing end as true means we still call the exit callback
+            }
+        };
+        loop.next();
+        return loop;
+    };
+    
+    
+    DSL.remoteMethod(
+        'syncLoop',
+        {
+            description: "Handling Asynchronous Loops",
+            isStatic: true,
+            accepts : [
+                { arg: 'iterations', type: 'Number', required: true, description: 'the number of iterations to carry out' },
+                { arg: 'process', type: 'Object', required: true, description: 'the code/function we\'re running for every iteration' },
+                { arg: 'exit', type: 'Object', required: true, description: 'an optional callback to carry out once the loop has completed' }
+            ],
+            returns: [
+                { arg: 'loop', type: 'Object' }
+            ]
+        }
+    );
+    
 };
