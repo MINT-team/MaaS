@@ -69,7 +69,7 @@ var Company = React.createClass({
     }
 
     var content;
-    if(this.props.children) 
+    if(this.props.children)
     {
       // users prop to children
       const childrenWithUsers = React.Children.map(this.props.children,
@@ -78,7 +78,7 @@ var Company = React.createClass({
         })
       );
       content = childrenWithUsers;
-    } 
+    }
     else
     {
       var name = this.state.name;

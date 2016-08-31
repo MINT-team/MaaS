@@ -24,6 +24,7 @@ function getState() {
             isLogged: SessionStore.isLogged(),
             definitionType: data ? data.definitionType : null,
             data: data ? data.result : null,
+            dashboardRows: data ? data.rows : null,
             label: data ? data.label : null,
             perpage: data ? data.perpage : null,
             action: data ? data.action : null,
@@ -113,8 +114,8 @@ var ExecuteDSL = React.createClass({
             var instance = this;
             var showDocument = function() {
                 instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row._DSL_ELEMENT_INDEX], 
-                instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], 
+                formatExtraData.nestedDocument ? formatExtraData.nestedDocument.identity : {}, formatExtraData.nestedDocument ? formatExtraData.nestedDocument.body : {});
                 var onback = function(e) {
                     e.preventDefault();
                     instance.setState(getState());  // back to Collection state
@@ -122,11 +123,86 @@ var ExecuteDSL = React.createClass({
                 };
                 document.getElementById('back-button').addEventListener("click", onback);
             };
-            
             cell = <span className="selectable" onClick={showDocument}>{cell}</span>;
         }
         
         return cell;
+    },
+    
+    horizontalTable: function(columns, data) {
+        return (
+            <table className="table table-striped table-bordered table-hover">
+                <tbody>
+                    {columns.map((column, i) => 
+                        <tr key={"row_"+i} className="short-column">
+                            <th key={"col_"+i} className="">{column}</th> 
+                            <td className="react-bs-container-body">{data[0][column]}</td>
+                        </tr>  
+                    )}
+                </tbody>
+            </table>
+        );  
+    },
+    
+    verticalTable: function(columns, data, perpage, definitionType, options) {
+        var table_data = data;
+        if(data.result) {
+            table_data = data.result;
+        }
+        console.log(data);
+        table_data.forEach(function(x, i) {
+            x._DSL_ELEMENT_INDEX = i;
+        });
+        var index = columns.indexOf("_DSL_ELEMENT_INDEX");
+        if(index != -1)
+            columns.splice(index, 1);
+        return (
+            <BootstrapTable ref="table" data={table_data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+table_data[0]._DSL_ELEMENT_INDEX}>
+                {columns.map((column, i) =>
+                    <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
+                    formatExtraData={
+                        {type: this.state.types ? this.state.types[i] : data.types ? data.types[i] : "string",
+                        selectable: this.state.selectables ? this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
+                        rawData: this.state.rowData ? this.state.rawData : data.rawData,
+                        nestedDocument: this.state.nestedDocument ? this.state.nestedDocument : data.document
+                        }
+                    }
+                    dataSort={definitionType == "Cell" ? false : 
+                                definitionType == "Collection" ? 
+                                    this.state.sortables ? (this.state.sortables[i] == true ? true : false) : data.sortables ? (data.sortables[i] == true ? true : false) : false
+                                    : false }
+                    dataAlign="center">{column}</TableHeaderColumn>
+                )}
+            </BootstrapTable>  
+        );  
+    },
+    
+    togglePopUp: function(id) {
+        var container = document.getElementById("dashboard-container");
+        var clone = document.getElementById(id).cloneNode(true);
+        var popup = document.createElement("div");
+        popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
+        var modal = document.createElement("div");
+        modal.setAttribute("class", "modal");
+        var close = document.createElement("p");
+        close.setAttribute("class", "close-modal");
+        close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
+        popup.appendChild(close);
+        popup.appendChild(clone);
+        modal.appendChild(popup);
+        container.appendChild(modal);
+
+        close.onclick = function() {
+            //modal.style.display = "none";
+            container.removeChild(modal);
+        };
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                //modal.style.display = "none";
+                container.removeChild(modal);
+            }
+        };
     },
     
     render: function() {
@@ -142,95 +218,94 @@ var ExecuteDSL = React.createClass({
         
         if(this.state.label)
             title = (<p className="container-title">{this.state.label}</p>);
-            
-        if(this.state.data && this.state.queried)
+        
+        if((this.state.data || this.state.dashboardRows) && this.state.queried)
         {
-            //console.log(this.state.data);
-            var columns = [];
-            if(this.state.data.length > 0)  // Array of table data with at least one element
-            {
-                data = this.state.data;
-                columns = Object.keys(data[0]);
-            }
-            else  // Array of table data empty
-            {
-                // for a single object
-                //     columns = Object.keys(this.state.data);  
-                //     data.push(this.state.data);
-            }
-            //console.log(this.state.data);
-            // console.log(columns);
-            data.forEach(function(x, i) {
-                x._DSL_ELEMENT_INDEX = i;
-            });
-            var index = columns.indexOf("_DSL_ELEMENT_INDEX");
-            if(index != -1)
-                columns.splice(index, 1);
-            //console.log(columns);
-            /*
-            sizePerPageList : Array
-            You can change the dropdown list for size per page if you enable pagination.
-            sizePerPage : Number
-            Means the size per page you want to locate as default.
-            paginationSize : Number
-            To define the pagination bar length, default is 5.
-            hideSizePerPage : Bool
-            Enable to hide the dropdown list for size per page, default is false.
-            */
-            var definitionType = this.state.definitionType;
-            //console.log(definitionType);
             var perpage = this.state.perpage;
             var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
             var showTotal = function(start, to, total) { return <span id="total-lines">{"Total rows: " + total}</span> };
-            if(definitionType == "Cell" || definitionType == "Collection")
-            {
-                var options = {
-                    hideSizePerPage : false, //definitionType=="Cell" ? true : false,
-                    sizePerPage: perpage ? perpage : 10,
-                    sizePerPageList: perpageList,
-                    paginationShowsTotal: showTotal
-                    //,onSizePerPageList: function(size) {alert("changed to: "+size);}
-                };
-                content = (
-                    <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
-                        <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
-                            {columns.map((column, i) =>
-                                <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
-                                formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
-                                dataSort={definitionType == "Cell" ? false : 
-                                            definitionType == "Collection" ? 
-                                                this.state.sortables[i] == true ? true : false
-                                                : false }
-                                dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
-                            )}
-                        </BootstrapTable>
-                    </div>
-                );
-            }
-            if(definitionType == "Document")
-            {
-                //console.log(this.state.action);
-                //console.log(data[0]);
-                content = (
-                    <div id="dsl-data-table" className="document-table-view">
-                        <table className="table table-striped table-bordered table-hover">
-                            <tbody>
-                                {columns.map((column, i) => 
-                                    <tr key={i} className="short-column">
-                                        <th key={i} className="">{column}</th> 
-                                        <td className="react-bs-container-body">{data[0][column]}</td>
-                                    </tr>  
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                );
-            }
-            if(definitionType == "Dashboard")
-            {
+            var options = {
+                hideSizePerPage : false, //definitionType=="Cell" ? true : false,
+                sizePerPage: perpage ? perpage : 10,
+                sizePerPageList: perpageList,
+                paginationShowsTotal: showTotal
+                //,onSizePerPageList: function(size) {alert("changed to: "+size);}
+            };
+            
+                /*
+                sizePerPageList : Array
+                You can change the dropdown list for size per page if you enable pagination.
+                sizePerPage : Number
+                Means the size per page you want to locate as default.
+                paginationSize : Number
+                To define the pagination bar length, default is 5.
+                hideSizePerPage : Bool
+                Enable to hide the dropdown list for size per page, default is false.
+                */
                 
+            if(this.state.data)
+            {
+                var columns = [];
+                if(this.state.data.length > 0)  // Array of table data with at least one element
+                {
+                    data = this.state.data;
+                    columns = Object.keys(data[0]);
+                }
+                else  // Array of table data empty
+                {
+                    // for a single object
+                    //     columns = Object.keys(this.state.data);  
+                    //     data.push(this.state.data);
+                }
+                
+                var definitionType = this.state.definitionType;
+                if(definitionType == "Cell" || definitionType == "Collection")
+                {
+                    
+                    content = (
+                        <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
+                            {this.verticalTable(columns, data, perpage, definitionType, options)}
+                        </div>
+                    );
+                }
+                else if(definitionType == "Document")
+                {
+                    content = (
+                        <div id="dsl-data-table" className="document-table-view">
+                            {this.horizontalTable(columns, data)}
+                        </div>
+                    );
+                }
             }
+            else if(this.state.dashboardRows)
+            {
+                if(this.state.definitionType == "Dashboard")
+                {
+                    var rows = this.state.dashboardRows;
+                    content = (
+                        <div id="dsl-data-table" className="dashboard-table-view">
+                            {rows.map((row, i) => 
+                                <div key={"row_"+i} className="dashboard-row">
+                                    {row.map((entity, j) => 
+                                        <div key={"entity_"+j} id={"entity_"+i+j} onClick={this.togglePopUp.bind(this, "entity_"+i+j)}
+                                        className={"dashboard-cell dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
+                                            <div key={"thumb_"+j} className="dsl-thumbnail dropdown-button">
+                                                {entity.data.label ? <p className="entity-label">{entity.data.label}</p> : <p className="entity-label"></p>}
+                                                {entity.type == "Document" ? 
+                                                    this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
+                                                    :
+                                                    this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type, options)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>  
+                            )}
+                        </div>
+                        
+                    );
+                }
+            }
+            
             if(this.state.action)
             {
                 var Export, SendEmail, instance = this;
@@ -351,7 +426,7 @@ var ExecuteDSL = React.createClass({
         }
         
         return (
-            <div id="dsl-data-container">
+            <div id={this.state.definitionType == "Dashboard" ? "dashboard-container" : "dsl-data-container"}>
                 <div className="tooltip tooltip-bottom" id="editor-back-button">
                     <Link to="manageDSL" id="back-button"><i className="material-icons md-48">&#xE15E;</i></Link>
                     <p className="tooltip-text tooltip-text-short">Back</p>

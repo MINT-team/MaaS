@@ -55,12 +55,19 @@ var Header = React.createClass({
     },
 
 	handleClick: function(event) {
-	    if(!event.target.className.match("dropdown-button")) {
+	    var elem = event.target;
+	    var child = false;
+	    while(!child && elem.parentElement)
+	    {
+	        if(elem.className.match("dropdown-button"))     // child of dropdown-button
+	            child = true;
+	        elem = elem.parentElement;
+	    }
+	    if(!event.target.className.match("dropdown-button") && !child) {
 		    var dropdowns = document.getElementsByClassName("dropdown-content");
-		    var i;
-		    for (i = 0; i < dropdowns.length; i++) {
+		    for (var i = 0; i < dropdowns.length; i++) {
 				var openDropdown = dropdowns[i];
-		    	if (openDropdown.classList.contains("dropdown-show")) {
+		    	if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {
 		        	openDropdown.classList.remove("dropdown-show");
 		    	}
 			}

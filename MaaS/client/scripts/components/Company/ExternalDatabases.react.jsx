@@ -33,7 +33,7 @@ function getState() {
 
 var ExternalDatabases = React.createClass({
   
-  contextTypes: {   // serve per utilizzare il router
+  contextTypes: {
     router: React.PropTypes.object.isRequired
   },
   

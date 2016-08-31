@@ -25,6 +25,7 @@ var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
 var UPLOAD_EVENT = 'upload';
 var CHANGE_DATABASE_EVENT = 'change_database';
+var INCLUDE_EVENT = 'include';
 
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
@@ -36,6 +37,15 @@ var _DSL = {
     type: localStorage.getItem('DSLType'),
     database: localStorage.getItem('DSLDatabase')
 };
+
+var current_DSL = {
+    currentDefinitionName: localStorage.getItem('currentDefinitionName'),
+    currentDefinitionType: localStorage.getItem('currentDefinitionType'),
+    currentDefinitionSource: localStorage.getItem('currentDefinitionSource'),
+    currentDefinitionDatabase: localStorage.getItem('currentDefinitionDatabase')
+};
+
+var includeSource = localStorage.getItem('includeSource');
 
 var _USER_LIST = []; // Member and Guest list
 
@@ -129,6 +139,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(CHANGE_DATABASE_EVENT, callback);
     },
     
+    emitInclude: function() {
+        this.emit(INCLUDE_EVENT);
+    },
+
+    addIncludeListener: function(callback) {
+        this.on(INCLUDE_EVENT, callback);
+    },
+
+    removeIncludeListener: function(callback) {
+        this.removeListener(INCLUDE_EVENT, callback);
+    },
+    
     getErrors: function() {
         return _errors;
     },
@@ -167,6 +189,26 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getDSLNestedData: function() {
         return _DSL_NESTED_DATA;
+    },
+    
+    getCurrentDefinitionName: function() {
+        return current_DSL.currentDefinitionName;
+    },
+    
+    getCurrentDefinitionType: function() {
+        return current_DSL.currentDefinitionType;
+    },
+    
+    getCurrentDefinitionSource: function() {
+        return current_DSL.currentDefinitionSource;
+    },
+    
+    getCurrentDefinitionDatabase: function() {
+        return current_DSL.currentDefinitionDatabase;
+    },
+    
+    getIncludeSource: function() {
+        return includeSource;
     }
 });
 
@@ -489,7 +531,28 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             DSLStore.emitChangeDatabase();
             break;
-            
+        case ActionTypes.SAVE_CURRENT_DEFINITION_DATA:
+            if (action.data)
+            {
+                current_DSL.currentDefinitionName = action.data.currentDefinitionName;
+                current_DSL.currentDefinitionType = action.data.currentDefinitionType;
+                current_DSL.currentDefinitionSource = action.data.currentDefinitionSource;
+                current_DSL.currentDefinitionDatabase = action.data.currentDefinitionDatabase;
+                
+                localStorage.setItem('currentDefinitionName', current_DSL.currentDefinitionName);
+                localStorage.setItem('currentDefinitionType', current_DSL.currentDefinitionType);
+                localStorage.setItem('currentDefinitionSource', current_DSL.currentDefinitionSource);
+                localStorage.setItem('currentDefinitionDatabase', current_DSL.currentDefinitionDatabase);
+            }
+            break;
+        case ActionTypes.HANDLE_INCLUDE_DEFINITION:
+            if (action.data)
+            {
+                includeSource = action.data.includeSource;
+                localStorage.setItem('includeSource', includeSource);
+            }
+            DSLStore.emitInclude();
+            break;
     }
     
 });
