@@ -91,10 +91,10 @@ var Header = React.createClass({
 	},
 
     render: function() {
-        console.log("faccio ancora il render");
+       // console.log("faccio ancora il render");
         var title, headerMenu, headerPanel;
         if (this.props.isLogged) {
-            console.log("sono loggato");
+           // console.log("sono loggato");
             if(this.props.type == "commonUser")
             {
                 title = (
