@@ -14,6 +14,7 @@ var assign = require('object-assign');
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 var IMPERSONATE_EVENT = 'impersonate';
+var LEAVE_IMPERSONATE_EVENT = 'LeaveImpersonate';
 
 // Load values from the  localSgorage
 var _accessToken = localStorage.getItem('accessToken');
@@ -38,6 +39,9 @@ var SessionStore = assign({}, EventEmitter.prototype, {
     this.emit(IMPERSONATE_EVENT);
   },
   
+  emitLeaveImpersonate: function() {
+    this.emit(LEAVE_IMPERSONATE_EVENT);
+  },
   
 //funzioni utili alla registrazione delle view 
   addChangeListener: function(callback) {
@@ -55,6 +59,16 @@ var SessionStore = assign({}, EventEmitter.prototype, {
   removeImpersonateListener: function(callback) {
       this.removeListener(IMPERSONATE_EVENT, callback);
   },
+  
+  addLeaveImpersonateListener: function(callback) {
+      this.on(LEAVE_IMPERSONATE_EVENT, callback);
+  },
+  
+  removeLeaveImpersonateListener: function(callback) {
+      this.removeListener(LEAVE_IMPERSONATE_EVENT, callback);
+  },
+  
+//funzioni utilità store
 
   isLogged: function() {
     return _accessToken ? true : false;
@@ -178,7 +192,7 @@ SessionStore.dispatchToken = Dispatcher.register(function(payload) {
       localStorage.setItem('accessToken', _accessToken);
       localStorage.setItem('userId', _userId);
       
-    //SessionStore.emitImpersonate();
+    SessionStore.emitLeaveImpersonate();
     break;
   }
 

@@ -553,6 +553,19 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             DSLStore.emitInclude();
             break;
+         case ActionTypes.LEAVE_IMPERSONATE:
+            if(_DSL_LIST){
+                _DSL_LIST = null;
+                localStorage.removeItem('DSLList');
+            }
+            if(_DSL){
+                _DSL = null;
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
+            }
+        break;   
     }
     
 });

@@ -221,6 +221,16 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             CompanyStore.emitChange();
             break;
+            case ActionTypes.LEAVE_IMPERSONATE:
+                 _company.id = null;
+                 _company.name = null;
+                 databasesCount = null;
+                 DSLDefinitionsCount = null;
+                 localStorage.removeItem('databasesCount');
+                 localStorage.removeItem('DSLDefinitionsCount');  
+                 localStorage.removeItem('companyName');
+                 localStorage.removeItem('companyId');  
+            break;
     }
 
     return true;  // richiesto dal Promise nel Dispatcher

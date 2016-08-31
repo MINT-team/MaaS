@@ -28,10 +28,12 @@ function getState() {
 
 var Header = React.createClass({
 
-    getInitialState: function() {
-      
-        return  getState();
+    contextTypes: {   // serve per utilizzare il router
+      router: React.PropTypes.object.isRequired
+    },
     
+    getInitialState: function() {
+        return  getState();
     },
 
     componentDidMount: function() {
@@ -40,6 +42,7 @@ var Header = React.createClass({
     	CompanyStore.addChangeListener(this._onChange);
     	SessionStore.addImpersonateListener(this._onChange);
     	UserStore.addUserLoadListener(this._onChange);
+    	SessionStore.addLeaveImpersonateListener(this._onLeaveImpersonate);
     },
 
     componentWillUnmount: function() {
@@ -48,10 +51,28 @@ var Header = React.createClass({
     	CompanyStore.removeChangeListener(this._onChange);
     	SessionStore.removeImpersonateListener(this._onChange);
     	UserStore.removeUserLoadListener(this._onChange);
+    	SessionStore.removeLeaveImpersonateListener(this._onLeaveImpersonate);
     },
     
     _onChange: function() {
-      this.setState({isImpersonate: "true"});
+      this.setState({
+          userEmail : UserStore.getEmail(),
+          userName : UserStore.getName(),
+          userSurname : UserStore.getSurname(),
+          userCompany : CompanyStore.getName(),
+          isImpersonate: SessionStore.getImpersonate()
+          
+      });
+      
+      
+    },
+    
+    _onLeaveImpersonate: function() {
+        // this.setState({isImpersonate: "false"}); 
+      
+        const { router } = this.context;
+        router.push('/impersonateUser');
+        this.forceUpdate();
     },
 
 	handleClick: function(event) {
@@ -86,15 +107,13 @@ var Header = React.createClass({
 		RequestSessionActionCreator.logout(accessToken);
 	},
 	
-	leave: function() {
+	leaveImpersonate: function() {
 	    RequestSessionActionCreator.leaveImpersonate();
 	},
 
     render: function() {
-       // console.log("faccio ancora il render");
         var title, headerMenu, headerPanel;
         if (this.props.isLogged) {
-           // console.log("sono loggato");
             if(this.props.type == "commonUser")
             {
                 title = (
@@ -134,11 +153,9 @@ var Header = React.createClass({
                 );
             }
             else // render superAdmin Component or impersonate user
-            {  
+            {   
                 if(this.state.isImpersonate == "true")        
                 {
-                    
-                    
                     
                     title = (
                     <div className="tooltip tooltip-bottom">
@@ -181,7 +198,7 @@ var Header = React.createClass({
                             <ul>
                                 <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
-                                <Link onClick={this.leave} to=""><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
+                                <Link onClick={this.leaveImpersonate} to=""><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
                             </ul>
                         </div>
                     </div>

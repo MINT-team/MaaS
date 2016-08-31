@@ -373,6 +373,20 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         }
         UserStore.emitChange(); 
       break;
+      case ActionTypes.LEAVE_IMPERSONATE:
+       
+        _user.name = localStorage.removeItem('userName');
+        _user.surname = localStorage.removeItem('userSurname');
+        _user.dateOfBirth =localStorage.removeItem('userDateOfBirth');
+        _user.gender = localStorage.removeItem('userGender');
+        _user.avatar = localStorage.removeItem('userAvatar');
+        _user.role = localStorage.removeItem('userRole');
+        _user.softTabs = localStorage.removeItem('softTabs');
+        _user.theme = localStorage.removeItem('theme');
+        _user.tabSize = localStorage.removeItem('tabSize');
+        _user.fontSize = localStorage.removeItem('fontSize');
+        _user.activeDashboard = localStorage.removeItem('activeDashboard');
+      break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });
