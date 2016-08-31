@@ -155,15 +155,22 @@ var ExecuteDSL = React.createClass({
             <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
                 {columns.map((column, i) =>
                     <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
-                    formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
+                    formatExtraData={{type: this.state.types ? this.state.types[i] : "string", selectable: this.state.selectables ? this.state.selectables[i] : false}}
                     dataSort={definitionType == "Cell" ? false : 
                                 definitionType == "Collection" ? 
-                                    this.state.sortables[i] == true ? true : false
+                                    this.state.sortables ? (this.state.sortables[i] == true ? true : false) : false
                                     : false }
                     dataAlign="center">{column}</TableHeaderColumn>
                 )}
             </BootstrapTable>  
         );  
+    },
+    
+    togglePopUp: function(id) {
+        alert("click");
+        var table = document.getElementById("dsl-data-table");
+        var clone = document.getElementById(id).cloneNode(true);
+        table.appendChild(clone);
     },
     
     render: function() {
@@ -278,15 +285,15 @@ var ExecuteDSL = React.createClass({
                             {rows.map((row, i) => 
                                 <div key={"row_"+i} className="dashboard-row">
                                     {row.map((entity, j) => 
-                                        <div key={"entity_"+j} className="dashboard-cell" >
+                                        <div key={"entity_"+j} id={"entity_"+j} className="dashboard-cell" onClick={this.togglePopUp.bind(this, "entity_"+j)}>
                                             {entity.data.label ? <p>{entity.data.label}</p> : ""}    
                                             {
-                                                entity.type == "Document" ? 
-                                                    <div className="dsl-thumbnail">
-                                                        {this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)}
-                                                    </div>
-                                                    :
-                                                    this.verticalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.perpage, entity.type, options)
+                                                <div className="dsl-thumbnail">
+                                                    {entity.type == "Document" ? 
+                                                        this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
+                                                        :
+                                                        this.verticalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.perpage, entity.type, options)}
+                                                </div>
                                             }
                                         </div>
                                     )}

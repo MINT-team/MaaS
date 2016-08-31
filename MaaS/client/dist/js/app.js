@@ -117,6 +117,30 @@ var RequestDSLActionCreator = {
 
     changeDefinitionDatabase: function changeDefinitionDatabase(id, databaseId) {
         WebAPIUtils.changeDefinitionDatabase(id, databaseId);
+    },
+
+    saveCurrentDefinitionData: function saveCurrentDefinitionData(currentDefinitionName, currentDefinitionType, currentDefinitionSource, currentDefinitionDatabase) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.SAVE_CURRENT_DEFINITION_DATA,
+            data: {
+                currentDefinitionName: currentDefinitionName,
+                currentDefinitionType: currentDefinitionType,
+                currentDefinitionSource: currentDefinitionSource,
+                currentDefinitionDatabase: currentDefinitionDatabase
+            }
+        });
+    },
+
+    handleIncludeDefinition: function handleIncludeDefinition(currentDefinitionName, currentDefinitionSource, currentDefinitionType, includeSource) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.HANDLE_INCLUDE_DEFINITION,
+            data: {
+                currentDefinitionName: currentDefinitionName,
+                currentDefinitionType: currentDefinitionType,
+                currentDefinitionSource: currentDefinitionSource,
+                includeSource: includeSource
+            }
+        });
     }
 };
 
@@ -1673,7 +1697,7 @@ var ExternalDatabases = React.createClass({
   displayName: 'ExternalDatabases',
 
 
-  contextTypes: { // serve per utilizzare il router
+  contextTypes: {
     router: React.PropTypes.object.isRequired
   },
 
@@ -2993,13 +3017,20 @@ var ExecuteDSL = React.createClass({
                 return React.createElement(
                     TableHeaderColumn,
                     { key: i, dataField: column, dataFormat: _this.dataFormatter,
-                        formatExtraData: { type: _this.state.types[i], selectable: _this.state.selectables ? _this.state.selectables[i] : false },
-                        dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables[i] == true ? true : false : false,
+                        formatExtraData: { type: _this.state.types ? _this.state.types[i] : "string", selectable: _this.state.selectables ? _this.state.selectables[i] : false },
+                        dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables ? _this.state.sortables[i] == true ? true : false : false : false,
                         dataAlign: 'center' },
                     column
                 );
             })
         );
+    },
+
+    togglePopUp: function togglePopUp(id) {
+        alert("click");
+        var table = document.getElementById("dsl-data-table");
+        var clone = document.getElementById(id).cloneNode(true);
+        table.appendChild(clone);
     },
 
     render: function render() {
@@ -3116,17 +3147,17 @@ var ExecuteDSL = React.createClass({
                                 row.map(function (entity, j) {
                                     return React.createElement(
                                         'div',
-                                        { key: "entity_" + j, className: 'dashboard-cell' },
+                                        { key: "entity_" + j, id: "entity_" + j, className: 'dashboard-cell', onClick: _this2.togglePopUp.bind(_this2, "entity_" + j) },
                                         entity.data.label ? React.createElement(
                                             'p',
                                             null,
                                             entity.data.label
                                         ) : "",
-                                        entity.type == "Document" ? React.createElement(
+                                        React.createElement(
                                             'div',
                                             { className: 'dsl-thumbnail' },
-                                            _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
-                                        ) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.perpage, entity.type, options)
+                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.perpage, entity.type, options)
+                                        )
                                     );
                                 })
                             );
@@ -3325,6 +3356,10 @@ function getState() {
 var ManageDSL = React.createClass({
     displayName: 'ManageDSL',
 
+
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     getInitialState: function getInitialState() {
         var state = getState();
@@ -3676,6 +3711,8 @@ var ManageDSL = React.createClass({
     },
 
     render: function render() {
+        var _this = this;
+
         if (!this.state.isLogged) {
             return React.createElement(AuthorizationRequired, null);
         }
@@ -3772,12 +3809,23 @@ var ManageDSL = React.createClass({
                 noDataText: "There are no DSL definitions to display"
             };
             if (this.props.mode == "include") {
-                options = {
-                    onRowClick: function onRowClick(row) {
-                        //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
-                    },
-                    noDataText: "There are no DSL definitions to display"
-                };
+                (function () {
+                    var router = _this.context.router;
+
+                    options = {
+                        onRowClick: function onRowClick(row) {
+                            //RequestDSLActionCreator.handleIncludeDefinition(instance.props.currentDefinitionName, instance.props.currentDefinitionSource, 
+                            //instance.props.currentDefinitionType, row.source);
+                            /*
+                            alert(instance.props.currentDefinitionName);
+                            alert(instance.props.currentDefinitionSource);
+                            alert(instance.props.currentDefinitionType);
+                            */
+                            router.push('/manageDSL/manageDSLSource?databaseID=' + row.externalDatabaseId);
+                        },
+                        noDataText: "There are no DSL definitions to display"
+                    };
+                })();
             }
             title = "Manage your DSL definitions";
             content = React.createElement(
@@ -4240,16 +4288,20 @@ function getState() {
         definitionType: DSLStore.getType(),
         definitionSource: DSLStore.getSource(),
         definitionDatabase: DSLStore.getDatabase(),
-        currentDefinitionName: DSLStore.getName(),
-        currentDefinitionType: DSLStore.getType(),
-        currentDefinitionSource: DSLStore.getSource(),
-        currentDefinitionDatabase: DSLStore.getDatabase()
+        currentDefinitionName: DSLStore.getCurrentDefinitionName(),
+        currentDefinitionType: DSLStore.getCurrentDefinitionType(),
+        currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
+        currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase()
     };
 }
 
 var ManageDSLSource = React.createClass({
     displayName: 'ManageDSLSource',
 
+
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     getInitialState: function getInitialState() {
         return {
@@ -4460,6 +4512,13 @@ var ManageDSLSource = React.createClass({
 
     onRun: function onRun() {},
 
+    onInclude: function onInclude() {
+        var router = this.context.router;
+
+        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType, this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
+        router.push('/manageDSL/manageDSLSource/include');
+    },
+
     toggleErrorPopUp: function toggleErrorPopUp() {
         this.refs.error.classList.toggle("dropdown-show");
     },
@@ -4628,13 +4687,9 @@ var ManageDSLSource = React.createClass({
                                 'Include a definition'
                             ),
                             React.createElement(
-                                Link,
-                                { to: "/manageDSL/manageDSLSource/include" },
-                                React.createElement(
-                                    'i',
-                                    { className: 'material-icons md-36 dropdown-button', ref: 'include' },
-                                    ''
-                                )
+                                'i',
+                                { onClick: this.onInclude, className: 'material-icons md-36 dropdown-button', ref: 'include' },
+                                ''
                             )
                         ) : ""
                     ) : "",
@@ -8977,6 +9032,8 @@ module.exports = {
     EXECUTE_NESTED_DOCUMENT_RESPONSE: null,
     UPLOAD_DEFINITION_RESPONSE: null,
     CHANGE_DEFINITION_RESPONSE: null,
+    HANDLE_INCLUDE_DEFINITION: null,
+    SAVE_CURRENT_DEFINITION_DATA: null,
 
     // Databases
     ADD_EXT_DB_RESPONSE: null,
@@ -9420,6 +9477,13 @@ var _DSL = {
     database: localStorage.getItem('DSLDatabase')
 };
 
+var current_DSL = {
+    currentDefinitionName: localStorage.getItem('currentDefinitionName'),
+    currentDefinitionType: localStorage.getItem('currentDefinitionType'),
+    currentDefinitionSource: localStorage.getItem('currentDefinitionSource'),
+    currentDefinitionDatabase: localStorage.getItem('currentDefinitionDatabase')
+};
+
 var _USER_LIST = []; // Member and Guest list
 
 var _DSL_DATA; // Data results from DSL execution
@@ -9550,6 +9614,22 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getDSLNestedData: function getDSLNestedData() {
         return _DSL_NESTED_DATA;
+    },
+
+    getCurrentDefinitionName: function getCurrentDefinitionName() {
+        return current_DSL.currentDefinitionName;
+    },
+
+    getCurrentDefinitionType: function getCurrentDefinitionType() {
+        return current_DSL.currentDefinitionType;
+    },
+
+    getCurrentDefinitionSource: function getCurrentDefinitionSource() {
+        return current_DSL.currentDefinitionSource;
+    },
+
+    getCurrentDefinitionDatabase: function getCurrentDefinitionDatabase() {
+        return current_DSL.currentDefinitionDatabase;
     }
 });
 
@@ -9815,7 +9895,19 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             DSLStore.emitChangeDatabase();
             break;
+        case ActionTypes.SAVE_CURRENT_DEFINITION_DATA:
+            if (action.data) {
+                current_DSL.currentDefinitionName = action.data.currentDefinitionName;
+                current_DSL.currentDefinitionType = action.data.currentDefinitionType;
+                current_DSL.currentDefinitionSource = action.data.currentDefinitionSource;
+                current_DSL.currentDefinitionDatabase = action.data.currentDefinitionDatabase;
 
+                localStorage.setItem('currentDefinitionName', current_DSL.currentDefinitionName);
+                localStorage.setItem('currentDefinitionType', current_DSL.currentDefinitionType);
+                localStorage.setItem('currentDefinitionSource', current_DSL.currentDefinitionSource);
+                localStorage.setItem('currentDefinitionDatabase', current_DSL.currentDefinitionDatabase);
+            }
+            break;
     }
 });
 

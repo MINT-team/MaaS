@@ -24,14 +24,18 @@ function getState() {
             definitionType: DSLStore.getType(),
             definitionSource: DSLStore.getSource(),
             definitionDatabase: DSLStore.getDatabase(),
-            currentDefinitionName: DSLStore.getName(),
-            currentDefinitionType: DSLStore.getType(),
-            currentDefinitionSource: DSLStore.getSource(),
-            currentDefinitionDatabase: DSLStore.getDatabase(),
+            currentDefinitionName: DSLStore.getCurrentDefinitionName(),
+            currentDefinitionType: DSLStore.getCurrentDefinitionType(),
+            currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
+            currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase()
     };
 }
 
 var ManageDSLSource = React.createClass({
+    
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
     
     getInitialState: function() {
         return {
@@ -284,6 +288,13 @@ var ManageDSLSource = React.createClass({
         
     },
     
+    onInclude: function() {
+        const { router } = this.context;
+        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType, 
+        this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
+        router.push('/manageDSL/manageDSLSource/include');
+    },
+    
     toggleErrorPopUp: function() {
 		this.refs.error.classList.toggle("dropdown-show");
 	},
@@ -361,7 +372,7 @@ var ManageDSLSource = React.createClass({
                                 {this.state.currentDefinitionType == "Dashboard" || this.state.currentDefinitionType == "Collection" ?
                                 <div className="tooltip tooltip-top">
                                     <p className="tooltip-text tooltip-text-longest">Include a definition</p>
-                                    <Link to={"/manageDSL/manageDSLSource/include"}><i className="material-icons md-36 dropdown-button" ref="include">&#xE14D;</i></Link>
+                                    <i onClick={this.onInclude} className="material-icons md-36 dropdown-button" ref="include">&#xE14D;</i>
                                 </div>
                                 : ""
                                 }

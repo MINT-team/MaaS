@@ -1574,10 +1574,19 @@ input {
 
 .dsl-thumbnail {
     text-align: center;
-    /*-ms-transform: scale(0.5, 0.25); */
-    /*-webkit-transform: scale(0.5, 0.25);*/
-    /*transform: scale(0.5, 0.25);*/
+    
 }
+
+/*.dsl-thumbnail:hover {*/
+/*    position: fixed;*/
+/*    top: 0; left: 0; bottom: 25%; right: 0;*/
+/*    -ms-transform: scale(1.5, 1.25); */
+/*    -webkit-transform: scale(1.5, 1.25);*/
+/*    transform: scale(1.5, 1.25);*/
+/*     -moz-transition: 0.2s;*/
+/*    -webkit-transition: 0.2s;*/
+/*    transition: 0.2s;*/
+/*}*/
 
 .cell-table-view th::-webkit-scrollbar-track, .cell-table-view td::-webkit-scrollbar-track,
 .document-table-view th::-webkit-scrollbar-track, .document-table-view td::-webkit-scrollbar-track,

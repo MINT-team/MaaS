@@ -37,6 +37,13 @@ var _DSL = {
     database: localStorage.getItem('DSLDatabase')
 };
 
+var current_DSL = {
+    currentDefinitionName: localStorage.getItem('currentDefinitionName'),
+    currentDefinitionType: localStorage.getItem('currentDefinitionType'),
+    currentDefinitionSource: localStorage.getItem('currentDefinitionSource'),
+    currentDefinitionDatabase: localStorage.getItem('currentDefinitionDatabase')
+}
+
 var _USER_LIST = []; // Member and Guest list
 
 var _DSL_DATA; // Data results from DSL execution
@@ -167,6 +174,22 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getDSLNestedData: function() {
         return _DSL_NESTED_DATA;
+    },
+    
+    getCurrentDefinitionName: function() {
+        return current_DSL.currentDefinitionName;
+    },
+    
+    getCurrentDefinitionType: function() {
+        return current_DSL.currentDefinitionType;
+    },
+    
+    getCurrentDefinitionSource: function() {
+        return current_DSL.currentDefinitionSource;
+    },
+    
+    getCurrentDefinitionDatabase: function() {
+        return current_DSL.currentDefinitionDatabase;
     }
 });
 
@@ -489,7 +512,20 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             }
             DSLStore.emitChangeDatabase();
             break;
-            
+        case ActionTypes.SAVE_CURRENT_DEFINITION_DATA:
+            if (action.data)
+            {
+                current_DSL.currentDefinitionName = action.data.currentDefinitionName;
+                current_DSL.currentDefinitionType = action.data.currentDefinitionType;
+                current_DSL.currentDefinitionSource = action.data.currentDefinitionSource;
+                current_DSL.currentDefinitionDatabase = action.data.currentDefinitionDatabase;
+                
+                localStorage.setItem('currentDefinitionName', current_DSL.currentDefinitionName);
+                localStorage.setItem('currentDefinitionType', current_DSL.currentDefinitionType);
+                localStorage.setItem('currentDefinitionSource', current_DSL.currentDefinitionSource);
+                localStorage.setItem('currentDefinitionDatabase', current_DSL.currentDefinitionDatabase);
+            }
+            break;
     }
     
 });

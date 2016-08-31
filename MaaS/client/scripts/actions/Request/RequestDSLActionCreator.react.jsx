@@ -69,6 +69,30 @@ var RequestDSLActionCreator = {
     
     changeDefinitionDatabase: function(id, databaseId) {
         WebAPIUtils.changeDefinitionDatabase(id, databaseId);
+    },
+    
+    saveCurrentDefinitionData: function(currentDefinitionName, currentDefinitionType, currentDefinitionSource, currentDefinitionDatabase) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.SAVE_CURRENT_DEFINITION_DATA,
+            data: { 
+                currentDefinitionName,
+                currentDefinitionType,
+                currentDefinitionSource,
+                currentDefinitionDatabase
+            }
+        });
+    },
+    
+    handleIncludeDefinition: function(currentDefinitionName, currentDefinitionSource, currentDefinitionType, includeSource) {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.HANDLE_INCLUDE_DEFINITION,
+            data: { 
+                currentDefinitionName,
+                currentDefinitionType,
+                currentDefinitionSource,
+                includeSource
+            }
+        });
     }
 };
 

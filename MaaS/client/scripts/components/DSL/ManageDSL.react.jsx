@@ -33,6 +33,10 @@ function getState() {
 
 var ManageDSL = React.createClass({
     
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
+    
     getInitialState: function() {
         var state = getState();
         state.uploadErrors = [];
@@ -381,9 +385,17 @@ var ManageDSL = React.createClass({
             };
             if (this.props.mode == "include")
             {
+                const { router } = this.context;
                 options = {
                     onRowClick: function(row){
-                        //router.push('/manageDSL/manageDSLSource?databaseID=' + row.id);   // redirect to DSL page
+                        //RequestDSLActionCreator.handleIncludeDefinition(instance.props.currentDefinitionName, instance.props.currentDefinitionSource, 
+                        //instance.props.currentDefinitionType, row.source);
+                        /*
+                        alert(instance.props.currentDefinitionName);
+                        alert(instance.props.currentDefinitionSource);
+                        alert(instance.props.currentDefinitionType);
+                        */
+                        router.push('/manageDSL/manageDSLSource?databaseID=' + row.externalDatabaseId);
                     },
                     noDataText: "There are no DSL definitions to display"
                 };
