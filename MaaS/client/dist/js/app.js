@@ -131,13 +131,10 @@ var RequestDSLActionCreator = {
         });
     },
 
-    handleIncludeDefinition: function handleIncludeDefinition(currentDefinitionName, currentDefinitionSource, currentDefinitionType, includeSource) {
+    handleIncludeDefinition: function handleIncludeDefinition(includeSource) {
         Dispatcher.handleViewAction({
             type: ActionTypes.HANDLE_INCLUDE_DEFINITION,
             data: {
-                currentDefinitionName: currentDefinitionName,
-                currentDefinitionType: currentDefinitionType,
-                currentDefinitionSource: currentDefinitionSource,
                 includeSource: includeSource
             }
         });
@@ -2956,7 +2953,7 @@ var ExecuteDSL = React.createClass({
             var instance = this;
             var showDocument = function showDocument() {
                 instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, instance.state.rawData[row._DSL_ELEMENT_INDEX], instance.state.nestedDocument.identity, instance.state.nestedDocument.body);
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], formatExtraData.nestedDocument ? formatExtraData.nestedDocument.identity : {}, formatExtraData.nestedDocument ? formatExtraData.nestedDocument.body : {});
                 var onback = function onback(e) {
                     e.preventDefault();
                     instance.setState(getState()); // back to Collection state
@@ -2964,7 +2961,6 @@ var ExecuteDSL = React.createClass({
                 };
                 document.getElementById('back-button').addEventListener("click", onback);
             };
-
             cell = React.createElement(
                 'span',
                 { className: 'selectable', onClick: showDocument },
@@ -3005,20 +3001,29 @@ var ExecuteDSL = React.createClass({
     verticalTable: function verticalTable(columns, data, perpage, definitionType, options) {
         var _this = this;
 
-        console.log(columns);
+        var table_data = data;
+        if (data.result) {
+            table_data = data.result;
+        }
         console.log(data);
-        console.log(perpage);
-        console.log(definitionType);
-        console.log(options);
+        table_data.forEach(function (x, i) {
+            x._DSL_ELEMENT_INDEX = i;
+        });
+        var index = columns.indexOf("_DSL_ELEMENT_INDEX");
+        if (index != -1) columns.splice(index, 1);
         return React.createElement(
             BootstrapTable,
-            { ref: 'table', data: data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: "id_" + data[0]._DSL_ELEMENT_INDEX },
+            { ref: 'table', data: table_data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: "id_" + table_data[0]._DSL_ELEMENT_INDEX },
             columns.map(function (column, i) {
                 return React.createElement(
                     TableHeaderColumn,
                     { key: i, dataField: column, dataFormat: _this.dataFormatter,
-                        formatExtraData: { type: _this.state.types ? _this.state.types[i] : "string", selectable: _this.state.selectables ? _this.state.selectables[i] : false },
-                        dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables ? _this.state.sortables[i] == true ? true : false : false : false,
+                        formatExtraData: { type: _this.state.types ? _this.state.types[i] : data.types ? data.types[i] : "string",
+                            selectable: _this.state.selectables ? _this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
+                            rawData: _this.state.rowData ? _this.state.rawData : data.rawData,
+                            nestedDocument: _this.state.nestedDocument ? _this.state.nestedDocument : data.document
+                        },
+                        dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables ? _this.state.sortables[i] == true ? true : false : data.sortables ? data.sortables[i] == true ? true : false : false : false,
                         dataAlign: 'center' },
                     column
                 );
@@ -3027,10 +3032,31 @@ var ExecuteDSL = React.createClass({
     },
 
     togglePopUp: function togglePopUp(id) {
-        alert("click");
-        var table = document.getElementById("dsl-data-table");
+        var container = document.getElementById("dashboard-container");
         var clone = document.getElementById(id).cloneNode(true);
-        table.appendChild(clone);
+        var popup = document.createElement("div");
+        popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
+        var modal = document.createElement("div");
+        modal.setAttribute("class", "modal");
+        var close = document.createElement("p");
+        close.setAttribute("class", "close-modal");
+        close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
+        popup.appendChild(close);
+        popup.appendChild(clone);
+        modal.appendChild(popup);
+        container.appendChild(modal);
+
+        close.onclick = function () {
+            //modal.style.display = "none";
+            container.removeChild(modal);
+        };
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                //modal.style.display = "none";
+                container.removeChild(modal);
+            }
+        };
     },
 
     render: function render() {
@@ -3065,6 +3091,18 @@ var ExecuteDSL = React.createClass({
                 paginationShowsTotal: showTotal
                 //,onSizePerPageList: function(size) {alert("changed to: "+size);}
             };
+
+            /*
+            sizePerPageList : Array
+            You can change the dropdown list for size per page if you enable pagination.
+            sizePerPage : Number
+            Means the size per page you want to locate as default.
+            paginationSize : Number
+            To define the pagination bar length, default is 5.
+            hideSizePerPage : Bool
+            Enable to hide the dropdown list for size per page, default is false.
+            */
+
             if (this.state.data) {
                 var columns = [];
                 if (this.state.data.length > 0) // Array of table data with at least one element
@@ -3072,29 +3110,12 @@ var ExecuteDSL = React.createClass({
                         data = this.state.data;
                         columns = Object.keys(data[0]);
                     } else // Array of table data empty
-                    {}
-                    // for a single object
-                    //     columns = Object.keys(this.state.data);  
-                    //     data.push(this.state.data);
+                    {
+                        // for a single object
+                        //     columns = Object.keys(this.state.data);  
+                        //     data.push(this.state.data);
+                    }
 
-                    //console.log(this.state.data);
-                    // console.log(columns);
-                data.forEach(function (x, i) {
-                    x._DSL_ELEMENT_INDEX = i;
-                });
-                var index = columns.indexOf("_DSL_ELEMENT_INDEX");
-                if (index != -1) columns.splice(index, 1);
-                //console.log(columns);
-                /*
-                sizePerPageList : Array
-                You can change the dropdown list for size per page if you enable pagination.
-                sizePerPage : Number
-                Means the size per page you want to locate as default.
-                paginationSize : Number
-                To define the pagination bar length, default is 5.
-                hideSizePerPage : Bool
-                Enable to hide the dropdown list for size per page, default is false.
-                */
                 var definitionType = this.state.definitionType;
                 if (definitionType == "Cell" || definitionType == "Collection") {
 
@@ -3103,17 +3124,6 @@ var ExecuteDSL = React.createClass({
                         { id: 'dsl-data-table', className: definitionType == "Cell" ? "cell-table-view" : definitionType == "Collection" ? "collection-table-view" : "" },
                         this.verticalTable(columns, data, perpage, definitionType, options)
                     );
-                    // <BootstrapTable ref="table" data={data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+data[0]._DSL_ELEMENT_INDEX}>
-                    //             {columns.map((column, i) =>
-                    //                 <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
-                    //                 formatExtraData={{type: this.state.types[i], selectable: this.state.selectables ? this.state.selectables[i] : false}}
-                    //                 dataSort={definitionType == "Cell" ? false : 
-                    //                             definitionType == "Collection" ? 
-                    //                                 this.state.sortables[i] == true ? true : false
-                    //                                 : false }
-                    //                 dataAlign="center">{column}</TableHeaderColumn> //column.charAt(0).toUpperCase() + column.slice(1)
-                    //             )}
-                    //         </BootstrapTable>
                 } else if (definitionType == "Document") {
                     content = React.createElement(
                         'div',
@@ -3121,22 +3131,9 @@ var ExecuteDSL = React.createClass({
                         this.horizontalTable(columns, data)
                     );
                 }
-                // <table className="table table-striped table-bordered table-hover">
-                //                 <tbody>
-                //                     {columns.map((column, i) => 
-                //                         <tr key={i} className="short-column">
-                //                             <th key={i} className="">{column}</th> 
-                //                             <td className="react-bs-container-body">{data[0][column]}</td>
-                //                         </tr>  
-                //                     )}
-                //                 </tbody>
-                //             </table>
             } else if (this.state.dashboardRows) {
                 if (this.state.definitionType == "Dashboard") {
                     var rows = this.state.dashboardRows;
-
-                    console.log(rows);
-                    //"# "+entity.type+(entity.data.result ? " ("+entity.data.result.length+")" : "")
                     content = React.createElement(
                         'div',
                         { id: 'dsl-data-table', className: 'dashboard-table-view' },
@@ -3147,16 +3144,17 @@ var ExecuteDSL = React.createClass({
                                 row.map(function (entity, j) {
                                     return React.createElement(
                                         'div',
-                                        { key: "entity_" + j, id: "entity_" + j, className: 'dashboard-cell', onClick: _this2.togglePopUp.bind(_this2, "entity_" + j) },
-                                        entity.data.label ? React.createElement(
-                                            'p',
-                                            null,
-                                            entity.data.label
-                                        ) : "",
+                                        { key: "entity_" + j, id: "entity_" + i + j, onClick: _this2.togglePopUp.bind(_this2, "entity_" + i + j),
+                                            className: "dashboard-cell dropdown-button " + "dashboard-" + entity.type.toLowerCase() + "-view" },
                                         React.createElement(
                                             'div',
-                                            { className: 'dsl-thumbnail' },
-                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.perpage, entity.type, options)
+                                            { key: "thumb_" + j, className: 'dsl-thumbnail dropdown-button' },
+                                            entity.data.label ? React.createElement(
+                                                'p',
+                                                { className: 'entity-label' },
+                                                entity.data.label
+                                            ) : React.createElement('p', { className: 'entity-label' }),
+                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type, options)
                                         )
                                     );
                                 })
@@ -3792,15 +3790,15 @@ var ManageDSL = React.createClass({
             if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
                 var instance = this;
                 this.state.DSL_LIST.forEach(function (DSL, i) {
-                    if (instance.props.mode == "include" && DSL.dsl.type != "Dashboard" || instance.props.mode != "include") {
-                        data[i] = {
+                    if (instance.props.mode == "include" && DSL.dsl.type != "Dashboard" && (instance.props.currentDefinitionType == "Collection" && DSL.dsl.type != "Cell" && DSL.dsl.type != "Collection" || instance.props.currentDefinitionType != "Collection") || instance.props.mode != "include") {
+                        data.push({
                             id: DSL.dsl.id,
                             name: DSL.dsl.name,
                             source: DSL.dsl.source,
                             permission: DSL.permission,
                             type: DSL.dsl.type,
                             externalDatabaseId: DSL.dsl.externalDatabaseId
-                        };
+                        });
                     }
                 });
             }
@@ -3814,14 +3812,9 @@ var ManageDSL = React.createClass({
 
                     options = {
                         onRowClick: function onRowClick(row) {
-                            //RequestDSLActionCreator.handleIncludeDefinition(instance.props.currentDefinitionName, instance.props.currentDefinitionSource, 
-                            //instance.props.currentDefinitionType, row.source);
-                            /*
-                            alert(instance.props.currentDefinitionName);
-                            alert(instance.props.currentDefinitionSource);
-                            alert(instance.props.currentDefinitionType);
-                            */
-                            router.push('/manageDSL/manageDSLSource?databaseID=' + row.externalDatabaseId);
+
+                            RequestDSLActionCreator.handleIncludeDefinition(row.source);
+                            router.push('/manageDSL/manageDSLSource?databaseID=' + instance.props.currentDefinitionDatabase);
                         },
                         noDataText: "There are no DSL definitions to display"
                     };
@@ -4291,7 +4284,8 @@ function getState() {
         currentDefinitionName: DSLStore.getCurrentDefinitionName(),
         currentDefinitionType: DSLStore.getCurrentDefinitionType(),
         currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
-        currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase()
+        currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase(),
+        includeSource: DSLStore.getIncludeSource()
     };
 }
 
@@ -4317,7 +4311,9 @@ var ManageDSLSource = React.createClass({
             currentDefinitionName: null,
             currentDefinitionType: null,
             currentDefinitionSource: null,
-            currentDefinitionDatabase: this.props.location.query.databaseID
+            currentDefinitionDatabase: this.props.location.query.databaseID,
+            includeSource: null,
+            include: false
         };
     },
 
@@ -4326,6 +4322,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.addSaveListener(this._onSave);
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
+        DSLStore.addIncludeListener(this._onInclude);
         if (!this.props.children) {
             var id = this.props.params.definitionId;
             if (id) {
@@ -4345,19 +4342,29 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeSaveListener(this._onSave);
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
+        DSLStore.removeIncludeListener(this._onInclude);
+    },
+
+    componentDidUpdate: function componentDidUpdate() {
+        console.log('update fuori');
+        if (this.state.include) {
+
+            if (this.state.currentDefinitionName) {
+                this.refs.definitionName.value = this.state.currentDefinitionName;
+            }
+
+            if (this.state.currentDefinitionType) {
+                if (this.state.currentDefinitionType == "Dashboard") this.refs.definitionType.selectedIndex = 1;
+                if (this.state.currentDefinitionType == "Collection") this.refs.definitionType.selectedIndex = 2;
+                if (this.state.currentDefinitionType == "Document") this.refs.definitionType.selectedIndex = 3;
+                if (this.state.currentDefinitionType == "Cell") this.refs.definitionType.selectedIndex = 4;
+            }
+        }
     },
 
     onEdit: function onEdit(e) {
-        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
-        var definitionSource = editor.getValue();
-        var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
-        this.setState({
-            saved: false,
-            currentDefinitionType: definitionType,
-            currentDefinitionName: definitionName,
-            currentDefinitionSource: definitionSource
-        });
+        this.setState({ saved: false, currentDefinitionType: definitionType });
         if (this.refs.save && this.refs.save.classList.contains("saved")) {
             this.refs.save.classList.remove("saved");
         }
@@ -4430,36 +4437,7 @@ var ManageDSLSource = React.createClass({
     },
 
     _onInclude: function _onInclude() {
-        /*
-        Possibilità di includere:
-        
-        1) Dashboard:
-                - Collection
-                - Document
-                - Cell
-                
-        2) Collection:
-                - Document
-        */
-        /*
-        Bottone assente nel caso in cui definitionType non ha valore o è diverso da Dashboard e Collection, altrimenti viene visualizzato.
-        
-        2 Casi:
-            1) Modifica definizione:
-                - clicco bottone, passo i dati inseriti in quel momento nella query string (source, nome e type)
-                - compare lista definizione (cell, collections, documents)
-                - seleziono una definizione (mi ricavo la source)
-                - torno alla pagina di manage dsl source settandola e analizzando il testo della source, trovando il posto adatto
-                dove inserire la source esterna, altrimenti errore.
-            
-            2) Creazione definizione:
-                - clicco bottone, passo i dati inseriti in quel momento nella query string (source, nome e type)
-                - compare lista definizione (cell, collections, documents)
-                - seleziono una definizione (mi ricavo la source)
-                - torno alla pagina di manage dsl source settandola e analizzando il testo della source, trovando il posto adatto
-                dove inserire la source esterna, altrimenti errore.
-        */
-
+        this.setState({ includeSource: DSLStore.getIncludeSource(), include: true });
     },
 
     onSave: function onSave() {
@@ -4515,6 +4493,15 @@ var ManageDSLSource = React.createClass({
     onInclude: function onInclude() {
         var router = this.context.router;
 
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+        var definitionSource = editor.getValue();
+        var definitionName = this.refs.definitionName.value;
+        var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
+        this.setState({
+            currentDefinitionType: definitionType,
+            currentDefinitionName: definitionName,
+            currentDefinitionSource: definitionSource
+        });
         RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType, this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
         router.push('/manageDSL/manageDSLSource/include');
     },
@@ -5362,12 +5349,18 @@ var Header = React.createClass({
     },
 
     handleClick: function handleClick(event) {
-        if (!event.target.className.match("dropdown-button")) {
+        var elem = event.target;
+        var child = false;
+        while (!child && elem.parentElement) {
+            if (elem.className.match("dropdown-button")) // child of dropdown-button
+                child = true;
+            elem = elem.parentElement;
+        }
+        if (!event.target.className.match("dropdown-button") && !child) {
             var dropdowns = document.getElementsByClassName("dropdown-content");
-            var i;
-            for (i = 0; i < dropdowns.length; i++) {
+            for (var i = 0; i < dropdowns.length; i++) {
                 var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains("dropdown-show")) {
+                if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {
                     openDropdown.classList.remove("dropdown-show");
                 }
             }
@@ -9466,6 +9459,7 @@ var EXECUTE_EVENT = 'execute';
 var NESTED_EXECUTE_EVENT = 'nested_execute';
 var UPLOAD_EVENT = 'upload';
 var CHANGE_DATABASE_EVENT = 'change_database';
+var INCLUDE_EVENT = 'include';
 
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList')); // DSL LIST WITH PERMISSION for current user
 
@@ -9483,6 +9477,8 @@ var current_DSL = {
     currentDefinitionSource: localStorage.getItem('currentDefinitionSource'),
     currentDefinitionDatabase: localStorage.getItem('currentDefinitionDatabase')
 };
+
+var includeSource = localStorage.getItem('includeSource');
 
 var _USER_LIST = []; // Member and Guest list
 
@@ -9576,6 +9572,18 @@ var DSLStore = assign({}, EventEmitter.prototype, {
         this.removeListener(CHANGE_DATABASE_EVENT, callback);
     },
 
+    emitInclude: function emitInclude() {
+        this.emit(INCLUDE_EVENT);
+    },
+
+    addIncludeListener: function addIncludeListener(callback) {
+        this.on(INCLUDE_EVENT, callback);
+    },
+
+    removeIncludeListener: function removeIncludeListener(callback) {
+        this.removeListener(INCLUDE_EVENT, callback);
+    },
+
     getErrors: function getErrors() {
         return _errors;
     },
@@ -9630,6 +9638,10 @@ var DSLStore = assign({}, EventEmitter.prototype, {
 
     getCurrentDefinitionDatabase: function getCurrentDefinitionDatabase() {
         return current_DSL.currentDefinitionDatabase;
+    },
+
+    getIncludeSource: function getIncludeSource() {
+        return includeSource;
     }
 });
 
@@ -9907,6 +9919,13 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('currentDefinitionSource', current_DSL.currentDefinitionSource);
                 localStorage.setItem('currentDefinitionDatabase', current_DSL.currentDefinitionDatabase);
             }
+            break;
+        case ActionTypes.HANDLE_INCLUDE_DEFINITION:
+            if (action.data) {
+                includeSource = action.data.includeSource;
+                localStorage.setItem('includeSource', includeSource);
+            }
+            DSLStore.emitInclude();
             break;
     }
 });

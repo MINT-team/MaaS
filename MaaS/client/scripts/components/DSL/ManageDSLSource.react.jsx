@@ -27,7 +27,8 @@ function getState() {
             currentDefinitionName: DSLStore.getCurrentDefinitionName(),
             currentDefinitionType: DSLStore.getCurrentDefinitionType(),
             currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
-            currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase()
+            currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase(),
+            includeSource: DSLStore.getIncludeSource()
     };
 }
 
@@ -51,7 +52,9 @@ var ManageDSLSource = React.createClass({
                 currentDefinitionName: null,
                 currentDefinitionType: null,
                 currentDefinitionSource: null,
-                currentDefinitionDatabase: this.props.location.query.databaseID
+                currentDefinitionDatabase: this.props.location.query.databaseID,
+                includeSource: null,
+                include: false
         };
     },
 
@@ -60,6 +63,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.addSaveListener(this._onSave);
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
+        DSLStore.addIncludeListener(this._onInclude);
         if (!this.props.children)
         {
             var id = this.props.params.definitionId;
@@ -82,21 +86,36 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeSaveListener(this._onSave);
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
+        DSLStore.removeIncludeListener(this._onInclude);
+    },
+    
+    componentDidUpdate: function() {
+        console.log('update fuori');
+        if (this.state.include)
+        {
+            
+            if(this.state.currentDefinitionName)
+            {
+                this.refs.definitionName.value = this.state.currentDefinitionName;
+            }
+            
+            if(this.state.currentDefinitionType)
+            {
+                if(this.state.currentDefinitionType == "Dashboard")
+                    this.refs.definitionType.selectedIndex = 1;
+                if(this.state.currentDefinitionType == "Collection")
+                    this.refs.definitionType.selectedIndex = 2;
+                if(this.state.currentDefinitionType == "Document")
+                    this.refs.definitionType.selectedIndex = 3;
+                if(this.state.currentDefinitionType == "Cell")
+                    this.refs.definitionType.selectedIndex = 4;
+            }
+        }
     },
     
     onEdit: function(e) {
-        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
-        var definitionSource = editor.getValue();
-        var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
-        this.setState(
-            { 
-                saved: false, 
-                currentDefinitionType: definitionType,
-                currentDefinitionName: definitionName,
-                currentDefinitionSource: definitionSource
-            }
-        );
+        this.setState({ saved: false, currentDefinitionType: definitionType });
         if(this.refs.save && this.refs.save.classList.contains("saved"))
         {
         	this.refs.save.classList.remove("saved");
@@ -186,36 +205,7 @@ var ManageDSLSource = React.createClass({
     },
     
     _onInclude: function() {
-        /*
-        Possibilità di includere:
-        
-        1) Dashboard:
-                - Collection
-                - Document
-                - Cell
-                
-        2) Collection:
-                - Document
-        */
-        /*
-        Bottone assente nel caso in cui definitionType non ha valore o è diverso da Dashboard e Collection, altrimenti viene visualizzato.
-        
-        2 Casi:
-            1) Modifica definizione:
-                - clicco bottone, passo i dati inseriti in quel momento nella query string (source, nome e type)
-                - compare lista definizione (cell, collections, documents)
-                - seleziono una definizione (mi ricavo la source)
-                - torno alla pagina di manage dsl source settandola e analizzando il testo della source, trovando il posto adatto
-                dove inserire la source esterna, altrimenti errore.
-            
-            2) Creazione definizione:
-                - clicco bottone, passo i dati inseriti in quel momento nella query string (source, nome e type)
-                - compare lista definizione (cell, collections, documents)
-                - seleziono una definizione (mi ricavo la source)
-                - torno alla pagina di manage dsl source settandola e analizzando il testo della source, trovando il posto adatto
-                dove inserire la source esterna, altrimenti errore.
-        */
-        
+        this.setState({ includeSource: DSLStore.getIncludeSource(), include: true });
     },
     
     onSave: function() {
@@ -290,7 +280,18 @@ var ManageDSLSource = React.createClass({
     
     onInclude: function() {
         const { router } = this.context;
-        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType, 
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+        var definitionSource = editor.getValue();
+        var definitionName = this.refs.definitionName.value;
+        var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
+        this.setState(
+            { 
+                currentDefinitionType: definitionType,
+                currentDefinitionName: definitionName,
+                currentDefinitionSource: definitionSource
+            }
+        );
+        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType,
         this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
         router.push('/manageDSL/manageDSLSource/include');
     },

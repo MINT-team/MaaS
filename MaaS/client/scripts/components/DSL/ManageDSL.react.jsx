@@ -366,16 +366,18 @@ var ManageDSL = React.createClass({
             {
                 var instance = this;
                 this.state.DSL_LIST.forEach(function(DSL, i) {
-                    if((instance.props.mode == "include" && DSL.dsl.type != "Dashboard") || instance.props.mode != "include")
+                    if((instance.props.mode == "include" && DSL.dsl.type != "Dashboard" 
+                    && ((instance.props.currentDefinitionType == "Collection" && (DSL.dsl.type != "Cell" && DSL.dsl.type != "Collection")) || instance.props.currentDefinitionType != "Collection") )
+                    || instance.props.mode != "include")
                     {
-                        data[i] = {
+                        data.push({
                             id: DSL.dsl.id,
                             name: DSL.dsl.name,
                             source: DSL.dsl.source,
                             permission: DSL.permission,
-                            type : DSL.dsl.type,
+                            type: DSL.dsl.type,
                             externalDatabaseId: DSL.dsl.externalDatabaseId
-                        };
+                        });
                     }
                 });
             }
@@ -388,14 +390,9 @@ var ManageDSL = React.createClass({
                 const { router } = this.context;
                 options = {
                     onRowClick: function(row){
-                        //RequestDSLActionCreator.handleIncludeDefinition(instance.props.currentDefinitionName, instance.props.currentDefinitionSource, 
-                        //instance.props.currentDefinitionType, row.source);
-                        /*
-                        alert(instance.props.currentDefinitionName);
-                        alert(instance.props.currentDefinitionSource);
-                        alert(instance.props.currentDefinitionType);
-                        */
-                        router.push('/manageDSL/manageDSLSource?databaseID=' + row.externalDatabaseId);
+                        RequestDSLActionCreator.handleIncludeDefinition(row.source);
+                        router.push('/manageDSL/manageDSLSource?databaseID=' + instance.props.currentDefinitionDatabase);
+                        
                     },
                     noDataText: "There are no DSL definitions to display"
                 };

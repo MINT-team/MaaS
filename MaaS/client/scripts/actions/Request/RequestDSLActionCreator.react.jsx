@@ -83,13 +83,10 @@ var RequestDSLActionCreator = {
         });
     },
     
-    handleIncludeDefinition: function(currentDefinitionName, currentDefinitionSource, currentDefinitionType, includeSource) {
+    handleIncludeDefinition: function(includeSource) {
         Dispatcher.handleViewAction({
             type: ActionTypes.HANDLE_INCLUDE_DEFINITION,
-            data: { 
-                currentDefinitionName,
-                currentDefinitionType,
-                currentDefinitionSource,
+            data: {
                 includeSource
             }
         });

@@ -1486,7 +1486,7 @@ input {
     margin-left: -25%;
 }
 
-.cell-table-view {
+.cell-table-view, .dashboard-cell-view {
     max-width: 20em;
     margin: auto;
     text-align: center;
@@ -1500,7 +1500,8 @@ input {
     width: 70% !important;
 }
 
-.document-table-view th, .document-table-view td {
+.document-table-view th, .document-table-view td,
+.dashboard-document-view th, .dashboard-document-view td {
     overflow: auto;
     white-space: nowrap;
     /*text-overflow: string;*/
@@ -1508,19 +1509,20 @@ input {
     min-width: 8em;
 }
 
-.collection-table-view th, .collection-table-view td {
+.collection-table-view th, .collection-table-view td, 
+.dashboard-collection-view th, .dashboard-collection-view td {
     overflow: auto !important;
     white-space: nowrap;
     /*max-width: 35em !important;*/
     /*min-width: 8em !important;*/
 }
 
-.collection-table-view .selectable {
+.collection-table-view .selectable, .dashboard-collection-view .selectable {
     cursor: pointer;
     color: #60D42E;
 }
 
-.collection-table-view .selectable:hover {
+.collection-table-view .selectable:hover, .dashboard-collection-view .selectable:hover {
     color: darkgreen;
 }
 
@@ -1536,7 +1538,7 @@ input {
 }
 
 .dashboard-row {
-    display: -webkit-flex; /* Safari */
+    display: -webkit-flex;
     display: flex;
     flex-direction: row;
     padding: 0;
@@ -1545,26 +1547,27 @@ input {
     text-align: justify;
 }
 
-.dashboard-cell {
+.dashboard-row .dashboard-cell {
     -webkit-flex: 1; /* Safari 6.1+ */
     -ms-flex: 1; /* IE 10 */ 
     flex: 1;
     text-align: center;
-    min-width: 20em;
-    margin: 0.04em;
-    /*border: 1px solid lightgray;*/
+    min-height: 5em;
+    margin: 0;
+    /*margin: 0.05em;*/
+    border: 1px solid lightgray;
     padding: 0.5em;
     background-color: white;
     vertical-align: middle;
     cursor: pointer;
 }
 
-.dashboard-cell:hover {
-    /*color: lightgray;*/
-    background: rgba(225, 235, 235, 0.9);
-    -moz-transition: 0.3s;
-    -webkit-transition: 0.3s;
-    transition: 0.3s;
+.dashboard-row > .dashboard-cell:hover {
+    color: lightgray;
+    background: rgba(255, 255, 255, 0.8);
+    -moz-transition: 0.2s;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
 }
 
 .dashboard-cell p {
@@ -1574,24 +1577,72 @@ input {
 
 .dsl-thumbnail {
     text-align: center;
-    
+    -webkit-flex: none; /* Safari 6.1+ */
+    -ms-flex: none; /* IE 10 */ 
+    flex: none;
+    display: block;
 }
 
-/*.dsl-thumbnail:hover {*/
-/*    position: fixed;*/
-/*    top: 0; left: 0; bottom: 25%; right: 0;*/
-/*    -ms-transform: scale(1.5, 1.25); */
-/*    -webkit-transform: scale(1.5, 1.25);*/
-/*    transform: scale(1.5, 1.25);*/
-/*     -moz-transition: 0.2s;*/
-/*    -webkit-transition: 0.2s;*/
-/*    transition: 0.2s;*/
-/*}*/
+.modal {
+    /*display: none;  Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    margin-right: 0.5em;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dashboard-popup {
+    width: 82%;
+    min-height: 50%;
+    overflow: auto;
+    margin: auto;
+    position: fixed;
+    top: 15%; left: 0; bottom: 20%; right: 0;
+}
+
+.dashboard-popup th, .dashboard-popup td {
+    overflow: auto !important;
+    white-space: nowrap;
+}
+
+.dashboard-popup .entity-label {
+    padding-bottom: 1em;
+    font-size: 2em;
+    min-height: 1em;
+    /*font-weight: bold;*/
+}
+
+.dashboard-document-view, .dashboard-cell-view {
+    width: 70% !important;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .cell-table-view th::-webkit-scrollbar-track, .cell-table-view td::-webkit-scrollbar-track,
 .document-table-view th::-webkit-scrollbar-track, .document-table-view td::-webkit-scrollbar-track,
 .collection-table-view th::-webkit-scrollbar-track, .collection-table-view td::-webkit-scrollbar-track,
-.dashboard-table-view th::-webkit-scrollbar-track, .dashboard-table-view td::-webkit-scrollbar-track
+.dashboard-table-view th::-webkit-scrollbar-track, .dashboard-table-view td::-webkit-scrollbar-track,
+.dashboard-popup th::-webkit-scrollbar-track, .dashboard-popup td::-webkit-scrollbar-track
 {
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 	background-color: rgba(0,0,0,0);
@@ -1600,7 +1651,8 @@ input {
 .cell-table-view th::-webkit-scrollbar, .cell-table-view td::-webkit-scrollbar,
 .document-table-view th::-webkit-scrollbar, .document-table-view td::-webkit-scrollbar,
 .collection-table-view th::-webkit-scrollbar, .collection-table-view td::-webkit-scrollbar,
-.dashboard-table-view th::-webkit-scrollbar, .dashboard-table-view td::-webkit-scrollbar
+.dashboard-table-view th::-webkit-scrollbar, .dashboard-table-view td::-webkit-scrollbar,
+.dashboard-popup th::-webkit-scrollbar, .dashboard-popup td::-webkit-scrollbar
 {
     height: 4px;
 	width: 4px;
@@ -1610,7 +1662,8 @@ input {
 .cell-table-view th::-webkit-scrollbar-thumb, .cell-table-view td::-webkit-scrollbar-thumb,
 .document-table-view th::-webkit-scrollbar-thumb, .document-table-view td::-webkit-scrollbar-thumb,
 .collection-table-view th::-webkit-scrollbar-thumb, .collection-table-view td::-webkit-scrollbar-thumb,
-.dashboard-table-view th::-webkit-scrollbar-thumb, .dashboard-table-view td::-webkit-scrollbar-thumb
+.dashboard-table-view th::-webkit-scrollbar-thumb, .dashboard-table-view td::-webkit-scrollbar-thumb,
+.dashboard-popup th::-webkit-scrollbar-thumb, .dashboard-popup td::-webkit-scrollbar-thumb
 {
     border-radius: 2px;
 	background-color: darkgrey;
