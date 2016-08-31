@@ -31,7 +31,17 @@ var RequestSessionActionCreator = {
       type: ActionTypes.LOGOUT
     });
     WebAPIUtils.logout(accessToken);
-  }
+  },
+  
+  createAccessToken: function(userId){
+        WebAPIUtils.createAccessToken(userId);
+    },
+    
+  leaveImpersonate: function() {
+        Dispatcher.handleViewAction({
+            type: ActionTypes.LEAVE_IMPERSONATE,
+        });
+    }
 };
 
 module.exports = RequestSessionActionCreator;

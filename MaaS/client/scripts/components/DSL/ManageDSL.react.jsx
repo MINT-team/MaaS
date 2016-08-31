@@ -21,12 +21,16 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
+    var userId;
+    if(SessionStore.getImpersonate() == "true")
+         userId = SessionStore.getUserId();  
+    else userId = UserStore.getId();
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
             DSL_LIST: DSLStore.getDSLList(),
             role: UserStore.getRole(),
-            userId: UserStore.getId(),
+            userId: userId,
             type: "All"
     };
 }

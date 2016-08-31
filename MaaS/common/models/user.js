@@ -834,6 +834,44 @@ module.exports = function(user) {
         }
     );
     
+    user.createAccessToken = function(userId, cb) {
+        
+        //find the user instance
+        user.findById(userId, function(err, userInstance) {
+            if(err){ 
+                console.log("errore nella query di ricerca dell'utente");
+                return cb(null, err, null);
+            }
+            if(userInstance){   // create the access token
+                userInstance.accessTokens.create({ ttl: INVITATION_TTL }, function(err, accessToken) {
+                    if(err) console.log("impossibile creare l'access token per l'utente selezionato");
+                        if(accessToken)
+                            return cb(null, null, accessToken);
+                        else 
+                        {
+                            console.log("impossibile creare l'access token per l'utente selezionato");
+                            return cb(null, err, null);
+                        }
+                });    
+            }else console.log("non è stato trovato l'utente da impersonificare");
+        });
+    };
+    
+    user.remoteMethod(
+        'createAccessToken',
+        {
+            description: 'create the acces tocken for the user wich has id = userId.',
+            accepts: [
+                { arg: 'userId', type: 'string', required: true, description: 'id of the user wich you want to create the access token'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'accessToken', type: 'Object'}
+            ],
+            http: { verb: 'post', path: '/createAccessToken' }
+        }
+    );
+    
     // Add specifications on which user has logged in
     user.afterRemote('login', function(ctx, remoteMethodOutput, next) {
         var ctx_ttl = ctx.result.ttl ;

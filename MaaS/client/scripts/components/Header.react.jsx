@@ -9,17 +9,49 @@
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
+var CompanyStore = require('../stores/CompanyStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
 
 
+function getState() {
+    return{
+        userEmail : UserStore.getEmail(),
+        userName : UserStore.getName(),
+        userSurname : UserStore.getSurname(),
+        userCompany : CompanyStore.getName(),
+        isImpersonate: SessionStore.getImpersonate()
+       
+    };
+    
+}
+
 var Header = React.createClass({
+
+    getInitialState: function() {
+      
+        return  getState();
+    
+    },
 
     componentDidMount: function() {
     	window.addEventListener('click', this.handleClick);
+    	
+    	CompanyStore.addChangeListener(this._onChange);
+    	SessionStore.addImpersonateListener(this._onChange);
+    	UserStore.addUserLoadListener(this._onChange);
     },
 
     componentWillUnmount: function() {
     	window.removeEventListener('click', this.handleClick);
+    	
+    	CompanyStore.removeChangeListener(this._onChange);
+    	SessionStore.removeImpersonateListener(this._onChange);
+    	UserStore.removeUserLoadListener(this._onChange);
+    },
+    
+    _onChange: function() {
+      this.setState({isImpersonate: "true"});
     },
 
 	handleClick: function(event) {
@@ -46,10 +78,16 @@ var Header = React.createClass({
 		var accessToken = SessionStore.getAccessToken();
 		RequestSessionActionCreator.logout(accessToken);
 	},
+	
+	leave: function() {
+	    RequestSessionActionCreator.leaveImpersonate();
+	},
 
     render: function() {
+        console.log("faccio ancora il render");
         var title, headerMenu, headerPanel;
         if (this.props.isLogged) {
+            console.log("sono loggato");
             if(this.props.type == "commonUser")
             {
                 title = (
@@ -65,10 +103,11 @@ var Header = React.createClass({
                         <Link to="/manageDSL">DSL</Link>
                     </div>
                 );
+                
                 headerPanel = (
                     <div id="header-panel">
                         <div className="tooltip tooltip-bottom">
-                            <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                            <Link to="/profile"><span id="header-user-name"></span><i className="material-icons md-36">&#xE7FD;</i></Link>
                             <p id="profile-tooltip" className="tooltip-text">Your profile</p>
                         </div>
                         <div className="tooltip tooltip-bottom">
@@ -87,25 +126,88 @@ var Header = React.createClass({
                     </div>
                 );
             }
-            else // render superAdmin Component
-            {
-                title = (
-                        <Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
+            else // render superAdmin Component or impersonate user
+            {  
+                if(this.state.isImpersonate == "true")        
+                {
+                    
+                    
+                    
+                    title = (
+                    <div className="tooltip tooltip-bottom">
+                        <Link to="/company" id="header-title">{this.state.userCompany}</Link>
+                        <p id="company-tooltip" className="tooltip-text tooltip-text-long">Your company</p>
+                    </div>
                     );
-               
-                headerPanel = (
+                
+                    headerMenu = (
+                    <div id="header-menu">
+                        <Link to="/company">Company</Link>
+                        <Link to="/externalDatabases">Database</Link>
+                        <Link to="/manageDSL">DSL</Link>
+                    </div>
+                    );
+                    
+                    var name;
+                    if(this.state.userName != '')
+                    {
+                        name = this.state.userName+" "+this.state.userSurname;
+                    }
+                    else
+                    {
+                        name = this.state.userEmail;
+                    }
+                    
+                    headerPanel = (
                     <div id="header-panel">
-                        <Link to="" id="settings-button" onClick={this.toggleDropdown}>
-                            <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
-                        </Link>
+                        <div className="tooltip tooltip-bottom">
+                            <Link to="/profile"><span id="header-user-name">You're impersonating: {name}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                            <p id="profile-tooltip" className="tooltip-text">Your profile</p>
+                        </div>
+                        <div className="tooltip tooltip-bottom">
+                            <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                                <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                            </Link>
+                            <p id="settings-tooltip" className="tooltip-text">Settings</p>
+                        </div>
                         <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
                             <ul>
-                                <Link to="/dashboardSuperAdmin"><li>Dashboard</li></Link>
-                                <Link onClick={this.logout} to=""><li><i className="material-icons md-24">&#xE879;</i>Logout</li></Link>
+                                <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+                                <Link to="/editorConfig"><li>Text editor</li></Link>
+                                <Link onClick={this.leave} to=""><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
                             </ul>
                         </div>
                     </div>
                 );
+                    
+                }    // render of super admin
+                else
+                {
+                    title = (
+                            <Link to="/dashboardSuperAdmin" id="header-title">{this.props.companyName}</Link>
+                        );
+                        
+                      headerMenu = (
+                    <div id="header-menu">
+                        <Link to="dashboardSuperAdmin/databaseManagement">Database management</Link>
+						<Link to="dashboardSuperAdmin/impersonateUser">Impersonate user</Link>
+                    </div>
+                        );      
+                   
+                    headerPanel = (
+                        <div id="header-panel">
+                            <Link to="" id="settings-button" onClick={this.toggleDropdown}>
+                                <i className="material-icons md-36 dropdown-button">&#xE8B8;</i>
+                            </Link>
+                            <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
+                                <ul>
+                                    <Link to="/dashboardSuperAdmin"><li>Dashboard</li></Link>
+                                    <Link onClick={this.logout} to=""><li><i className="material-icons md-24">&#xE879;</i>Logout</li></Link>
+                                </ul>
+                            </div>
+                        </div>
+                    );
+                }
             }
         } else {        //user not logged
             title = (

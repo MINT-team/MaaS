@@ -197,6 +197,25 @@ module.exports = {
                 //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
             }
         });
-    }
-
+    },
+    
+    createAccessToken: function(userId){
+        request.post(APIEndpoints.USERS + '/createAccessToken')
+            .send({
+                    userId: userId
+            })
+            .set('Accept', 'application/json')
+            .set('Authorization', localStorage.getItem('accessToken'))
+            .end(function(err, res){
+              if(res)
+              {
+                res = JSON.parse(res.text);
+                if (res.error)
+                  ResponseSessionActionCreator.responseCreateAccessToken(null,res.error.message);
+                else
+                  ResponseSessionActionCreator.responseCreateAccessToken(res.accessToken);  
+              }
+            });
+   }
+    
 };

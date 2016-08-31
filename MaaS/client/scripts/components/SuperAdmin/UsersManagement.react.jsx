@@ -44,12 +44,14 @@ var usersManagement = React.createClass({
         UserStore.addChangeListener(this._onChange);
         UserStore.addDeleteListener(this._onChange);
         UserStore.addUserLoadListener(this._onChange);
+        UserStore.addAllUsersLoadListener(this._onChange);
     },
 
     componentWillUnmount: function() {
         UserStore.removeChangeListener(this._onChange);
         UserStore.removeDeleteListener(this._onChange);
         UserStore.removeUserLoadListener(this._onChange);
+        UserStore.removeAllUsersLoadListener(this._onChange);
     },
 
     _onChange: function() {

@@ -1,4 +1,4 @@
-// Name: {DatabaseManagement.react.jsx}
+// Name: {ImpersonateUser.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/SuperAdmin/}
 
@@ -34,26 +34,54 @@ function getState() {
 
 var ImpersonateUser = React.createClass({
     
+    contextTypes: {   // serve per utilizzare il router
+      router: React.PropTypes.object.isRequired
+    },
+    
     getInitialState: function() {
         return getState();
     },
 
     componentWillMount: function() {
         RequestUserActionCreator.getUsers();  //Recovery all the users
+        
         UserStore.addChangeListener(this._onChange);
-        UserStore.addDeleteListener(this._onChange);
-        UserStore.addUserLoadListener(this._onChange);
+        UserStore.addAllUsersLoadListener(this._onChange);
+                                                                                   //UserStore.addUserLoadListener(/*this._onChange*/);////////////////////////////////////
+    
+        SessionStore.addImpersonateListener(this.onImpersonate);
+        //UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function() {
         UserStore.removeChangeListener(this._onChange);
-        UserStore.removeDeleteListener(this._onChange);
-        UserStore.removeUserLoadListener(this._onChange);
+        UserStore.removeAllUsersLoadListener(this._onChange);
+                                                                                    //UserStore.removeAllUsersLoadListener(/*this._onChange*/);////////////////////////////////////
+        SessionStore.removeImpersonateListener(this.onImpersonate);
+        //UserStore.removeUserLoadListener(this._onUserLoad);
+    },
+    
+    handleRedirect: function() {       // qui va fatto il controllo per capire se ha dashboard attive o no
+        const { router } = this.context;
+         router.push('/manageDSL'); 
     },
 
     _onChange: function() {
         this.setState(getState());
     },
+    
+    onImpersonate: function() {
+        RequestUserActionCreator.getUser(SessionStore.getUserId());
+        RequestUserActionCreator.getCompany(SessionStore.getUserId());
+        RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+        this.handleRedirect();
+        // RequestUserActionCreator.getCompany(SessionStore.getUserId());
+        // RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+    },
+    
+    // _onUserLoad:function() {
+    //     this.handleRedirect();
+    // },
     
     buttonFormatter: function(cell, row) {
         var errors;
@@ -64,9 +92,7 @@ var ImpersonateUser = React.createClass({
         }
    
         var onClickImpersonate = function() {
-          window.alert(row.password);
-            RequestSessionActionCreator.logout(localStorage.getItem('accessToken'));
-            RequestSessionActionCreator.login(row.email, row.password, "true");
+            RequestSessionActionCreator.createAccessToken(row.id);
         };
 
         return (

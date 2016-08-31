@@ -32,6 +32,14 @@ var ResponseSessionActionCreator = {
            errors: errors,
            email: email
         });
+    },
+    
+    responseCreateAccessToken: function(json, errors){
+        Dispatcher.handleServerAction({
+                type: ActionTypes.CREATE_ACCESS_TOKEN,
+                json: json,
+                errors: errors
+            });
     }
 };
 

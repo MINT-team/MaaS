@@ -16,6 +16,7 @@ var ActionTypes = Constants.ActionTypes;
 var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
+var USERS_LOAD_EVENT = 'loadAll';
 
 var _user = {
               id: SessionStore.getUserId(),
@@ -48,6 +49,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
     this.emit(USER_LOAD_EVENT);
   },
 
+  emitAllUsersLoad: function() {
+    this.emit(USERS_LOAD_EVENT);
+  },
+
   addChangeListener: function(callback) {
     this.on(CHANGE_EVENT, callback);
   },
@@ -71,6 +76,16 @@ var UserStore = assign({}, EventEmitter.prototype, {
   removeUserLoadListener: function(callback) {
       this.removeListener(USER_LOAD_EVENT, callback);
   },
+
+  addAllUsersLoadListener: function(callback) {
+      this.on(USERS_LOAD_EVENT, callback);
+  },
+  
+  removeAllUsersLoadListener: function(callback) {
+      this.removeListener(USERS_LOAD_EVENT, callback);
+  },
+  
+  
 
   getUser: function() {
     return _user;
@@ -251,7 +266,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           localStorage.setItem('activeDashboard',_user.activeDashboard);
         }
         UserStore.emitUserLoad();
-        UserStore.emitChange();
+        //UserStore.emitChange();
         break;
         
       case ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE:
@@ -312,7 +327,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
             _users = action.json;
             localStorage.setItem('users', JSON.stringify(_users));
         }
-        UserStore.emitUserLoad();
+        UserStore.emitAllUsersLoad();
         break;
       
       case ActionTypes.CHANGE_USER_EMAIL:
@@ -357,6 +372,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           }
         }
         UserStore.emitChange(); 
+      break;
     }
     return true;  // richiesto dal Promise nel Dispatcher
 });

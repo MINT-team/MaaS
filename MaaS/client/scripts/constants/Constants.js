@@ -36,6 +36,8 @@ module.exports = {
     SIGNUP_RESPONSE: null,
     INVITE_RESPONSE: null,
     LOGOUT: null,
+    CREATE_ACCESS_TOKEN: null,
+    LEAVE_IMPERSONATE: null,
     //SESSION_SET: null,
 
     // User
