@@ -555,11 +555,16 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             break;
          case ActionTypes.LEAVE_IMPERSONATE:
             if(_DSL_LIST){
-                _DSL_LIST = null;
+                _DSL_LIST = [];
                 localStorage.removeItem('DSLList');
             }
             if(_DSL){
-                _DSL = null;
+                _DSL.id = null;
+                _DSL.name = null;
+                _DSL.source = null;
+                _DSL.type = null;
+                _DSL.database = null;
+                
                 localStorage.removeItem('DSLId');
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');

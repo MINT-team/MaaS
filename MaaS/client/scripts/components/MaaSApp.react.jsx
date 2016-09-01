@@ -77,7 +77,7 @@ var MaaSApp = React.createClass({
                     <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company}/>
                 </div>
     	    );    
-        }else{
+        }else{  // render of SuperAfmin or userImpersonate
             return (
                 <div id="content">
                     <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />

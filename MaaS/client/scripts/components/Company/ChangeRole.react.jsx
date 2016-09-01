@@ -9,16 +9,22 @@
 
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
 var ChangeRole = React.createClass({
 
     getInitialState: function() {
+        var userId;
+        if(SessionStore.getImpersonate() == "true")
+                userId = SessionStore.getUserId();
+        else
+            userId = UserStore.getId();
         return {
             active: false,  // used to show errors only for active forms
             companyId: this.props.companyId,
-            id: UserStore.getId(),
+            id: userId,
             role: this.props.role,
             errors: []
         };

@@ -55,7 +55,7 @@ var ManageDSL = React.createClass({
         if(!this.props.children)
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
-        }
+         }
     },
     
     componentDidUpdate: function(prevProps) {

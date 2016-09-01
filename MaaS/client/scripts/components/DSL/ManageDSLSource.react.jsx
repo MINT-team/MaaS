@@ -28,7 +28,8 @@ function getState() {
             currentDefinitionType: DSLStore.getCurrentDefinitionType(),
             currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
             currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase(),
-            includeSource: DSLStore.getIncludeSource()
+            includeSource: DSLStore.getIncludeSource(),
+            isImpersonate: SessionStore.getImpersonate()
     };
 }
 
@@ -54,7 +55,8 @@ var ManageDSLSource = React.createClass({
                 currentDefinitionSource: null,
                 currentDefinitionDatabase: this.props.location.query.databaseID,
                 includeSource: null,
-                include: false
+                include: false,
+                isImpersonate: SessionStore.getImpersonate()
         };
     },
 

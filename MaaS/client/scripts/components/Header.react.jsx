@@ -21,16 +21,10 @@ function getState() {
         userSurname : UserStore.getSurname(),
         userCompany : CompanyStore.getName(),
         isImpersonate: SessionStore.getImpersonate()
-       
     };
-    
 }
 
 var Header = React.createClass({
-
-    contextTypes: {   // serve per utilizzare il router
-      router: React.PropTypes.object.isRequired
-    },
     
     getInitialState: function() {
         return  getState();
@@ -55,24 +49,11 @@ var Header = React.createClass({
     },
     
     _onChange: function() {
-      this.setState({
-          userEmail : UserStore.getEmail(),
-          userName : UserStore.getName(),
-          userSurname : UserStore.getSurname(),
-          userCompany : CompanyStore.getName(),
-          isImpersonate: SessionStore.getImpersonate()
-          
-      });
-      
-      
+        this.setState(getState());
     },
     
     _onLeaveImpersonate: function() {
-        // this.setState({isImpersonate: "false"}); 
-      
-        const { router } = this.context;
-        router.push('/impersonateUser');
-        this.forceUpdate();
+        this.setState({isImpersonate: "false"}); 
     },
 
 	handleClick: function(event) {
@@ -198,7 +179,7 @@ var Header = React.createClass({
                             <ul>
                                 <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
-                                <Link onClick={this.leaveImpersonate} to=""><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
+                                <Link onClick={this.leaveImpersonate} to="dashboardSuperAdmin/impersonateUser"><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
                             </ul>
                         </div>
                     </div>
