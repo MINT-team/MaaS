@@ -66,7 +66,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
         DSLStore.addIncludeListener(this._onInclude);
-        DSLStore.addRestoreStateListener(this._onRestoreState);
+        //DSLStore.addRestoreStateListener(this._onRestoreState);
         if (!this.props.children)
         {
             var id = this.props.params.definitionId;
@@ -90,7 +90,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
         DSLStore.removeIncludeListener(this._onInclude);
-        DSLStore.removeRestoreStateListener(this._onRestoreState);
+        //DSLStore.removeRestoreStateListener(this._onRestoreState);
     },
     
     componentDidUpdate: function() {
