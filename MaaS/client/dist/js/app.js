@@ -222,6 +222,16 @@ var RequestSessionActionCreator = {
       type: ActionTypes.LOGOUT
     });
     WebAPIUtils.logout(accessToken);
+  },
+
+  createAccessToken: function createAccessToken(userId) {
+    WebAPIUtils.createAccessToken(userId);
+  },
+
+  leaveImpersonate: function leaveImpersonate() {
+    Dispatcher.handleViewAction({
+      type: ActionTypes.LEAVE_IMPERSONATE
+    });
   }
 };
 
@@ -597,6 +607,14 @@ var ResponseSessionActionCreator = {
             type: ActionTypes.INVITE_RESPONSE,
             errors: errors,
             email: email
+        });
+    },
+
+    responseCreateAccessToken: function responseCreateAccessToken(json, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CREATE_ACCESS_TOKEN,
+            json: json,
+            errors: errors
         });
     }
 };
@@ -2846,6 +2864,7 @@ return (
 // ==========================================
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
@@ -2884,7 +2903,8 @@ function getNestedState(label) {
         label: label,
         action: data ? data.action : null,
         types: data ? data.types : null,
-        queried: true
+        queried: true,
+        popup: null
     };
 }
 
@@ -2998,19 +3018,35 @@ var ExecuteDSL = React.createClass({
         );
     },
 
-    verticalTable: function verticalTable(columns, data, perpage, definitionType, options) {
+    verticalTable: function verticalTable(columns, data, perpage, definitionType) {
         var _this = this;
 
         var table_data = data;
+        var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
+        var showTotal = function showTotal(start, to, total) {
+            return React.createElement(
+                'span',
+                { className: 'total-lines' },
+                "Total rows: " + total
+            );
+        };
+        var options = {
+            hideSizePerPage: false, //definitionType=="Cell" ? true : false,
+            sizePerPage: perpage ? perpage : 10,
+            sizePerPageList: perpageList,
+            paginationShowsTotal: showTotal
+            //,onSizePerPageList: function(size) {alert("changed to: "+size);}
+        };
+        console.log(options);
         if (data.result) {
             table_data = data.result;
         }
-        console.log(data);
         table_data.forEach(function (x, i) {
             x._DSL_ELEMENT_INDEX = i;
         });
         var index = columns.indexOf("_DSL_ELEMENT_INDEX");
         if (index != -1) columns.splice(index, 1);
+
         return React.createElement(
             BootstrapTable,
             { ref: 'table', data: table_data, ignoreSinglePage: perpage ? false : true, pagination: true, striped: true, hover: true, options: options, keyField: "id_" + table_data[0]._DSL_ELEMENT_INDEX },
@@ -3020,7 +3056,7 @@ var ExecuteDSL = React.createClass({
                     { key: i, dataField: column, dataFormat: _this.dataFormatter,
                         formatExtraData: { type: _this.state.types ? _this.state.types[i] : data.types ? data.types[i] : "string",
                             selectable: _this.state.selectables ? _this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
-                            rawData: _this.state.rowData ? _this.state.rawData : data.rawData,
+                            rawData: _this.state.rawData ? _this.state.rawData : data.rawData,
                             nestedDocument: _this.state.nestedDocument ? _this.state.nestedDocument : data.document
                         },
                         dataSort: definitionType == "Cell" ? false : definitionType == "Collection" ? _this.state.sortables ? _this.state.sortables[i] == true ? true : false : data.sortables ? data.sortables[i] == true ? true : false : false : false,
@@ -3032,31 +3068,54 @@ var ExecuteDSL = React.createClass({
     },
 
     togglePopUp: function togglePopUp(id) {
-        var container = document.getElementById("dashboard-container");
-        var clone = document.getElementById(id).cloneNode(true);
-        var popup = document.createElement("div");
-        popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
-        var modal = document.createElement("div");
-        modal.setAttribute("class", "modal");
-        var close = document.createElement("p");
-        close.setAttribute("class", "close-modal");
-        close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
-        popup.appendChild(close);
-        popup.appendChild(clone);
-        modal.appendChild(popup);
-        container.appendChild(modal);
+        alert("pop");
+        if (!this.state.popup) {
+            this.setState({ popup: id });
+            var container = document.getElementById("dashboard-container");
+            var entity = document.getElementById(id);
+            var parent = entity.parentElement;
 
-        close.onclick = function () {
-            //modal.style.display = "none";
-            container.removeChild(modal);
-        };
+            // Epaque cell
+            var cell = parent.parentElement;
+            cell.classList.add("selected-cell");
 
-        window.onclick = function (event) {
-            if (event.target == modal) {
-                //modal.style.display = "none";
+            // Enlarge entity and save dashboard width
+            var width = entity.offsetWidth;
+            entity.style.width = "100%";
+
+            // Create pop-up
+            var modal = document.createElement("div"); // Background
+            modal.setAttribute("class", "modal");
+            var popup = document.createElement("div"); // White box for dsl entity
+            popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
+            var close = document.createElement("p"); // Close button
+            close.setAttribute("class", "close-modal");
+            close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
+
+            popup.appendChild(close);
+            popup.appendChild(entity);
+            modal.appendChild(popup);
+            container.appendChild(modal);
+
+            var instance = this;
+            close.onclick = function () {
                 container.removeChild(modal);
-            }
-        };
+                parent.appendChild(entity);
+                cell.classList.remove("selected-cell");
+                instance.setState({ popup: null });
+                entity.style.width = width + "px";
+            };
+
+            window.onclick = function (event) {
+                if (event.target == modal || event.target.className.match("selectable")) {
+                    container.removeChild(modal);
+                    parent.appendChild(entity);
+                    cell.classList.remove("selected-cell");
+                    instance.setState({ popup: null });
+                    entity.style.width = width + "px";
+                }
+            };
+        }
     },
 
     render: function render() {
@@ -3075,34 +3134,6 @@ var ExecuteDSL = React.createClass({
         );
 
         if ((this.state.data || this.state.dashboardRows) && this.state.queried) {
-            var perpage = this.state.perpage;
-            var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
-            var showTotal = function showTotal(start, to, total) {
-                return React.createElement(
-                    'span',
-                    { id: 'total-lines' },
-                    "Total rows: " + total
-                );
-            };
-            var options = {
-                hideSizePerPage: false, //definitionType=="Cell" ? true : false,
-                sizePerPage: perpage ? perpage : 10,
-                sizePerPageList: perpageList,
-                paginationShowsTotal: showTotal
-                //,onSizePerPageList: function(size) {alert("changed to: "+size);}
-            };
-
-            /*
-            sizePerPageList : Array
-            You can change the dropdown list for size per page if you enable pagination.
-            sizePerPage : Number
-            Means the size per page you want to locate as default.
-            paginationSize : Number
-            To define the pagination bar length, default is 5.
-            hideSizePerPage : Bool
-            Enable to hide the dropdown list for size per page, default is false.
-            */
-
             if (this.state.data) {
                 var columns = [];
                 if (this.state.data.length > 0) // Array of table data with at least one element
@@ -3122,7 +3153,7 @@ var ExecuteDSL = React.createClass({
                     content = React.createElement(
                         'div',
                         { id: 'dsl-data-table', className: definitionType == "Cell" ? "cell-table-view" : definitionType == "Collection" ? "collection-table-view" : "" },
-                        this.verticalTable(columns, data, perpage, definitionType, options)
+                        this.verticalTable(columns, data, this.state.perpage, definitionType)
                     );
                 } else if (definitionType == "Document") {
                     content = React.createElement(
@@ -3144,17 +3175,17 @@ var ExecuteDSL = React.createClass({
                                 row.map(function (entity, j) {
                                     return React.createElement(
                                         'div',
-                                        { key: "entity_" + j, id: "entity_" + i + j, onClick: _this2.togglePopUp.bind(_this2, "entity_" + i + j),
-                                            className: "dashboard-cell dropdown-button " + "dashboard-" + entity.type.toLowerCase() + "-view" },
+                                        { key: "entity_" + j, onClick: _this2.togglePopUp.bind(_this2, "entity_" + i + j),
+                                            className: "dashboard-cell dropdown-button" },
                                         React.createElement(
                                             'div',
-                                            { key: "thumb_" + j, className: 'dsl-thumbnail dropdown-button' },
+                                            { key: "thumb_" + j, id: "entity_" + i + j, className: "dsl-thumbnail dropdown-button " + "dashboard-" + entity.type.toLowerCase() + "-view" },
                                             entity.data.label ? React.createElement(
                                                 'p',
                                                 { className: 'entity-label' },
                                                 entity.data.label
                                             ) : React.createElement('p', { className: 'entity-label' }),
-                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type, options)
+                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)
                                         )
                                     );
                                 })
@@ -3315,7 +3346,7 @@ var ExecuteDSL = React.createClass({
 
 module.exports = ExecuteDSL;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"react":370,"react-bootstrap-table":93,"react-router":139}],24:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"react":370,"react-bootstrap-table":93,"react-dom":108,"react-router":139}],24:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSL.react.jsx}
@@ -3341,12 +3372,14 @@ var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
+    var userId;
+    if (SessionStore.getImpersonate() == "true") userId = SessionStore.getUserId();else userId = UserStore.getId();
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         DSL_LIST: DSLStore.getDSLList(),
         role: UserStore.getRole(),
-        userId: UserStore.getId(),
+        userId: userId,
         type: "All"
     };
 }
@@ -3812,7 +3845,6 @@ var ManageDSL = React.createClass({
 
                     options = {
                         onRowClick: function onRowClick(row) {
-
                             RequestDSLActionCreator.handleIncludeDefinition(row.source);
                             router.push('/manageDSL/manageDSLSource?databaseID=' + instance.props.currentDefinitionDatabase);
                         },
@@ -4323,6 +4355,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
         DSLStore.addIncludeListener(this._onInclude);
+        DSLStore.addRestoreStateListener(this._onRestoreState);
         if (!this.props.children) {
             var id = this.props.params.definitionId;
             if (id) {
@@ -4343,12 +4376,12 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
         DSLStore.removeIncludeListener(this._onInclude);
+        DSLStore.removeRestoreStateListener(this._onRestoreState);
     },
 
     componentDidUpdate: function componentDidUpdate() {
-        console.log('update fuori');
-        if (this.state.include) {
 
+        if (this.state.include) {
             if (this.state.currentDefinitionName) {
                 this.refs.definitionName.value = this.state.currentDefinitionName;
             }
@@ -4359,6 +4392,14 @@ var ManageDSLSource = React.createClass({
                 if (this.state.currentDefinitionType == "Document") this.refs.definitionType.selectedIndex = 3;
                 if (this.state.currentDefinitionType == "Cell") this.refs.definitionType.selectedIndex = 4;
             }
+
+            /*
+            
+            modifica source con aggiunta includeSource
+            
+            */
+
+            this.setState({ include: false });
         }
     },
 
@@ -4437,7 +4478,8 @@ var ManageDSLSource = React.createClass({
     },
 
     _onInclude: function _onInclude() {
-        this.setState({ includeSource: DSLStore.getIncludeSource(), include: true });
+        this.setState({ include: true });
+        this.setState(getState());
     },
 
     onSave: function onSave() {
@@ -4497,12 +4539,7 @@ var ManageDSLSource = React.createClass({
         var definitionSource = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
-        this.setState({
-            currentDefinitionType: definitionType,
-            currentDefinitionName: definitionName,
-            currentDefinitionSource: definitionSource
-        });
-        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType, this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
+        RequestDSLActionCreator.saveCurrentDefinitionData(definitionName, definitionType, definitionSource, this.state.currentDefinitionDatabase);
         router.push('/manageDSL/manageDSLSource/include');
     },
 
@@ -5334,18 +5371,69 @@ module.exports = Footer;
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
+var CompanyStore = require('../stores/CompanyStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
+
+function getState() {
+    return {
+        userEmail: UserStore.getEmail(),
+        userName: UserStore.getName(),
+        userSurname: UserStore.getSurname(),
+        userCompany: CompanyStore.getName(),
+        isImpersonate: SessionStore.getImpersonate()
+
+    };
+}
 
 var Header = React.createClass({
     displayName: 'Header',
 
 
+    contextTypes: { // serve per utilizzare il router
+        router: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function getInitialState() {
+        return getState();
+    },
+
     componentDidMount: function componentDidMount() {
         window.addEventListener('click', this.handleClick);
+
+        CompanyStore.addChangeListener(this._onChange);
+        SessionStore.addImpersonateListener(this._onChange);
+        UserStore.addUserLoadListener(this._onChange);
+        SessionStore.addLeaveImpersonateListener(this._onLeaveImpersonate);
     },
 
     componentWillUnmount: function componentWillUnmount() {
         window.removeEventListener('click', this.handleClick);
+
+        CompanyStore.removeChangeListener(this._onChange);
+        SessionStore.removeImpersonateListener(this._onChange);
+        UserStore.removeUserLoadListener(this._onChange);
+        SessionStore.removeLeaveImpersonateListener(this._onLeaveImpersonate);
+    },
+
+    _onChange: function _onChange() {
+        this.setState({
+            userEmail: UserStore.getEmail(),
+            userName: UserStore.getName(),
+            userSurname: UserStore.getSurname(),
+            userCompany: CompanyStore.getName(),
+            isImpersonate: SessionStore.getImpersonate()
+
+        });
+    },
+
+    _onLeaveImpersonate: function _onLeaveImpersonate() {
+        // this.setState({isImpersonate: "false"}); 
+
+        var router = this.context.router;
+
+        router.push('/impersonateUser');
+        this.forceUpdate();
     },
 
     handleClick: function handleClick(event) {
@@ -5377,6 +5465,10 @@ var Header = React.createClass({
     logout: function logout() {
         var accessToken = SessionStore.getAccessToken();
         RequestSessionActionCreator.logout(accessToken);
+    },
+
+    leaveImpersonate: function leaveImpersonate() {
+        RequestSessionActionCreator.leaveImpersonate();
     },
 
     render: function render() {
@@ -5416,6 +5508,7 @@ var Header = React.createClass({
                         'DSL'
                     )
                 );
+
                 headerPanel = React.createElement(
                     'div',
                     { id: 'header-panel' },
@@ -5425,11 +5518,7 @@ var Header = React.createClass({
                         React.createElement(
                             Link,
                             { to: '/profile' },
-                            React.createElement(
-                                'span',
-                                { id: 'header-user-name' },
-                                this.props.userName
-                            ),
+                            React.createElement('span', { id: 'header-user-name' }),
                             React.createElement(
                                 'i',
                                 { className: 'material-icons md-36' },
@@ -5501,58 +5590,206 @@ var Header = React.createClass({
                         )
                     )
                 );
-            } else // render superAdmin Component
+            } else // render superAdmin Component or impersonate user
                 {
-                    title = React.createElement(
-                        Link,
-                        { to: '/dashboardSuperAdmin', id: 'header-title' },
-                        this.props.companyName
-                    );
+                    if (this.state.isImpersonate == "true") {
 
-                    headerPanel = React.createElement(
-                        'div',
-                        { id: 'header-panel' },
-                        React.createElement(
-                            Link,
-                            { to: '', id: 'settings-button', onClick: this.toggleDropdown },
-                            React.createElement(
-                                'i',
-                                { className: 'material-icons md-36 dropdown-button' },
-                                ''
-                            )
-                        ),
-                        React.createElement(
+                        title = React.createElement(
                             'div',
-                            { id: 'header-dropdown', className: 'dropdown-content', ref: 'dropdownMenu' },
+                            { className: 'tooltip tooltip-bottom' },
                             React.createElement(
-                                'ul',
-                                null,
+                                Link,
+                                { to: '/company', id: 'header-title' },
+                                this.state.userCompany
+                            ),
+                            React.createElement(
+                                'p',
+                                { id: 'company-tooltip', className: 'tooltip-text tooltip-text-long' },
+                                'Your company'
+                            )
+                        );
+
+                        headerMenu = React.createElement(
+                            'div',
+                            { id: 'header-menu' },
+                            React.createElement(
+                                Link,
+                                { to: '/company' },
+                                'Company'
+                            ),
+                            React.createElement(
+                                Link,
+                                { to: '/externalDatabases' },
+                                'Database'
+                            ),
+                            React.createElement(
+                                Link,
+                                { to: '/manageDSL' },
+                                'DSL'
+                            )
+                        );
+
+                        var name;
+                        if (this.state.userName != '') {
+                            name = this.state.userName + " " + this.state.userSurname;
+                        } else {
+                            name = this.state.userEmail;
+                        }
+
+                        headerPanel = React.createElement(
+                            'div',
+                            { id: 'header-panel' },
+                            React.createElement(
+                                'div',
+                                { className: 'tooltip tooltip-bottom' },
                                 React.createElement(
                                     Link,
-                                    { to: '/dashboardSuperAdmin' },
+                                    { to: '/profile' },
                                     React.createElement(
-                                        'li',
-                                        null,
-                                        'Dashboard'
+                                        'span',
+                                        { id: 'header-user-name' },
+                                        'You\'re impersonating: ',
+                                        name
+                                    ),
+                                    React.createElement(
+                                        'i',
+                                        { className: 'material-icons md-36' },
+                                        ''
                                     )
                                 ),
                                 React.createElement(
+                                    'p',
+                                    { id: 'profile-tooltip', className: 'tooltip-text' },
+                                    'Your profile'
+                                )
+                            ),
+                            React.createElement(
+                                'div',
+                                { className: 'tooltip tooltip-bottom' },
+                                React.createElement(
                                     Link,
-                                    { onClick: this.logout, to: '' },
+                                    { to: '', id: 'settings-button', onClick: this.toggleDropdown },
                                     React.createElement(
-                                        'li',
-                                        null,
+                                        'i',
+                                        { className: 'material-icons md-36 dropdown-button' },
+                                        ''
+                                    )
+                                ),
+                                React.createElement(
+                                    'p',
+                                    { id: 'settings-tooltip', className: 'tooltip-text' },
+                                    'Settings'
+                                )
+                            ),
+                            React.createElement(
+                                'div',
+                                { id: 'header-dropdown', className: 'dropdown-content', ref: 'dropdownMenu' },
+                                React.createElement(
+                                    'ul',
+                                    null,
+                                    React.createElement(
+                                        Link,
+                                        { to: '/manageDashboard' },
                                         React.createElement(
-                                            'i',
-                                            { className: 'material-icons md-24' },
-                                            ''
-                                        ),
-                                        'Logout'
+                                            'li',
+                                            null,
+                                            'Active Dashboard'
+                                        )
+                                    ),
+                                    React.createElement(
+                                        Link,
+                                        { to: '/editorConfig' },
+                                        React.createElement(
+                                            'li',
+                                            null,
+                                            'Text editor'
+                                        )
+                                    ),
+                                    React.createElement(
+                                        Link,
+                                        { onClick: this.leaveImpersonate, to: '' },
+                                        React.createElement(
+                                            'li',
+                                            null,
+                                            React.createElement(
+                                                'i',
+                                                { className: 'material-icons md-24' },
+                                                ''
+                                            ),
+                                            'Leave'
+                                        )
                                     )
                                 )
                             )
-                        )
-                    );
+                        );
+                    } // render of super admin
+                    else {
+                            title = React.createElement(
+                                Link,
+                                { to: '/dashboardSuperAdmin', id: 'header-title' },
+                                this.props.companyName
+                            );
+
+                            headerMenu = React.createElement(
+                                'div',
+                                { id: 'header-menu' },
+                                React.createElement(
+                                    Link,
+                                    { to: 'dashboardSuperAdmin/databaseManagement' },
+                                    'Database management'
+                                ),
+                                React.createElement(
+                                    Link,
+                                    { to: 'dashboardSuperAdmin/impersonateUser' },
+                                    'Impersonate user'
+                                )
+                            );
+
+                            headerPanel = React.createElement(
+                                'div',
+                                { id: 'header-panel' },
+                                React.createElement(
+                                    Link,
+                                    { to: '', id: 'settings-button', onClick: this.toggleDropdown },
+                                    React.createElement(
+                                        'i',
+                                        { className: 'material-icons md-36 dropdown-button' },
+                                        ''
+                                    )
+                                ),
+                                React.createElement(
+                                    'div',
+                                    { id: 'header-dropdown', className: 'dropdown-content', ref: 'dropdownMenu' },
+                                    React.createElement(
+                                        'ul',
+                                        null,
+                                        React.createElement(
+                                            Link,
+                                            { to: '/dashboardSuperAdmin' },
+                                            React.createElement(
+                                                'li',
+                                                null,
+                                                'Dashboard'
+                                            )
+                                        ),
+                                        React.createElement(
+                                            Link,
+                                            { onClick: this.logout, to: '' },
+                                            React.createElement(
+                                                'li',
+                                                null,
+                                                React.createElement(
+                                                    'i',
+                                                    { className: 'material-icons md-24' },
+                                                    ''
+                                                ),
+                                                'Logout'
+                                            )
+                                        )
+                                    )
+                                )
+                            );
+                        }
                 }
         } else {
             //user not logged
@@ -5597,7 +5834,7 @@ var Header = React.createClass({
 
 module.exports = Header;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],32:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],32:[function(require,module,exports){
 'use strict';
 
 // Name: {Home.react.jsx}
@@ -8272,7 +8509,7 @@ module.exports = DatabaseManagement;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-router":139}],49:[function(require,module,exports){
 'use strict';
 
-// Name: {DatabaseManagement.react.jsx}
+// Name: {ImpersonateUser.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/SuperAdmin/}
 
@@ -8310,26 +8547,56 @@ var ImpersonateUser = React.createClass({
     displayName: 'ImpersonateUser',
 
 
+    contextTypes: { // serve per utilizzare il router
+        router: React.PropTypes.object.isRequired
+    },
+
     getInitialState: function getInitialState() {
         return getState();
     },
 
     componentWillMount: function componentWillMount() {
         RequestUserActionCreator.getUsers(); //Recovery all the users
+
         UserStore.addChangeListener(this._onChange);
-        UserStore.addDeleteListener(this._onChange);
-        UserStore.addUserLoadListener(this._onChange);
+        UserStore.addAllUsersLoadListener(this._onChange);
+        //UserStore.addUserLoadListener(/*this._onChange*/);////////////////////////////////////
+
+        SessionStore.addImpersonateListener(this.onImpersonate);
+        //UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function componentWillUnmount() {
         UserStore.removeChangeListener(this._onChange);
-        UserStore.removeDeleteListener(this._onChange);
-        UserStore.removeUserLoadListener(this._onChange);
+        UserStore.removeAllUsersLoadListener(this._onChange);
+        //UserStore.removeAllUsersLoadListener(/*this._onChange*/);////////////////////////////////////
+        SessionStore.removeImpersonateListener(this.onImpersonate);
+        //UserStore.removeUserLoadListener(this._onUserLoad);
+    },
+
+    handleRedirect: function handleRedirect() {
+        // qui va fatto il controllo per capire se ha dashboard attive o no
+        var router = this.context.router;
+
+        router.push('/manageDSL');
     },
 
     _onChange: function _onChange() {
         this.setState(getState());
     },
+
+    onImpersonate: function onImpersonate() {
+        RequestUserActionCreator.getUser(SessionStore.getUserId());
+        RequestUserActionCreator.getCompany(SessionStore.getUserId());
+        RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+        this.handleRedirect();
+        // RequestUserActionCreator.getCompany(SessionStore.getUserId());
+        // RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
+    },
+
+    // _onUserLoad:function() {
+    //     this.handleRedirect();
+    // },
 
     buttonFormatter: function buttonFormatter(cell, row) {
         var errors;
@@ -8342,9 +8609,7 @@ var ImpersonateUser = React.createClass({
         }
 
         var onClickImpersonate = function onClickImpersonate() {
-            window.alert(row.password);
-            RequestSessionActionCreator.logout(localStorage.getItem('accessToken'));
-            RequestSessionActionCreator.login(row.email, row.password, "true");
+            RequestSessionActionCreator.createAccessToken(row.id);
         };
 
         return React.createElement(
@@ -8585,12 +8850,14 @@ var usersManagement = React.createClass({
         UserStore.addChangeListener(this._onChange);
         UserStore.addDeleteListener(this._onChange);
         UserStore.addUserLoadListener(this._onChange);
+        UserStore.addAllUsersLoadListener(this._onChange);
     },
 
     componentWillUnmount: function componentWillUnmount() {
         UserStore.removeChangeListener(this._onChange);
         UserStore.removeDeleteListener(this._onChange);
         UserStore.removeUserLoadListener(this._onChange);
+        UserStore.removeAllUsersLoadListener(this._onChange);
     },
 
     _onChange: function _onChange() {
@@ -8981,6 +9248,8 @@ module.exports = {
     SIGNUP_RESPONSE: null,
     INVITE_RESPONSE: null,
     LOGOUT: null,
+    CREATE_ACCESS_TOKEN: null,
+    LEAVE_IMPERSONATE: null,
     //SESSION_SET: null,
 
     // User
@@ -9421,6 +9690,16 @@ CompanyStore.dispatchToken = Dispatcher.register(function (payload) {
                 localStorage.setItem('DSLDefinitionsCount', DSLDefinitionsCount);
             }
             CompanyStore.emitChange();
+            break;
+        case ActionTypes.LEAVE_IMPERSONATE:
+            _company.id = null;
+            _company.name = null;
+            databasesCount = null;
+            DSLDefinitionsCount = null;
+            localStorage.removeItem('databasesCount');
+            localStorage.removeItem('DSLDefinitionsCount');
+            localStorage.removeItem('companyName');
+            localStorage.removeItem('companyId');
             break;
     }
 
@@ -9927,6 +10206,19 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             }
             DSLStore.emitInclude();
             break;
+        case ActionTypes.LEAVE_IMPERSONATE:
+            if (_DSL_LIST) {
+                _DSL_LIST = null;
+                localStorage.removeItem('DSLList');
+            }
+            if (_DSL) {
+                _DSL = null;
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
+            }
+            break;
     }
 });
 
@@ -10063,6 +10355,8 @@ var assign = require('object-assign');
 
 var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
+var IMPERSONATE_EVENT = 'impersonate';
+var LEAVE_IMPERSONATE_EVENT = 'LeaveImpersonate';
 
 // Load values from the  localSgorage
 var _accessToken = localStorage.getItem('accessToken');
@@ -10071,12 +10365,26 @@ var _userId = localStorage.getItem('userId'); // user id
 var _userType = localStorage.getItem('userType');
 var _errors = [];
 
+//variabili per l'impersonificazione
+var _secondAccessToken = localStorage.getItem('secondAccessToken');
+var _secondUserId = localStorage.getItem('secondUserId');
+var _impersonate = localStorage.getItem('impersonate');
+
 var SessionStore = assign({}, EventEmitter.prototype, {
 
   emitChange: function emitChange() {
     this.emit(CHANGE_EVENT);
   },
 
+  emitImpersonate: function emitImpersonate() {
+    this.emit(IMPERSONATE_EVENT);
+  },
+
+  emitLeaveImpersonate: function emitLeaveImpersonate() {
+    this.emit(LEAVE_IMPERSONATE_EVENT);
+  },
+
+  //funzioni utili alla registrazione delle view 
   addChangeListener: function addChangeListener(callback) {
     this.on(CHANGE_EVENT, callback);
   },
@@ -10084,6 +10392,24 @@ var SessionStore = assign({}, EventEmitter.prototype, {
   removeChangeListener: function removeChangeListener(callback) {
     this.removeListener(CHANGE_EVENT, callback);
   },
+
+  addImpersonateListener: function addImpersonateListener(callback) {
+    this.on(IMPERSONATE_EVENT, callback);
+  },
+
+  removeImpersonateListener: function removeImpersonateListener(callback) {
+    this.removeListener(IMPERSONATE_EVENT, callback);
+  },
+
+  addLeaveImpersonateListener: function addLeaveImpersonateListener(callback) {
+    this.on(LEAVE_IMPERSONATE_EVENT, callback);
+  },
+
+  removeLeaveImpersonateListener: function removeLeaveImpersonateListener(callback) {
+    this.removeListener(LEAVE_IMPERSONATE_EVENT, callback);
+  },
+
+  //funzioni utilità store
 
   isLogged: function isLogged() {
     return _accessToken ? true : false;
@@ -10111,6 +10437,10 @@ var SessionStore = assign({}, EventEmitter.prototype, {
 
   whoIam: function whoIam() {
     return _userType;
+  },
+
+  getImpersonate: function getImpersonate() {
+    return _impersonate;
   }
 
 });
@@ -10135,6 +10465,8 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
       if (action.errors) {
         _errors = action.errors;
       } else if (action.json && action.json.id) {
+        _impersonate = "false";
+        localStorage.setItem('impersonate', _impersonate);
         _accessToken = action.json.id;
         _userId = action.json.userId;
         _userType = action.json.type;
@@ -10163,6 +10495,43 @@ SessionStore.dispatchToken = Dispatcher.register(function (payload) {
       _email = null;
       localStorage.clear(); // clear all data
       SessionStore.emitChange();
+      break;
+
+    case ActionTypes.CREATE_ACCESS_TOKEN:
+      // dopo aver recuperato l'azione cambio i due access tocke e gli id mettendo come valori di default le variabili dell'utente impersonificato
+      if (action.errors) {
+        _errors = action.errors;
+      } else {
+        _errors = [];
+        _secondAccessToken = _accessToken;
+        _accessToken = action.json.id;
+        localStorage.setItem('accessToken', action.json.id);
+        localStorage.setItem('secondAccessToken', _secondAccessToken);
+
+        _impersonate = "true";
+        localStorage.setItem('impersonate', _impersonate);
+        _secondUserId = _userId;
+        _userId = action.json.userId;
+        localStorage.setItem('userId', action.json.userId);
+        localStorage.setItem('secondUserId', _secondUserId);
+      }
+      SessionStore.emitImpersonate();
+      break;
+    case ActionTypes.LEAVE_IMPERSONATE:
+      _accessToken = _secondAccessToken;
+      _userId = _secondUserId;
+      _secondAccessToken = null;
+      _secondUserId = null;
+      _impersonate = false;
+      _email = null;
+      localStorage.removeItem('email');
+      localStorage.setItem('impersonate', _impersonate);
+      localStorage.removeItem('secondAccessToken');
+      localStorage.removeItem('secondUserId');
+      localStorage.setItem('accessToken', _accessToken);
+      localStorage.setItem('userId', _userId);
+
+      SessionStore.emitLeaveImpersonate();
       break;
   }
 
@@ -10287,6 +10656,7 @@ var ActionTypes = Constants.ActionTypes;
 var USER_LOAD_EVENT = 'load';
 var CHANGE_EVENT = 'change';
 var DELETE_EVENT = 'delete';
+var USERS_LOAD_EVENT = 'loadAll';
 
 var _user = {
   id: SessionStore.getUserId(),
@@ -10319,6 +10689,10 @@ var UserStore = assign({}, EventEmitter.prototype, {
     this.emit(USER_LOAD_EVENT);
   },
 
+  emitAllUsersLoad: function emitAllUsersLoad() {
+    this.emit(USERS_LOAD_EVENT);
+  },
+
   addChangeListener: function addChangeListener(callback) {
     this.on(CHANGE_EVENT, callback);
   },
@@ -10341,6 +10715,14 @@ var UserStore = assign({}, EventEmitter.prototype, {
 
   removeUserLoadListener: function removeUserLoadListener(callback) {
     this.removeListener(USER_LOAD_EVENT, callback);
+  },
+
+  addAllUsersLoadListener: function addAllUsersLoadListener(callback) {
+    this.on(USERS_LOAD_EVENT, callback);
+  },
+
+  removeAllUsersLoadListener: function removeAllUsersLoadListener(callback) {
+    this.removeListener(USERS_LOAD_EVENT, callback);
   },
 
   getUser: function getUser() {
@@ -10509,7 +10891,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         localStorage.setItem('activeDashboard', _user.activeDashboard);
       }
       UserStore.emitUserLoad();
-      UserStore.emitChange();
+      //UserStore.emitChange();
       break;
 
     case ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE:
@@ -10566,7 +10948,7 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
         _users = action.json;
         localStorage.setItem('users', JSON.stringify(_users));
       }
-      UserStore.emitUserLoad();
+      UserStore.emitAllUsersLoad();
       break;
 
     case ActionTypes.CHANGE_USER_EMAIL:
@@ -10605,6 +10987,21 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
           }
       }
       UserStore.emitChange();
+      break;
+    case ActionTypes.LEAVE_IMPERSONATE:
+
+      _user.name = localStorage.removeItem('userName');
+      _user.surname = localStorage.removeItem('userSurname');
+      _user.dateOfBirth = localStorage.removeItem('userDateOfBirth');
+      _user.gender = localStorage.removeItem('userGender');
+      _user.avatar = localStorage.removeItem('userAvatar');
+      _user.role = localStorage.removeItem('userRole');
+      _user.softTabs = localStorage.removeItem('softTabs');
+      _user.theme = localStorage.removeItem('theme');
+      _user.tabSize = localStorage.removeItem('tabSize');
+      _user.fontSize = localStorage.removeItem('fontSize');
+      _user.activeDashboard = localStorage.removeItem('activeDashboard');
+      break;
   }
   return true; // richiesto dal Promise nel Dispatcher
 });
@@ -11214,6 +11611,17 @@ module.exports = {
             }
             if (err) {
                 //ReactDOM.render(<p>Errore: {err.status} {err.message}</p>, document.getElementById('content'));
+            }
+        });
+    },
+
+    createAccessToken: function createAccessToken(userId) {
+        request.post(APIEndpoints.USERS + '/createAccessToken').send({
+            userId: userId
+        }).set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (err, res) {
+            if (res) {
+                res = JSON.parse(res.text);
+                if (res.error) ResponseSessionActionCreator.responseCreateAccessToken(null, res.error.message);else ResponseSessionActionCreator.responseCreateAccessToken(res.accessToken);
             }
         });
     }

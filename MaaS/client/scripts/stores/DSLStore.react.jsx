@@ -26,7 +26,6 @@ var NESTED_EXECUTE_EVENT = 'nested_execute';
 var UPLOAD_EVENT = 'upload';
 var CHANGE_DATABASE_EVENT = 'change_database';
 var INCLUDE_EVENT = 'include';
-
  
 var _DSL_LIST = JSON.parse(localStorage.getItem('DSLList'));    // DSL LIST WITH PERMISSION for current user
 
@@ -570,7 +569,7 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 localStorage.removeItem('DSLType');
                 localStorage.removeItem('DSLSource');
             }
-        break;   
+            break;   
     }
     
 });

@@ -1481,7 +1481,7 @@ input {
     margin: auto;
 }
 
-#total-lines {
+.total-lines {
     position: absolute;
     margin-left: -25%;
 }
@@ -1562,7 +1562,7 @@ input {
     cursor: pointer;
 }
 
-.dashboard-row > .dashboard-cell:hover {
+.dashboard-row > .dashboard-cell:hover, .dashboard-row > .selected-cell {
     color: lightgray;
     background: rgba(255, 255, 255, 0.8);
     -moz-transition: 0.2s;
@@ -1575,12 +1575,26 @@ input {
     padding-bottom: 0.5em;
 }
 
+.dashboard-cell .entity-label {
+    padding-bottom: 0.5em;
+    font-size: 1.2em;
+}
+
 .dsl-thumbnail {
     text-align: center;
     -webkit-flex: none; /* Safari 6.1+ */
     -ms-flex: none; /* IE 10 */ 
     flex: none;
     display: block;
+}
+
+.dashboard-cell .total-lines {
+    position: relative;
+    margin-left: -0.5em;
+}
+
+.dashboard-cell .col-md-6 > .dropdown, .dashboard-cell .col-md-6 > .pagination {
+    display: none;
 }
 
 .modal {

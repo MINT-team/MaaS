@@ -66,6 +66,7 @@ var ManageDSLSource = React.createClass({
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
         DSLStore.addIncludeListener(this._onInclude);
+        DSLStore.addRestoreStateListener(this._onRestoreState);
         if (!this.props.children)
         {
             var id = this.props.params.definitionId;
@@ -89,13 +90,13 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
         DSLStore.removeIncludeListener(this._onInclude);
+        DSLStore.removeRestoreStateListener(this._onRestoreState);
     },
     
     componentDidUpdate: function() {
-        console.log('update fuori');
+        
         if (this.state.include)
         {
-            
             if(this.state.currentDefinitionName)
             {
                 this.refs.definitionName.value = this.state.currentDefinitionName;
@@ -112,7 +113,16 @@ var ManageDSLSource = React.createClass({
                 if(this.state.currentDefinitionType == "Cell")
                     this.refs.definitionType.selectedIndex = 4;
             }
+            
+            /*
+            
+            modifica source con aggiunta includeSource
+            
+            */
+            
+            this.setState({ include: false });
         }
+        
     },
     
     onEdit: function(e) {
@@ -207,7 +217,8 @@ var ManageDSLSource = React.createClass({
     },
     
     _onInclude: function() {
-        this.setState({ includeSource: DSLStore.getIncludeSource(), include: true });
+        this.setState({ include: true });
+        this.setState(getState());
     },
     
     onSave: function() {
@@ -286,15 +297,8 @@ var ManageDSLSource = React.createClass({
         var definitionSource = editor.getValue();
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
-        this.setState(
-            { 
-                currentDefinitionType: definitionType,
-                currentDefinitionName: definitionName,
-                currentDefinitionSource: definitionSource
-            }
-        );
-        RequestDSLActionCreator.saveCurrentDefinitionData(this.state.currentDefinitionName, this.state.currentDefinitionType,
-        this.state.currentDefinitionSource, this.state.currentDefinitionDatabase);
+        RequestDSLActionCreator.saveCurrentDefinitionData(definitionName, definitionType,
+        definitionSource, this.state.currentDefinitionDatabase);
         router.push('/manageDSL/manageDSLSource/include');
     },
     
