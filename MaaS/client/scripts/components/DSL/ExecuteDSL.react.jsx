@@ -7,6 +7,7 @@
 // ==========================================
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
@@ -45,7 +46,8 @@ function getNestedState(label) {
         label: label,
         action: data ? data.action : null,
         types: data ? data.types : null,
-        queried: true
+        queried: true,
+        popup: null
     };
 }
 
@@ -144,18 +146,28 @@ var ExecuteDSL = React.createClass({
         );  
     },
     
-    verticalTable: function(columns, data, perpage, definitionType, options) {
+    verticalTable: function(columns, data, perpage, definitionType) {
         var table_data = data;
+        var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
+        var showTotal = function(start, to, total) { return <span className="total-lines">{"Total rows: " + total}</span> };
+        var options = {
+            hideSizePerPage : false, //definitionType=="Cell" ? true : false,
+            sizePerPage: perpage ? perpage : 10,
+            sizePerPageList: perpageList,
+            paginationShowsTotal: showTotal
+            //,onSizePerPageList: function(size) {alert("changed to: "+size);}
+        };
+        console.log(options);
         if(data.result) {
             table_data = data.result;
         }
-        console.log(data);
         table_data.forEach(function(x, i) {
             x._DSL_ELEMENT_INDEX = i;
         });
         var index = columns.indexOf("_DSL_ELEMENT_INDEX");
         if(index != -1)
             columns.splice(index, 1);
+            
         return (
             <BootstrapTable ref="table" data={table_data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+table_data[0]._DSL_ELEMENT_INDEX}>
                 {columns.map((column, i) =>
@@ -163,7 +175,7 @@ var ExecuteDSL = React.createClass({
                     formatExtraData={
                         {type: this.state.types ? this.state.types[i] : data.types ? data.types[i] : "string",
                         selectable: this.state.selectables ? this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
-                        rawData: this.state.rowData ? this.state.rawData : data.rawData,
+                        rawData: this.state.rawData ? this.state.rawData : data.rawData,
                         nestedDocument: this.state.nestedDocument ? this.state.nestedDocument : data.document
                         }
                     }
@@ -178,31 +190,56 @@ var ExecuteDSL = React.createClass({
     },
     
     togglePopUp: function(id) {
-        var container = document.getElementById("dashboard-container");
-        var clone = document.getElementById(id).cloneNode(true);
-        var popup = document.createElement("div");
-        popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
-        var modal = document.createElement("div");
-        modal.setAttribute("class", "modal");
-        var close = document.createElement("p");
-        close.setAttribute("class", "close-modal");
-        close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
-        popup.appendChild(close);
-        popup.appendChild(clone);
-        modal.appendChild(popup);
-        container.appendChild(modal);
-
-        close.onclick = function() {
-            //modal.style.display = "none";
-            container.removeChild(modal);
-        };
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                //modal.style.display = "none";
+        alert("pop");
+        if(!this.state.popup)
+        {
+            this.setState({popup: id});
+            var container = document.getElementById("dashboard-container");
+            var entity = document.getElementById(id);
+            var parent = entity.parentElement;
+            
+            // Epaque cell
+            var cell = parent.parentElement;
+            cell.classList.add("selected-cell");
+            
+            // Enlarge entity and save dashboard width
+            var width = entity.offsetWidth;
+            entity.style.width = "100%";
+            
+            // Create pop-up
+            var modal = document.createElement("div");  // Background
+            modal.setAttribute("class", "modal");
+            var popup = document.createElement("div");  // White box for dsl entity
+            popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
+            var close = document.createElement("p");    // Close button
+            close.setAttribute("class", "close-modal");
+            close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
+            
+            popup.appendChild(close);
+            popup.appendChild(entity);
+            modal.appendChild(popup);
+            container.appendChild(modal);
+    
+            var instance = this;
+            close.onclick = function() {
                 container.removeChild(modal);
-            }
-        };
+                parent.appendChild(entity);
+                cell.classList.remove("selected-cell");
+                instance.setState({popup: null});
+                entity.style.width = width+"px";
+            };
+    
+            window.onclick = function(event) {
+                if(event.target == modal || event.target.className.match("selectable"))
+                {
+                    container.removeChild(modal);
+                    parent.appendChild(entity);
+                    cell.classList.remove("selected-cell");
+                    instance.setState({popup: null});
+                    entity.style.width = width+"px";
+                }
+            };
+        }
     },
     
     render: function() {
@@ -221,28 +258,6 @@ var ExecuteDSL = React.createClass({
         
         if((this.state.data || this.state.dashboardRows) && this.state.queried)
         {
-            var perpage = this.state.perpage;
-            var perpageList = perpage ? [perpage, 10, 25, 30, 50] : [10, 25, 30, 50];
-            var showTotal = function(start, to, total) { return <span id="total-lines">{"Total rows: " + total}</span> };
-            var options = {
-                hideSizePerPage : false, //definitionType=="Cell" ? true : false,
-                sizePerPage: perpage ? perpage : 10,
-                sizePerPageList: perpageList,
-                paginationShowsTotal: showTotal
-                //,onSizePerPageList: function(size) {alert("changed to: "+size);}
-            };
-            
-                /*
-                sizePerPageList : Array
-                You can change the dropdown list for size per page if you enable pagination.
-                sizePerPage : Number
-                Means the size per page you want to locate as default.
-                paginationSize : Number
-                To define the pagination bar length, default is 5.
-                hideSizePerPage : Bool
-                Enable to hide the dropdown list for size per page, default is false.
-                */
-                
             if(this.state.data)
             {
                 var columns = [];
@@ -264,7 +279,7 @@ var ExecuteDSL = React.createClass({
                     
                     content = (
                         <div id="dsl-data-table" className={definitionType == "Cell" ? "cell-table-view" : definitionType=="Collection" ? "collection-table-view" : ""}>
-                            {this.verticalTable(columns, data, perpage, definitionType, options)}
+                            {this.verticalTable(columns, data, this.state.perpage, definitionType)}
                         </div>
                     );
                 }
@@ -286,15 +301,15 @@ var ExecuteDSL = React.createClass({
                         <div id="dsl-data-table" className="dashboard-table-view">
                             {rows.map((row, i) => 
                                 <div key={"row_"+i} className="dashboard-row">
-                                    {row.map((entity, j) => 
-                                        <div key={"entity_"+j} id={"entity_"+i+j} onClick={this.togglePopUp.bind(this, "entity_"+i+j)}
-                                        className={"dashboard-cell dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
-                                            <div key={"thumb_"+j} className="dsl-thumbnail dropdown-button">
+                                    {row.map((entity, j) =>
+                                        <div key={"entity_"+j} onClick={this.togglePopUp.bind(this, "entity_"+i+j)}
+                                        className={"dashboard-cell dropdown-button"}>
+                                            <div key={"thumb_"+j} id={"entity_"+i+j} className={"dsl-thumbnail dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
                                                 {entity.data.label ? <p className="entity-label">{entity.data.label}</p> : <p className="entity-label"></p>}
                                                 {entity.type == "Document" ? 
                                                     this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
                                                     :
-                                                    this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type, options)}
+                                                    this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)}
                                             </div>
                                         </div>
                                     )}
