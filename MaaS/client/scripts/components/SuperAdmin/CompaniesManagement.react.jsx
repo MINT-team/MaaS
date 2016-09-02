@@ -26,6 +26,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
   return {
+      userType: SessionStore.whoIam(),
       errors: [],//SuperAdminStore.getErrors(),
       isLogged: SessionStore.isLogged(),
       companies: CompanyStore.getCompanies()       //JSON that contains the companies in the system 
@@ -124,7 +125,7 @@ var CompaniesManagement = React.createClass({
   },
   
   render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0) 
+    if(!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") 
     {
       return (
         <AuthorizationRequired />
@@ -165,7 +166,7 @@ var CompaniesManagement = React.createClass({
           <div id="table-top">
           </div>
           <div id="table">
-            <BootstrapTable ref="table" keyField="id" selectRow={selectRowProp} pagination={true} data={data}
+            <BootstrapTable ref="table" keyField="id" pagination={true} data={data}
                 search={true} striped={true} hover={true} options={options}>
               <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
               <TableHeaderColumn dataField="owner" dataSort={true}>Owner</TableHeaderColumn>

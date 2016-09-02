@@ -10,8 +10,10 @@ var Sidebar = require('../Sidebar.react.jsx');
 function getState() {
     
   return {
+            userType: SessionStore.whoIam(),
             errors: [],//DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
+            userType: SessionStore.whoIam(),
             companies:  localStorage.getItem('companies')  //JSON that contains the companies in the system 
       };
 }
@@ -40,7 +42,7 @@ var DatabaseManagement = React.createClass({
   },
   
     render: function() {
-        if(!this.state.isLogged || this.state.errors.length > 0) 
+        if(!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") 
         {
             alert(this.state.errors);
             return (

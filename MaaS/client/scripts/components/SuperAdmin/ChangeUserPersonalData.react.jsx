@@ -15,9 +15,11 @@ var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 function getState() {
   return {
+    userType: SessionStore.whoIam(),
     isLogged: SessionStore.isLogged(),
     first: "false",
     errors: UserStore.getErrors(),
@@ -29,6 +31,8 @@ var ChangeUserPersonalData = React.createClass({
 
   getInitialState: function() {
       return {
+          userType: SessionStore.whoIam(),
+          isLogged: SessionStore.isLogged(),
           accessToken: SessionStore.getAccessToken() || this.props.location.query.access_token,
           userId: this.props.params.userId,
           errors: [],
@@ -78,6 +82,14 @@ var ChangeUserPersonalData = React.createClass({
   },
 
   render: function() {
+    
+    if(!this.state.isLogged || this.state.errors.length > 0 /*|| this.state.userType != "superAdmin"*/) 
+    {
+      return (
+        <AuthorizationRequired />
+      );
+    }
+    
 	  var title, content, errors;
     if(this.state.errors.length > 0 || this.state.first == "true") 
     { 
