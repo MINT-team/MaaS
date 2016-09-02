@@ -90,6 +90,10 @@ var RequestDSLActionCreator = {
                 includeSource
             }
         });
+    },
+    
+    sendEmail: function(userId, definitonId, email, label, json, csv) {
+        WebAPIUtils.sendEmail(userId, definitonId, email, label, json, csv);
     }
 };
 

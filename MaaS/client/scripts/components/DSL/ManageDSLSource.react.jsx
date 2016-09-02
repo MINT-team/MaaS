@@ -15,6 +15,85 @@ var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCre
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 
+function includeCollection(instance ,editorSession) {
+    /*
+    var linesNum = editorSession.getLength();
+    for (var row=1;row<linesNum;row++)
+    {
+        
+    }
+    */
+    var tot;
+    var source = instance.state.currentDefinitionSource;
+    
+    
+    source = source.replace(/\s/g, '');
+    var macro = source.slice(0, 10);
+    
+    
+    if (macro != "Collection")
+    {
+        alert('errore macro');
+    }
+    else
+    {
+        //var txt2 = txt1.slice(0, 3) + "bar" + txt1.slice(3);
+        if (source[source.length-1] != "}")
+        {
+            alert('errore }');
+        }
+        else
+        {
+            var index = instance.state.currentDefinitionSource.indexOf("}", source.length-1);
+            tot = instance.state.currentDefinitionSource.slice(0, index-1) + instance.state.includeSource 
+            + instance.state.currentDefinitionSource.slice(index);
+            console.log(tot);
+        }
+    }
+}
+
+/*
+Collection(
+    table: "customers",
+    label: "JuniorCustomers",
+    ---------id: "Junior",
+    ---------Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+) {
+    column(
+        name: "3"
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    column(
+        name: "4"
+    )
+    Document(
+        table: "prova"
+    ){
+        row(
+            name: "asd"
+        )
+        action(
+            SendEmail: "true"
+        )
+    }   
+    column(
+        name: "5"
+    )
+}
+*/
+
+
+function includeDashboard() {
+    
+}
+
 function getState() {
     return {
             errors: DSLStore.getErrors(),
@@ -123,8 +202,11 @@ var ManageDSLSource = React.createClass({
             
             if (this.state.includeSource != "")
             {
-                var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-                var tokenIterator = new TokenIterator(editorSession, 0, 0);
+                //var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+                //var tokenIterator = new TokenIterator(editorSession, 0, 0);
+                //tokenIterator.stepForward();
+                //console.log(tokenIterator.getCurrentToken());
+                includeCollection(this, editorSession);
             }
             
             this.setState({ include: false });
@@ -132,42 +214,7 @@ var ManageDSLSource = React.createClass({
         
     },
     
-    /*
-Collection(
-    table: "customers",
-    label: "JuniorCustomers",
-    ---------id: "Junior",
-    ---------Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-) {
-    column(
-        name: "3"
-    )
-    action(
-        Export: "true",
-        SendEmail: "true"
-    )
-    column(
-        name: "4"
-    )
-    Document(
-        table: "prova"
-    ){
-        row(
-            name: "asd"
-        )
-        action(
-            SendEmail: "true"
-        )
-    }   
-    column(
-        name: "5"
-    )
-}
-*/
+    
 
 /*
 

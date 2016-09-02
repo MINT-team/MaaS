@@ -1,4 +1,6 @@
 var app = require('../../server/server.js');
+var loopback = require('loopback');
+var path = require('path');
 var sweet = require('sweet.js');
 var fs = require('fs');
 var mongoose = require('mongoose');
@@ -412,6 +414,84 @@ module.exports = function(DSL) {
         }
     );
     
+    DSL.sendEmail = function(userId, id, email, label, json, csv, cb) {
+        var user = app.models.user;
+        user.findById(userId, function(err, userInstance) {
+            if(err || !userInstance)
+            {
+                console.log("> SendEmail failed: user not found");
+                return cb(null, { message: "User not found" });
+            }
+            var sender;
+            if(userInstance.name || userInstance.surname)
+            {
+                sender = userInstance.name + " " + userInstance.surname
+            }
+            else
+            {
+                sender = userInstance.email;
+            }
+            var attachments = [];
+            if(json)
+            {
+                attachments.push({
+                    filename: label + ".json",
+                    content: json,
+                    contentType: 'application/json'
+                });
+            }
+            if(csv)
+            {
+                attachments.push({
+                    filename: label + ".csv",
+                    content: csv,
+                    contentType: 'text/csv'
+                });
+            }
+            //var url = HOST_URL + ':' + PORT + API_ROOT + '/users/confirm';
+            var template = loopback.template(path.resolve(__dirname, '../../server/views/dsl.ejs'));
+            var options = {
+                sender: sender,
+                downloadHref: ' '
+            };
+            var html = template(options);
+
+            user.app.models.Email.send({
+                to: email,
+                from: 'noreply@maas.com',
+                subject: 'Data Sharing',
+                html: html,
+                attachments: attachments
+            }, function(err) {
+                if (err)
+                {
+                    console.log('> SendEmail failed: error sending email');
+                    return cb(null, { message: "Error sending data sharing email" }, null);
+                }
+                console.log('> Sending data sharing email to:', email);
+                return cb(null, null);
+            });
+        });
+    };
+    
+    DSL.remoteMethod(
+        'sendEmail',
+        {
+            description: "Send data sharing",
+            accepts: [
+                { arg: 'userId', type: 'string', required: true, description: 'User id' },
+                { arg: 'id', type: 'string', required: true, description: 'Definition id' },
+                { arg: 'email', type: 'string', required: true, description: 'Email address' },
+                { arg: 'label', type: 'string', required: true, description: 'Data label' },
+                { arg: 'json', type: 'string', required: true, description: 'Data (json)' },
+                { arg: 'csv', type: 'string', required: true, description: 'Data (csv)' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'post', path: '/:id/sendEmail' }
+        }
+    );
     
     DSL.compile = function(dsl, cb) {
         var expanded;
@@ -615,10 +695,9 @@ module.exports = function(DSL) {
         {
             //.....
         }
-        console.log(body.action);
+        
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
-            console.log("dentro");
             data.action = body.action;
         }
         

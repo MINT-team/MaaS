@@ -371,7 +371,7 @@ var ExecuteDSL = React.createClass({
                         csv = buildCSV();
                         break;
                 }
-                RequestDSLActionCreator.sendEmail(instance.refs.email.value, json, csv);
+                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitonId, instance.refs.email.value, label, json, csv);
             };
             
             if(action.SendEmail == true || action.SendEmail == "true")          // All format types

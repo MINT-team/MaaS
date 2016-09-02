@@ -138,6 +138,10 @@ var RequestDSLActionCreator = {
                 includeSource: includeSource
             }
         });
+    },
+
+    sendEmail: function sendEmail(userId, definitonId, email, label, json, csv) {
+        WebAPIUtils.sendEmail(userId, definitonId, email, label, json, csv);
     }
 };
 
@@ -772,36 +776,66 @@ ReactDOM.render(React.createElement(App, null), document.getElementById('app'));
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../stores/SessionStore.react.jsx');
+
+function getState() {
+    return {
+        isLogged: SessionStore.isLogged()
+    };
+}
 
 var AuthorizationRequired = React.createClass({
     displayName: 'AuthorizationRequired',
 
+
+    getInitialState: function getInitialState() {
+        return getState();
+    },
+
     render: function render() {
-        return React.createElement(
-            'div',
-            { className: 'container' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                'Authorization required'
-            ),
-            React.createElement(
-                'p',
-                { className: 'container-description' },
-                'You need to be logged in to view this page.'
-            ),
-            React.createElement(
-                Link,
-                { to: '/login', className: 'button' },
-                'Go to Login'
-            )
-        );
+
+        if (this.state.isLogged) {
+            return React.createElement(
+                'div',
+                { className: 'container' },
+                React.createElement(
+                    'p',
+                    { className: 'container-title' },
+                    'Authorization required'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'container-description' },
+                    'You aren\'t a super administrator so you can\'t display this page.'
+                )
+            );
+        } else {
+            return React.createElement(
+                'div',
+                { className: 'container' },
+                React.createElement(
+                    'p',
+                    { className: 'container-title' },
+                    'Authorization required'
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'container-description' },
+                    'You need to be logged in to view this page.'
+                ),
+                React.createElement(
+                    Link,
+                    { to: '/login', className: 'button' },
+                    'Go to Login'
+                )
+            );
+        }
     }
 });
 
 module.exports = AuthorizationRequired;
 
-},{"react":370,"react-router":139}],15:[function(require,module,exports){
+},{"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],15:[function(require,module,exports){
 'use strict';
 
 // Name: {AddExternalDatabase.react.jsx}
@@ -3253,7 +3287,7 @@ var ExecuteDSL = React.createClass({
                         csv = buildCSV();
                         break;
                 }
-                RequestDSLActionCreator.sendEmail(instance.refs.email.value, json, csv);
+                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitonId, instance.refs.email.value, label, json, csv);
             };
 
             if (action.SendEmail == true || action.SendEmail == "true") // All format types
@@ -4403,6 +4437,73 @@ var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
+function includeCollection(instance, editorSession) {
+    /*
+    var linesNum = editorSession.getLength();
+    for (var row=1;row<linesNum;row++)
+    {
+        
+    }
+    */
+    var tot;
+    var source = instance.state.currentDefinitionSource;
+
+    source = source.replace(/\s/g, '');
+    var macro = source.slice(0, 10);
+
+    if (macro != "Collection") {
+        alert('errore macro');
+    } else {
+        //var txt2 = txt1.slice(0, 3) + "bar" + txt1.slice(3);
+        if (source[source.length - 1] != "}") {
+            alert('errore }');
+        } else {
+            var index = instance.state.currentDefinitionSource.indexOf("}", source.length - 1);
+            tot = instance.state.currentDefinitionSource.slice(0, index - 1) + instance.state.includeSource + instance.state.currentDefinitionSource.slice(index);
+            console.log(tot);
+        }
+    }
+}
+
+/*
+Collection(
+    table: "customers",
+    label: "JuniorCustomers",
+    ---------id: "Junior",
+    ---------Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+) {
+    column(
+        name: "3"
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    column(
+        name: "4"
+    )
+    Document(
+        table: "prova"
+    ){
+        row(
+            name: "asd"
+        )
+        action(
+            SendEmail: "true"
+        )
+    }   
+    column(
+        name: "5"
+    )
+}
+*/
+
+function includeDashboard() {}
+
 function getState() {
     return {
         errors: DSLStore.getErrors(),
@@ -4501,50 +4602,16 @@ var ManageDSLSource = React.createClass({
             }
 
             if (this.state.includeSource != "") {
-                var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-                var tokenIterator = new TokenIterator(editorSession, 0, 0);
+                //var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+                //var tokenIterator = new TokenIterator(editorSession, 0, 0);
+                //tokenIterator.stepForward();
+                //console.log(tokenIterator.getCurrentToken());
+                includeCollection(this, editorSession);
             }
 
             this.setState({ include: false });
         }
     },
-
-    /*
-    Collection(
-    table: "customers",
-    label: "JuniorCustomers",
-    ---------id: "Junior",
-    ---------Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-    ) {
-    column(
-        name: "3"
-    )
-    action(
-        Export: "true",
-        SendEmail: "true"
-    )
-    column(
-        name: "4"
-    )
-    Document(
-        table: "prova"
-    ){
-        row(
-            name: "asd"
-        )
-        action(
-            SendEmail: "true"
-        )
-    }   
-    column(
-        name: "5"
-    )
-    }
-    */
 
     /*
     
@@ -5763,7 +5830,11 @@ var Header = React.createClass({
                         React.createElement(
                             Link,
                             { to: '/profile' },
-                            React.createElement('span', { id: 'header-user-name' }),
+                            React.createElement(
+                                'span',
+                                { id: 'header-user-name' },
+                                this.props.userName
+                            ),
                             React.createElement(
                                 'i',
                                 { className: 'material-icons md-36' },
@@ -6435,31 +6506,6 @@ var MaaSApp = React.createClass({
                 React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS' })
             );
         }
-
-        /*var content;
-        if(this.state.user.type == "superAdmin")
-        {
-            content =( 
-                <div id="app">
-                    <Header isLogged={this.state.isLogged}  type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
-                        {this.props.children}
-                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
-                </div>
-            );
-        }
-        else
-        {
-            content =( 
-                <div id="app">
-                   <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
-                        {this.props.children}
-                   <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
-                </div>
-            );
-        }
-        return (
-            {content}
-        );*/
     }
 });
 
@@ -8024,7 +8070,8 @@ function getState() {
     name: CompanyStore.getName(),
     errors: CompanyStore.getErrors(),
     isLogged: SessionStore.isLogged(),
-    first: "false"
+    first: "false",
+    userType: SessionStore.whoIam()
   };
 }
 
@@ -8037,7 +8084,9 @@ var ChangeCompanyName = React.createClass({
       name: this.props.params.companyName,
       companyId: this.props.params.companyId,
       first: "true",
-      errors: []
+      errors: [],
+      isLogged: SessionStore.isLogged(),
+      userType: SessionStore.whoIam()
     };
   },
 
@@ -8074,6 +8123,10 @@ var ChangeCompanyName = React.createClass({
   },
 
   render: function render() {
+    if (!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") {
+      return React.createElement(AuthorizationRequired, null);
+    }
+
     var title, content, errors;
     if (this.state.errors.length > 0 || this.state.first == "true") {
       title = "Change company name";
@@ -8157,9 +8210,11 @@ var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 function getState() {
   return {
+    userType: SessionStore.whoIam(),
     isLogged: SessionStore.isLogged(),
     first: "false",
     errors: UserStore.getErrors(),
@@ -8173,6 +8228,8 @@ var ChangeUserPersonalData = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
+      userType: SessionStore.whoIam(),
+      isLogged: SessionStore.isLogged(),
       accessToken: SessionStore.getAccessToken() || this.props.location.query.access_token,
       userId: this.props.params.userId,
       errors: [],
@@ -8219,6 +8276,11 @@ var ChangeUserPersonalData = React.createClass({
   },
 
   render: function render() {
+
+    if (!this.state.isLogged || this.state.errors.length > 0 /*|| this.state.userType != "superAdmin"*/) {
+        return React.createElement(AuthorizationRequired, null);
+      }
+
     var title, content, errors;
     if (this.state.errors.length > 0 || this.state.first == "true") {
       title = "Change user data";
@@ -8312,7 +8374,7 @@ var ChangeUserPersonalData = React.createClass({
 
 module.exports = ChangeUserPersonalData;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],46:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"react":370,"react-router":139}],46:[function(require,module,exports){
 'use strict';
 
 // Name: {CompaniesManagement.react.jsx}
@@ -8342,6 +8404,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
+        userType: SessionStore.whoIam(),
         errors: [], //SuperAdminStore.getErrors(),
         isLogged: SessionStore.isLogged(),
         companies: CompanyStore.getCompanies() //JSON that contains the companies in the system 
@@ -8502,7 +8565,7 @@ var CompaniesManagement = React.createClass({
     },
 
     render: function render() {
-        if (!this.state.isLogged || this.state.errors.length > 0) {
+        if (!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") {
             return React.createElement(AuthorizationRequired, null);
         }
         if (this.props.children) {
@@ -8545,7 +8608,7 @@ var CompaniesManagement = React.createClass({
                     { id: 'table' },
                     React.createElement(
                         BootstrapTable,
-                        { ref: 'table', keyField: 'id', selectRow: selectRowProp, pagination: true, data: data,
+                        { ref: 'table', keyField: 'id', pagination: true, data: data,
                             search: true, striped: true, hover: true, options: options },
                         React.createElement(
                             TableHeaderColumn,
@@ -8589,9 +8652,24 @@ module.exports = CompaniesManagement;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+
+function getState() {
+
+  return {
+    isLogged: SessionStore.isLogged(),
+    userType: SessionStore.whoIam()
+  };
+}
 
 var DashboardSuperAdmin = React.createClass({
   displayName: 'DashboardSuperAdmin',
+
+
+  getInitialState: function getInitialState() {
+    return getState();
+  },
 
   render: function render() {
     var content = React.createElement(
@@ -8613,24 +8691,31 @@ var DashboardSuperAdmin = React.createClass({
         React.createElement(
           'i',
           { className: 'material-icons-dashboard' },
-          ''
+          ''
         ),
         'Impersonate other user'
       )
     );
 
-    return React.createElement(
-      'div',
-      null,
-      this.props.children || content
-    );
+    if (this.state.userType != "superAdmin" || !this.state.isLogged) {
+
+      return React.createElement(AuthorizationRequired, null);
+    } else {
+      return React.createElement(
+        'div',
+        null,
+        this.props.children || content
+      );
+    }
   }
 });
 
 module.exports = DashboardSuperAdmin;
 
-},{"react":370,"react-router":139}],48:[function(require,module,exports){
+},{"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"react":370,"react-router":139}],48:[function(require,module,exports){
 'use strict';
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -8642,12 +8727,13 @@ var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var Sidebar = require('../Sidebar.react.jsx');
 
 function getState() {
+    var _ref;
 
-    return {
+    return _ref = {
+        userType: SessionStore.whoIam(),
         errors: [], //DSLStore.getErrors(),
-        isLogged: SessionStore.isLogged(),
-        companies: localStorage.getItem('companies') //JSON that contains the companies in the system 
-    };
+        isLogged: SessionStore.isLogged()
+    }, _defineProperty(_ref, 'userType', SessionStore.whoIam()), _defineProperty(_ref, 'companies', localStorage.getItem('companies')), _ref;
 }
 
 var DatabaseManagement = React.createClass({
@@ -8674,7 +8760,7 @@ var DatabaseManagement = React.createClass({
     },
 
     render: function render() {
-        if (!this.state.isLogged || this.state.errors.length > 0) {
+        if (!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") {
             alert(this.state.errors);
             return React.createElement(AuthorizationRequired, null);
         }
@@ -8782,6 +8868,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
+        isImpersonate: SessionStore.getImpersonate(),
+        userType: SessionStore.whoIam(),
         users: UserStore.getAllUsers(),
         errors: UserStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -8802,29 +8890,44 @@ var ImpersonateUser = React.createClass({
     },
 
     componentWillMount: function componentWillMount() {
-        RequestUserActionCreator.getUsers(); //Recovery all the users
+        if (this.state.isImpersonate == "true") RequestSessionActionCreator.leaveImpersonate();else RequestUserActionCreator.getUsers();
 
         UserStore.addChangeListener(this._onChange);
         UserStore.addAllUsersLoadListener(this._onChange);
-        //UserStore.addUserLoadListener(/*this._onChange*/);////////////////////////////////////
-
+        SessionStore.addLeaveImpersonateListener(this._onLeave);
         SessionStore.addImpersonateListener(this.onImpersonate);
-        //UserStore.addUserLoadListener(this._onUserLoad);
+        UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function componentWillUnmount() {
         UserStore.removeChangeListener(this._onChange);
         UserStore.removeAllUsersLoadListener(this._onChange);
-        //UserStore.removeAllUsersLoadListener(/*this._onChange*/);////////////////////////////////////
+        SessionStore.removeLeaveImpersonateListener(this._onLeave);
         SessionStore.removeImpersonateListener(this.onImpersonate);
-        //UserStore.removeUserLoadListener(this._onUserLoad);
+        UserStore.removeUserLoadListener(this._onUserLoad);
+    },
+
+    //impersonifico -> premo tasto "indietro" del browser -> eseguo il leave dall'utente imperonificato -> eseguo la richiesta con access token del super admin
+    _onLeave: function _onLeave() {
+        RequestUserActionCreator.getUsers();
     },
 
     handleRedirect: function handleRedirect() {
-        // qui va fatto il controllo per capire se ha dashboard attive o no
+        // const { router } = this.context;
+        // router.push('/manageDSL'); 
         var router = this.context.router;
 
-        router.push('/manageDSL');
+        console.log("cosa è attivo? ", this.state.activeDashboard);
+        if (this.state.activeDashboard == "default") {
+            router.push('/manageDSL'); // redirect to Dashboard page
+        } else {
+                //Redirect to active dashboard
+            }
+    },
+
+    _onUserLoad: function _onUserLoad() {
+        this.setState({ activeDashboard: UserStore.getActiveDashboard() });
+        this.handleRedirect();
     },
 
     _onChange: function _onChange() {
@@ -8835,14 +8938,7 @@ var ImpersonateUser = React.createClass({
         RequestUserActionCreator.getUser(SessionStore.getUserId());
         RequestUserActionCreator.getCompany(SessionStore.getUserId());
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
-        this.handleRedirect();
-        // RequestUserActionCreator.getCompany(SessionStore.getUserId());
-        // RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
     },
-
-    // _onUserLoad:function() {
-    //     this.handleRedirect();
-    // },
 
     buttonFormatter: function buttonFormatter(cell, row) {
         var errors;
@@ -8904,7 +9000,7 @@ var ImpersonateUser = React.createClass({
 
     render: function render() {
 
-        if (!this.state.isLogged) {
+        if (!this.state.isLogged || this.state.userType != "superAdmin") {
             return React.createElement(AuthorizationRequired, null);
         }
         var title, content;
@@ -8985,7 +9081,7 @@ var ImpersonateUser = React.createClass({
                 });
             }
 
-            title = "Manage users";
+            title = "Impersonate User";
             content = React.createElement(
                 'div',
                 { id: 'manage-dsl' },
@@ -9013,7 +9109,7 @@ var ImpersonateUser = React.createClass({
                         React.createElement(
                             BootstrapTable,
                             { ref: 'table', data: data, pagination: true,
-                                search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
+                                search: true, striped: true, hover: true, options: options, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
                                 { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
@@ -9076,6 +9172,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
+
+        userType: SessionStore.whoIam(),
         users: UserStore.getAllUsers(),
         errors: UserStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -9313,7 +9411,7 @@ var usersManagement = React.createClass({
 
     render: function render() {
 
-        if (!this.state.isLogged) {
+        if (!this.state.isLogged || this.state.userType != "superAdmin") {
             return React.createElement(AuthorizationRequired, null);
         }
         var title, content;
@@ -9421,7 +9519,7 @@ var usersManagement = React.createClass({
                         React.createElement(
                             BootstrapTable,
                             { ref: 'table', data: data, pagination: true,
-                                search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
+                                search: true, striped: true, hover: true, options: options, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
                                 { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
@@ -11607,6 +11705,27 @@ module.exports = {
         } else {
           ResponseDSLActionCreator.responseChangeDefinitionDatabase(res.definition, null);
         }
+      }
+    });
+  },
+
+  sendEmail: function sendEmail(userId, definitonId, email, label, json, csv) {
+    alert("send");
+    request.post(APIEndpoints.DSL + '/' + definitonId + '/sendEmail').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      userId: userId,
+      email: email,
+      label: label,
+      json: json,
+      csv: csv
+    }).end(function (err, res) {
+      if (res) {
+        alert("res " + res);
+        res = JSON.parse(res.text);
+        if (res.error) {
+          //ResponseDSLActionCreator.responseChangeDefinitionDatabase(null, res.error.message);
+        } else {
+            //ResponseDSLActionCreator.responseChangeDefinitionDatabase(res.definition, null);
+          }
       }
     });
   }

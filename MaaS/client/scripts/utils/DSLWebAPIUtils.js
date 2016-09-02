@@ -334,5 +334,35 @@ module.exports = {
             }
           }
         });
+    },
+    
+    sendEmail: function(userId, definitonId, email, label, json, csv) {
+      alert("send");
+      request
+        .post(APIEndpoints.DSL + '/' + definitonId + '/sendEmail')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send({
+          userId: userId,
+          email: email,
+          label: label,
+          json: json,
+          csv: csv
+        })
+        .end(function(err, res) {
+          if(res)
+          {
+            alert("res "+ res);
+            res = JSON.parse(res.text);
+            if(res.error)
+            {
+              //ResponseDSLActionCreator.responseChangeDefinitionDatabase(null, res.error.message);
+            }
+            else
+            {
+              //ResponseDSLActionCreator.responseChangeDefinitionDatabase(res.definition, null);
+            }
+          }
+        });
     }
 };
