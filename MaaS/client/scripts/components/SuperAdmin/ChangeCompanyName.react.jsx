@@ -24,7 +24,8 @@ function getState(){
       name: CompanyStore.getName(),
       errors: CompanyStore.getErrors(),
       isLogged: SessionStore.isLogged(),
-      first: "false"
+      first: "false",
+      userType: SessionStore.whoIam()
     };
 }
 
@@ -36,7 +37,9 @@ var ChangeCompanyName = React.createClass({
         name: this.props.params.companyName,
         companyId: this.props.params.companyId,
         first: "true",
-        errors: []
+        errors: [],
+        isLogged: SessionStore.isLogged(),
+        userType: SessionStore.whoIam()
     };
   },
   
@@ -77,6 +80,13 @@ var ChangeCompanyName = React.createClass({
   },
   
 	 render: function() {
+	  if(!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") 
+    {
+      return (
+        <AuthorizationRequired />
+      );
+    }  
+	   
 	  var title, content, errors;
     if(this.state.errors.length > 0 || this.state.first == "true") 
     { 

@@ -25,6 +25,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
+            isImpersonate: SessionStore.getImpersonate(),
+            userType: SessionStore.whoIam(),
             users: UserStore.getAllUsers(),
             errors: UserStore.getErrors(),
             isLogged: SessionStore.isLogged(),
@@ -43,27 +45,47 @@ var ImpersonateUser = React.createClass({
     },
 
     componentWillMount: function() {
-        RequestUserActionCreator.getUsers();  //Recovery all the users
+        if(this.state.isImpersonate == "true") RequestSessionActionCreator.leaveImpersonate();
+        else  RequestUserActionCreator.getUsers(); 
         
         UserStore.addChangeListener(this._onChange);
         UserStore.addAllUsersLoadListener(this._onChange);
-                                                                                   //UserStore.addUserLoadListener(/*this._onChange*/);////////////////////////////////////
-    
+        SessionStore.addLeaveImpersonateListener(this._onLeave);
         SessionStore.addImpersonateListener(this.onImpersonate);
-        //UserStore.addUserLoadListener(this._onUserLoad);
+        UserStore.addUserLoadListener(this._onUserLoad);
     },
 
     componentWillUnmount: function() {
         UserStore.removeChangeListener(this._onChange);
         UserStore.removeAllUsersLoadListener(this._onChange);
-                                                                                    //UserStore.removeAllUsersLoadListener(/*this._onChange*/);////////////////////////////////////
+        SessionStore.removeLeaveImpersonateListener(this._onLeave);
         SessionStore.removeImpersonateListener(this.onImpersonate);
-        //UserStore.removeUserLoadListener(this._onUserLoad);
+        UserStore.removeUserLoadListener(this._onUserLoad);
     },
     
-    handleRedirect: function() {       // qui va fatto il controllo per capire se ha dashboard attive o no
+    //impersonifico -> premo tasto "indietro" del browser -> eseguo il leave dall'utente imperonificato -> eseguo la richiesta con access token del super admin
+    _onLeave: function(){  
+        RequestUserActionCreator.getUsers();
+    },
+    
+    handleRedirect: function() {
+        // const { router } = this.context;
+        // router.push('/manageDSL'); 
         const { router } = this.context;
-         router.push('/manageDSL'); 
+        console.log("cosa è attivo? ",this.state.activeDashboard);
+          if (this.state.activeDashboard == "default")
+          {
+            router.push('/manageDSL');   // redirect to Dashboard page
+          }
+          else
+          {
+            //Redirect to active dashboard
+          }
+    },
+
+    _onUserLoad: function() {
+        this.setState({ activeDashboard: UserStore.getActiveDashboard() });
+        this.handleRedirect();
     },
 
     _onChange: function() {
@@ -74,14 +96,7 @@ var ImpersonateUser = React.createClass({
         RequestUserActionCreator.getUser(SessionStore.getUserId());
         RequestUserActionCreator.getCompany(SessionStore.getUserId());
         RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
-        this.handleRedirect();
-        // RequestUserActionCreator.getCompany(SessionStore.getUserId());
-        // RequestUserActionCreator.getEditorConfig(SessionStore.getUserId());
     },
-    
-    // _onUserLoad:function() {
-    //     this.handleRedirect();
-    // },
     
     buttonFormatter: function(cell, row) {
         var errors;
@@ -137,7 +152,7 @@ var ImpersonateUser = React.createClass({
     
     render: function() {
   
-        if(!this.state.isLogged) 
+        if(!this.state.isLogged || this.state.userType != "superAdmin") 
         {
             return (
                 <AuthorizationRequired />
@@ -206,7 +221,7 @@ var ImpersonateUser = React.createClass({
             }
             
             
-            title = "Manage users";
+            title = "Impersonate User";
             content = (
                 <div id="manage-dsl">
                     <Sidebar title="Users filter" data={sidebarData}/>
@@ -218,7 +233,7 @@ var ImpersonateUser = React.createClass({
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
-                            search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                            search={true} striped={true} hover={true} options={options} keyField="id">
                                 <TableHeaderColumn dataField="email" dataSort={true} columnClassName="emailColumn" >Email</TableHeaderColumn>
                                 <TableHeaderColumn dataField="role" dataSort={true} columnClassName="roleColumn">Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>

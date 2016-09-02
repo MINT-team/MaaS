@@ -546,9 +546,12 @@ input {
 }
 
 #header-dropdown {
+    float: right;
+    width: 12em;
+    right: 1.9em;
     margin-top: 0.7em;
-    margin-left: 4em;
-    margin-right: 2em;
+    /*margin-left: 4em;*/
+    /*margin-right: 2em;*/
 }
 
 #header-dropdown::after {

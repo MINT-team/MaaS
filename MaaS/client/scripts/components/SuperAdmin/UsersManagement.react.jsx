@@ -26,6 +26,8 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     return {
+            
+            userType: SessionStore.whoIam(),
             users: UserStore.getAllUsers(),
             errors: UserStore.getErrors(),
             isLogged: SessionStore.isLogged(),
@@ -191,7 +193,7 @@ var usersManagement = React.createClass({
     
     render: function() {
   
-        if(!this.state.isLogged) 
+        if(!this.state.isLogged || this.state.userType != "superAdmin") 
         {
             return (
                 <AuthorizationRequired />
@@ -271,7 +273,7 @@ var usersManagement = React.createClass({
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
-                            search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
+                            search={true} striped={true} hover={true} options={options} keyField="id">
                                 <TableHeaderColumn dataField="email" dataSort={true} columnClassName="emailColumn" >Email</TableHeaderColumn>
                                 <TableHeaderColumn dataField="role" dataSort={true} columnClassName="roleColumn">Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>

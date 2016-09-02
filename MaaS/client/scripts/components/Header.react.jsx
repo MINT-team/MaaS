@@ -114,7 +114,7 @@ var Header = React.createClass({
                 headerPanel = (
                     <div id="header-panel">
                         <div className="tooltip tooltip-bottom">
-                            <Link to="/profile"><span id="header-user-name"></span><i className="material-icons md-36">&#xE7FD;</i></Link>
+                            <Link to="/profile"><span id="header-user-name">{this.props.userName}</span><i className="material-icons md-36">&#xE7FD;</i></Link>
                             <p id="profile-tooltip" className="tooltip-text">Your profile</p>
                         </div>
                         <div className="tooltip tooltip-bottom">

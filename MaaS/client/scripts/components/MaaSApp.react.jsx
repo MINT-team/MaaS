@@ -87,31 +87,6 @@ var MaaSApp = React.createClass({
     	    );    
         }
         
-            
-        /*var content;
-        if(this.state.user.type == "superAdmin")
-        {
-            content =( 
-                <div id="app">
-                    <Header isLogged={this.state.isLogged}  type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
-                        {this.props.children}
-                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
-                </div>
-            );
-        }
-        else
-        {
-            content =( 
-                <div id="app">
-                   <Header isLogged={this.state.isLogged} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
-                        {this.props.children}
-                   <Footer isLogged={this.state.isLogged} companyName={this.state.company}/>
-                </div>
-            );
-        }
-        return (
-            {content}
-	    );*/
     }
 });
 
