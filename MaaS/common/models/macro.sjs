@@ -370,7 +370,6 @@ syntax Dashboard = function (ctx) {
         {
             params = value.inner();
             let marker = params.mark();
-            let found = false;
             for(let item of params)
             {
                 if(item.isIdentifier('row'))
@@ -380,19 +379,6 @@ syntax Dashboard = function (ctx) {
                     marker = params.mark();
                     rows = rows.concat(#`${expr.value}`);
                 }
-                else if(item.isIdentifier('action'))
-                {
-                    if(!found)
-                    {
-                        params.reset(marker);
-                        let expr = params.expand('expr');
-                        action = action.concat(#`${expr.value}`);
-                        marker = params.mark();
-                        found = true;
-                    }
-                    else
-                        throw new Error('Multiple actions defined, action must be unique');
-                }
                 else
                 {
                     throw new Error('Unexpected syntax: ' + #`${item}` + ' at: ' + #`${item.lineNumber()}`);
@@ -401,10 +387,6 @@ syntax Dashboard = function (ctx) {
             }
         }
     }
-    
-    if(action == #``)
-        action = #`{}`;
-        
-    tot = #`DSL.compileDashboard({${identity}}, [${rows}], ${action}, callback)`;
+    tot = #`DSL.compileDashboard({${identity}}, [${rows}], callback)`;
     return tot;
 }

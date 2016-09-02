@@ -546,9 +546,12 @@ input {
 }
 
 #header-dropdown {
+    float: right;
+    width: 12em;
+    right: 1.9em;
     margin-top: 0.7em;
-    margin-left: 4em;
-    margin-right: 2em;
+    /*margin-left: 4em;*/
+    /*margin-right: 2em;*/
 }
 
 #header-dropdown::after {
@@ -1465,7 +1468,8 @@ input {
 }
 
 .dsl-download:hover {
-    color: blue;
+    color: navy;
+    cursor: pointer;
 }
 
 .modify-button:hover {
@@ -1597,6 +1601,10 @@ input {
     display: none;
 }
 
+.dashboard-cell .dsl-action {
+    display: none;
+}
+
 .modal {
     /*display: none;  Hidden by default */
     position: fixed; /* Stay in place */
@@ -1646,10 +1654,15 @@ input {
     /*font-weight: bold;*/
 }
 
-.dashboard-document-view, .dashboard-cell-view {
+.dashboard-popup .dashboard-document-view, .dashboard-cell-view {
     width: 70% !important;
     margin-left: auto;
     margin-right: auto;
+}
+
+.dashboard-cell .dashboard-collection-view {
+    width: 95%;
+    margin: auto;
 }
 
 .cell-table-view th::-webkit-scrollbar-track, .cell-table-view td::-webkit-scrollbar-track,
@@ -1681,6 +1694,39 @@ input {
 {
     border-radius: 2px;
 	background-color: darkgrey;
+}
+
+/*------------------------------------------------ ACTIONS --------------------------------------------------------------*/
+
+.dsl-action {
+    width: 90%;
+    margin: auto;
+    margin-top: 2em;
+    /*background-color: lightgrey;*/
+}
+
+.dsl-action div, .dsl-action form {
+    display: inline-block;
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+}
+
+.action-export:hover {
+    color: darkgrey;
+    cursor: pointer;
+}
+
+.action-export i, .action-export span  {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.action-export span {
+    margin-right: 0.5em;
+}
+
+.share-button {
+    margin-left: 1.5em;
 }
 
 /*------------------------------------------------ TOOLTIPs --------------------------------------------------------------*/

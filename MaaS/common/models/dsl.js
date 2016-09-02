@@ -615,6 +615,12 @@ module.exports = function(DSL) {
         {
             //.....
         }
+        console.log(body.action);
+        if(Object.getOwnPropertyNames(body.action).length !== 0)
+        {
+            console.log("dentro");
+            data.action = body.action;
+        }
         
         if(body && body.rows && body.rows.length > 0)   // document with rows
         {
@@ -810,7 +816,6 @@ module.exports = function(DSL) {
                                                         }
                                                         
                                                         data.definitionType = DSLInstance.type;
-                                                        
                                                         return cb(null, null, data);
                                                     }
                                                 });
@@ -850,7 +855,6 @@ module.exports = function(DSL) {
                                                         if(!data.label)
                                                             data.label = DSLInstance.name;
                                                         data.definitionType = DSLInstance.type;
-                                                        data.document = body.document;
                                                         return cb(null, null, data);
                                                     }
                                                 });
@@ -870,7 +874,6 @@ module.exports = function(DSL) {
                                                         if(!data.label)
                                                             data.label = DSLInstance.name;
                                                         data.definitionType = DSLInstance.type;
-                                                        data.document = body.document;
                                                         return cb(null, null, data);
                                                     }
                                                 });
@@ -1865,6 +1868,7 @@ Collection(
         data.types = [];
         data.selectables = [];
         data.sortables = [];
+        data.document = body.document;
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
             data.action = body.action;
@@ -2191,120 +2195,114 @@ Collection(
     }
     */
     
-    DSL.compileDashboard = function(identity, rows, action, cb) {
+    DSL.compileDashboard = function(identity, rows, cb) {
         var body = {};
         body.definitionType = "Dashboard";
         body.rows = [];
         AttributesReader.checkSupportedAttributes(identity, ['label'], function(unsupportedIdentityAttributesError) {
-            AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
-                AttributesReader.checkKeywordValue({Export: action.Export, SendEmail: action.SendEmail}, function(actionKeywordValueError) {
-                    var error = Object.assign(unsupportedIdentityAttributesError, unsupportedActionAttributesError, actionKeywordValueError);
-                    if(rows.length > 0)     // Dashboard with rows
+            var error = Object.assign(unsupportedIdentityAttributesError, {});
+            if(rows.length > 0)     // Dashboard with rows
+            {
+                var stop = false;
+                for(var i = 0; !stop && i < rows.length; i++)
+                {
+                    var row = rows[i];      // each row is an array of DSL entities
+                    body.rows.push([]);     // initialize the Dashboard row 
+                    var dashboardRow = body.rows[i];    // take the reference to that row
+                    for(var j = 0; !stop && j < row.length; j++)
                     {
-                        var stop = false;
-                        for(var i = 0; !stop && i < rows.length; i++)
+                        var entity = row[j];
+                        if(entity.type == "Cell")
                         {
-                            var row = rows[i];      // each row is an array of DSL entities
-                            body.rows.push([]);     // initialize the Dashboard row 
-                            var dashboardRow = body.rows[i];    // take the reference to that row
-                            for(var j = 0; !stop && j < row.length; j++)
+                            DSL.compileCell(entity.identity, entity.body, function(cellCompileErrors, identity, body) {
+                                if(cellCompileErrors)
+                                {
+                                    stop = true;
+                                    error = Object.assign(error, cellCompileErrors);    // merge errors
+                                    return cb(error, null, null);
+                                }
+                                else
+                                {
+                                    dashboardRow.push(
+                                        {
+                                            type: "Cell",
+                                            identity: identity,
+                                            body: body
+                                        }
+                                    );
+                                }
+                            });
+                        }
+                        else if(entity.type == "Document")
+                        {
+                            DSL.compileDocument(entity.identity, entity.rows, entity.action, false, function(documentCompileErrors, identity, body) {
+                                if(documentCompileErrors)
+                                {
+                                    stop = true;
+                                    error = Object.assign(error, documentCompileErrors);    // merge errors
+                                    return cb(error, null, null);
+                                }
+                                else
+                                {
+                                    dashboardRow.push(
+                                        {
+                                            type: "Document",
+                                            identity: identity,
+                                            body: body
+                                        }
+                                    );
+                                }
+                            });
+                        }
+                        else if(entity.type == "Collection")
+                        {
+                            DSL.compileCollection(entity.identity, entity.columns, entity.document, entity.action, function(collectionCompileErrors, identity, body) {
+                                if(collectionCompileErrors)
+                                {
+                                    stop = true;
+                                    error = Object.assign(error, collectionCompileErrors);    // merge errors
+                                    return cb(error, null, null);
+                                }
+                                else
+                                {
+                                    dashboardRow.push(
+                                        {
+                                            type: "Collection",
+                                            identity: identity,
+                                            body: body
+                                        }
+                                    );
+                                }
+                            });
+                        }
+                        if(!stop && i==rows.length-1 && j==row.length-1)  // last element
+                        {
+                            if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
                             {
-                                var entity = row[j];
-                                if(entity.type == "Cell")
-                                {
-                                    DSL.compileCell(entity.identity, entity.body, function(cellCompileErrors, identity, body) {
-                                        if(cellCompileErrors)
-                                        {
-                                            stop = true;
-                                            error = Object.assign(error, cellCompileErrors);    // merge errors
-                                            return cb(error, null, null);
-                                        }
-                                        else
-                                        {
-                                            dashboardRow.push(
-                                                {
-                                                    type: "Cell",
-                                                    identity: identity,
-                                                    body: body
-                                                }
-                                            );
-                                        }
-                                    });
-                                }
-                                else if(entity.type == "Document")
-                                {
-                                    DSL.compileDocument(entity.identity, entity.rows, entity.action, false, function(documentCompileErrors, identity, body) {
-                                        if(documentCompileErrors)
-                                        {
-                                            stop = true;
-                                            error = Object.assign(error, documentCompileErrors);    // merge errors
-                                            return cb(error, null, null);
-                                        }
-                                        else
-                                        {
-                                            dashboardRow.push(
-                                                {
-                                                    type: "Document",
-                                                    identity: identity,
-                                                    body: body
-                                                }
-                                            );
-                                        }
-                                    });
-                                }
-                                else if(entity.type == "Collection")
-                                {
-                                    DSL.compileCollection(entity.identity, entity.columns, entity.document, entity.action, function(collectionCompileErrors, identity, body) {
-                                        if(collectionCompileErrors)
-                                        {
-                                            stop = true;
-                                            error = Object.assign(error, collectionCompileErrors);    // merge errors
-                                            return cb(error, null, null);
-                                        }
-                                        else
-                                        {
-                                            dashboardRow.push(
-                                                {
-                                                    type: "Collection",
-                                                    identity: identity,
-                                                    body: body
-                                                }
-                                            );
-                                        }
-                                    });
-                                }
-                                if(!stop && i==rows.length-1 && j==row.length-1)  // last element
-                                {
-                                    if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
-                                    {
-                                        stop = true;
-                                        return cb(error, null, null);
-                                    }
-                                    else 
-                                    {
-                                        body.action = action;
-                                        stop = true;
-                                        return cb(null, identity, body);
-                                    }
-                                }
+                                stop = true;
+                                return cb(error, null, null);
                             }
-                            
+                            else 
+                            {
+                                stop = true;
+                                return cb(null, identity, body);
+                            }
                         }
                     }
-                    else     // Dashboard without rows
-                    {
-                        if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
-                        {
-                            return cb(error, null, null);
-                        }
-                        else 
-                        {
-                            body.action = action;
-                            return cb(null, identity, body);
-                        }
-                    }
-                });
-            });
+                    
+                }
+            }
+            else     // Dashboard without rows
+            {
+                if(Object.getOwnPropertyNames(error).length !== 0)  // general errors from above
+                {
+                    return cb(error, null, null);
+                }
+                else 
+                {
+                    return cb(null, identity, body);
+                }
+            }
         });
     };
     
@@ -2329,10 +2327,6 @@ Collection(
     DSL.executeDashboard = function(identity, body, conn, cb) {
         var data = {};
         data.rows = [];
-        if(Object.getOwnPropertyNames(body.action).length !== 0)
-        {
-            data.action = body.action;
-        }
         if(identity.label)
         {
             data.label = identity.label;

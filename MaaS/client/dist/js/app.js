@@ -950,6 +950,7 @@ module.exports = AddExternalDatabase;
 
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
 
@@ -958,10 +959,12 @@ var ChangeRole = React.createClass({
 
 
     getInitialState: function getInitialState() {
+        var userId;
+        if (SessionStore.getImpersonate() == "true") userId = SessionStore.getUserId();else userId = UserStore.getId();
         return {
             active: false, // used to show errors only for active forms
             companyId: this.props.companyId,
-            id: UserStore.getId(),
+            id: userId,
             role: this.props.role,
             errors: []
         };
@@ -1109,7 +1112,7 @@ var ChangeRole = React.createClass({
 
 module.exports = ChangeRole;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/UserStore.react.jsx":59,"react":370}],17:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370}],17:[function(require,module,exports){
 'use strict';
 
 // Name: {Company.react.jsx}
@@ -3037,7 +3040,6 @@ var ExecuteDSL = React.createClass({
             paginationShowsTotal: showTotal
             //,onSizePerPageList: function(size) {alert("changed to: "+size);}
         };
-        console.log(options);
         if (data.result) {
             table_data = data.result;
         }
@@ -3068,7 +3070,6 @@ var ExecuteDSL = React.createClass({
     },
 
     togglePopUp: function togglePopUp(id) {
-        alert("pop");
         if (!this.state.popup) {
             this.setState({ popup: id });
             var container = document.getElementById("dashboard-container");
@@ -3098,24 +3099,193 @@ var ExecuteDSL = React.createClass({
             container.appendChild(modal);
 
             var instance = this;
-            close.onclick = function () {
+            var onClose = function onClose() {
                 container.removeChild(modal);
                 parent.appendChild(entity);
                 cell.classList.remove("selected-cell");
-                instance.setState({ popup: null });
                 entity.style.width = width + "px";
+                entity.blur();
+                instance.setState({ popup: null });
+            };
+
+            close.onclick = function () {
+                onClose();
             };
 
             window.onclick = function (event) {
                 if (event.target == modal || event.target.className.match("selectable")) {
-                    container.removeChild(modal);
-                    parent.appendChild(entity);
-                    cell.classList.remove("selected-cell");
-                    instance.setState({ popup: null });
-                    entity.style.width = width + "px";
+                    onClose();
                 }
             };
         }
+    },
+
+    createAction: function createAction(action, data, label, type) {
+        // Export and SendEmail
+        var Export, SendEmail;
+
+        if (!label || label == undefined) label = type;
+
+        var buildJSON = function buildJSON() {
+            var lines = JSON.stringify(data, null, 4).split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                if (lines[i].match("_DSL_ELEMENT_INDEX")) // Remove dsl managing index
+                    {
+                        lines.splice(i, 1);
+                        if (lines[i - 1]) {
+                            lines[i - 1] = lines[i - 1].substring(0, lines[i - 1].length - 1); // Remove precedent comma
+                        }
+                    }
+            }
+            return lines.join('\n');
+        };
+
+        var buildCSV = function buildCSV() {
+            var content = ""; // = "data:text/csv;charset=utf-8,";
+            var keys = Object.keys(data[0]);
+            var index = keys.indexOf("_DSL_ELEMENT_INDEX");
+            if (index != -1) keys.splice(index, 1);
+            keys.forEach(function (k, i) {
+                content += i < keys.length - 1 ? k + "," : k + "\n";
+            });
+            for (var i = 0; i < data.length; i++) {
+                keys.forEach(function (k, j) {
+                    content += j < keys.length - 1 ? data[i][k] + "," : data[i][k] + "\n";
+                });
+            }
+            return content;
+        };
+
+        if (action && action.Export) {
+            var onExport = function onExport(format) {
+                var json, csv;
+                switch (format) {
+                    case 'all':
+                        json = buildJSON();
+                        csv = buildCSV();
+                        break;
+
+                    case 'json':
+                        json = buildJSON();
+                        break;
+
+                    case 'csv':
+                        csv = buildCSV();
+                        break;
+                }
+
+                var downloadBlob = function downloadBlob(blob, filename) {
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var url = window.URL.createObjectURL(blob);
+                        var tempLink = document.createElement('a');
+                        tempLink.href = url;
+                        tempLink.setAttribute('download', filename);
+                        tempLink.click();
+                    }
+                };
+                var blob;
+                if (json) {
+                    blob = new Blob([json], { type: 'application/json' });
+                    downloadBlob(blob, label + ".json");
+                }
+                if (csv) {
+                    blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    downloadBlob(blob, label + ".csv");
+                }
+            };
+
+            if (action.Export == true || action.Export == "true") // All format types
+                {
+                    Export = React.createElement(
+                        'div',
+                        { className: 'action-export', onClick: onExport.bind(this, "all") },
+                        React.createElement(
+                            'span',
+                            null,
+                            'Download JSON and CSV'
+                        ),
+                        React.createElement(
+                            'i',
+                            { className: 'dsl-download material-icons md-36' },
+                            ''
+                        )
+                    );
+                } else if (action.Export != false && action.Export != "false") // JSON or CSV
+                {
+                    Export = React.createElement(
+                        'div',
+                        { className: 'action-export', onClick: onExport.bind(this, action.Export) },
+                        React.createElement(
+                            'span',
+                            null,
+                            'Download ',
+                            action.Export.toUpperCase()
+                        ),
+                        React.createElement(
+                            'i',
+                            { className: 'dsl-download material-icons md-36' },
+                            ''
+                        )
+                    );
+                }
+        }
+        if (action && action.SendEmail) {
+            var instance = this;
+            var onSendEmail = function onSendEmail(event) {
+                event.preventDefault();
+                var format;
+                if (action.SendEmail == true || action.SendEmail == "true") format = "all";else if (action.SendEmail != false && action.SendEmail != "false") format = action.SendEmail;
+                var json, csv;
+                switch (format) {
+                    case 'all':
+                        json = buildJSON();
+                        csv = buildCSV();
+                        break;
+
+                    case 'json':
+                        json = buildJSON();
+                        break;
+
+                    case 'csv':
+                        csv = buildCSV();
+                        break;
+                }
+                RequestDSLActionCreator.sendEmail(instance.refs.email.value, json, csv);
+            };
+
+            if (action.SendEmail == true || action.SendEmail == "true") // All format types
+                {
+                    SendEmail = React.createElement(
+                        'form',
+                        { onSubmit: onSendEmail, className: 'action-sendemail' },
+                        React.createElement('input', { type: 'email', placeholder: 'Email', ref: 'email', required: true }),
+                        React.createElement(
+                            'span',
+                            { ref: 'shareButton' },
+                            React.createElement(
+                                'button',
+                                { className: 'share-button inline-button dropdown-button' },
+                                'Share'
+                            )
+                        )
+                    );
+                } else if (action.SendEmail != false && action.SendEmail != "false") // JSON or CSV
+                {
+                    SendEmail = React.createElement('div', null);
+                }
+            if (action.SendEmail == "csv") {
+                SendEmail = React.createElement('div', null);
+            }
+        }
+        return React.createElement(
+            'div',
+            { className: 'dsl-action' },
+            Export,
+            SendEmail
+        );
     },
 
     render: function render() {
@@ -3135,16 +3305,12 @@ var ExecuteDSL = React.createClass({
 
         if ((this.state.data || this.state.dashboardRows) && this.state.queried) {
             if (this.state.data) {
+                window.onclick = null; // Remove dashboard modal handler
                 var columns = [];
                 if (this.state.data.length > 0) // Array of table data with at least one element
                     {
                         data = this.state.data;
                         columns = Object.keys(data[0]);
-                    } else // Array of table data empty
-                    {
-                        // for a single object
-                        //     columns = Object.keys(this.state.data);  
-                        //     data.push(this.state.data);
                     }
 
                 var definitionType = this.state.definitionType;
@@ -3162,105 +3328,38 @@ var ExecuteDSL = React.createClass({
                         this.horizontalTable(columns, data)
                     );
                 }
-            } else if (this.state.dashboardRows) {
-                if (this.state.definitionType == "Dashboard") {
-                    var rows = this.state.dashboardRows;
-                    content = React.createElement(
-                        'div',
-                        { id: 'dsl-data-table', className: 'dashboard-table-view' },
-                        rows.map(function (row, i) {
-                            return React.createElement(
-                                'div',
-                                { key: "row_" + i, className: 'dashboard-row' },
-                                row.map(function (entity, j) {
-                                    return React.createElement(
-                                        'div',
-                                        { key: "entity_" + j, onClick: _this2.togglePopUp.bind(_this2, "entity_" + i + j),
-                                            className: "dashboard-cell dropdown-button" },
-                                        React.createElement(
-                                            'div',
-                                            { key: "thumb_" + j, id: "entity_" + i + j, className: "dsl-thumbnail dropdown-button " + "dashboard-" + entity.type.toLowerCase() + "-view" },
-                                            entity.data.label ? React.createElement(
-                                                'p',
-                                                { className: 'entity-label' },
-                                                entity.data.label
-                                            ) : React.createElement('p', { className: 'entity-label' }),
-                                            entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)
-                                        )
-                                    );
-                                })
-                            );
-                        })
-                    );
-                }
-            }
-
-            if (this.state.action) {
-                var Export,
-                    SendEmail,
-                    instance = this;
-                if (this.state.action.Export) {
-                    var onExport = function onExport(format) {
-
-                        var exportData = JSON.stringify(data);
-                        exportData = JSON.parse(exportData);
-                        exportData.forEach(function (obj) {
-                            if (obj._DSL_ELEMENT_INDEX) {
-                                console.log("trovato");
-                                delete obj._DSL_ELEMENT_INDEX;
-                            }
-                        });
-                        exportData = JSON.stringify(data, null, 4);
-                        var filename = instance.state.label + ".json";
-                        var blob = new Blob([exportData], { type: 'application/json' });
-
-                        if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                            // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
-                            window.navigator.msSaveBlob(blob, filename);
-                        } else {
-                            var url = window.URL.createObjectURL(blob);
-                            var tempLink = document.createElement('a');
-                            tempLink.href = url;
-                            tempLink.setAttribute('download', filename);
-                            tempLink.click();
-                        }
-                    };
-                    if (this.state.action.Export == true || this.state.action.Export == "true") {
-                        Export = React.createElement(
-                            'div',
-                            null,
-                            React.createElement(
-                                'i',
-                                { onClick: onExport, className: 'dsl-download material-icons md-36' },
-                                ''
-                            )
-                        );
-                    }
-                    if (this.state.action.Export == "json") {
-                        Export = React.createElement('div', null);
-                    }
-                    if (this.state.action.Export == "csv") {
-                        Export = React.createElement('div', null);
-                    }
-                }
-                if (this.state.action.SendEmail) {
-                    if (this.state.action.SendEmail == true || this.state.action.SendEmail == "true") {
-                        SendEmail = React.createElement('div', null);
-                    }
-                    if (this.state.action.SendEmail == "json") {
-                        SendEmail = React.createElement('div', null);
-                    }
-                    if (this.state.action.SendEmail == "csv") {
-                        SendEmail = React.createElement('div', null);
-                    }
-                }
-                action = React.createElement(
+            } else if (this.state.dashboardRows && this.state.definitionType == "Dashboard") {
+                var rows = this.state.dashboardRows;
+                content = React.createElement(
                     'div',
-                    { id: 'dsl-action' },
-                    Export,
-                    SendEmail
+                    { id: 'dsl-data-table', className: 'dashboard-table-view' },
+                    rows.map(function (row, i) {
+                        return React.createElement(
+                            'div',
+                            { key: "row_" + i, className: 'dashboard-row' },
+                            row.map(function (entity, j) {
+                                return React.createElement(
+                                    'div',
+                                    { key: "entity_" + j, onClick: _this2.togglePopUp.bind(_this2, "entity_" + i + j),
+                                        className: "dashboard-cell dropdown-button" },
+                                    React.createElement(
+                                        'div',
+                                        { key: "thumb_" + j, id: "entity_" + i + j, className: "dsl-thumbnail dropdown-button " + "dashboard-" + entity.type.toLowerCase() + "-view" },
+                                        entity.data.label ? React.createElement(
+                                            'p',
+                                            { className: 'entity-label' },
+                                            entity.data.label
+                                        ) : React.createElement('p', { className: 'entity-label' }),
+                                        entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type),
+                                        _this2.createAction(entity.data.action, entity.data.result, entity.data.label, entity.type)
+                                    )
+                                );
+                            })
+                        );
+                    })
                 );
             }
+            action = this.createAction(this.state.action, data, this.state.label, this.state.definitionType);
         } else {
             if (this.state.queried) {
                 if (this.state.errors.length > 0) {
@@ -4317,7 +4416,8 @@ function getState() {
         currentDefinitionType: DSLStore.getCurrentDefinitionType(),
         currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
         currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase(),
-        includeSource: DSLStore.getIncludeSource()
+        includeSource: DSLStore.getIncludeSource(),
+        isImpersonate: SessionStore.getImpersonate()
     };
 }
 
@@ -4345,7 +4445,8 @@ var ManageDSLSource = React.createClass({
             currentDefinitionSource: null,
             currentDefinitionDatabase: this.props.location.query.databaseID,
             includeSource: null,
-            include: false
+            include: false,
+            isImpersonate: SessionStore.getImpersonate()
         };
     },
 
@@ -4355,7 +4456,6 @@ var ManageDSLSource = React.createClass({
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
         DSLStore.addIncludeListener(this._onInclude);
-        DSLStore.addRestoreStateListener(this._onRestoreState);
         if (!this.props.children) {
             var id = this.props.params.definitionId;
             if (id) {
@@ -4376,7 +4476,6 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
         DSLStore.removeIncludeListener(this._onInclude);
-        DSLStore.removeRestoreStateListener(this._onRestoreState);
     },
 
     componentDidUpdate: function componentDidUpdate() {
@@ -4393,15 +4492,101 @@ var ManageDSLSource = React.createClass({
                 if (this.state.currentDefinitionType == "Cell") this.refs.definitionType.selectedIndex = 4;
             }
 
-            /*
-            
-            modifica source con aggiunta includeSource
-            
-            */
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            var editorSession = editor.getSession();
+            editor.$blockScrolling = Infinity;
+            editorSession.on("change", this.onEdit);
+            if (this.state.currentDefinitionSource) {
+                editor.setValue(this.state.currentDefinitionSource);
+            }
+
+            if (this.state.includeSource != "") {
+                var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+                var tokenIterator = new TokenIterator(editorSession, 0, 0);
+            }
 
             this.setState({ include: false });
         }
     },
+
+    /*
+    Collection(
+    table: "customers",
+    label: "JuniorCustomers",
+    ---------id: "Junior",
+    ---------Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+    ) {
+    column(
+        name: "3"
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    column(
+        name: "4"
+    )
+    Document(
+        table: "prova"
+    ){
+        row(
+            name: "asd"
+        )
+        action(
+            SendEmail: "true"
+        )
+    }   
+    column(
+        name: "5"
+    )
+    }
+    */
+
+    /*
+    
+    Dashboard(
+            label: "Dashboard"
+        )
+        {
+            row(
+                Document(
+                    table: "prova"
+                )
+                {
+                    row(
+                        name: "email",
+                        type: "string",
+                        label: "Email"
+                    )
+                }
+                Document(
+                    table: "prova"
+                ){
+                }
+            )
+            row(
+                Document(
+                    table: "prova"
+                ){
+                }
+                Collection(
+                    table: "users"
+                ){
+                }
+                Cell(
+                    type: "string"
+                ){
+                }
+            )
+            action(
+                Export: "json"
+            )
+        }
+        */
 
     onEdit: function onEdit(e) {
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
@@ -5207,15 +5392,51 @@ module.exports = Error404;
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
+var CompanyStore = require('../stores/CompanyStore.react.jsx');
 var RequestSessionActionCreator = require('../actions/Request/RequestSessionActionCreator.react.jsx');
+
+function getState() {
+	return {
+		userCompany: CompanyStore.getName(),
+		isImpersonate: SessionStore.getImpersonate()
+	};
+}
 
 var Footer = React.createClass({
 	displayName: 'Footer',
 
 
+	getInitialState: function getInitialState() {
+		return getState();
+	},
+
+	componentDidMount: function componentDidMount() {
+		CompanyStore.addChangeListener(this._onChange);
+		SessionStore.addImpersonateListener(this._onChange);
+		SessionStore.addLeaveImpersonateListener(this._onLeaveImpersonate);
+	},
+
+	componentWillUnmount: function componentWillUnmount() {
+		CompanyStore.removeChangeListener(this._onChange);
+		SessionStore.removeImpersonateListener(this._onChange);
+		SessionStore.removeLeaveImpersonateListener(this._onLeaveImpersonate);
+	},
+
+	_onChange: function _onChange() {
+		this.setState(getState());
+	},
+
 	logout: function logout() {
 		var accessToken = SessionStore.getAccessToken();
 		RequestSessionActionCreator.logout(accessToken);
+	},
+
+	_onLeaveImpersonate: function _onLeaveImpersonate() {
+		this.setState({ isImpersonate: "false" });
+	},
+
+	leaveImpersonate: function leaveImpersonate() {
+		RequestSessionActionCreator.leaveImpersonate();
 	},
 
 	render: function render() {
@@ -5261,35 +5482,78 @@ var Footer = React.createClass({
 					)
 				);
 			} else {
-				//if I want to render the footer of the Super Admin
-				footerCenter = React.createElement(
-					'div',
-					{ className: 'footer-centerLooged' },
-					React.createElement(
-						Link,
-						{ to: '/dashboardSuperAdmin', id: 'header-title' },
-						this.props.companyName
-					),
-					React.createElement(
-						'p',
-						{ className: 'footer-links' },
+				//if I want to render the footer of the Super Admin or a impersonate user
+
+				if (this.state.isImpersonate == "true") //render impersonate
+					{
+						footerCenter = React.createElement(
+							'div',
+							{ className: 'footer-centerLooged' },
+							React.createElement(
+								Link,
+								{ to: '/company', id: 'header-title' },
+								this.state.userCompany
+							),
+							React.createElement(
+								'p',
+								{ className: 'footer-links' },
+								React.createElement(
+									Link,
+									{ to: '/company' },
+									'Company'
+								),
+								React.createElement(
+									Link,
+									{ to: '/externalDatabases' },
+									'Database'
+								),
+								React.createElement(
+									Link,
+									{ to: '/manageDSL' },
+									'DSL'
+								),
+								React.createElement(
+									Link,
+									{ onClick: this.leaveImpersonate, to: 'dashboardSuperAdmin/impersonateUser' },
+									'Leave'
+								)
+							),
+							React.createElement(
+								'p',
+								{ className: 'text-footer' },
+								'MaaS is offered by RedBabel and developed with ❤ by MINT. '
+							)
+						);
+					} else {
+					footerCenter = React.createElement(
+						'div',
+						{ className: 'footer-centerLooged' },
 						React.createElement(
 							Link,
-							{ to: '/dashboardSuperAdmin' },
-							'Dashboard'
+							{ to: '/dashboardSuperAdmin', id: 'header-title' },
+							this.props.companyName
 						),
 						React.createElement(
-							Link,
-							{ onClick: this.logout, to: '' },
-							'Logout'
+							'p',
+							{ className: 'footer-links' },
+							React.createElement(
+								Link,
+								{ to: '/dashboardSuperAdmin' },
+								'Dashboard'
+							),
+							React.createElement(
+								Link,
+								{ onClick: this.logout, to: '' },
+								'Logout'
+							)
+						),
+						React.createElement(
+							'p',
+							{ className: 'text-footer' },
+							'MaaS is offered by RedBabel and developed with ❤ by MINT. '
 						)
-					),
-					React.createElement(
-						'p',
-						{ className: 'text-footer' },
-						'MaaS is offered by RedBabel and developed with ❤ by MINT. '
-					)
-				);
+					);
+				}
 			}
 		} else {
 			// user not logged
@@ -5357,7 +5621,7 @@ var Footer = React.createClass({
 
 module.exports = Footer;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],31:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],31:[function(require,module,exports){
 'use strict';
 
 // Name: {Header.react.jsx}
@@ -5382,7 +5646,6 @@ function getState() {
         userSurname: UserStore.getSurname(),
         userCompany: CompanyStore.getName(),
         isImpersonate: SessionStore.getImpersonate()
-
     };
 }
 
@@ -5390,17 +5653,12 @@ var Header = React.createClass({
     displayName: 'Header',
 
 
-    contextTypes: { // serve per utilizzare il router
-        router: React.PropTypes.object.isRequired
-    },
-
     getInitialState: function getInitialState() {
         return getState();
     },
 
     componentDidMount: function componentDidMount() {
         window.addEventListener('click', this.handleClick);
-
         CompanyStore.addChangeListener(this._onChange);
         SessionStore.addImpersonateListener(this._onChange);
         UserStore.addUserLoadListener(this._onChange);
@@ -5409,7 +5667,6 @@ var Header = React.createClass({
 
     componentWillUnmount: function componentWillUnmount() {
         window.removeEventListener('click', this.handleClick);
-
         CompanyStore.removeChangeListener(this._onChange);
         SessionStore.removeImpersonateListener(this._onChange);
         UserStore.removeUserLoadListener(this._onChange);
@@ -5417,23 +5674,11 @@ var Header = React.createClass({
     },
 
     _onChange: function _onChange() {
-        this.setState({
-            userEmail: UserStore.getEmail(),
-            userName: UserStore.getName(),
-            userSurname: UserStore.getSurname(),
-            userCompany: CompanyStore.getName(),
-            isImpersonate: SessionStore.getImpersonate()
-
-        });
+        this.setState(getState());
     },
 
     _onLeaveImpersonate: function _onLeaveImpersonate() {
-        // this.setState({isImpersonate: "false"}); 
-
-        var router = this.context.router;
-
-        router.push('/impersonateUser');
-        this.forceUpdate();
+        this.setState({ isImpersonate: "false" });
     },
 
     handleClick: function handleClick(event) {
@@ -5707,7 +5952,7 @@ var Header = React.createClass({
                                     ),
                                     React.createElement(
                                         Link,
-                                        { onClick: this.leaveImpersonate, to: '' },
+                                        { onClick: this.leaveImpersonate, to: 'dashboardSuperAdmin/impersonateUser' },
                                         React.createElement(
                                             'li',
                                             null,
@@ -6181,6 +6426,7 @@ var MaaSApp = React.createClass({
                 React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company })
             );
         } else {
+            // render of SuperAfmin or userImpersonate
             return React.createElement(
                 'div',
                 { id: 'content' },
@@ -10208,11 +10454,16 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             break;
         case ActionTypes.LEAVE_IMPERSONATE:
             if (_DSL_LIST) {
-                _DSL_LIST = null;
+                _DSL_LIST = [];
                 localStorage.removeItem('DSLList');
             }
             if (_DSL) {
-                _DSL = null;
+                _DSL.id = null;
+                _DSL.name = null;
+                _DSL.source = null;
+                _DSL.type = null;
+                _DSL.database = null;
+
                 localStorage.removeItem('DSLId');
                 localStorage.removeItem('DSLName');
                 localStorage.removeItem('DSLType');

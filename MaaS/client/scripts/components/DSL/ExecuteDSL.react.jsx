@@ -157,7 +157,6 @@ var ExecuteDSL = React.createClass({
             paginationShowsTotal: showTotal
             //,onSizePerPageList: function(size) {alert("changed to: "+size);}
         };
-        console.log(options);
         if(data.result) {
             table_data = data.result;
         }
@@ -172,25 +171,26 @@ var ExecuteDSL = React.createClass({
             <BootstrapTable ref="table" data={table_data} ignoreSinglePage={perpage ? false : true} pagination={true} striped={true} hover={true} options={options} keyField={"id_"+table_data[0]._DSL_ELEMENT_INDEX}>
                 {columns.map((column, i) =>
                     <TableHeaderColumn key={i} dataField={column} dataFormat={this.dataFormatter} 
-                    formatExtraData={
-                        {type: this.state.types ? this.state.types[i] : data.types ? data.types[i] : "string",
-                        selectable: this.state.selectables ? this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
-                        rawData: this.state.rawData ? this.state.rawData : data.rawData,
-                        nestedDocument: this.state.nestedDocument ? this.state.nestedDocument : data.document
+                        formatExtraData={
+                            {type: this.state.types ? this.state.types[i] : data.types ? data.types[i] : "string",
+                            selectable: this.state.selectables ? this.state.selectables[i] : data.selectables ? data.selectables[i] : false,
+                            rawData: this.state.rawData ? this.state.rawData : data.rawData,
+                            nestedDocument: this.state.nestedDocument ? this.state.nestedDocument : data.document
+                            }
                         }
-                    }
-                    dataSort={definitionType == "Cell" ? false : 
-                                definitionType == "Collection" ? 
-                                    this.state.sortables ? (this.state.sortables[i] == true ? true : false) : data.sortables ? (data.sortables[i] == true ? true : false) : false
-                                    : false }
-                    dataAlign="center">{column}</TableHeaderColumn>
+                        dataSort={definitionType == "Cell" ? false : 
+                                    definitionType == "Collection" ? 
+                                        this.state.sortables ? (this.state.sortables[i] == true ? true : false) : data.sortables ? (data.sortables[i] == true ? true : false) : false
+                                        : false }
+                        dataAlign="center">
+                            {column}
+                    </TableHeaderColumn>
                 )}
             </BootstrapTable>  
         );  
     },
     
     togglePopUp: function(id) {
-        alert("pop");
         if(!this.state.popup)
         {
             this.setState({popup: id});
@@ -221,25 +221,191 @@ var ExecuteDSL = React.createClass({
             container.appendChild(modal);
     
             var instance = this;
-            close.onclick = function() {
+            var onClose = function() {
                 container.removeChild(modal);
                 parent.appendChild(entity);
                 cell.classList.remove("selected-cell");
-                instance.setState({popup: null});
                 entity.style.width = width+"px";
+                entity.blur();
+                instance.setState({popup: null});
+            };
+            
+            close.onclick = function() {
+                onClose();
             };
     
             window.onclick = function(event) {
                 if(event.target == modal || event.target.className.match("selectable"))
                 {
-                    container.removeChild(modal);
-                    parent.appendChild(entity);
-                    cell.classList.remove("selected-cell");
-                    instance.setState({popup: null});
-                    entity.style.width = width+"px";
+                    onClose();
                 }
             };
         }
+    },
+    
+    createAction: function(action, data, label, type) {       // Export and SendEmail
+        var Export, SendEmail;
+        
+        if(!label || label == undefined)
+            label = type;
+            
+        var buildJSON = function() {
+            var lines = JSON.stringify(data, null, 4).split('\n');
+            for(var i=0; i<lines.length; i++)
+            {
+                if(lines[i].match("_DSL_ELEMENT_INDEX"))    // Remove dsl managing index
+                {
+                    lines.splice(i, 1);
+                    if(lines[i-1])
+                    {
+                        lines[i-1] = lines[i-1].substring(0, lines[i-1].length-1);  // Remove precedent comma
+                    }
+                }
+            }
+            return lines.join('\n');
+        };
+        
+        var buildCSV = function() {
+            var content = "";    // = "data:text/csv;charset=utf-8,";
+            var keys = Object.keys(data[0]);
+            var index = keys.indexOf("_DSL_ELEMENT_INDEX");
+            if(index != -1)
+                keys.splice(index, 1);
+            keys.forEach(function(k, i) {
+                content += i < keys.length-1 ? k + "," : k + "\n";
+            });
+            for(var i=0; i<data.length; i++)
+            {
+                keys.forEach(function(k, j) {
+                    content += j < keys.length-1 ? data[i][k] + "," :  data[i][k] + "\n";
+                });
+            }
+            return content;
+        };
+        
+        if(action && action.Export)
+        {
+            var onExport = function(format) {
+                var json, csv;
+                switch (format) {
+                    case 'all':
+                        json = buildJSON();
+                        csv = buildCSV();
+                        break;
+                    
+                    case 'json':
+                        json = buildJSON();
+                        break;
+                    
+                    case 'csv':
+                        csv = buildCSV();
+                        break;
+                }
+                
+                var downloadBlob = function(blob, filename) {
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var url = window.URL.createObjectURL(blob);
+                        var tempLink = document.createElement('a');
+                        tempLink.href = url;
+                        tempLink.setAttribute('download', filename);
+                        tempLink.click();
+                    }    
+                };
+                var blob;
+                if(json)
+                {
+                    blob = new Blob([json], {type: 'application/json'});
+                    downloadBlob(blob, label + ".json");
+                }
+                if(csv)
+                {
+                    blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+                    downloadBlob(blob, label + ".csv");   
+                }
+            };
+            
+            if(action.Export == true || action.Export == "true")            // All format types
+            {
+                Export = (
+                    <div className="action-export" onClick={onExport.bind(this, "all")}>
+                        <span>Download JSON and CSV</span>
+                        <i className="dsl-download material-icons md-36">&#xE884;</i>
+                    </div>
+                );
+            }
+            else if(action.Export != false && action.Export != "false")     // JSON or CSV
+            {
+                Export = (
+                    <div className="action-export" onClick={onExport.bind(this, action.Export)}>
+                        <span>Download {action.Export.toUpperCase()}</span>
+                        <i className="dsl-download material-icons md-36">&#xE884;</i>
+                    </div>
+                );
+            }
+        }
+        if(action && action.SendEmail)
+        {
+            var instance = this;
+            var onSendEmail = function(event) {
+                event.preventDefault();
+                var format;
+                if(action.SendEmail == true || action.SendEmail == "true")
+                    format = "all";
+                else if(action.SendEmail != false && action.SendEmail != "false")
+                    format = action.SendEmail;
+                var json, csv;
+                switch (format) {
+                    case 'all':
+                        json = buildJSON();
+                        csv = buildCSV();
+                        break;
+                    
+                    case 'json':
+                        json = buildJSON();
+                        break;
+                    
+                    case 'csv':
+                        csv = buildCSV();
+                        break;
+                }
+                RequestDSLActionCreator.sendEmail(instance.refs.email.value, json, csv);
+            };
+            
+            if(action.SendEmail == true || action.SendEmail == "true")          // All format types
+            {
+                SendEmail = (
+                    <form onSubmit={onSendEmail} className="action-sendemail">
+                        <input type="email" placeholder="Email" ref="email" required />
+                        <span ref="shareButton">
+                            <button className="share-button inline-button dropdown-button" >Share</button>
+                        </span>
+                    </form>
+                );
+            }
+            else if(action.SendEmail != false && action.SendEmail != "false")   // JSON or CSV
+            {
+                SendEmail = (
+                    <div>
+                    </div>
+                );
+            }
+            if(action.SendEmail == "csv")
+            {
+                SendEmail = (
+                    <div>
+                    </div>
+                );
+            }
+        }
+        return (
+            <div className="dsl-action">
+                {Export}
+                {SendEmail}
+            </div>
+        );
     },
     
     render: function() {
@@ -260,17 +426,12 @@ var ExecuteDSL = React.createClass({
         {
             if(this.state.data)
             {
+                window.onclick = null;  // Remove dashboard modal handler
                 var columns = [];
                 if(this.state.data.length > 0)  // Array of table data with at least one element
                 {
                     data = this.state.data;
                     columns = Object.keys(data[0]);
-                }
-                else  // Array of table data empty
-                {
-                    // for a single object
-                    //     columns = Object.keys(this.state.data);  
-                    //     data.push(this.state.data);
                 }
                 
                 var definitionType = this.state.definitionType;
@@ -292,120 +453,32 @@ var ExecuteDSL = React.createClass({
                     );
                 }
             }
-            else if(this.state.dashboardRows)
+            else if(this.state.dashboardRows && this.state.definitionType == "Dashboard")
             {
-                if(this.state.definitionType == "Dashboard")
-                {
-                    var rows = this.state.dashboardRows;
-                    content = (
-                        <div id="dsl-data-table" className="dashboard-table-view">
-                            {rows.map((row, i) => 
-                                <div key={"row_"+i} className="dashboard-row">
-                                    {row.map((entity, j) =>
-                                        <div key={"entity_"+j} onClick={this.togglePopUp.bind(this, "entity_"+i+j)}
-                                        className={"dashboard-cell dropdown-button"}>
-                                            <div key={"thumb_"+j} id={"entity_"+i+j} className={"dsl-thumbnail dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
-                                                {entity.data.label ? <p className="entity-label">{entity.data.label}</p> : <p className="entity-label"></p>}
-                                                {entity.type == "Document" ? 
-                                                    this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
-                                                    :
-                                                    this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)}
-                                            </div>
+                var rows = this.state.dashboardRows;
+                content = (
+                    <div id="dsl-data-table" className="dashboard-table-view">
+                        {rows.map((row, i) => 
+                            <div key={"row_"+i} className="dashboard-row">
+                                {row.map((entity, j) =>
+                                    <div key={"entity_"+j} onClick={this.togglePopUp.bind(this, "entity_"+i+j)}
+                                    className={"dashboard-cell dropdown-button"}>
+                                        <div key={"thumb_"+j} id={"entity_"+i+j} className={"dsl-thumbnail dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
+                                            {entity.data.label ? <p className="entity-label">{entity.data.label}</p> : <p className="entity-label"></p>}
+                                            {entity.type == "Document" ? 
+                                                this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
+                                                :
+                                                this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)}
+                                            {this.createAction(entity.data.action, entity.data.result, entity.data.label, entity.type)}
                                         </div>
-                                    )}
-                                </div>  
-                            )}
-                        </div>
-                        
-                    );
-                }
-            }
-            
-            if(this.state.action)
-            {
-                var Export, SendEmail, instance = this;
-                if(this.state.action.Export)
-                {
-                    var onExport = function(format) {
-                        
-                        var exportData = JSON.stringify(data);
-                        exportData = JSON.parse(exportData);
-                        exportData.forEach(function(obj) {
-                            if(obj._DSL_ELEMENT_INDEX)
-                            {
-                                console.log("trovato");
-                                delete obj._DSL_ELEMENT_INDEX;
-                            }
-                        });
-                        exportData = JSON.stringify(data, null, 4);
-                        var filename = instance.state.label + ".json";
-                        var blob = new Blob([exportData], {type: 'application/json'});
-                        
-                        if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
-                                window.navigator.msSaveBlob(blob, filename);
-                        } else {
-                            var url = window.URL.createObjectURL(blob);
-                            var tempLink = document.createElement('a');
-                            tempLink.href = url;
-                            tempLink.setAttribute('download', filename);
-                            tempLink.click();
-                        }
-                    };
-                    if(this.state.action.Export == true || this.state.action.Export == "true")
-                    {
-                        Export = (
-                            <div>
-                                <i onClick={onExport} className="dsl-download material-icons md-36">&#xE884;</i>
-                            </div>
-                        );
-                    }
-                    if(this.state.action.Export == "json")
-                    {
-                        Export = (
-                            <div>
-                            </div>
-                        );
-                    }
-                    if(this.state.action.Export == "csv")
-                    {
-                        Export = (
-                            <div>
-                            </div>    
-                        );
-                    }
-                }
-                if(this.state.action.SendEmail)
-                {
-                    if(this.state.action.SendEmail == true || this.state.action.SendEmail == "true")
-                    {
-                        SendEmail = (
-                            <div>
-                            </div>
-                        );
-                    }
-                    if(this.state.action.SendEmail == "json")
-                    {
-                        SendEmail = (
-                            <div>
-                            </div>
-                        );
-                    }
-                    if(this.state.action.SendEmail == "csv")
-                    {
-                        SendEmail = (
-                            <div>
-                            </div>
-                        );
-                    }
-                }
-                action = (
-                    <div id="dsl-action">
-                        {Export}
-                        {SendEmail}
+                                    </div>
+                                )}
+                            </div>  
+                        )}
                     </div>
                 );
             }
+            action = this.createAction(this.state.action, data, this.state.label, this.state.definitionType);
         }
         else
         {

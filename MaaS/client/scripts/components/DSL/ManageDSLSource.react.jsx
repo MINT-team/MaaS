@@ -66,7 +66,6 @@ var ManageDSLSource = React.createClass({
         DSLStore.addCompileListener(this._onCompile);
         DSLStore.addExecuteListener(this._onExecute);
         DSLStore.addIncludeListener(this._onInclude);
-        //DSLStore.addRestoreStateListener(this._onRestoreState);
         if (!this.props.children)
         {
             var id = this.props.params.definitionId;
@@ -90,7 +89,6 @@ var ManageDSLSource = React.createClass({
         DSLStore.removeCompileListener(this._onCompile);
         DSLStore.removeExecuteListener(this._onExecute);
         DSLStore.removeIncludeListener(this._onInclude);
-        //DSLStore.removeRestoreStateListener(this._onRestoreState);
     },
     
     componentDidUpdate: function() {
@@ -114,16 +112,104 @@ var ManageDSLSource = React.createClass({
                     this.refs.definitionType.selectedIndex = 4;
             }
             
-            /*
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            var editorSession = editor.getSession();
+            editor.$blockScrolling = Infinity;
+            editorSession.on("change", this.onEdit);
+            if(this.state.currentDefinitionSource)
+            {
+                editor.setValue(this.state.currentDefinitionSource);
+            }
             
-            modifica source con aggiunta includeSource
-            
-            */
+            if (this.state.includeSource != "")
+            {
+                var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+                var tokenIterator = new TokenIterator(editorSession, 0, 0);
+            }
             
             this.setState({ include: false });
         }
         
     },
+    
+    /*
+Collection(
+    table: "customers",
+    label: "JuniorCustomers",
+    ---------id: "Junior",
+    ---------Weight:"0",
+    perpage: "20",
+    sortby: "surname",
+    order: "asc",
+    query: {age: {$lt: 40}}
+) {
+    column(
+        name: "3"
+    )
+    action(
+        Export: "true",
+        SendEmail: "true"
+    )
+    column(
+        name: "4"
+    )
+    Document(
+        table: "prova"
+    ){
+        row(
+            name: "asd"
+        )
+        action(
+            SendEmail: "true"
+        )
+    }   
+    column(
+        name: "5"
+    )
+}
+*/
+
+/*
+
+Dashboard(
+        label: "Dashboard"
+    )
+    {
+        row(
+            Document(
+                table: "prova"
+            )
+            {
+                row(
+                    name: "email",
+                    type: "string",
+                    label: "Email"
+                )
+            }
+            Document(
+                table: "prova"
+            ){
+            }
+        )
+        row(
+            Document(
+                table: "prova"
+            ){
+            }
+            Collection(
+                table: "users"
+            ){
+            }
+            Cell(
+                type: "string"
+            ){
+            }
+        )
+        action(
+            Export: "json"
+        )
+    }
+    */
     
     onEdit: function(e) {
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;

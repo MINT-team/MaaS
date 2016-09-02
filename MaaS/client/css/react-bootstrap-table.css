@@ -719,6 +719,11 @@ fieldset[disabled] .btn-default.focus {
   margin: 10px;
 }
 
+.react-bs-table-pagination .pagination {
+  position: relative;
+  margin-top: -2em !important;
+}
+
 .react-bs-table-tool-bar {
   margin: 10px 10px 0px 10px;
 }

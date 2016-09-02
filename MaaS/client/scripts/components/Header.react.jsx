@@ -32,7 +32,6 @@ var Header = React.createClass({
 
     componentDidMount: function() {
     	window.addEventListener('click', this.handleClick);
-    	
     	CompanyStore.addChangeListener(this._onChange);
     	SessionStore.addImpersonateListener(this._onChange);
     	UserStore.addUserLoadListener(this._onChange);
@@ -41,7 +40,6 @@ var Header = React.createClass({
 
     componentWillUnmount: function() {
     	window.removeEventListener('click', this.handleClick);
-    	
     	CompanyStore.removeChangeListener(this._onChange);
     	SessionStore.removeImpersonateListener(this._onChange);
     	UserStore.removeUserLoadListener(this._onChange);
