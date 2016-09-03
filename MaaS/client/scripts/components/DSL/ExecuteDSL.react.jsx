@@ -57,7 +57,7 @@ var ExecuteDSL = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
-            definitonId: this.props.params.definitionId,
+            definitionId: this.props.definitionId ? this.props.definitionId : this.props.params.definitionId,
             data: null,
             queried: false
         };
@@ -66,7 +66,7 @@ var ExecuteDSL = React.createClass({
     componentWillMount: function() {
         DSLStore.addExecuteListener(this._onChange);
         DSLStore.addNestedExecuteListener(this._onNestedChange);
-        RequestDSLActionCreator.executeDefinition(this.state.definitonId);
+        RequestDSLActionCreator.executeDefinition(this.state.definitionId);
     },
     
     componentWillUnmount: function() {
@@ -116,7 +116,7 @@ var ExecuteDSL = React.createClass({
             var instance = this;
             var showDocument = function() {
                 instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], 
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitionId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], 
                 formatExtraData.nestedDocument ? formatExtraData.nestedDocument.identity : {}, formatExtraData.nestedDocument ? formatExtraData.nestedDocument.body : {});
                 var onback = function(e) {
                     e.preventDefault();
@@ -310,6 +310,7 @@ var ExecuteDSL = React.createClass({
                         var url = window.URL.createObjectURL(blob);
                         var tempLink = document.createElement('a');
                         tempLink.href = url;
+                        console.log(url);
                         tempLink.setAttribute('download', filename);
                         tempLink.click();
                     }    
@@ -371,10 +372,10 @@ var ExecuteDSL = React.createClass({
                         csv = buildCSV();
                         break;
                 }
-                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitonId, instance.refs.email.value, label, json, csv);
+                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitionId, instance.refs.email.value, label, json, csv);
             };
             
-            if(action.SendEmail == true || action.SendEmail == "true")          // All format types
+            if(action.SendEmail != false && action.SendEmail != "false")          // All format types
             {
                 SendEmail = (
                     <form onSubmit={onSendEmail} className="action-sendemail">
@@ -383,20 +384,6 @@ var ExecuteDSL = React.createClass({
                             <button className="share-button inline-button dropdown-button" >Share</button>
                         </span>
                     </form>
-                );
-            }
-            else if(action.SendEmail != false && action.SendEmail != "false")   // JSON or CSV
-            {
-                SendEmail = (
-                    <div>
-                    </div>
-                );
-            }
-            if(action.SendEmail == "csv")
-            {
-                SendEmail = (
-                    <div>
-                    </div>
                 );
             }
         }
@@ -493,7 +480,7 @@ var ExecuteDSL = React.createClass({
                                     <div id="errors">
                                         {this.state.errors.map((error) => <p>{error}</p>)}
                                     </div>
-                                    <Link className="button " to={"/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit"}>Check definition source</Link>
+                                    <Link className="button " to={"/manageDSL/manageDSLSource/" + this.state.definitionId + "/edit"}>Check definition source</Link>
                                 </div>
                             );
                 }
@@ -512,18 +499,26 @@ var ExecuteDSL = React.createClass({
                 );
             }
         }
-        
+        var fromManageSource = this.props.definitionId ? true : false;
         return (
-            <div id={this.state.definitionType == "Dashboard" ? "dashboard-container" : "dsl-data-container"}>
-                <div className="tooltip tooltip-bottom" id="editor-back-button">
-                    <Link to="manageDSL" id="back-button"><i className="material-icons md-48">&#xE15E;</i></Link>
-                    <p className="tooltip-text tooltip-text-short">Back</p>
+            fromManageSource ?
+                <div className="execute-popup">
+                    {title}
+                    {content}
+                    {action}
+                    {errors}
                 </div>
-                {title}
-                {content}
-                {action}
-                {errors}
-            </div>
+            :
+                <div id={this.state.definitionType == "Dashboard" ? "dashboard-container" : "dsl-data-container"}>
+                    <div className="tooltip tooltip-bottom" id="editor-back-button">
+                        <Link to="manageDSL" id="back-button"><i className="material-icons md-48">&#xE15E;</i></Link>
+                        <p className="tooltip-text tooltip-text-short">Back</p>
+                    </div>
+                    {title}
+                    {content}
+                    {action}
+                    {errors}
+                </div>
         );
     }
 });

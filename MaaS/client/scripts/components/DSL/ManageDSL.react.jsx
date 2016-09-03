@@ -256,7 +256,9 @@ var ManageDSL = React.createClass({
     },
     
     deleteAllSelected: function() {
-        alert(this.refs.table.state.selectedRowKeys);
+        
+        console.log(this.refs.table.state.selectedRowKeys);
+        
     },
 
     onUploadSource: function() {
@@ -396,7 +398,6 @@ var ManageDSL = React.createClass({
                     onRowClick: function(row){
                         RequestDSLActionCreator.handleIncludeDefinition(row.source);
                         router.push('/manageDSL/manageDSLSource?databaseID=' + instance.props.currentDefinitionDatabase);
-                        
                     },
                     noDataText: "There are no DSL definitions to display"
                 };

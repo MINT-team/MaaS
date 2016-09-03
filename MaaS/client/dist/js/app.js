@@ -91,6 +91,10 @@ var RequestDSLActionCreator = {
         WebAPIUtils.deleteDSLDefinition(id);
     },
 
+    deleteAllSelectedDSLDefinitions: function deleteAllSelectedDSLDefinitions(arrayId) {
+        WebAPIUtils.deleteAllSelectedDSLDefinitions(arrayId);
+    },
+
     changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId, permission) {
         WebAPIUtils.changeDSLDefinitionPermissions(id, userId, permission);
     },
@@ -2381,10 +2385,6 @@ var Invite = require('./Invite.react.jsx');
 var DeleteUser = require('./DeleteUser.react.jsx');
 var ChangeRole = require('./ChangeRole.react.jsx');
 
-var ReactBSTable = require('react-bootstrap-table');
-var BootstrapTable = ReactBSTable.BootstrapTable;
-var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
-
 function getState() {
   return {
     id: CompanyStore.getId(),
@@ -2445,47 +2445,6 @@ var People = React.createClass({
     router.push("company/" + id + "/profile");
   },
 
-  emailFormatter: function emailFormatter(cell, row) {
-    /*
-      return (
-          <Link to={"/manageDSL/executeDSL/" + row.id}>{row.name}</Link>
-      );
-      */
-    return row.email;
-  },
-
-  buttonFormatter: function buttonFormatter(cell, row) {},
-
-  onAllClick: function onAllClick() {
-    this.refs.table.handleFilterData({});
-    this.setState({ roleFilter: "All" });
-  },
-
-  onAdministratorsClick: function onAdministratorsClick() {
-    this.refs.table.handleFilterData({
-      role: 'Administrator'
-    });
-    this.setState({ roleFilter: "Administrators" });
-  },
-
-  onMembersClick: function onMembersClick() {
-    this.refs.table.handleFilterData({
-      role: 'Member'
-    });
-    this.setState({ roleFilter: "Members" });
-  },
-
-  onGuestsClick: function onGuestsClick() {
-    this.refs.table.handleFilterData({
-      role: 'Guest'
-    });
-    this.setState({ roleFilter: "Guests" });
-  },
-
-  deleteAllSelected: function deleteAllSelected() {
-    //alert(this.refs.table.state.selectedRowKeys);
-  },
-
   render: function render() {
     var _this = this;
 
@@ -2494,63 +2453,6 @@ var People = React.createClass({
     }
 
     var title, content;
-
-    var all = {
-      label: "All",
-      onClick: this.onAllClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
-    var administrators = {
-      label: "Administrators",
-      onClick: this.onAdministratorsClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
-    var members = {
-      label: "Members",
-      onClick: this.onMembersClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        'list'
-      )
-    };
-    var guests = {
-      label: "Guests",
-      onClick: this.onGuestsClick,
-      icon: React.createElement(
-        'i',
-        { className: 'material-icons md-24' },
-        ''
-      )
-    };
-
-    var data = [];
-    var selectRowProp = {
-      mode: "checkbox",
-      bgColor: "rgba(144, 238, 144, 0.42)"
-    };
-
-    var sidebarData = [all, administrators, members, guests];
-
-    var options = {
-      noDataText: "There are no users to display"
-    };
-
-    data = [{
-      id: 1,
-      email: 'asd@gmail.com',
-      role: 'Guest',
-      name: 'Cancaro',
-      surname: 'Man'
-    }];
 
     if (this.props.users.length > 1) {
       title = "Users of your Company";
@@ -2656,7 +2558,7 @@ var People = React.createClass({
           this.props.users.map(function (u) {
             return React.createElement(
               'div',
-              { className: 'table-row' },
+              { key: u.email, className: 'table-row' },
               React.createElement(
                 'span',
                 { className: 'table-column-small' },
@@ -2690,41 +2592,6 @@ var People = React.createClass({
           })
         );
       }
-      /*title = "Users of your Company";
-      content = (
-        <div id="manage-people">
-            <Sidebar title="Filter users" data={sidebarData}/>
-            <div className="container sidebar-container">
-                <p className="container-title">{title}</p>
-                <div id="table-top">
-                    <p id="filter-role">{this.state.roleFilter}</p>
-                    {this.state.role == "Administrator" || this.state.role == "Owner" ?
-                        <div className="top-buttons">
-                            <div className="tooltip tooltip-bottom" id="deleteAll-button">
-                                <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
-                                <p className="tooltip-text tooltip-text-long">Delete all selected users</p>
-                            </div>
-                        </div>
-                    : "" }
-                </div>
-                <div id="table">
-                    <p>Ci sono due sidebar sovrapposte</p>
-                    <Link to={"company/" + this.props.users[0].id + "/profile"}>Prova profilo 1</Link>
-                    <Link to={"company/" + this.props.users[1].id + "/profile"}>Prova profilo 2</Link>
-                    <Link to={"company/" + this.props.users[2].id + "/profile"}>Prova profilo 3</Link>
-                    <BootstrapTable ref="table" data={data} pagination={true} 
-                    search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
-                        <TableHeaderColumn dataField="avatar" dataSort={true} >Avatar</TableHeaderColumn>
-                        <TableHeaderColumn dataField="email" dataSort={true} dataFormat={this.emailFormatter} >Email</TableHeaderColumn>
-                        <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
-                        <TableHeaderColumn dataField="surname" dataSort={true}>Surname</TableHeaderColumn>
-                        <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
-                        <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
-                    </BootstrapTable>
-                </div>
-            </div>
-        </div>
-      );*/
     } else {
       title = "Invite someone to your company";
       content = React.createElement(
@@ -2799,97 +2666,12 @@ var People = React.createClass({
       ),
       content
     );
-    /*
-    return (
-      <div id="people">
-        {content}
-      </div>
-    );*/
   }
 });
 
 module.exports = People;
 
-/*
-
-
-
-title = "Users of your Company";
-        if(this.state.role == "Owner" || this.state.role == "Administrator") 
-        {
-          content = (
-            <div className="table-content">
-                <div className="table-header">
-                    <span className="table-column-small"></span>
-                    <span className="table-column-normal">Name</span>
-                    <span className="table-column-normal">Surname</span>
-                    <span className="table-column-normal">Role</span>
-                    <span className="table-spacing"></span>
-                    <span className="table-column-big">Email</span>
-                    <span className="table-spacing"></span>
-                </div>
-                {this.props.users.map((u) =>
-                  <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
-          					<span className="table-column-small">
-          					  {u.avatar?
-          					    <img src={"../../../images/"+u.avatar} /> :
-          					    <i className="material-icons md-36 table-row-icon">&#xE851;</i>}
-          					</span>
-          					<span className="table-column-normal">{u.name}</span>
-          					<span className="table-column-normal">{u.surname}</span>
-          					<span className="table-column-normal">{u.role}</span>
-          					{this.isLowerGrade(u.role) ? <ChangeRole email={u.email} role={u.role} companyId={this.state.id}/> : <span className="table-spacing"></span>}
-          					<span className="table-column-big">{u.email}</span>
-          					{this.isLowerGrade(u.role) ? <DeleteUser email={u.email} /> : <span className="table-spacing"></span>}
-          				</div>
-      			    )}
-			          <Invite companyId={this.state.id}/>
-            </div>
-          );
-        }
-        else
-        {
-          content = (
-            <div className="table-content">
-                <div className="table-header">
-                    <p className="table-column-small"></p>
-                    <span className="table-column-normal">Name</span>
-                    <span className="table-column-normal">Surname</span>
-                    <span className="table-column-normal">Role</span>
-                    <span className="table-column-big">Email</span>
-                </div>
-                {this.props.users.map((u) =>
-                  <div className="table-row">
-          					<span className="table-column-small">
-          					  {u.avatar?
-          					    (<img src={"../../../images/"+u.avatar} />) :
-          					    (<i className="material-icons md-36 table-row-icon">&#xE851;</i>)}
-          					</span>
-          					<span className="table-column-normal">{u.name}</span>
-          					<span className="table-column-normal">{u.surname}</span>
-          					<span className="table-column-normal">{u.role}</span>
-          					<span className="table-column-big">{u.email}</span>
-          				</div>
-      			    )}
-            </div>
-          );
-        }
-
-
-
-*/
-/*
-
-return (
-      <div className="container sidebar-container">
-        <p className="container-title">{title}</p>
-        {content}
-      </div>
-    );
-
-*/
-
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./ChangeRole.react.jsx":16,"./DeleteUser.react.jsx":19,"./Invite.react.jsx":21,"react":370,"react-bootstrap-table":93,"react-router":139}],23:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./ChangeRole.react.jsx":16,"./DeleteUser.react.jsx":19,"./Invite.react.jsx":21,"react":370,"react-router":139}],23:[function(require,module,exports){
 'use strict';
 
 // Name: {ExecuteDSL.react.jsx}
@@ -2953,7 +2735,7 @@ var ExecuteDSL = React.createClass({
         return {
             errors: [],
             isLogged: SessionStore.isLogged(),
-            definitonId: this.props.params.definitionId,
+            definitionId: this.props.definitionId ? this.props.definitionId : this.props.params.definitionId,
             data: null,
             queried: false
         };
@@ -2962,7 +2744,7 @@ var ExecuteDSL = React.createClass({
     componentWillMount: function componentWillMount() {
         DSLStore.addExecuteListener(this._onChange);
         DSLStore.addNestedExecuteListener(this._onNestedChange);
-        RequestDSLActionCreator.executeDefinition(this.state.definitonId);
+        RequestDSLActionCreator.executeDefinition(this.state.definitionId);
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -3010,7 +2792,7 @@ var ExecuteDSL = React.createClass({
             var instance = this;
             var showDocument = function showDocument() {
                 instance.setState({ nestedLabel: "Document " + cell.props.children, queried: false });
-                RequestDSLActionCreator.executeNestedDocument(instance.state.definitonId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], formatExtraData.nestedDocument ? formatExtraData.nestedDocument.identity : {}, formatExtraData.nestedDocument ? formatExtraData.nestedDocument.body : {});
+                RequestDSLActionCreator.executeNestedDocument(instance.state.definitionId, formatExtraData.rawData[row._DSL_ELEMENT_INDEX], formatExtraData.nestedDocument ? formatExtraData.nestedDocument.identity : {}, formatExtraData.nestedDocument ? formatExtraData.nestedDocument.body : {});
                 var onback = function onback(e) {
                     e.preventDefault();
                     instance.setState(getState()); // back to Collection state
@@ -3216,6 +2998,7 @@ var ExecuteDSL = React.createClass({
                         var url = window.URL.createObjectURL(blob);
                         var tempLink = document.createElement('a');
                         tempLink.href = url;
+                        console.log(url);
                         tempLink.setAttribute('download', filename);
                         tempLink.click();
                     }
@@ -3287,10 +3070,10 @@ var ExecuteDSL = React.createClass({
                         csv = buildCSV();
                         break;
                 }
-                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitonId, instance.refs.email.value, label, json, csv);
+                RequestDSLActionCreator.sendEmail(SessionStore.getUserId(), instance.state.definitionId, instance.refs.email.value, label, json, csv);
             };
 
-            if (action.SendEmail == true || action.SendEmail == "true") // All format types
+            if (action.SendEmail != false && action.SendEmail != "false") // All format types
                 {
                     SendEmail = React.createElement(
                         'form',
@@ -3306,13 +3089,7 @@ var ExecuteDSL = React.createClass({
                             )
                         )
                     );
-                } else if (action.SendEmail != false && action.SendEmail != "false") // JSON or CSV
-                {
-                    SendEmail = React.createElement('div', null);
                 }
-            if (action.SendEmail == "csv") {
-                SendEmail = React.createElement('div', null);
-            }
         }
         return React.createElement(
             'div',
@@ -3423,7 +3200,7 @@ var ExecuteDSL = React.createClass({
                         ),
                         React.createElement(
                             Link,
-                            { className: 'button ', to: "/manageDSL/manageDSLSource/" + this.state.definitonId + "/edit" },
+                            { className: 'button ', to: "/manageDSL/manageDSLSource/" + this.state.definitionId + "/edit" },
                             'Check definition source'
                         )
                     );
@@ -3447,8 +3224,15 @@ var ExecuteDSL = React.createClass({
                 );
             }
         }
-
-        return React.createElement(
+        var fromManageSource = this.props.definitionId ? true : false;
+        return fromManageSource ? React.createElement(
+            'div',
+            { className: 'execute-popup' },
+            title,
+            content,
+            action,
+            errors
+        ) : React.createElement(
             'div',
             { id: this.state.definitionType == "Dashboard" ? "dashboard-container" : "dsl-data-container" },
             React.createElement(
@@ -3827,7 +3611,8 @@ var ManageDSL = React.createClass({
     },
 
     deleteAllSelected: function deleteAllSelected() {
-        alert(this.refs.table.state.selectedRowKeys);
+
+        console.log(this.refs.table.state.selectedRowKeys);
     },
 
     onUploadSource: function onUploadSource() {
@@ -4436,73 +4221,55 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var ExecuteDSL = require('./ExecuteDSL.react.jsx');
 
-function includeCollection(instance, editorSession) {
-    /*
-    var linesNum = editorSession.getLength();
-    for (var row=1;row<linesNum;row++)
-    {
-        
-    }
-    */
+function includeCollection(instance, editor, editorSession) {
     var tot;
     var source = instance.state.currentDefinitionSource;
-
+    var errors = [];
     source = source.replace(/\s/g, '');
     var macro = source.slice(0, 10);
 
-    if (macro != "Collection") {
-        alert('errore macro');
-    } else {
-        //var txt2 = txt1.slice(0, 3) + "bar" + txt1.slice(3);
-        if (source[source.length - 1] != "}") {
-            alert('errore }');
-        } else {
-            var index = instance.state.currentDefinitionSource.indexOf("}", source.length - 1);
-            tot = instance.state.currentDefinitionSource.slice(0, index - 1) + instance.state.includeSource + instance.state.currentDefinitionSource.slice(index);
-            console.log(tot);
+    if (macro != "Collection" || source[source.length - 1] != "}") {
+        if (macro != "Collection") {
+            errors.push("The definition doesn't corrispond to the selected type");
         }
+
+        if (source[source.length - 1] != "}") {
+            errors.push('Missing "}" in the end of the definition');
+        }
+    } else {
+        var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
+        tot = instance.state.currentDefinitionSource.slice(0, index - 1) + instance.state.includeSource + '\n' + instance.state.currentDefinitionSource.slice(index);
+        editor.setValue(tot);
+    }
+    if (errors.length > 0) {
+        instance.setState({ popUpErrors: errors });
+        instance.toggleErrorPopUp();
+        return false;
     }
 }
 
-/*
-Collection(
-    table: "customers",
-    label: "JuniorCustomers",
-    ---------id: "Junior",
-    ---------Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-) {
-    column(
-        name: "3"
-    )
-    action(
-        Export: "true",
-        SendEmail: "true"
-    )
-    column(
-        name: "4"
-    )
-    Document(
-        table: "prova"
-    ){
-        row(
-            name: "asd"
-        )
-        action(
-            SendEmail: "true"
-        )
-    }   
-    column(
-        name: "5"
-    )
-}
-*/
+function includeDashboard(instance, editor, editorSession) {
+    var tot;
+    var source = instance.state.currentDefinitionSource;
+    var errors = [];
+    source = source.replace(/\s/g, '');
+    var macro = source.slice(0, 9);
+    if (macro != "Dashboard" || source[source.length - 1] != "}") {
+        if (macro != "Dashboard") {
+            errors.push("The definition doesn't corrispond to the selected type");
+        }
 
-function includeDashboard() {}
+        if (source[source.length - 1] != "}") {
+            errors.push('Missing "}" in the end of the definition');
+        }
+    } else {
+        var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
+        tot = instance.state.currentDefinitionSource.slice(0, index - 1) + "\t\trow(\n\t\t\t" + instance.state.includeSource + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
+        editor.setValue(tot);
+    }
+}
 
 function getState() {
     return {
@@ -4533,7 +4300,8 @@ var ManageDSLSource = React.createClass({
     getInitialState: function getInitialState() {
         return {
             errors: [],
-            saveErrors: [],
+            popUpErrors: [],
+            includeErrors: [],
             isLogged: SessionStore.isLogged(),
             definitionId: this.props.params.definitionId,
             definitionName: null,
@@ -4541,6 +4309,7 @@ var ManageDSLSource = React.createClass({
             definitionSource: DSLStore.getSource(),
             saved: this.props.params.definitionId ? true : false,
             building: false,
+            executing: false,
             currentDefinitionName: null,
             currentDefinitionType: null,
             currentDefinitionSource: null,
@@ -4602,58 +4371,16 @@ var ManageDSLSource = React.createClass({
             }
 
             if (this.state.includeSource != "") {
-                //var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-                //var tokenIterator = new TokenIterator(editorSession, 0, 0);
-                //tokenIterator.stepForward();
-                //console.log(tokenIterator.getCurrentToken());
-                includeCollection(this, editorSession);
+                if (this.state.currentDefinitionType == "Collection") {
+                    includeCollection(this, editor, editorSession);
+                } else if (this.state.currentDefinitionType == "Dashboard") {
+                    includeDashboard(this, editor, editorSession);
+                }
             }
 
             this.setState({ include: false });
         }
     },
-
-    /*
-    
-    Dashboard(
-            label: "Dashboard"
-        )
-        {
-            row(
-                Document(
-                    table: "prova"
-                )
-                {
-                    row(
-                        name: "email",
-                        type: "string",
-                        label: "Email"
-                    )
-                }
-                Document(
-                    table: "prova"
-                ){
-                }
-            )
-            row(
-                Document(
-                    table: "prova"
-                ){
-                }
-                Collection(
-                    table: "users"
-                ){
-                }
-                Cell(
-                    type: "string"
-                ){
-                }
-            )
-            action(
-                Export: "json"
-            )
-        }
-        */
 
     onEdit: function onEdit(e) {
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
@@ -4713,6 +4440,10 @@ var ManageDSLSource = React.createClass({
             if (this.state.building) {
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
+            // if save was launched by a execute request then build the source
+            if (this.state.executing) {
+                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
         }
     },
 
@@ -4726,7 +4457,12 @@ var ManageDSLSource = React.createClass({
     },
 
     _onExecute: function _onExecute() {
-        this.setState({ errors: DSLStore.getErrors() });
+        //alert("executed");
+        //this.setState({errors: DSLStore.getErrors()});
+        if (this.state.executing) {
+            console.log(this.state);
+            //this.setState({executing: false});
+        }
     },
 
     _onInclude: function _onInclude() {
@@ -4759,7 +4495,7 @@ var ManageDSLSource = React.createClass({
                 return true;
             }
             if (errors.length > 0) {
-                this.setState({ saveErrors: errors });
+                this.setState({ popUpErrors: errors });
                 this.toggleErrorPopUp();
                 return false;
             }
@@ -4782,7 +4518,20 @@ var ManageDSLSource = React.createClass({
         }
     },
 
-    onRun: function onRun() {},
+    onRun: function onRun() {
+        if (!this.state.executing) {
+            if (this.state.saved == false) {
+                var saved = this.onSave(); // save definition first
+                alert("not saved, res: " + saved);
+                if (saved) {
+                    this.setState({ executing: true });
+                }
+            } else {
+                this.setState({ executing: true });
+                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
+        }
+    },
 
     onInclude: function onInclude() {
         var router = this.context.router;
@@ -4799,8 +4548,8 @@ var ManageDSLSource = React.createClass({
         this.refs.error.classList.toggle("dropdown-show");
     },
 
-    emptySaveErrors: function emptySaveErrors() {
-        this.setState({ saveErrors: [] });
+    emptyPopUpErrors: function emptyPopUpErrors() {
+        this.setState({ popUpErrors: [] });
     },
 
     scrollToBottom: function scrollToBottom() {
@@ -4816,7 +4565,8 @@ var ManageDSLSource = React.createClass({
         }
         var content,
             log = [],
-            errors;
+            errors,
+            execute;
         if (this.props.children) {
             var childrenWithProps = React.Children.map(this.props.children, function (child) {
                 return React.cloneElement(child, {
@@ -4830,7 +4580,6 @@ var ManageDSLSource = React.createClass({
             content = childrenWithProps;
         } else {
             if (this.state.errors.length > 0) {
-                //id="errors"className="error-item"
                 log = React.createElement(
                     'div',
                     null,
@@ -4843,17 +4592,48 @@ var ManageDSLSource = React.createClass({
                     })
                 );
             }
-            if (this.state.saveErrors.length > 0) {
+            if (this.state.popUpErrors.length > 0) {
                 errors = React.createElement(
                     'div',
                     { id: 'errors' },
-                    this.state.saveErrors.map(function (error, i) {
+                    this.state.popUpErrors.map(function (error, i) {
                         return React.createElement(
                             'p',
                             { className: 'error-item', key: i },
                             error
                         );
                     })
+                );
+            }
+
+            if (this.state.executing) {
+                var instance = this;
+                var onClose = function onClose() {
+                    instance.setState({ executing: false });
+                };
+
+                var onModalClick = function onModalClick(event) {
+                    if (event.target.className.match("modal")) {
+                        onClose();
+                    }
+                };
+                execute = React.createElement(
+                    'div',
+                    { className: 'modal', ref: 'modal', onClick: onModalClick },
+                    React.createElement(
+                        'div',
+                        { className: 'dashboard-popup dropdown-content dropdown-show' },
+                        React.createElement(
+                            'p',
+                            { className: 'close-modal', onClick: onClose },
+                            React.createElement(
+                                'i',
+                                { className: 'material-icons md-36' },
+                                ''
+                            )
+                        ),
+                        React.createElement(ExecuteDSL, { definitionId: this.state.definitionId })
+                    )
                 );
             }
 
@@ -5032,7 +4812,7 @@ var ManageDSLSource = React.createClass({
                         { className: 'dropdown-buttons' },
                         React.createElement(
                             'button',
-                            { onClick: this.emptySaveErrors, className: 'button' },
+                            { onClick: this.emptyPopUpErrors, className: 'button' },
                             'Ok'
                         )
                     )
@@ -5043,14 +4823,15 @@ var ManageDSLSource = React.createClass({
         return React.createElement(
             'div',
             { id: 'dsl-definition' },
-            content
+            content,
+            execute
         );
     }
 });
 
 module.exports = ManageDSLSource;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Editor.react.jsx":27,"react":370,"react-router":139}],27:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Editor.react.jsx":27,"./ExecuteDSL.react.jsx":23,"react":370,"react-router":139}],27:[function(require,module,exports){
 'use strict';
 
 // Name: {Editor.react.jsx}
@@ -11593,6 +11374,15 @@ module.exports = {
     });
   },
 
+  deleteAllSelectedDSLDefinitions: function deleteAllSelectedDSLDefinitions(arrayId) {
+    request.del(APIEndpoints.DSL + '/' + arrayId[0] + '/deleteAllSelectedDefinitions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      arrayId: arrayId
+    }).end(function (error, res) {
+      res = JSON.parse(res.text);
+      if (res.error) {} else {}
+    });
+  },
+
   changeDSLDefinitionPermissions: function changeDSLDefinitionPermissions(id, userId, permission) {
     request.put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       id: id,
@@ -11710,7 +11500,6 @@ module.exports = {
   },
 
   sendEmail: function sendEmail(userId, definitonId, email, label, json, csv) {
-    alert("send");
     request.post(APIEndpoints.DSL + '/' + definitonId + '/sendEmail').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
       userId: userId,
       email: email,

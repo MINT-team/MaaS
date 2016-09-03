@@ -1189,6 +1189,7 @@ input {
         -webkit-border-radius: 5px;
         border-radius: 5px;
         text-align: left;
+        z-index: 0;
 }
 
 #editorContainerPreview{
@@ -1485,6 +1486,10 @@ input {
     margin: auto;
 }
 
+.execute-popup {
+    text-align: center;
+}
+
 .total-lines {
     position: absolute;
     margin-left: -25%;
@@ -1621,7 +1626,8 @@ input {
 .close-modal {
     color: #aaa;
     float: right;
-    margin-right: 0.5em;
+    position: absolute;
+    margin-left: 95%;
     font-size: 28px;
     font-weight: bold;
 }
@@ -1640,6 +1646,7 @@ input {
     margin: auto;
     position: fixed;
     top: 15%; left: 0; bottom: 20%; right: 0;
+    z-index: 1;
 }
 
 .dashboard-popup th, .dashboard-popup td {

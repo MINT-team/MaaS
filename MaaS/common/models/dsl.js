@@ -205,6 +205,26 @@ module.exports = function(DSL) {
         
     );
     
+    DSL.deleteAllSelectedDefinitions = function(arraId) {
+        
+    };
+    
+    DSL.remoteMethod(
+        'deleteAllSelectedDefinitions',
+        {
+            description: "Delete all selected DSL definitions and its relationships",
+            accepts: [
+                { arg: 'arrayId', type: 'Array', required: true, description: 'Definitions id' }
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' }
+            ],
+            http: { verb: 'delete', path: '/:id/deleteAllSelectedDefinitions' }
+        }
+        
+    );
+    
+    
     DSL.changeDefinitionPermissions = function(id, userId, permission, cb) {
         var DSLAccess = app.models.DSLAccess;
         var user = app.models.user;
@@ -425,7 +445,7 @@ module.exports = function(DSL) {
             var sender;
             if(userInstance.name || userInstance.surname)
             {
-                sender = userInstance.name + " " + userInstance.surname
+                sender = userInstance.name + " " + userInstance.surname;
             }
             else
             {
@@ -448,11 +468,9 @@ module.exports = function(DSL) {
                     contentType: 'text/csv'
                 });
             }
-            //var url = HOST_URL + ':' + PORT + API_ROOT + '/users/confirm';
             var template = loopback.template(path.resolve(__dirname, '../../server/views/dsl.ejs'));
             var options = {
-                sender: sender,
-                downloadHref: ' '
+                sender: sender
             };
             var html = template(options);
 
@@ -661,7 +679,7 @@ module.exports = function(DSL) {
                                 console.log("> DSL compilation error:", err);
                                 var error = err.toString();
                                 if(error.match(/ReferenceError/g) && error.match(/is not defined/g))
-                                    return cb(null, "Syntax error: missing comma before transformation");
+                                    return cb(null, "Syntax error: unexpected keyword that can't be handled (ReferenceError)");
                                 else
                                     return cb(null, error);
                             }

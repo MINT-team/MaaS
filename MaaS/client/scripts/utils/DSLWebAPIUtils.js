@@ -149,6 +149,29 @@ module.exports = {
         });
     },
     
+    deleteAllSelectedDSLDefinitions: function(arrayId) {
+      request
+        .del(APIEndpoints.DSL + '/' + arrayId[0] + '/deleteAllSelectedDefinitions')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send(
+          {
+            arrayId: arrayId
+          }
+        )
+        .end(function(error, res) {
+          res = JSON.parse(res.text);
+          if (res.error)
+          {
+            
+          }
+          else
+          {
+            
+          }
+        });
+    },
+    
     changeDSLDefinitionPermissions: function(id, userId, permission) {
       request
         .put(APIEndpoints.DSL + '/' + id + '/changeDefinitionPermissions')
@@ -337,7 +360,6 @@ module.exports = {
     },
     
     sendEmail: function(userId, definitonId, email, label, json, csv) {
-      alert("send");
       request
         .post(APIEndpoints.DSL + '/' + definitonId + '/sendEmail')
         .set('Accept', 'application/json')

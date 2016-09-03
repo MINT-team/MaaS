@@ -43,6 +43,10 @@ var RequestDSLActionCreator = {
         WebAPIUtils.deleteDSLDefinition(id);
     },
     
+    deleteAllSelectedDSLDefinitions: function(arrayId) {
+        WebAPIUtils.deleteAllSelectedDSLDefinitions(arrayId);
+    },
+    
     changeDSLDefinitionPermissions: function(id, userId, permission) {
         WebAPIUtils.changeDSLDefinitionPermissions(id, userId, permission);
     },

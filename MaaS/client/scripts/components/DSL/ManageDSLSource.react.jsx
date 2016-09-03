@@ -13,85 +13,67 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
+var ExecuteDSL = require('./ExecuteDSL.react.jsx');
 
-
-function includeCollection(instance ,editorSession) {
-    /*
-    var linesNum = editorSession.getLength();
-    for (var row=1;row<linesNum;row++)
-    {
-        
-    }
-    */
+function includeCollection(instance, editor, editorSession) {
     var tot;
     var source = instance.state.currentDefinitionSource;
-    
-    
+    var errors = [];
     source = source.replace(/\s/g, '');
     var macro = source.slice(0, 10);
     
-    
-    if (macro != "Collection")
+    if (macro != "Collection" || source[source.length-1] != "}")
     {
-        alert('errore macro');
+        if (macro != "Collection")
+        {
+            errors.push("The definition doesn't corrispond to the selected type");
+        }
+        
+        if (source[source.length-1] != "}")
+        {
+            errors.push('Missing "}" in the end of the definition');
+        }
     }
     else
     {
-        //var txt2 = txt1.slice(0, 3) + "bar" + txt1.slice(3);
-        if (source[source.length-1] != "}")
-        {
-            alert('errore }');
-        }
-        else
-        {
-            var index = instance.state.currentDefinitionSource.indexOf("}", source.length-1);
-            tot = instance.state.currentDefinitionSource.slice(0, index-1) + instance.state.includeSource 
-            + instance.state.currentDefinitionSource.slice(index);
-            console.log(tot);
-        }
+        var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length-1);
+        tot = instance.state.currentDefinitionSource.slice(0, index-1) + instance.state.includeSource 
+        + '\n' + instance.state.currentDefinitionSource.slice(index);
+        editor.setValue(tot);
+    }
+    if(errors.length > 0)
+    {
+        instance.setState({ popUpErrors: errors });
+        instance.toggleErrorPopUp();
+        return false;
     }
 }
 
-/*
-Collection(
-    table: "customers",
-    label: "JuniorCustomers",
-    ---------id: "Junior",
-    ---------Weight:"0",
-    perpage: "20",
-    sortby: "surname",
-    order: "asc",
-    query: {age: {$lt: 40}}
-) {
-    column(
-        name: "3"
-    )
-    action(
-        Export: "true",
-        SendEmail: "true"
-    )
-    column(
-        name: "4"
-    )
-    Document(
-        table: "prova"
-    ){
-        row(
-            name: "asd"
-        )
-        action(
-            SendEmail: "true"
-        )
-    }   
-    column(
-        name: "5"
-    )
-}
-*/
-
-
-function includeDashboard() {
-    
+function includeDashboard(instance, editor, editorSession) {
+    var tot;
+    var source = instance.state.currentDefinitionSource;
+    var errors = [];
+    source = source.replace(/\s/g, '');
+    var macro = source.slice(0, 9);
+    if (macro != "Dashboard" || source[source.length-1] != "}")
+    {
+        if (macro != "Dashboard")
+        {
+            errors.push("The definition doesn't corrispond to the selected type");
+        }
+        
+        if (source[source.length-1] != "}")
+        {
+            errors.push('Missing "}" in the end of the definition');
+        }
+    }
+    else
+    {
+        var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length-1);
+        tot = instance.state.currentDefinitionSource.slice(0, index-1) + "\t\trow(\n\t\t\t" + instance.state.includeSource 
+        + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
+        editor.setValue(tot);
+    }
 }
 
 function getState() {
@@ -121,7 +103,8 @@ var ManageDSLSource = React.createClass({
     getInitialState: function() {
         return {
                 errors: [],
-                saveErrors: [],
+                popUpErrors: [],
+                includeErrors: [],
                 isLogged: SessionStore.isLogged(),
                 definitionId: this.props.params.definitionId,
                 definitionName: null,
@@ -129,6 +112,7 @@ var ManageDSLSource = React.createClass({
                 definitionSource: DSLStore.getSource(),
                 saved: this.props.params.definitionId ? true : false,
                 building: false,
+                executing: false,
                 currentDefinitionName: null,
                 currentDefinitionType: null,
                 currentDefinitionSource: null,
@@ -202,61 +186,20 @@ var ManageDSLSource = React.createClass({
             
             if (this.state.includeSource != "")
             {
-                //var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-                //var tokenIterator = new TokenIterator(editorSession, 0, 0);
-                //tokenIterator.stepForward();
-                //console.log(tokenIterator.getCurrentToken());
-                includeCollection(this, editorSession);
+                if (this.state.currentDefinitionType == "Collection")
+                {
+                    includeCollection(this, editor, editorSession);
+                }
+                else if (this.state.currentDefinitionType == "Dashboard")
+                {
+                    includeDashboard(this, editor, editorSession);
+                }
             }
             
             this.setState({ include: false });
         }
         
     },
-    
-    
-
-/*
-
-Dashboard(
-        label: "Dashboard"
-    )
-    {
-        row(
-            Document(
-                table: "prova"
-            )
-            {
-                row(
-                    name: "email",
-                    type: "string",
-                    label: "Email"
-                )
-            }
-            Document(
-                table: "prova"
-            ){
-            }
-        )
-        row(
-            Document(
-                table: "prova"
-            ){
-            }
-            Collection(
-                table: "users"
-            ){
-            }
-            Cell(
-                type: "string"
-            ){
-            }
-        )
-        action(
-            Export: "json"
-        )
-    }
-    */
     
     onEdit: function(e) {
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
@@ -332,6 +275,11 @@ Dashboard(
             {
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
+            // if save was launched by a execute request then build the source
+            if(this.state.executing)
+            {
+                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
         }
     },
     
@@ -346,7 +294,13 @@ Dashboard(
     },
     
     _onExecute: function() {
-        this.setState({errors: DSLStore.getErrors()});
+        //alert("executed");
+        //this.setState({errors: DSLStore.getErrors()});
+        if(this.state.executing)
+        {
+            console.log(this.state);
+            //this.setState({executing: false});
+        }
     },
     
     _onInclude: function() {
@@ -392,7 +346,7 @@ Dashboard(
             }
             if(errors.length > 0)
             {
-                this.setState({ saveErrors: errors });
+                this.setState({ popUpErrors: errors });
                 this.toggleErrorPopUp();
                 return false;
             }
@@ -421,7 +375,23 @@ Dashboard(
     },
     
     onRun: function() {
-        
+        if(!this.state.executing)
+        {
+            if(this.state.saved == false)
+            {
+                var saved = this.onSave();  // save definition first
+                alert("not saved, res: "+saved);
+                if(saved)
+                {
+                    this.setState({executing: true});
+                }
+            }
+            else
+            {
+                this.setState({executing: true});
+                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+            }
+        }
     },
     
     onInclude: function() {
@@ -439,8 +409,8 @@ Dashboard(
 		this.refs.error.classList.toggle("dropdown-show");
 	},
 	
-	emptySaveErrors: function() {
-	    this.setState({ saveErrors: [] });
+	emptyPopUpErrors: function() {
+	    this.setState({ popUpErrors: [] });
 	},
 	
 	scrollToBottom: function() {
@@ -455,7 +425,7 @@ Dashboard(
                 <AuthorizationRequired />
             );
         }
-        var content, log = [], errors;
+        var content, log = [], errors, execute;
         if(this.props.children)
         {
             const childrenWithProps = React.Children.map(this.props.children,
@@ -471,13 +441,38 @@ Dashboard(
         }
         else
         {
-            if(this.state.errors.length > 0) 
-            {//id="errors"className="error-item"
+            if(this.state.errors.length > 0)
+            {
                 log = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
             }
-            if(this.state.saveErrors.length > 0)
+            if(this.state.popUpErrors.length > 0)
             {
-                errors = ( <div id="errors">{this.state.saveErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
+                errors = ( <div id="errors">{this.state.popUpErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
+            }
+            
+            if(this.state.executing)
+            {
+                var instance = this;
+                var onClose = function() {
+                    instance.setState({ executing: false });
+                };
+        
+                var onModalClick = function(event) {
+                    if(event.target.className.match("modal"))
+                    {
+                        onClose();
+                    }
+                };
+                execute = (
+                    <div className="modal" ref="modal" onClick={onModalClick} >
+                        <div className="dashboard-popup dropdown-content dropdown-show">
+                            <p className="close-modal" onClick={onClose}>
+                                <i className="material-icons md-36">&#xE5CD;</i>
+                            </p>
+                            <ExecuteDSL definitionId={this.state.definitionId} />
+                        </div>
+                    </div>
+                );
             }
             
             content = (
@@ -540,7 +535,7 @@ Dashboard(
                         <p className="dropdown-title">Error</p>
                         <div className="dropdown-description">{errors}</div>
                         <div className="dropdown-buttons">
-                            <button onClick={this.emptySaveErrors} className="button">Ok</button>
+                            <button onClick={this.emptyPopUpErrors} className="button">Ok</button>
                         </div>
                     </div>
                 </div>
@@ -550,6 +545,7 @@ Dashboard(
         return (
             <div id="dsl-definition">
                 {content}
+                {execute}
             </div>
         );
     }
