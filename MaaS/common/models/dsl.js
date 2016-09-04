@@ -205,8 +205,41 @@ module.exports = function(DSL) {
         
     );
     
-    DSL.deleteAllSelectedDefinitions = function(arraId) {
-        
+    DSL.deleteAllSelectedDefinitions = function(arrayId, cb) {
+        /*
+        arrayId.forEach(function(id) {
+            DSL.findById(id, function(err, DSLInstance) {
+                if (err)
+                {
+                    return cb(err, null);
+                }
+                DSLInstance.users({ where: {} }, function(err, users) {
+                    if(err)
+                    {
+                        return cb(err, null);
+                    }
+                    users.forEach(function(user, i) {
+                        DSLInstance.users.remove(user, function(err) {
+                            if(err)
+                            {
+                                console.log("> Error deleting DSL definition");
+                                return cb(err, null);
+                            }
+                        });
+                    });
+                    // Success
+                    DSL.destroyById(DSLInstance.id, function(err) {
+                        if(err)
+                        {
+                            return cb(err, null);
+                        }
+                        console.log("> DSL definition deleted:", id);
+                        return cb(null, null);
+                    });
+                });
+            });
+        });
+        */
     };
     
     DSL.remoteMethod(
@@ -512,6 +545,10 @@ module.exports = function(DSL) {
     );
     
     DSL.compile = function(dsl, cb) {
+        if(!dsl)
+        {
+            return cb("Definition has empty source", null);
+        }
         var expanded;
         macro = macro.toString();
         var macroLines = macro.split("\n").length;
@@ -608,7 +645,6 @@ module.exports = function(DSL) {
                 console.log(err);
                 return cb(err);
             }
-            
             ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
                 if(err)
                 {

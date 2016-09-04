@@ -275,10 +275,10 @@ var ManageDSLSource = React.createClass({
             {
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
-            // if save was launched by a execute request then build the source
+            // if save was launched by a execute request
             if(this.state.executing)
             {
-                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+                this.refs.run.classList.remove("loader-small");
             }
         }
     },
@@ -294,13 +294,7 @@ var ManageDSLSource = React.createClass({
     },
     
     _onExecute: function() {
-        //alert("executed");
-        //this.setState({errors: DSLStore.getErrors()});
-        if(this.state.executing)
-        {
-            console.log(this.state);
-            //this.setState({executing: false});
-        }
+        this.setState({errors: DSLStore.getErrors()});
     },
     
     _onInclude: function() {
@@ -380,16 +374,15 @@ var ManageDSLSource = React.createClass({
             if(this.state.saved == false)
             {
                 var saved = this.onSave();  // save definition first
-                alert("not saved, res: "+saved);
                 if(saved)
                 {
                     this.setState({executing: true});
+                    this.refs.run.classList.add("loader-small");
                 }
             }
             else
             {
                 this.setState({executing: true});
-                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
         }
     },
@@ -450,7 +443,7 @@ var ManageDSLSource = React.createClass({
                 errors = ( <div id="errors">{this.state.popUpErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
             }
             
-            if(this.state.executing)
+            if(this.state.executing && this.state.saved)
             {
                 var instance = this;
                 var onClose = function() {
@@ -458,7 +451,7 @@ var ManageDSLSource = React.createClass({
                 };
         
                 var onModalClick = function(event) {
-                    if(event.target.className.match("modal"))
+                    if(event.target.className.match("modal") || event.target.toString().match("manageDSL/manageDSLSource"))
                     {
                         onClose();
                     }
@@ -496,9 +489,9 @@ var ManageDSLSource = React.createClass({
                                     <p className="tooltip-text tooltip-text-long" ref="buildTooltip">Build [Alt + B]</p>
                                     <i onClick={this.onBuild} accessKey="b" className="material-icons md-36 dropdown-button">&#xE869;</i>
                                 </div>
-                                <div className="tooltip tooltip-top">
+                                <div className="tooltip tooltip-top" ref="run">
                                     <p className="tooltip-text tooltip-text-longest">Build & Run [Alt + R]</p>
-                                    <i onClick={this.onRun} accessKey="r" className="material-icons md-36 dropdown-button" ref="run">&#xE037;</i>
+                                    <i onClick={this.onRun} accessKey="r" className="material-icons md-36 dropdown-button" >&#xE037;</i>
                                 </div>
                                 <div className="tooltip tooltip-top">
                                     <p className="tooltip-text tooltip-text-longest">Change database</p>

@@ -55,16 +55,22 @@ var Header = React.createClass({
     },
 
 	handleClick: function(event) {
-	    var elem = event.target;
-	    var child = false;
-	    while(!child && elem.parentElement)
+	   // var elem = event.target;
+	   // var child = false;
+	   // while(!child && elem.parentElement)
+	   // {
+	   //     if(elem.className.match("dropdown-button"))     // child of dropdown-button
+	   //         child = true;
+	   //     elem = elem.parentElement;
+	   // }
+	   // console.log(child);
+	   // console.log(event.target.className);
+	    var dropdowns = document.getElementsByClassName("dropdown-content");
+	   // console.log(dropdowns);
+	    if(!event.target.className.match("dropdown-button")  && dropdowns)
 	    {
-	        if(elem.className.match("dropdown-button"))     // child of dropdown-button
-	            child = true;
-	        elem = elem.parentElement;
-	    }
-	    if(!event.target.className.match("dropdown-button") && !child) {
-		    var dropdowns = document.getElementsByClassName("dropdown-content");
+	       // console.log("entrato");
+		    
 		    for (var i = 0; i < dropdowns.length; i++) {
 				var openDropdown = dropdowns[i];
 		    	if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {

@@ -3107,6 +3107,7 @@ var ExecuteDSL = React.createClass({
         }
         var content, errors, title, action;
         var data = [];
+        var fromManageSource = this.props.definitionId ? true : false;
 
         if (this.state.label) title = React.createElement(
             'p',
@@ -3224,7 +3225,7 @@ var ExecuteDSL = React.createClass({
                 );
             }
         }
-        var fromManageSource = this.props.definitionId ? true : false;
+
         return fromManageSource ? React.createElement(
             'div',
             { className: 'execute-popup' },
@@ -4440,9 +4441,9 @@ var ManageDSLSource = React.createClass({
             if (this.state.building) {
                 RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
-            // if save was launched by a execute request then build the source
+            // if save was launched by a execute request
             if (this.state.executing) {
-                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
+                this.refs.run.classList.remove("loader-small");
             }
         }
     },
@@ -4457,12 +4458,7 @@ var ManageDSLSource = React.createClass({
     },
 
     _onExecute: function _onExecute() {
-        //alert("executed");
-        //this.setState({errors: DSLStore.getErrors()});
-        if (this.state.executing) {
-            console.log(this.state);
-            //this.setState({executing: false});
-        }
+        this.setState({ errors: DSLStore.getErrors() });
     },
 
     _onInclude: function _onInclude() {
@@ -4522,13 +4518,12 @@ var ManageDSLSource = React.createClass({
         if (!this.state.executing) {
             if (this.state.saved == false) {
                 var saved = this.onSave(); // save definition first
-                alert("not saved, res: " + saved);
                 if (saved) {
                     this.setState({ executing: true });
+                    this.refs.run.classList.add("loader-small");
                 }
             } else {
                 this.setState({ executing: true });
-                //RequestDSLActionCreator.compileDefinition(this.state.definitionId);
             }
         }
     },
@@ -4606,14 +4601,14 @@ var ManageDSLSource = React.createClass({
                 );
             }
 
-            if (this.state.executing) {
+            if (this.state.executing && this.state.saved) {
                 var instance = this;
                 var onClose = function onClose() {
                     instance.setState({ executing: false });
                 };
 
                 var onModalClick = function onModalClick(event) {
-                    if (event.target.className.match("modal")) {
+                    if (event.target.className.match("modal") || event.target.toString().match("manageDSL/manageDSLSource")) {
                         onClose();
                     }
                 };
@@ -4704,7 +4699,7 @@ var ManageDSLSource = React.createClass({
                         ),
                         React.createElement(
                             'div',
-                            { className: 'tooltip tooltip-top' },
+                            { className: 'tooltip tooltip-top', ref: 'run' },
                             React.createElement(
                                 'p',
                                 { className: 'tooltip-text tooltip-text-longest' },
@@ -4712,7 +4707,7 @@ var ManageDSLSource = React.createClass({
                             ),
                             React.createElement(
                                 'i',
-                                { onClick: this.onRun, accessKey: 'r', className: 'material-icons md-36 dropdown-button', ref: 'run' },
+                                { onClick: this.onRun, accessKey: 'r', className: 'material-icons md-36 dropdown-button' },
                                 ''
                             )
                         ),
@@ -5530,15 +5525,21 @@ var Header = React.createClass({
     },
 
     handleClick: function handleClick(event) {
-        var elem = event.target;
-        var child = false;
-        while (!child && elem.parentElement) {
-            if (elem.className.match("dropdown-button")) // child of dropdown-button
-                child = true;
-            elem = elem.parentElement;
-        }
-        if (!event.target.className.match("dropdown-button") && !child) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
+        // var elem = event.target;
+        // var child = false;
+        // while(!child && elem.parentElement)
+        // {
+        //     if(elem.className.match("dropdown-button"))     // child of dropdown-button
+        //         child = true;
+        //     elem = elem.parentElement;
+        // }
+        // console.log(child);
+        // console.log(event.target.className);
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        // console.log(dropdowns);
+        if (!event.target.className.match("dropdown-button") && dropdowns) {
+            // console.log("entrato");
+
             for (var i = 0; i < dropdowns.length; i++) {
                 var openDropdown = dropdowns[i];
                 if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {

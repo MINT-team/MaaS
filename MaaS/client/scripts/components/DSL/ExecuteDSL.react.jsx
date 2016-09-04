@@ -404,7 +404,7 @@ var ExecuteDSL = React.createClass({
         }
         var content, errors, title, action;
         var data = [];
-        
+        var fromManageSource = this.props.definitionId ? true : false;
         
         if(this.state.label)
             title = (<p className="container-title">{this.state.label}</p>);
@@ -499,7 +499,7 @@ var ExecuteDSL = React.createClass({
                 );
             }
         }
-        var fromManageSource = this.props.definitionId ? true : false;
+        
         return (
             fromManageSource ?
                 <div className="execute-popup">
