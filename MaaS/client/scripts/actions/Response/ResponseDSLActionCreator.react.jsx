@@ -64,6 +64,14 @@ var ResponseDSLActionCreator = {
         });
     },
     
+    responseDeleteAllSelectedDSLDefinitions: function(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_DSL_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
+        });
+    },
+    
     responseLoadUserList: function(userList, permissionList) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,

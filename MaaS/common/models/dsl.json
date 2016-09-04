@@ -78,6 +78,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "Write",
+      "permission": "ALLOW",
+      "property": "deleteAllSelectedDSLDefinitions"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "Member",
       "permission": "ALLOW",
       "property": "findById"

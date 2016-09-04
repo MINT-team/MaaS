@@ -32,7 +32,6 @@ module.exports = function(ExternalDatabase) {
                 }
                 
                 // verify connectivity
-                //var conn = mongoose.createConnection(connString);
                 var conn = mongoose.connect(connString, function(err) {
                     if (err)
                     {
@@ -60,7 +59,6 @@ module.exports = function(ExternalDatabase) {
                         }
                     });
                 });
-                //mongoose.connection.close();
                 conn.disconnect();
             });
         }
@@ -77,7 +75,7 @@ module.exports = function(ExternalDatabase) {
     ExternalDatabase.remoteMethod(
         'addExtDb',
         {
-            description: 'Adds an external database to the company.',
+            description: 'Adds an external database to the company',
             accepts: [
                 { arg: 'companyId', type: 'string', required: true, description: 'Company Id'},
                 { arg: 'name', type: 'string', required: true, description: 'Database name'},
@@ -90,4 +88,44 @@ module.exports = function(ExternalDatabase) {
             http: { verb: 'post', path: '/addExtDb' }
         }
     );
+    
+    ExternalDatabase.deleteAllSelectedDatabases = function(companyId, arrayId, cb) {
+        var Company = app.models.Company;
+        Company.findById(companyId, function(err, companyInstance) {
+            if(err)
+            {
+                return cb(err, null);
+            }
+            arrayId.forEach(function(id, index) {
+                companyInstance.externalDatabases.destroy(id, function(err) {
+                    if (err)
+                    {
+                        return cb(err, null);
+                    }
+                });
+                if (index == arrayId.length-1)
+                {
+                    console.log('Selected databases deleted');
+                    return cb(null, null);
+                }
+            });
+        });
+    };
+    
+    
+    ExternalDatabase.remoteMethod(
+        'deleteAllSelectedDatabases',
+        {
+            description: 'Delete all selected databases',
+            accepts: [
+                { arg: 'companyId', type: 'string', required: true, description: 'Company id'},
+                { arg: 'arrayId', type: 'Array', required: true, description: 'Databases id'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'delete', path: '/deleteAllSelectedDatabases' }
+        }
+    );
+    
 };

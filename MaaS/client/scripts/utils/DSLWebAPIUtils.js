@@ -137,11 +137,11 @@ module.exports = {
           if (res)
           {
             res = JSON.parse(res.text);
-            if(res.error) 
+            if(res.error)
             {
               ResponseDSLActionCreator.responseDeleteDSLDefinition(res.error.message, null);
             } 
-            else 
+            else
             {
               ResponseDSLActionCreator.responseDeleteDSLDefinition(null, id);
             }
@@ -163,11 +163,11 @@ module.exports = {
           res = JSON.parse(res.text);
           if (res.error)
           {
-            
+            ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(res.error.message, null);
           }
           else
           {
-            
+            ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(null, arrayId);
           }
         });
     },

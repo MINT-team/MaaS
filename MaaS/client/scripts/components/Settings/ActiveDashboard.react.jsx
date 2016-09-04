@@ -10,13 +10,16 @@ var React = require('react');
 var Link = require('react-router').Link;
 
 var ManageActiveDashboard = React.createClass({
-    render(){
+    
+    render: function() {
         return(
-            <div className="dashMan">
-            <p className="dashMan-title">Dashboard Management</p>
-            aaaaaaaaaaaaaaa
+            <div className="container">
+                <p className="container-title">Dashboard Management</p>
+                <p>Select your main Dashboard</p>
+                <p>It will appear as your home page under the name of your company</p>
+            
             </div>
-            );
+        );
     }
 });
 

@@ -145,9 +145,8 @@ var Register = React.createClass({
             <p>Now please confirm your account.</p>
             <p>Click the link we sent at: <span id="successful-email">{SessionStore.getEmail()}</span></p>
             <Link id="successful-button" className="button" to="/login">Go to Login</Link>
-            <p>If you didn‘t receive your verification email <Link className="help-link" to="/verify">require another one</Link></p>
           </div>
-        );
+        ); //<p>If you didn‘t receive your verification email <Link className="help-link" to="/verify">require another one</Link></p>
       }
     }
     return (

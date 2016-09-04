@@ -359,6 +359,35 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
             DSLStore.emitChange();
             break;
             
+        case ActionTypes.DELETE_ALL_SELECTED_DSL_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else
+            {
+                _errors = [];
+                var count = 0;
+                for (var i = 0; count < action.arrayId.length && i <_DSL_LIST.length; i++)
+                {
+                    for (var j = 0; j < action.arrayId.length; j++)
+                    {
+                        if(_DSL_LIST[i].dsl.id == action.arrayId[j])
+                        {
+                            _DSL_LIST.splice(i,1);
+                            count++;
+                        }
+                    }
+                }
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
+                localStorage.removeItem('DSLDatabase');
+            }
+            DSLStore.emitChange();
+            break;
+            
         case ActionTypes.LOAD_USER_LIST_RESPONSE:
             if(action.userList && action.permissionList)
             {

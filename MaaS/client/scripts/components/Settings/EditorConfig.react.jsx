@@ -32,10 +32,10 @@
 */
 var React = require('react');
 var Link = require('react-router').Link;
-var UserStore = require('../stores/UserStore.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
-var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
-var Editor = require('./Editor.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var Editor = require('../Editor.react.jsx');
 
 function getState() {
     return {

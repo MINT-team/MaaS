@@ -399,7 +399,8 @@ var ManageDSLSource = React.createClass({
     },
     
     toggleErrorPopUp: function() {
-		this.refs.error.classList.toggle("dropdown-show");
+        alert("call");
+		this.refs.error.classList.add("dropdown-show");
 	},
 	
 	emptyPopUpErrors: function() {
@@ -440,6 +441,7 @@ var ManageDSLSource = React.createClass({
             }
             if(this.state.popUpErrors.length > 0)
             {
+                console.log(this.state.popUpErrors);
                 errors = ( <div id="errors">{this.state.popUpErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
             }
             

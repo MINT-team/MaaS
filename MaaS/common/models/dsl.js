@@ -206,8 +206,8 @@ module.exports = function(DSL) {
     );
     
     DSL.deleteAllSelectedDefinitions = function(arrayId, cb) {
-        /*
-        arrayId.forEach(function(id) {
+        
+        arrayId.forEach(function(id, index) {
             DSL.findById(id, function(err, DSLInstance) {
                 if (err)
                 {
@@ -227,19 +227,20 @@ module.exports = function(DSL) {
                             }
                         });
                     });
-                    // Success
                     DSL.destroyById(DSLInstance.id, function(err) {
                         if(err)
                         {
                             return cb(err, null);
                         }
-                        console.log("> DSL definition deleted:", id);
-                        return cb(null, null);
                     });
                 });
             });
+            if (index == arrayId.length-1)
+            {
+                console.log("> DSL definitions deleted");
+                return cb(null, null);
+            }
         });
-        */
     };
     
     DSL.remoteMethod(

@@ -80,15 +80,39 @@ module.exports = {
           if(res.errors)
           {
             res = JSON.parse(res.text);
-            ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message);
+            ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message, null);
           }
           else
           {
-            ResponseExternalDatabaseActionCreator.responseDeleteDb(null);
+            ResponseExternalDatabaseActionCreator.responseDeleteDb(null, id);
           }
         }
       });
   },
+  
+  deleteAllSelectedDatabases: function(companyId, arrayId) {
+      request
+        .del(APIEndpoints.EXTERNAL_DATABASES + '/deleteAllSelectedDatabases')
+        .set('Accept', 'application/json')
+        .set('Authorization', localStorage.getItem('accessToken'))
+        .send(
+          {
+            companyId: companyId,
+            arrayId: arrayId
+          }
+        )
+        .end(function(error, res) {
+          res = JSON.parse(res.text);
+          if (res.error)
+          {
+            ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+          }
+          else
+          {
+            ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(null, arrayId);
+          }
+        });
+    },
   
   changeStateDb: function(id, status, companyId) {
     request

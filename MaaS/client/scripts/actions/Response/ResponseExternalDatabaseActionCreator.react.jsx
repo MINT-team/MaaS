@@ -20,11 +20,27 @@ var ResponseExternalDatabaseActionCreator = {
         });
     },
     
-    responseGetDbs:function(json, errors) {
+    responseGetDbs: function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.GET_DBS,
           json: json,
           errors: errors
+        });
+    },
+    
+    responseDeleteDb: function(errors, id) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_DB_RESPONSE,
+            errors: errors,
+            id: id
+        });
+    },
+    
+    responseDeleteAllSelectedDatabases: function(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_DATABASES_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
         });
     },
     
@@ -34,15 +50,7 @@ var ResponseExternalDatabaseActionCreator = {
           json: json,
           errors: errors
         });  
-    },
-    
-    responseDeleteDb: function(errors) {
-        Dispatcher.handleServerAction({
-          type: ActionTypes.DELETE_DB,
-          errors: errors
-        });  
     }
-
 };
 
 module.exports = ResponseExternalDatabaseActionCreator;

@@ -178,11 +178,11 @@ var RequestExternalDatabaseActionCreator = {
     },
 
     deleteDb: function deleteDb(id, companyId) {
-        Dispatcher.handleViewAction({
-            type: ActionTypes.DELETE_DB,
-            id: id
-        });
         WebAPIUtils.deleteDb(id, companyId);
+    },
+
+    deleteAllSelectedDatabases: function deleteAllSelectedDatabases(companyId, arrayId) {
+        WebAPIUtils.deleteAllSelectedDatabases(companyId, arrayId);
     },
 
     changeStateDb: function changeStateDb(id, status, companyId) {
@@ -468,6 +468,14 @@ var ResponseDSLActionCreator = {
         });
     },
 
+    responseDeleteAllSelectedDSLDefinitions: function responseDeleteAllSelectedDSLDefinitions(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_DSL_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
+        });
+    },
+
     responseLoadUserList: function responseLoadUserList(userList, permissionList) {
         Dispatcher.handleServerAction({
             type: ActionTypes.LOAD_USER_LIST_RESPONSE,
@@ -560,21 +568,29 @@ var ResponseExternalDatabaseActionCreator = {
         });
     },
 
+    responseDeleteDb: function responseDeleteDb(errors, id) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_DB_RESPONSE,
+            errors: errors,
+            id: id
+        });
+    },
+
+    responseDeleteAllSelectedDatabases: function responseDeleteAllSelectedDatabases(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_DATABASES_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
+        });
+    },
+
     responseChangeStateDb: function responseChangeStateDb(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_STATE_DB,
             json: json,
             errors: errors
         });
-    },
-
-    responseDeleteDb: function responseDeleteDb(errors) {
-        Dispatcher.handleServerAction({
-            type: ActionTypes.DELETE_DB,
-            errors: errors
-        });
     }
-
 };
 
 module.exports = ResponseExternalDatabaseActionCreator;
@@ -1990,13 +2006,13 @@ var ExternalDatabases = React.createClass({
   },
 
   deleteAllSelected: function deleteAllSelected() {
-    alert(this.refs.table.state.selectedRowKeys);
+    RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
   },
 
   nameFormatter: function nameFormatter(cell, row) {
     return React.createElement(
       'span',
-      { className: 'db-link' },
+      { className: 'table-link' },
       row.name
     );
   },
@@ -3356,6 +3372,14 @@ var ManageDSL = React.createClass({
         });
     },
 
+    includeNameFormatter: function includeNameFormatter(cell, row) {
+        return React.createElement(
+            'span',
+            { className: 'table-link' },
+            row.name
+        );
+    },
+
     nameFormatter: function nameFormatter(cell, row) {
         return React.createElement(
             Link,
@@ -3612,8 +3636,7 @@ var ManageDSL = React.createClass({
     },
 
     deleteAllSelected: function deleteAllSelected() {
-
-        console.log(this.refs.table.state.selectedRowKeys);
+        RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
     },
 
     onUploadSource: function onUploadSource() {
@@ -3863,7 +3886,7 @@ var ManageDSL = React.createClass({
                                 search: true, striped: true, hover: true, selectRow: selectRowProp, options: options, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
-                                { dataField: 'name', dataSort: true },
+                                { dataField: 'name', dataSort: true, dataFormat: this.includeNameFormatter },
                                 'Name'
                             ),
                             React.createElement(
@@ -4540,7 +4563,8 @@ var ManageDSLSource = React.createClass({
     },
 
     toggleErrorPopUp: function toggleErrorPopUp() {
-        this.refs.error.classList.toggle("dropdown-show");
+        alert("call");
+        this.refs.error.classList.add("dropdown-show");
     },
 
     emptyPopUpErrors: function emptyPopUpErrors() {
@@ -4588,6 +4612,7 @@ var ManageDSLSource = React.createClass({
                 );
             }
             if (this.state.popUpErrors.length > 0) {
+                console.log(this.state.popUpErrors);
                 errors = React.createElement(
                     'div',
                     { id: 'errors' },
@@ -4887,288 +4912,6 @@ module.exports = Editor;
 },{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370}],28:[function(require,module,exports){
 'use strict';
 
-/*
-* Name: {Error404.react.jsx}
-* Module: {Front-end::Views}
-* Location: {/MaaS/client/script/components/}
-* 
-* History:
-* Version         Date            Programmer
-* ==========================================
-* 1.0.0         30/07/2016          Navid Taha
-* ------------------------------------------
-* Approved stability.
-* ==========================================
-* 0.1.0        30/07/2016          Fabiano Tavallini
-* ------------------------------------------
-* Verify of the component.
-* ==========================================
-* 0.0.4        29/07/2016          Navid Taha
-* ------------------------------------------
-* Defined connection with UserStore.
-* ==========================================
-* 0.0.3        28/07/2016          Thomas Fuser
-* ------------------------------------------
-* Defined connection with RequestUserActionCreator.
-* ==========================================
-* 0.0.2        28/07/2016          Navid Taha
-* ------------------------------------------
-* Defined HTML structure of the component.
-* ==========================================
-* 0.0.1        27/07/2016          Navid Taha
-* ------------------------------------------
-* First structure of the file.
-*/
-var React = require('react');
-var Link = require('react-router').Link;
-var UserStore = require('../stores/UserStore.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
-var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
-var Editor = require('./Editor.react.jsx');
-
-function getState() {
-    return {
-        theme: UserStore.getEditorTheme(),
-        softTabs: UserStore.getEditorSoftTabs(),
-        tabSize: UserStore.getEditorTabSize(),
-        fontSize: UserStore.getEditorFontSize(),
-        errors: UserStore.getErrors()
-    };
-}
-
-var EditorConfig = React.createClass({
-    displayName: 'EditorConfig',
-
-    getInitialState: function getInitialState() {
-        return {
-            submit: false,
-            theme: UserStore.getEditorTheme(),
-            softTabs: UserStore.getEditorSoftTabs(),
-            tabSize: UserStore.getEditorTabSize(),
-            fontSize: UserStore.getEditorFontSize(),
-            errors: UserStore.getErrors()
-        };
-    },
-
-    componentDidMount: function componentDidMount() {
-        UserStore.addChangeListener(this._onChange);
-        this.initForm();
-    },
-
-    componentWillUnmount: function componentWillUnmount() {
-        UserStore.removeChangeListener(this._onChange);
-    },
-
-    componentDidUpdate: function componentDidUpdate() {
-        this.initForm();
-    },
-
-    initForm: function initForm() {
-        if (!this.state.submit) {
-            if (this.state.softTabs == "true") {
-                document.getElementById('softTabs').checked = true;
-            } else {
-                document.getElementById('softTabs').checked = false;
-            }
-            document.getElementById('theme').value = this.state.theme;
-            document.getElementById('tabSize').value = this.state.tabSize;
-            document.getElementById('fontSize').value = this.state.fontSize;
-        }
-    },
-
-    _onChange: function _onChange() {
-        this.setState(getState());
-        this.setState({ submit: true });
-    },
-
-    _onSubmit: function _onSubmit(event) {
-        event.preventDefault();
-        var checked;
-        this.refs.softTabs.checked ? checked = "true" : checked = "false";
-        var softTabs = checked;
-        var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
-        var tabSize = this.refs.tabSize.value;
-        var fontSize = this.refs.fontSize.value;
-        if (softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize) {
-            RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme, tabSize, fontSize);
-        } else {
-            this.setState({
-                errors: "No changes to save"
-            });
-        }
-    },
-
-    backToConfig: function backToConfig(event) {
-        event.preventDefault();
-        this.setState({ submit: false });
-    },
-
-    render: function render() {
-        var title, content, errors;
-        if (!this.state.submit || this.state.errors.length > 0) {
-            title = "Editor configuration";
-            if (this.state.errors.length > 0) {
-                errors = React.createElement(
-                    'p',
-                    { id: 'errors' },
-                    this.state.errors
-                );
-            }
-            content = React.createElement(
-                'div',
-                null,
-                React.createElement(
-                    'form',
-                    { onSubmit: this._onSubmit, className: 'form-container' },
-                    React.createElement(
-                        'div',
-                        { className: 'form-field' },
-                        React.createElement(
-                            'label',
-                            { htmlFor: 'tabSize' },
-                            'Tab size'
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'form-right-block' },
-                            React.createElement('input', { type: 'number', id: 'tabSize', ref: 'tabSize', min: '1', max: '64' })
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'form-field' },
-                        React.createElement(
-                            'label',
-                            { htmlFor: 'softTabs' },
-                            'Soft tabs'
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'form-right-block-checkbox' },
-                            React.createElement('input', { type: 'checkbox', id: 'softTabs', className: 'cbx hidden', ref: 'softTabs' }),
-                            React.createElement('label', { htmlFor: 'softTabs', className: 'lbl' })
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'form-field' },
-                        React.createElement(
-                            'label',
-                            { htmlFor: 'fontSize' },
-                            'Font size'
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'form-right-block' },
-                            React.createElement('input', { type: 'number', id: 'fontSize', ref: 'fontSize', min: '1', max: '72' })
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'form-field' },
-                        React.createElement(
-                            'label',
-                            { htmlFor: 'theme' },
-                            'Theme'
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'form-right-block' },
-                            React.createElement(
-                                'select',
-                                { id: 'theme', className: 'select', ref: 'theme' },
-                                React.createElement(
-                                    'option',
-                                    { value: 'chaos' },
-                                    'Chaos'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'dawn' },
-                                    'Dawn'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'twilight' },
-                                    'Twilight'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'ambiance' },
-                                    'Ambiance'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'cobalt' },
-                                    'Cobalt'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow' },
-                                    'Tomorrow'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow_night' },
-                                    'Tomorrow night'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow_night_blue' },
-                                    'Tomorrow night blue'
-                                )
-                            )
-                        )
-                    ),
-                    errors,
-                    React.createElement(
-                        'button',
-                        { type: 'submit', className: 'form-submit' },
-                        'Save changes'
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { id: 'editorContainerPreview' },
-                    React.createElement(Editor, null)
-                )
-            );
-        } else {
-            title = "Editor configuration changed";
-            content = React.createElement(
-                'div',
-                { id: 'successful-operation' },
-                React.createElement(
-                    'p',
-                    null,
-                    'Your editor configuration has been changed successfully.'
-                ),
-                React.createElement(
-                    Link,
-                    { onClick: this.backToConfig, id: 'successful-button', className: 'button', to: '' },
-                    'Back to your editor configuration'
-                )
-            );
-        }
-
-        return React.createElement(
-            'div',
-            { className: 'container' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                title
-            ),
-            content
-        );
-    }
-});
-
-module.exports = EditorConfig;
-
-},{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"./Editor.react.jsx":27,"react":370,"react-router":139}],29:[function(require,module,exports){
-'use strict';
-
 // Name: {Error404.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/}
@@ -5221,7 +4964,7 @@ var Error404 = React.createClass({
 
 module.exports = Error404;
 
-},{"react":370,"react-router":139}],30:[function(require,module,exports){
+},{"react":370,"react-router":139}],29:[function(require,module,exports){
 'use strict';
 
 // Name: {Footer.react.jsx}
@@ -5464,7 +5207,7 @@ var Footer = React.createClass({
 
 module.exports = Footer;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],31:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],30:[function(require,module,exports){
 'use strict';
 
 // Name: {Header.react.jsx}
@@ -5525,25 +5268,14 @@ var Header = React.createClass({
     },
 
     handleClick: function handleClick(event) {
-        // var elem = event.target;
-        // var child = false;
-        // while(!child && elem.parentElement)
-        // {
-        //     if(elem.className.match("dropdown-button"))     // child of dropdown-button
-        //         child = true;
-        //     elem = elem.parentElement;
-        // }
-        // console.log(child);
-        // console.log(event.target.className);
         var dropdowns = document.getElementsByClassName("dropdown-content");
-        // console.log(dropdowns);
+        console.log(event.target.className);
         if (!event.target.className.match("dropdown-button") && dropdowns) {
-            // console.log("entrato");
-
             for (var i = 0; i < dropdowns.length; i++) {
                 var openDropdown = dropdowns[i];
                 if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {
                     openDropdown.classList.remove("dropdown-show");
+                    alert("kill");
                 }
             }
         } else {
@@ -5655,7 +5387,7 @@ var Header = React.createClass({
                             null,
                             React.createElement(
                                 Link,
-                                { to: '/manageDashboard' },
+                                { to: '/activeDashboard' },
                                 React.createElement(
                                     'li',
                                     null,
@@ -5932,7 +5664,7 @@ var Header = React.createClass({
 
 module.exports = Header;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],32:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],31:[function(require,module,exports){
 'use strict';
 
 // Name: {Home.react.jsx}
@@ -6021,7 +5753,7 @@ var Home = React.createClass({
 
 module.exports = Home;
 
-},{"react":370,"react-slick":176}],33:[function(require,module,exports){
+},{"react":370,"react-slick":176}],32:[function(require,module,exports){
 'use strict';
 
 // Name: {Login.react.jsx}
@@ -6200,7 +5932,7 @@ var Login = React.createClass({
 
 module.exports = Login;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/SuperAdminStore.react.jsx":58,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],34:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/SuperAdminStore.react.jsx":58,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],33:[function(require,module,exports){
 'use strict';
 
 // Name: {MaaSApp.react.jsx}
@@ -6293,39 +6025,7 @@ var MaaSApp = React.createClass({
 
 module.exports = MaaSApp;
 
-},{"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"./Footer.react.jsx":30,"./Header.react.jsx":31,"react":370}],35:[function(require,module,exports){
-'use strict';
-
-// Name: {ManageDashboard.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var React = require('react');
-var Link = require('react-router').Link;
-
-var ManageActiveDashboard = React.createClass({
-    displayName: 'ManageActiveDashboard',
-    render: function render() {
-        return React.createElement(
-            'div',
-            { className: 'dashMan' },
-            React.createElement(
-                'p',
-                { className: 'dashMan-title' },
-                'Dashboard Management'
-            ),
-            'aaaaaaaaaaaaaaa'
-        );
-    }
-});
-
-module.exports = ManageActiveDashboard;
-
-},{"react":370,"react-router":139}],36:[function(require,module,exports){
+},{"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"./Footer.react.jsx":29,"./Header.react.jsx":30,"react":370}],34:[function(require,module,exports){
 'use strict';
 
 // Name: {ChangeAvatar.react.jsx}
@@ -6432,7 +6132,7 @@ var ChangeAvatar = React.createClass({
 
 module.exports = ChangeAvatar;
 
-},{"react":370,"react-dropzone":109}],37:[function(require,module,exports){
+},{"react":370,"react-dropzone":109}],35:[function(require,module,exports){
 'use strict';
 
 // Name: {}
@@ -6586,7 +6286,7 @@ var ChangePassword = React.createClass({
 
 module.exports = ChangePassword;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],38:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],36:[function(require,module,exports){
 'use strict';
 
 // Name: {DeleteAccount.react.jsx}
@@ -6700,7 +6400,7 @@ var DeleteAccount = React.createClass({
                 ),
                 React.createElement(
                     Link,
-                    { className: 'button', to: '/company' },
+                    { className: 'button', to: '/profile' },
                     'No'
                 ),
                 React.createElement(
@@ -6767,7 +6467,7 @@ var DeleteAccount = React.createClass({
 
 module.exports = DeleteAccount;
 
-},{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],39:[function(require,module,exports){
+},{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],37:[function(require,module,exports){
 'use strict';
 
 // Name: {PersonalData.react.jsx}
@@ -6990,7 +6690,7 @@ var PersonalData = React.createClass({
 
 module.exports = PersonalData;
 
-},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],40:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],38:[function(require,module,exports){
 'use strict';
 
 // Name: {Profile.react.jsx}
@@ -7331,7 +7031,7 @@ var Profile = React.createClass({
 
 module.exports = Profile;
 
-},{"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370}],41:[function(require,module,exports){
+},{"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370}],39:[function(require,module,exports){
 'use strict';
 
 // Name: {Register.react.jsx}
@@ -7560,18 +7260,8 @@ var Register = React.createClass({
             Link,
             { id: 'successful-button', className: 'button', to: '/login' },
             'Go to Login'
-          ),
-          React.createElement(
-            'p',
-            null,
-            'If you didn‘t receive your verification email ',
-            React.createElement(
-              Link,
-              { className: 'help-link', to: '/verify' },
-              'require another one'
-            )
           )
-        );
+        ); //<p>If you didn‘t receive your verification email <Link className="help-link" to="/verify">require another one</Link></p>
       }
     }
     return React.createElement(
@@ -7589,7 +7279,7 @@ var Register = React.createClass({
 
 module.exports = Register;
 
-},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],42:[function(require,module,exports){
+},{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],40:[function(require,module,exports){
 'use strict';
 
 // Name: {ResetPwd.react.jsx}
@@ -7716,19 +7406,9 @@ var ResetPwd = React.createClass({
             this.state.email
           )
         ),
-        React.createElement('div', { id: 'successful-button' }),
-        React.createElement(
-          'p',
-          null,
-          'If you didn‘t receive your password reset email ',
-          React.createElement(
-            Link,
-            { className: 'help-link', to: '/verify' },
-            'require another one'
-          )
-        )
+        React.createElement('div', { id: 'successful-button' })
       );
-      //<Link id="successful-registration-login" className="button" to="/recoverpwd">Go to Password Change</Link>
+      //<p>If you didn‘t receive your password reset email <Link className="help-link" to="/verify">require another one</Link></p>
     }
     return React.createElement(
       'div',
@@ -7745,7 +7425,332 @@ var ResetPwd = React.createClass({
 
 module.exports = ResetPwd;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],43:[function(require,module,exports){
+},{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],41:[function(require,module,exports){
+'use strict';
+
+// Name: {ManageDashboard.react.jsx}
+// Module: {Front-end::Views}
+// Location: {/MaaS/client/script/components/}
+
+// History:
+// Version         Date            Programmer
+// ==========================================
+
+var React = require('react');
+var Link = require('react-router').Link;
+
+var ManageActiveDashboard = React.createClass({
+    displayName: 'ManageActiveDashboard',
+
+
+    render: function render() {
+        return React.createElement(
+            'div',
+            { className: 'container' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                'Dashboard Management'
+            ),
+            React.createElement(
+                'p',
+                null,
+                'Select your main Dashboard'
+            ),
+            React.createElement(
+                'p',
+                null,
+                'It will appear as your home page under the name of your company'
+            )
+        );
+    }
+});
+
+module.exports = ManageActiveDashboard;
+
+},{"react":370,"react-router":139}],42:[function(require,module,exports){
+'use strict';
+
+/*
+* Name: {Error404.react.jsx}
+* Module: {Front-end::Views}
+* Location: {/MaaS/client/script/components/}
+* 
+* History:
+* Version         Date            Programmer
+* ==========================================
+* 1.0.0         30/07/2016          Navid Taha
+* ------------------------------------------
+* Approved stability.
+* ==========================================
+* 0.1.0        30/07/2016          Fabiano Tavallini
+* ------------------------------------------
+* Verify of the component.
+* ==========================================
+* 0.0.4        29/07/2016          Navid Taha
+* ------------------------------------------
+* Defined connection with UserStore.
+* ==========================================
+* 0.0.3        28/07/2016          Thomas Fuser
+* ------------------------------------------
+* Defined connection with RequestUserActionCreator.
+* ==========================================
+* 0.0.2        28/07/2016          Navid Taha
+* ------------------------------------------
+* Defined HTML structure of the component.
+* ==========================================
+* 0.0.1        27/07/2016          Navid Taha
+* ------------------------------------------
+* First structure of the file.
+*/
+var React = require('react');
+var Link = require('react-router').Link;
+var UserStore = require('../../stores/UserStore.react.jsx');
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var Editor = require('../Editor.react.jsx');
+
+function getState() {
+    return {
+        theme: UserStore.getEditorTheme(),
+        softTabs: UserStore.getEditorSoftTabs(),
+        tabSize: UserStore.getEditorTabSize(),
+        fontSize: UserStore.getEditorFontSize(),
+        errors: UserStore.getErrors()
+    };
+}
+
+var EditorConfig = React.createClass({
+    displayName: 'EditorConfig',
+
+    getInitialState: function getInitialState() {
+        return {
+            submit: false,
+            theme: UserStore.getEditorTheme(),
+            softTabs: UserStore.getEditorSoftTabs(),
+            tabSize: UserStore.getEditorTabSize(),
+            fontSize: UserStore.getEditorFontSize(),
+            errors: UserStore.getErrors()
+        };
+    },
+
+    componentDidMount: function componentDidMount() {
+        UserStore.addChangeListener(this._onChange);
+        this.initForm();
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        UserStore.removeChangeListener(this._onChange);
+    },
+
+    componentDidUpdate: function componentDidUpdate() {
+        this.initForm();
+    },
+
+    initForm: function initForm() {
+        if (!this.state.submit) {
+            if (this.state.softTabs == "true") {
+                document.getElementById('softTabs').checked = true;
+            } else {
+                document.getElementById('softTabs').checked = false;
+            }
+            document.getElementById('theme').value = this.state.theme;
+            document.getElementById('tabSize').value = this.state.tabSize;
+            document.getElementById('fontSize').value = this.state.fontSize;
+        }
+    },
+
+    _onChange: function _onChange() {
+        this.setState(getState());
+        this.setState({ submit: true });
+    },
+
+    _onSubmit: function _onSubmit(event) {
+        event.preventDefault();
+        var checked;
+        this.refs.softTabs.checked ? checked = "true" : checked = "false";
+        var softTabs = checked;
+        var theme = this.refs.theme.options[this.refs.theme.selectedIndex].value;
+        var tabSize = this.refs.tabSize.value;
+        var fontSize = this.refs.fontSize.value;
+        if (softTabs != this.state.softTabs || theme != this.state.theme || tabSize != this.state.tabSize || fontSize != this.state.fontSize) {
+            RequestUserActionCreator.changeEditorConfig(SessionStore.getUserId(), softTabs, theme, tabSize, fontSize);
+        } else {
+            this.setState({
+                errors: "No changes to save"
+            });
+        }
+    },
+
+    backToConfig: function backToConfig(event) {
+        event.preventDefault();
+        this.setState({ submit: false });
+    },
+
+    render: function render() {
+        var title, content, errors;
+        if (!this.state.submit || this.state.errors.length > 0) {
+            title = "Editor configuration";
+            if (this.state.errors.length > 0) {
+                errors = React.createElement(
+                    'p',
+                    { id: 'errors' },
+                    this.state.errors
+                );
+            }
+            content = React.createElement(
+                'div',
+                null,
+                React.createElement(
+                    'form',
+                    { onSubmit: this._onSubmit, className: 'form-container' },
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'tabSize' },
+                            'Tab size'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement('input', { type: 'number', id: 'tabSize', ref: 'tabSize', min: '1', max: '64' })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'softTabs' },
+                            'Soft tabs'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block-checkbox' },
+                            React.createElement('input', { type: 'checkbox', id: 'softTabs', className: 'cbx hidden', ref: 'softTabs' }),
+                            React.createElement('label', { htmlFor: 'softTabs', className: 'lbl' })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'fontSize' },
+                            'Font size'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement('input', { type: 'number', id: 'fontSize', ref: 'fontSize', min: '1', max: '72' })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'form-field' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'theme' },
+                            'Theme'
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'form-right-block' },
+                            React.createElement(
+                                'select',
+                                { id: 'theme', className: 'select', ref: 'theme' },
+                                React.createElement(
+                                    'option',
+                                    { value: 'chaos' },
+                                    'Chaos'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'dawn' },
+                                    'Dawn'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'twilight' },
+                                    'Twilight'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'ambiance' },
+                                    'Ambiance'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'cobalt' },
+                                    'Cobalt'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow' },
+                                    'Tomorrow'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow_night' },
+                                    'Tomorrow night'
+                                ),
+                                React.createElement(
+                                    'option',
+                                    { value: 'tomorrow_night_blue' },
+                                    'Tomorrow night blue'
+                                )
+                            )
+                        )
+                    ),
+                    errors,
+                    React.createElement(
+                        'button',
+                        { type: 'submit', className: 'form-submit' },
+                        'Save changes'
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { id: 'editorContainerPreview' },
+                    React.createElement(Editor, null)
+                )
+            );
+        } else {
+            title = "Editor configuration changed";
+            content = React.createElement(
+                'div',
+                { id: 'successful-operation' },
+                React.createElement(
+                    'p',
+                    null,
+                    'Your editor configuration has been changed successfully.'
+                ),
+                React.createElement(
+                    Link,
+                    { onClick: this.backToConfig, id: 'successful-button', className: 'button', to: '' },
+                    'Back to your editor configuration'
+                )
+            );
+        }
+
+        return React.createElement(
+            'div',
+            { className: 'container' },
+            React.createElement(
+                'p',
+                { className: 'container-title' },
+                title
+            ),
+            content
+        );
+    }
+});
+
+module.exports = EditorConfig;
+
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Editor.react.jsx":27,"react":370,"react-router":139}],43:[function(require,module,exports){
 'use strict';
 
 // Name: {Sidebar.react.jsx}
@@ -9414,6 +9419,7 @@ module.exports = {
     LOAD_DSL_ACCESS_RESPONSE: null,
     LOAD_USER_LIST_RESPONSE: null,
     DELETE_DSL_RESPONSE: null,
+    DELETE_ALL_SELECTED_DSL_RESPONSE: null,
     CHANGE_DSL_PERMISSION_RESPONSE: null,
     COMPILE_DEFINITION_RESPONSE: null,
     EXECUTE_DEFINITION_RESPONSE: null,
@@ -9427,7 +9433,8 @@ module.exports = {
     ADD_EXT_DB_RESPONSE: null,
     CONNECT_DBS_RESPONSE: null,
     GET_DBS: null,
-    DELETE_DB: null,
+    DELETE_DB_RESPONSE: null,
+    DELETE_ALL_SELECTED_DATABASES_RESPONSE: null,
     CHANGE_STATE_DB: null
 
   })
@@ -9529,8 +9536,8 @@ var ExecuteDSL = require('./components/DSL/ExecuteDSL.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-var ManageActiveDashboard = require('./components/ManageActiveDashboard.react.jsx');
-var EditorConfig = require('./components/EditorConfig.react.jsx');
+var ActiveDashboard = require('./components/Settings/ActiveDashboard.react.jsx');
+var EditorConfig = require('./components/Settings/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
@@ -9587,7 +9594,7 @@ var Routes = React.createClass({
         ),
         React.createElement(Route, { path: 'editor', component: Editor }),
         React.createElement(Route, { path: 'editorConfig', component: EditorConfig }),
-        React.createElement(Route, { path: 'manageActiveDashboard', component: ManageActiveDashboard }),
+        React.createElement(Route, { path: 'activeDashboard', component: ActiveDashboard }),
         React.createElement(
           Route,
           { path: 'dashboardSuperAdmin', component: DashboardSuperAdmin },
@@ -9616,7 +9623,7 @@ var Routes = React.createClass({
 
 module.exports = Routes;
 
-},{"./components/Company/Company.react.jsx":17,"./components/Company/DeleteCompany.react.jsx":18,"./components/Company/ExternalDatabases.react.jsx":20,"./components/Company/People.react.jsx":22,"./components/DSL/ExecuteDSL.react.jsx":23,"./components/DSL/ManageDSL.react.jsx":24,"./components/DSL/ManageDSLPermissions.react.jsx":25,"./components/DSL/ManageDSLSource.react.jsx":26,"./components/Editor.react.jsx":27,"./components/EditorConfig.react.jsx":28,"./components/Error404.react.jsx":29,"./components/Home.react.jsx":32,"./components/Login.react.jsx":33,"./components/MaaSApp.react.jsx":34,"./components/ManageActiveDashboard.react.jsx":35,"./components/Profile/ChangeAvatar.react.jsx":36,"./components/Profile/ChangePassword.react.jsx":37,"./components/Profile/DeleteAccount.react.jsx":38,"./components/Profile/PersonalData.react.jsx":39,"./components/Profile/Profile.react.jsx":40,"./components/Register.react.jsx":41,"./components/ResetPwd.react.jsx":42,"./components/SuperAdmin/ChangeCompanyName.react.jsx":44,"./components/SuperAdmin/ChangeUserPersonalData.react.jsx":45,"./components/SuperAdmin/CompaniesManagement.react.jsx":46,"./components/SuperAdmin/DashboardSuperAdmin.react.jsx":47,"./components/SuperAdmin/DatabaseManagement.react.jsx":48,"./components/SuperAdmin/ImpersonateUser.react.jsx":49,"./components/SuperAdmin/UsersManagement.react.jsx":50,"react":370,"react-router":139}],54:[function(require,module,exports){
+},{"./components/Company/Company.react.jsx":17,"./components/Company/DeleteCompany.react.jsx":18,"./components/Company/ExternalDatabases.react.jsx":20,"./components/Company/People.react.jsx":22,"./components/DSL/ExecuteDSL.react.jsx":23,"./components/DSL/ManageDSL.react.jsx":24,"./components/DSL/ManageDSLPermissions.react.jsx":25,"./components/DSL/ManageDSLSource.react.jsx":26,"./components/Editor.react.jsx":27,"./components/Error404.react.jsx":28,"./components/Home.react.jsx":31,"./components/Login.react.jsx":32,"./components/MaaSApp.react.jsx":33,"./components/Profile/ChangeAvatar.react.jsx":34,"./components/Profile/ChangePassword.react.jsx":35,"./components/Profile/DeleteAccount.react.jsx":36,"./components/Profile/PersonalData.react.jsx":37,"./components/Profile/Profile.react.jsx":38,"./components/Register.react.jsx":39,"./components/ResetPwd.react.jsx":40,"./components/Settings/ActiveDashboard.react.jsx":41,"./components/Settings/EditorConfig.react.jsx":42,"./components/SuperAdmin/ChangeCompanyName.react.jsx":44,"./components/SuperAdmin/ChangeUserPersonalData.react.jsx":45,"./components/SuperAdmin/CompaniesManagement.react.jsx":46,"./components/SuperAdmin/DashboardSuperAdmin.react.jsx":47,"./components/SuperAdmin/DatabaseManagement.react.jsx":48,"./components/SuperAdmin/ImpersonateUser.react.jsx":49,"./components/SuperAdmin/UsersManagement.react.jsx":50,"react":370,"react-router":139}],54:[function(require,module,exports){
 'use strict';
 
 // Name: {CompanyStore.react.jsx}
@@ -10137,10 +10144,10 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                     _DSL.name = action.definition.name;
                     _DSL.type = action.definition.type;
                     var trovato = false;
-                    for (var i = 0; !trovato && i < _DSL_LIST.length; i++) {
-                        if (action.definition.id == _DSL_LIST[i].dsl.id) {
-                            _DSL_LIST[i].dsl.name = _DSL.name;
-                            _DSL_LIST[i].dsl.type = _DSL.type;
+                    for (var _i = 0; !trovato && _i < _DSL_LIST.length; _i++) {
+                        if (action.definition.id == _DSL_LIST[_i].dsl.id) {
+                            _DSL_LIST[_i].dsl.name = _DSL.name;
+                            _DSL_LIST[_i].dsl.type = _DSL.type;
                             trovato = true;
                         }
                     }
@@ -10162,10 +10169,33 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
                 _errors = [];
 
                 var _trovato = false;
-                for (var _i = 0; !_trovato && _i < _DSL_LIST.length; _i++) {
-                    if (_DSL_LIST[_i].dsl.id == action.id) {
+                for (var _i2 = 0; !_trovato && _i2 < _DSL_LIST.length; _i2++) {
+                    if (_DSL_LIST[_i2].dsl.id == action.id) {
                         _trovato = true;
-                        _DSL_LIST.splice(_i, 1);
+                        _DSL_LIST.splice(_i2, 1);
+                    }
+                }
+                localStorage.removeItem('DSLId');
+                localStorage.removeItem('DSLName');
+                localStorage.removeItem('DSLType');
+                localStorage.removeItem('DSLSource');
+                localStorage.removeItem('DSLDatabase');
+            }
+            DSLStore.emitChange();
+            break;
+
+        case ActionTypes.DELETE_ALL_SELECTED_DSL_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else {
+                _errors = [];
+                var count = 0;
+                for (var i = 0; count < action.arrayId.length && i < _DSL_LIST.length; i++) {
+                    for (var j = 0; j < action.arrayId.length; j++) {
+                        if (_DSL_LIST[i].dsl.id == action.arrayId[j]) {
+                            _DSL_LIST.splice(i, 1);
+                            count++;
+                        }
                     }
                 }
                 localStorage.removeItem('DSLId');
@@ -10181,15 +10211,15 @@ DSLStore.dispatchToken = Dispatcher.register(function (payload) {
             if (action.userList && action.permissionList) {
                 var USER_LIST = action.userList;
                 var PERMISSION_LIST = action.permissionList;
-                var _i2 = 0,
-                    j = 0;
+                var _i3 = 0,
+                    _j = 0;
                 // Add permission field to users
-                while (j < USER_LIST.length && _i2 < PERMISSION_LIST.length) {
-                    if (PERMISSION_LIST[_i2].userId == USER_LIST[j].id) {
-                        USER_LIST[j].permission = PERMISSION_LIST[_i2].permission;
-                        j++;
+                while (_j < USER_LIST.length && _i3 < PERMISSION_LIST.length) {
+                    if (PERMISSION_LIST[_i3].userId == USER_LIST[_j].id) {
+                        USER_LIST[_j].permission = PERMISSION_LIST[_i3].permission;
+                        _j++;
                     }
-                    _i2++;
+                    _i3++;
                 }
                 _USER_LIST = USER_LIST;
             }
@@ -10438,14 +10468,36 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function (payload) {
             ExternalDatabaseStore.emitChange();
             break;
 
-        case ActionTypes.DELETE_DB:
-            if (action.id) {
+        case ActionTypes.DELETE_DB_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else {
                 _errors = [];
-                _databases.forEach(function (database, i) {
-                    if (database.id == action.id) {
+                var trovato = false;
+                for (var i = 0; !trovato && i < _databases.length; i++) {
+                    if (_databases[i].id == action.id) {
                         _databases.splice(i, 1);
+                        trovato = true;
                     }
-                });
+                }
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
+
+        case ActionTypes.DELETE_ALL_SELECTED_DATABASES_RESPONSE:
+            if (action.errors) {
+                _errors.push(action.errors);
+            } else {
+                _errors = [];
+                var count = 0;
+                for (var i = 0; count < action.arrayId.length && i < _databases.length; i++) {
+                    for (var j = 0; j < action.arrayId.length; j++) {
+                        if (_databases[i].id == action.arrayId[j]) {
+                            _databases.splice(i, 1);
+                            count++;
+                        }
+                    }
+                }
             }
             ExternalDatabaseStore.emitChange();
             break;
@@ -11380,7 +11432,11 @@ module.exports = {
       arrayId: arrayId
     }).end(function (error, res) {
       res = JSON.parse(res.text);
-      if (res.error) {} else {}
+      if (res.error) {
+        ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(res.error.message, null);
+      } else {
+        ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(null, arrayId);
+      }
     });
   },
 
@@ -11585,10 +11641,24 @@ module.exports = {
       if (res) {
         if (res.errors) {
           res = JSON.parse(res.text);
-          ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message);
+          ResponseExternalDatabaseActionCreator.responseDeleteDb(res.error.message, null);
         } else {
-          ResponseExternalDatabaseActionCreator.responseDeleteDb(null);
+          ResponseExternalDatabaseActionCreator.responseDeleteDb(null, id);
         }
+      }
+    });
+  },
+
+  deleteAllSelectedDatabases: function deleteAllSelectedDatabases(companyId, arrayId) {
+    request.del(APIEndpoints.EXTERNAL_DATABASES + '/deleteAllSelectedDatabases').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      companyId: companyId,
+      arrayId: arrayId
+    }).end(function (error, res) {
+      res = JSON.parse(res.text);
+      if (res.error) {
+        ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+      } else {
+        ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(null, arrayId);
       }
     });
   },

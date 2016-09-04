@@ -92,7 +92,7 @@ var DeleteAccount = React.createClass({
                 <p className="container-title">{title}</p>
                 <div id="successful-operation">
                     <p>Are you sure you want to remove your account from this company?</p>
-                    <Link className="button" to="/company">No</Link>
+                    <Link className="button" to="/profile">No</Link>
                     <Link id="delete-button" className="button" onClick={this.deleteAccount} to="/">Delete my account</Link>
                 </div>
                 <div className="dropdown-content dropdown-popup" ref="error">

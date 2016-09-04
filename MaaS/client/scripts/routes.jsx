@@ -34,8 +34,8 @@ var ExecuteDSL = require('./components/DSL/ExecuteDSL.react.jsx');
 var DeleteCompany = require('./components/Company/DeleteCompany.react.jsx');
 var Editor = require('./components/Editor.react.jsx');
 var Error404 = require('./components/Error404.react.jsx');
-var ManageActiveDashboard = require('./components/ManageActiveDashboard.react.jsx');
-var EditorConfig = require('./components/EditorConfig.react.jsx');
+var ActiveDashboard = require('./components/Settings/ActiveDashboard.react.jsx');
+var EditorConfig = require('./components/Settings/EditorConfig.react.jsx');
 var DashboardSuperAdmin = require('./components/SuperAdmin/DashboardSuperAdmin.react.jsx');
 var DatabaseManagement = require('./components/SuperAdmin/DatabaseManagement.react.jsx');
 var CompaniesManagement = require('./components/SuperAdmin/CompaniesManagement.react.jsx');
@@ -79,7 +79,7 @@ var Routes = React.createClass({
           </Route>
           <Route path="editor" component={Editor} />
           <Route path="editorConfig" component={EditorConfig} />
-          <Route path="manageActiveDashboard" component={ManageActiveDashboard} />
+          <Route path="activeDashboard" component={ActiveDashboard} />
           <Route path="dashboardSuperAdmin" component={DashboardSuperAdmin} >
             <Route path="databaseManagement" component={DatabaseManagement} >
               <Route path="companiesManagement" component={CompaniesManagement} >

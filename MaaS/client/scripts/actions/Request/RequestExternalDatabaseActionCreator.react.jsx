@@ -23,11 +23,11 @@ var RequestExternalDatabaseActionCreator = {
     },
     
     deleteDb: function(id, companyId) {
-        Dispatcher.handleViewAction({
-            type: ActionTypes.DELETE_DB,
-            id: id
-        });
         WebAPIUtils.deleteDb(id, companyId);
+    },
+    
+    deleteAllSelectedDatabases: function(companyId, arrayId) {
+        WebAPIUtils.deleteAllSelectedDatabases(companyId, arrayId);
     },
     
     changeStateDb: function(id, status, companyId) {

@@ -55,26 +55,17 @@ var Header = React.createClass({
     },
 
 	handleClick: function(event) {
-	   // var elem = event.target;
-	   // var child = false;
-	   // while(!child && elem.parentElement)
-	   // {
-	   //     if(elem.className.match("dropdown-button"))     // child of dropdown-button
-	   //         child = true;
-	   //     elem = elem.parentElement;
-	   // }
-	   // console.log(child);
-	   // console.log(event.target.className);
 	    var dropdowns = document.getElementsByClassName("dropdown-content");
-	   // console.log(dropdowns);
+	    console.log(event.target.className);
 	    if(!event.target.className.match("dropdown-button")  && dropdowns)
 	    {
-	       // console.log("entrato");
-		    
-		    for (var i = 0; i < dropdowns.length; i++) {
+		    for (var i = 0; i < dropdowns.length; i++)
+		    {
 				var openDropdown = dropdowns[i];
-		    	if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {
+		    	if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup"))
+		    	{
 		        	openDropdown.classList.remove("dropdown-show");
+		        	alert("kill");
 		    	}
 			}
 		} else {
@@ -129,7 +120,7 @@ var Header = React.createClass({
                         </div>
                         <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
                             <ul>
-                                <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+                                <Link to="/activeDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
                                 <Link onClick={this.logout} to=""><li><i className="material-icons md-24">&#xE879;</i>Logout</li></Link>
                             </ul>

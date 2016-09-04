@@ -191,14 +191,14 @@ var ExternalDatabases = React.createClass({
   },
   
   deleteAllSelected: function() {
-    alert(this.refs.table.state.selectedRowKeys);
+    RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
   },
   
   nameFormatter: function(cell, row) {
-        return (
-            <span className="db-link">{row.name}</span>
-        );
-    },
+    return (
+        <span className="table-link">{row.name}</span>
+    );
+  },
   
   render: function() {
     if(!this.state.isLogged)

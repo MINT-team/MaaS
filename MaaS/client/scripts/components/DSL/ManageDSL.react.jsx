@@ -90,6 +90,12 @@ var ManageDSL = React.createClass({
         });
     },
     
+    includeNameFormatter: function(cell, row) {
+        return (
+            <span className="table-link">{row.name}</span>
+        );
+    },
+    
     nameFormatter: function(cell, row) {
         return (
             <Link to={"/manageDSL/executeDSL/" + row.id}>{row.name}</Link>
@@ -256,9 +262,7 @@ var ManageDSL = React.createClass({
     },
     
     deleteAllSelected: function() {
-        
-        console.log(this.refs.table.state.selectedRowKeys);
-        
+        RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
     },
 
     onUploadSource: function() {
@@ -363,7 +367,13 @@ var ManageDSL = React.createClass({
                 var uploadErrors;
                 if(this.state.uploadErrors.length > 0)
                 {
-                    uploadErrors = ( <div id="errors">{this.state.uploadErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
+                    uploadErrors = (
+                        <div id="errors">
+                            {this.state.uploadErrors.map((error, i) =>
+                                <p className="error-item" key={i}>{error}</p>
+                            )}
+                        </div>
+                    );
                 }
             }
             
@@ -440,10 +450,9 @@ var ManageDSL = React.createClass({
                             :
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">
-                                <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                                <TableHeaderColumn dataField="name" dataSort={true} dataFormat={this.includeNameFormatter}>Name</TableHeaderColumn>
                                 <TableHeaderColumn dataField="type" dataSort={true}>Type</TableHeaderColumn>
                             </BootstrapTable>
-                            
                             }
                         </div>
                     </div>

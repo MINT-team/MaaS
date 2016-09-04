@@ -84,16 +84,47 @@ ExternalDatabaseStore.dispatchToken = Dispatcher.register(function(payload) {
             ExternalDatabaseStore.emitChange();
             break;
             
-        case ActionTypes.DELETE_DB:
-            if(action.id)
+        case ActionTypes.DELETE_DB_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else
             {
                 _errors = [];
-                _databases.forEach(function(database, i) {
-                    if (database.id == action.id)
+                var trovato = false;
+                for (var i = 0; !trovato &&  i < _databases.length; i++)
+                {
+                    if (_databases[i].id == action.id)
                     {
                         _databases.splice(i,1);
+                        trovato = true;
                     }
-                });
+                }
+            }
+            ExternalDatabaseStore.emitChange();
+            break;
+        
+        case ActionTypes.DELETE_ALL_SELECTED_DATABASES_RESPONSE:
+            if(action.errors)
+            {
+                _errors.push(action.errors);
+            }
+            else
+            {
+                _errors = [];
+                var count = 0;
+                for (var i = 0; count < action.arrayId.length && i <_databases.length; i++)
+                {
+                    for (var j = 0; j < action.arrayId.length; j++)
+                    {
+                        if(_databases[i].id == action.arrayId[j])
+                        {
+                            _databases.splice(i,1);
+                            count++;
+                        }
+                    }
+                }
             }
             ExternalDatabaseStore.emitChange();
             break;

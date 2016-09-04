@@ -85,10 +85,9 @@ var ResetPwd = React.createClass({
               <p>Now please confirm your request.</p>
               <p>Click the link we sent at: <span id="successful-email">{this.state.email}</span></p>
               <div id="successful-button"></div>
-              <p>If you didn‘t receive your password reset email <Link className="help-link" to="/verify">require another one</Link></p>
             </div>
           );
-          //<Link id="successful-registration-login" className="button" to="/recoverpwd">Go to Password Change</Link>
+          //<p>If you didn‘t receive your password reset email <Link className="help-link" to="/verify">require another one</Link></p>
         }
         return (
           <div className="container">
