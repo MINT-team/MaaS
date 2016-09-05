@@ -20,7 +20,8 @@ function getState() {
         userName : UserStore.getName(),
         userSurname : UserStore.getSurname(),
         userCompany : CompanyStore.getName(),
-        isImpersonate: SessionStore.getImpersonate()
+        isImpersonate: SessionStore.getImpersonate(),
+        userActiveDashboard: UserStore.getActiveDashboard()
     };
 }
 
@@ -35,6 +36,7 @@ var Header = React.createClass({
     	CompanyStore.addChangeListener(this._onChange);
     	SessionStore.addImpersonateListener(this._onChange);
     	UserStore.addUserLoadListener(this._onChange);
+    	UserStore.addChangeListener(this._onDashboardChange);
     	SessionStore.addLeaveImpersonateListener(this._onLeaveImpersonate);
     },
 
@@ -43,6 +45,7 @@ var Header = React.createClass({
     	CompanyStore.removeChangeListener(this._onChange);
     	SessionStore.removeImpersonateListener(this._onChange);
     	UserStore.removeUserLoadListener(this._onChange);
+    	UserStore.removeChangeListener(this._onDashboardChange);
     	SessionStore.removeLeaveImpersonateListener(this._onLeaveImpersonate);
     },
     
@@ -50,22 +53,36 @@ var Header = React.createClass({
         this.setState(getState());
     },
     
+    _onDashboardChange: function() {
+        this.setState({userActiveDashboard: UserStore.getActiveDashboard()});  
+    },
+    
     _onLeaveImpersonate: function() {
         this.setState({isImpersonate: "false"}); 
     },
 
 	handleClick: function(event) {
+	    var fromInclude = false;
+	    var elem = event.target;
+	    for(var i=0; elem.parentElement && !fromInclude; i++)
+	    {
+	        if(elem.parentElement.className.match("include-table"))
+	        {
+	            fromInclude = true;
+	        }
+	        elem = elem.parentElement;
+	    }
 	    var dropdowns = document.getElementsByClassName("dropdown-content");
-	    console.log(event.target.className);
-	    if(!event.target.className.match("dropdown-button")  && dropdowns)
+	    if(!event.target.className.match("dropdown-button") && dropdowns && !fromInclude)
 	    {
 		    for (var i = 0; i < dropdowns.length; i++)
 		    {
 				var openDropdown = dropdowns[i];
-		    	if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup"))
+		    	if (openDropdown.classList.contains("dropdown-show")
+		    	    && !openDropdown.classList.contains("dashboard-popup")
+		    	    && !openDropdown.classList.contains("execute-popup"))
 		    	{
 		        	openDropdown.classList.remove("dropdown-show");
-		        	alert("kill");
 		    	}
 			}
 		} else {
@@ -94,7 +111,9 @@ var Header = React.createClass({
             {
                 title = (
                     <div className="tooltip tooltip-bottom">
-                        <Link to="/company" id="header-title">{this.props.companyName}</Link>
+                        <Link to={this.state.userActiveDashboard=="default" ? "/manageDSL" :  "/manageDSL/executeDSL/"+this.state.userActiveDashboard} id="header-title">
+                            {this.props.companyName}
+                        </Link>
                         <p id="company-tooltip" className="tooltip-text tooltip-text-long">Your company</p>
                     </div>
                 );
@@ -190,7 +209,7 @@ var Header = React.createClass({
                       headerMenu = (
                     <div id="header-menu">
                         <Link to="dashboardSuperAdmin/databaseManagement">Database management</Link>
-						<Link to="dashboardSuperAdmin/impersonateUser">Impersonate user</Link>
+						<Link to="dashboardSuperAdmin/impersonateUser">Impersonate users</Link>
                     </div>
                         );      
                    

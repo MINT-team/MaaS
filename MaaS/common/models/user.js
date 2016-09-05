@@ -74,15 +74,15 @@ module.exports = function(user) {
                         }
                         // Create the company
                         Company.create({name: company}, function(err, companyInstance) {
-                            if(err) 
+                            if(err)
                                 return cb(null, err);
                             console.log('> Company created:', companyInstance);
                             // Create the user and set the company has him
                             user.create({companyId: companyInstance.id, email: email, password: password, role: "Owner"}, function(err, userInstance) {
-                                if(err) 
+                                if(err)
                                 {
                                     Company.destroyById(companyInstance.id, function(err) {
-                                        if(err) 
+                                        if(err)
                                         {
                                             console.log("> Error destroying the company after an error occurred creating the user. Please clean your database, company id:", companyInstance.id);
                                             return cb(null, err);
@@ -110,7 +110,7 @@ module.exports = function(user) {
                                     user: userInstance
                                 };
                                 userInstance.verify(options, function(err, response) {
-                                    if(err) 
+                                    if(err)
                                     {
                                         //return next(err);
                                         return cb(null, err);
@@ -439,26 +439,33 @@ module.exports = function(user) {
         }
     );
 
-    // Elimino l'utente - vedesi relativo ACL
+    
     user.deleteUser = function(id, email, cb) {
         user.findById(id, function(err, userInstance) {
             if(err || !userInstance)
+            {
                 return cb(err);
+            }
             user.findOne({where: {companyId: userInstance.companyId, email: email}, limit: 1}, function(err, userToDelete) {
                 if(err || !userToDelete)
+                {
                     return cb(err);
+                }
                 // User trying to delete another user
-                if(userInstance.email != userToDelete.email) 
+                if(userInstance.email != userToDelete.email)
                 {
                     var error = {
                         message: 'You haven\'t the rights to delete this user'
                     };
-                    if(userInstance.role != "Owner" && userInstance.role != "Administrator") {
+                    if(userInstance.role != "Owner" && userInstance.role != "Administrator")
+                    {
                         return cb(null, error);
                     }
                     // if userInstance.role == "Owner" then he's allowed to
-                    if(userInstance.role == "Administrator") {
-                        if(userToDelete.role == "Owner" || userToDelete.role == "Administrator") {
+                    if(userInstance.role == "Administrator")
+                    {
+                        if(userToDelete.role == "Owner" || userToDelete.role == "Administrator")
+                        {
                             return cb(null, error);
                         }
                     }
@@ -518,6 +525,78 @@ module.exports = function(user) {
                 {arg: 'email', type: 'String'}
             ],
             http: { verb: 'delete', path: '/:id/deleteUser' }
+        }
+    );
+    
+    user.deleteAllSelectedUsers = function(arrayId, cb) {
+        var Company = app.models.Company;
+        arrayId.forEach(function(id, index) {
+            user.findById(id, function(err, userInstance) {
+                if (userInstance)
+                {
+                    if (userInstance.role == "Owner")
+                    {
+                        userInstance.company(function(err, company) {
+                            Company.deleteCompany(company.id, userInstance.email, function(err, error, id) {
+                                if (error)
+                                {
+                                    return cb(error, null);
+                                }
+                                if (err)
+                                {
+                                    return cb(err, null);
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        userInstance.dsl({ where: {} }, function(err, DSLList) {
+                            if(err || !DSLList)
+                            {
+                                return cb(err, null);
+                            }
+                            // Remove DSL accesses
+                            DSLList.forEach(function(DSLInstance, i) {
+                                userInstance.dsl.remove(DSLInstance, function(err) {
+                                    if(err)
+                                    {
+                                        console.log("> Error removing DSL from user to delete");
+                                        return cb(err, null);
+                                    }
+                                });
+                            });
+                            // Delete the user
+                            user.deleteById(userInstance.id, function(err) {
+                                if(err) 
+                                {
+                                    console.log("> Error deleting user:", userInstance.email);
+                                    return cb(err, null);
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+            if (index == arrayId.length-1)
+            {
+                console.log("Selected users deleted");
+                return cb(null, null);
+            }
+        });
+    };
+    
+    user.remoteMethod(
+        'deleteAllSelectedUsers',
+        {
+            description: 'Delete all selected users',
+            accepts: [
+                { arg: 'arrayId', type: 'Array', required: true, description: 'Users id'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'delete', path: '/deleteAllSelectedUsers' }
         }
     );
     
@@ -806,7 +885,8 @@ module.exports = function(user) {
                         message: 'enter the email confirmation'
                     };
                     return cb(null, error, null); 
-                }else
+                }
+                else
                 {
                     var error = {
                         message: 'email is already used'
@@ -831,6 +911,47 @@ module.exports = function(user) {
                 {arg: 'data', type: 'Object'}
             ],
             http: { verb: 'put', path: '/:id/changeUserEmail' }
+        }
+    );
+    
+    user.changeActiveDashboard = function(id, definitionId, cb) {
+        user.findById(id, function(err, userInstance) {
+            if(err || !userInstance)
+            {
+                console.log("> Error changing active dashboard: "+id+" not found");
+                return cb(null, { message: "Error changing active dashboard" }, null);
+            }
+            else
+            {
+                userInstance.updateAttributes({ activeDashboard: definitionId }, function() {
+                    if(err) 
+                    {
+                        console.log('> Failed changing active dashboard for: ', userInstance.email);
+                        return cb(err, null, null);
+                    }
+                    else
+                    {
+                        console.log('> Active dashboard changed for: ', userInstance.email);
+                        return cb(null, null, definitionId);
+                    }
+                });
+            }
+        });
+    };
+    
+    user.remoteMethod(
+        'changeActiveDashboard',
+        {
+            description: 'Change main dashboard.',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'},
+                { arg: 'definitionId', type: 'string', required: true, description: 'Dashboard id'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'},
+                {arg: 'dashboard', type: 'string'}
+            ],
+            http: { verb: 'put', path: '/:id/changeActiveDashboard' }
         }
     );
     

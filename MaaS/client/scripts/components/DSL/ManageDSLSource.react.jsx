@@ -31,7 +31,7 @@ function includeCollection(instance, editor, editorSession) {
         
         if (source[source.length-1] != "}")
         {
-            errors.push('Missing "}" in the end of the definition');
+            errors.push('Missing "}" at the end of the definition');
         }
     }
     else
@@ -64,7 +64,7 @@ function includeDashboard(instance, editor, editorSession) {
         
         if (source[source.length-1] != "}")
         {
-            errors.push('Missing "}" in the end of the definition');
+            errors.push('Missing "}" at the end of the definition');
         }
     }
     else
@@ -73,6 +73,12 @@ function includeDashboard(instance, editor, editorSession) {
         tot = instance.state.currentDefinitionSource.slice(0, index-1) + "\t\trow(\n\t\t\t" + instance.state.includeSource 
         + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
         editor.setValue(tot);
+    }
+    if(errors.length > 0)
+    {
+        instance.setState({ popUpErrors: errors });
+        instance.toggleErrorPopUp();
+        return false;
     }
 }
 
@@ -399,7 +405,6 @@ var ManageDSLSource = React.createClass({
     },
     
     toggleErrorPopUp: function() {
-        alert("call");
 		this.refs.error.classList.add("dropdown-show");
 	},
 	
@@ -441,7 +446,6 @@ var ManageDSLSource = React.createClass({
             }
             if(this.state.popUpErrors.length > 0)
             {
-                console.log(this.state.popUpErrors);
                 errors = ( <div id="errors">{this.state.popUpErrors.map((error, i) => <p className="error-item" key={i}>{error}</p>)}</div> );
             }
             
@@ -460,8 +464,8 @@ var ManageDSLSource = React.createClass({
                 };
                 execute = (
                     <div className="modal" ref="modal" onClick={onModalClick} >
-                        <div className="dashboard-popup dropdown-content dropdown-show">
-                            <p className="close-modal" onClick={onClose}>
+                        <div className="execute-popup dropdown-content dropdown-show">
+                            <p className="close-modal dropdown-button" onClick={onClose}>
                                 <i className="material-icons md-36">&#xE5CD;</i>
                             </p>
                             <ExecuteDSL definitionId={this.state.definitionId} />

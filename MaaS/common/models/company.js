@@ -24,7 +24,8 @@ module.exports = function(Company) {
                     };
                     return cb(null, error);
                 } 
-                      
+                
+                // Remove all company DSLs
                 userInstance.dsl.destroyAll( function(err) {
                     if (err)
                     {
@@ -55,10 +56,9 @@ module.exports = function(Company) {
                 });
             });
         });
-        
     };
     
-     Company.remoteMethod(
+    Company.remoteMethod(
         'deleteCompany',
         {
             description: 'Delete Company by passing id to delete and email of the user making the request.',
@@ -70,6 +70,7 @@ module.exports = function(Company) {
                 {arg: 'error', type: 'Object'},
                 {arg: 'id', type: 'String'}
             ],
+            isStatic: true,
             http: { verb: 'delete', path: '/deleteCompany/:id' }
         }
     );

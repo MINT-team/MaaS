@@ -32,6 +32,10 @@ var RequestUserActionCreator = {
     deleteUser: function(email, id) {
         WebAPIUtils.deleteUser(email, id);
     },
+    
+    deleteAllSelectedUsers: function(arrayId) {
+        WebAPIUtils.deleteAllSelectedUsers(arrayId);
+    },
 
     getCompany: function(userId) {
         WebAPIUtils.getCompany(userId);
@@ -55,6 +59,10 @@ var RequestUserActionCreator = {
     
     changeEmail: function(id, email, confirmationEmail){
         WebAPIUtils.changeEmail(id, email, confirmationEmail);
+    },
+    
+    changeActiveDashboard: function(id, definitionId) {
+        WebAPIUtils.changeActiveDashboard(id, definitionId);
     }
 };
 

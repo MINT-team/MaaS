@@ -52,6 +52,8 @@ module.exports = {
     CHANGE_ROLE_RESPONSE: null,
     GET_ALL_USERS: null,
     CHANGE_USER_EMAIL: null,  
+    CHANGE_ACTIVE_DASHBOARD: null,
+    
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
@@ -61,12 +63,6 @@ module.exports = {
     GET_DSLDEFINITION_COUNT: null,
     
     // Super Admin
-    
-    // Dashboard
-
-    // Collection
-
-    // Document
 
     // DSL
     SAVE_DSL_RESPONSE: null,

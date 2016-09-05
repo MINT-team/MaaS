@@ -49,7 +49,6 @@ var Login = React.createClass({
     },
     
     handleRedirect: function() {
-      
       if(this.state.isLogged)
       {
         if(this.state.userType == "commonUser")
@@ -57,13 +56,12 @@ var Login = React.createClass({
           const { router } = this.context;
           if (this.state.activeDashboard == "default")
           {
-            router.push('/manageDSL');   // redirect to Dashboard page
+            router.push('/manageDSL');   // redirect to DSL page
           }
-          else
+          else if (this.state.activeDashboard)
           {
-            //Redirect to active dashboard
+            router.push('/manageDSL/executeDSL/'+this.state.activeDashboard);      // redirect to Dashboard page
           }
-          //router.push('/');
         }else //redirect for Super Admin
         {
           const { router } = this.context;

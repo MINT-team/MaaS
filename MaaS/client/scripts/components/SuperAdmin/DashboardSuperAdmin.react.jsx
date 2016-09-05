@@ -37,7 +37,7 @@ var DashboardSuperAdmin = React.createClass({
               <i className="material-icons-dashboard">&#xE1DB;</i> Internal database management 
           </Link>
           <Link className="dashElement" to="/dashboardSuperAdmin/impersonateUser"> 
-              <i className="material-icons-dashboard">&#xE572;</i>Impersonate other user 
+              <i className="material-icons-dashboard">&#xE572;</i>Impersonate other users
           </Link>
         </div>
       );

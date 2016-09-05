@@ -305,6 +305,10 @@ var RequestUserActionCreator = {
         WebAPIUtils.deleteUser(email, id);
     },
 
+    deleteAllSelectedUsers: function deleteAllSelectedUsers(arrayId) {
+        WebAPIUtils.deleteAllSelectedUsers(arrayId);
+    },
+
     getCompany: function getCompany(userId) {
         WebAPIUtils.getCompany(userId);
     },
@@ -327,6 +331,10 @@ var RequestUserActionCreator = {
 
     changeEmail: function changeEmail(id, email, confirmationEmail) {
         WebAPIUtils.changeEmail(id, email, confirmationEmail);
+    },
+
+    changeActiveDashboard: function changeActiveDashboard(id, definitionId) {
+        WebAPIUtils.changeActiveDashboard(id, definitionId);
     }
 };
 
@@ -756,6 +764,14 @@ var ResponseUserActionCreator = {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_USER_EMAIL,
             json: json,
+            errors: errors
+        });
+    },
+
+    responseChangeActiveDashboard: function responseChangeActiveDashboard(dashboard, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_ACTIVE_DASHBOARD,
+            dashboard: dashboard,
             errors: errors
         });
     }
@@ -2905,6 +2921,7 @@ var ExecuteDSL = React.createClass({
         if (!this.state.popup) {
             this.setState({ popup: id });
             var container = document.getElementById("dashboard-container");
+            if (!container) container = document.getElementById("execute-container");
             var entity = document.getElementById(id);
             var parent = entity.parentElement;
 
@@ -2922,7 +2939,7 @@ var ExecuteDSL = React.createClass({
             var popup = document.createElement("div"); // White box for dsl entity
             popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
             var close = document.createElement("p"); // Close button
-            close.setAttribute("class", "close-modal");
+            close.setAttribute("class", "close-modal dropdown-button");
             close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
 
             popup.appendChild(close);
@@ -3244,7 +3261,7 @@ var ExecuteDSL = React.createClass({
 
         return fromManageSource ? React.createElement(
             'div',
-            { className: 'execute-popup' },
+            { id: 'execute-container' },
             title,
             content,
             action,
@@ -3343,9 +3360,10 @@ var ManageDSL = React.createClass({
     },
 
     componentDidUpdate: function componentDidUpdate(prevProps) {
-        if (!this.props.children && prevProps.children) {
-            RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
-        }
+        if (!this.props.children && prevProps.children) // from children to main page
+            {
+                RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+            }
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -3864,7 +3882,7 @@ var ManageDSL = React.createClass({
                     ) : "",
                     React.createElement(
                         'div',
-                        { id: 'table' },
+                        { id: 'table', className: this.props.mode == "include" ? "include-table" : "" },
                         this.props.mode != "include" ? React.createElement(
                             BootstrapTable,
                             { ref: 'table', data: data, pagination: true,
@@ -4260,7 +4278,7 @@ function includeCollection(instance, editor, editorSession) {
         }
 
         if (source[source.length - 1] != "}") {
-            errors.push('Missing "}" in the end of the definition');
+            errors.push('Missing "}" at the end of the definition');
         }
     } else {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
@@ -4286,12 +4304,17 @@ function includeDashboard(instance, editor, editorSession) {
         }
 
         if (source[source.length - 1] != "}") {
-            errors.push('Missing "}" in the end of the definition');
+            errors.push('Missing "}" at the end of the definition');
         }
     } else {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
         tot = instance.state.currentDefinitionSource.slice(0, index - 1) + "\t\trow(\n\t\t\t" + instance.state.includeSource + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
         editor.setValue(tot);
+    }
+    if (errors.length > 0) {
+        instance.setState({ popUpErrors: errors });
+        instance.toggleErrorPopUp();
+        return false;
     }
 }
 
@@ -4563,7 +4586,6 @@ var ManageDSLSource = React.createClass({
     },
 
     toggleErrorPopUp: function toggleErrorPopUp() {
-        alert("call");
         this.refs.error.classList.add("dropdown-show");
     },
 
@@ -4612,7 +4634,6 @@ var ManageDSLSource = React.createClass({
                 );
             }
             if (this.state.popUpErrors.length > 0) {
-                console.log(this.state.popUpErrors);
                 errors = React.createElement(
                     'div',
                     { id: 'errors' },
@@ -4642,10 +4663,10 @@ var ManageDSLSource = React.createClass({
                     { className: 'modal', ref: 'modal', onClick: onModalClick },
                     React.createElement(
                         'div',
-                        { className: 'dashboard-popup dropdown-content dropdown-show' },
+                        { className: 'execute-popup dropdown-content dropdown-show' },
                         React.createElement(
                             'p',
-                            { className: 'close-modal', onClick: onClose },
+                            { className: 'close-modal dropdown-button', onClick: onClose },
                             React.createElement(
                                 'i',
                                 { className: 'material-icons md-36' },
@@ -5231,7 +5252,8 @@ function getState() {
         userName: UserStore.getName(),
         userSurname: UserStore.getSurname(),
         userCompany: CompanyStore.getName(),
-        isImpersonate: SessionStore.getImpersonate()
+        isImpersonate: SessionStore.getImpersonate(),
+        userActiveDashboard: UserStore.getActiveDashboard()
     };
 }
 
@@ -5248,6 +5270,7 @@ var Header = React.createClass({
         CompanyStore.addChangeListener(this._onChange);
         SessionStore.addImpersonateListener(this._onChange);
         UserStore.addUserLoadListener(this._onChange);
+        UserStore.addChangeListener(this._onDashboardChange);
         SessionStore.addLeaveImpersonateListener(this._onLeaveImpersonate);
     },
 
@@ -5256,6 +5279,7 @@ var Header = React.createClass({
         CompanyStore.removeChangeListener(this._onChange);
         SessionStore.removeImpersonateListener(this._onChange);
         UserStore.removeUserLoadListener(this._onChange);
+        UserStore.removeChangeListener(this._onDashboardChange);
         SessionStore.removeLeaveImpersonateListener(this._onLeaveImpersonate);
     },
 
@@ -5263,19 +5287,29 @@ var Header = React.createClass({
         this.setState(getState());
     },
 
+    _onDashboardChange: function _onDashboardChange() {
+        this.setState({ userActiveDashboard: UserStore.getActiveDashboard() });
+    },
+
     _onLeaveImpersonate: function _onLeaveImpersonate() {
         this.setState({ isImpersonate: "false" });
     },
 
     handleClick: function handleClick(event) {
+        var fromInclude = false;
+        var elem = event.target;
+        for (var i = 0; elem.parentElement && !fromInclude; i++) {
+            if (elem.parentElement.className.match("include-table")) {
+                fromInclude = true;
+            }
+            elem = elem.parentElement;
+        }
         var dropdowns = document.getElementsByClassName("dropdown-content");
-        console.log(event.target.className);
-        if (!event.target.className.match("dropdown-button") && dropdowns) {
+        if (!event.target.className.match("dropdown-button") && dropdowns && !fromInclude) {
             for (var i = 0; i < dropdowns.length; i++) {
                 var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup")) {
+                if (openDropdown.classList.contains("dropdown-show") && !openDropdown.classList.contains("dashboard-popup") && !openDropdown.classList.contains("execute-popup")) {
                     openDropdown.classList.remove("dropdown-show");
-                    alert("kill");
                 }
             }
         } else {
@@ -5306,7 +5340,7 @@ var Header = React.createClass({
                     { className: 'tooltip tooltip-bottom' },
                     React.createElement(
                         Link,
-                        { to: '/company', id: 'header-title' },
+                        { to: this.state.userActiveDashboard == "default" ? "/manageDSL" : "/manageDSL/executeDSL/" + this.state.userActiveDashboard, id: 'header-title' },
                         this.props.companyName
                     ),
                     React.createElement(
@@ -5571,7 +5605,7 @@ var Header = React.createClass({
                                 React.createElement(
                                     Link,
                                     { to: 'dashboardSuperAdmin/impersonateUser' },
-                                    'Impersonate user'
+                                    'Impersonate users'
                                 )
                             );
 
@@ -5808,17 +5842,15 @@ var Login = React.createClass({
   },
 
   handleRedirect: function handleRedirect() {
-
     if (this.state.isLogged) {
       if (this.state.userType == "commonUser") {
         var router = this.context.router;
 
         if (this.state.activeDashboard == "default") {
-          router.push('/manageDSL'); // redirect to Dashboard page
-        } else {}
-          //Redirect to active dashboard
-
-          //router.push('/');
+          router.push('/manageDSL'); // redirect to DSL page
+        } else if (this.state.activeDashboard) {
+          router.push('/manageDSL/executeDSL/' + this.state.activeDashboard); // redirect to Dashboard page
+        }
       } else //redirect for Super Admin
         {
           var _router = this.context.router;
@@ -7438,37 +7470,274 @@ module.exports = ResetPwd;
 
 var React = require('react');
 var Link = require('react-router').Link;
+var SessionStore = require('../../stores/SessionStore.react.jsx');
+var UserStore = require('../../stores/UserStore.react.jsx');
+var DSLStore = require('../../stores/DSLStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
+var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
+var ReactBSTable = require('react-bootstrap-table');
+var BootstrapTable = ReactBSTable.BootstrapTable;
+var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
+
+function getState() {
+    var userId;
+    if (SessionStore.getImpersonate() == "true") userId = SessionStore.getUserId();else userId = UserStore.getId();
+    return {
+        DSL_errors: DSLStore.getErrors(),
+        isLogged: SessionStore.isLogged(),
+        DSL_LIST: DSLStore.getDSLList(),
+        userId: userId
+    };
+}
 
 var ManageActiveDashboard = React.createClass({
     displayName: 'ManageActiveDashboard',
 
 
-    render: function render() {
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function getInitialState() {
+        var state = getState();
+        state.sent = false;
+        var currentActiveDashboard = UserStore.getActiveDashboard();
+        if (currentActiveDashboard != "default") state.currentActiveDashboard = currentActiveDashboard;
+        return state;
+    },
+
+    componentWillMount: function componentWillMount() {
+        DSLStore.addChangeListener(this._onDSLChange);
+        UserStore.addChangeListener(this._onUserChange);
+        RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        DSLStore.removeChangeListener(this._onDSLChange);
+        UserStore.removeChangeListener(this._onUserChange);
+    },
+
+    _onDSLChange: function _onDSLChange() {
+        this.setState(getState());
+    },
+
+    _onUserChange: function _onUserChange() {
+        this.setState({ activeDashboard: UserStore.getActiveDashboard(), userErrors: UserStore.getErrors() });
+    },
+
+    dashboardNameFormatter: function dashboardNameFormatter(cell, row) {
         return React.createElement(
-            'div',
-            { className: 'container' },
-            React.createElement(
-                'p',
-                { className: 'container-title' },
-                'Dashboard Management'
-            ),
-            React.createElement(
-                'p',
-                null,
-                'Select your main Dashboard'
-            ),
-            React.createElement(
-                'p',
-                null,
-                'It will appear as your home page under the name of your company'
-            )
+            'span',
+            { className: 'table-link' },
+            row.name
         );
+    },
+
+    unsetDashboard: function unsetDashboard() {
+        RequestUserActionCreator.changeActiveDashboard(this.state.userId, "default");
+        this.setState({ sent: true });
+    },
+
+    render: function render() {
+        var data = [];
+        var content, errors;
+        var instance = this;
+        if (this.state.DSL_LIST && this.state.DSL_LIST.length > 0) {
+            this.state.DSL_LIST.forEach(function (DSL, i) {
+                if (DSL.dsl.type == "Dashboard" && DSL.dsl.id != instance.state.currentActiveDashboard) {
+                    data.push({
+                        id: DSL.dsl.id,
+                        name: DSL.dsl.name
+                    });
+                }
+                if (DSL.dsl.id == instance.state.currentActiveDashboard) {
+                    instance.setState({ currentActiveDashboard: DSL.dsl.name });
+                }
+            });
+        }
+        // const { router } = this.context;
+
+        var options = {
+            noDataText: "There are no Dashboards to display",
+            onRowClick: function onRowClick(row) {
+                RequestUserActionCreator.changeActiveDashboard(instance.state.userId, row.id);
+                instance.setState({ sent: true });
+                // router.push('/manageDSL/executeDSL/' + row.id);
+            }
+        };
+
+        if (this.state.sent) {
+            if (this.state.activeDashboard) {
+                content = React.createElement(
+                    'div',
+                    { id: 'active-dashboard', className: 'container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        'Active Dashboard'
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'active-dashboard-description' },
+                        React.createElement(
+                            'p',
+                            null,
+                            'Main Dashboard changed!'
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'It will appear as your home page under the name of your company'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'successful-operation' },
+                        React.createElement(
+                            Link,
+                            { className: 'button', to: this.state.activeDashboard == "default" ? "/manageDSL" : "/manageDSL/executeDSL/" + this.state.activeDashboard },
+                            'Check it out'
+                        )
+                    )
+                );
+            } else if (this.state.userErrors && this.state.userErrors.length > 0) {
+                content = React.createElement(
+                    'div',
+                    { id: 'active-dashboard', className: 'container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        'Active Dashboard'
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'active-dashboard-description' },
+                        React.createElement(
+                            'p',
+                            null,
+                            'Error'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'errors' },
+                        this.state.userErrors
+                    )
+                );
+            } else {
+                content = React.createElement(
+                    'div',
+                    { id: 'active-dashboard', className: 'container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        'Active Dashboard'
+                    ),
+                    React.createElement('div', { id: 'active-dashboard-description' }),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement('p', { className: 'loader' }),
+                        React.createElement(
+                            'p',
+                            { className: 'container-description' },
+                            'Changing Dashboard...'
+                        )
+                    )
+                );
+            }
+        } else {
+            if (this.state.DSL_errors && this.state.DSL_errors.length > 0) {
+                content = React.createElement(
+                    'div',
+                    { id: 'active-dashboard', className: 'container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        'Active Dashboard'
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'active-dashboard-description' },
+                        React.createElement(
+                            'p',
+                            null,
+                            'Error'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'errors' },
+                        this.state.DSL_errors
+                    )
+                );
+            } else {
+                content = React.createElement(
+                    'div',
+                    { id: 'active-dashboard', className: 'container' },
+                    React.createElement(
+                        'p',
+                        { className: 'container-title' },
+                        'Active Dashboard'
+                    ),
+                    React.createElement(
+                        'div',
+                        { id: 'active-dashboard-description' },
+                        React.createElement(
+                            'p',
+                            null,
+                            'Select your main Dashboard'
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'It will appear as your home page under the name of your company'
+                        )
+                    ),
+                    this.state.currentActiveDashboard ? React.createElement(
+                        'div',
+                        { id: 'current-dashboard', className: 'container-description' },
+                        React.createElement(
+                            'p',
+                            null,
+                            'Current Dashboard:',
+                            React.createElement(
+                                'span',
+                                null,
+                                this.state.currentActiveDashboard
+                            ),
+                            React.createElement(
+                                'i',
+                                { onClick: this.unsetDashboard, className: 'material-icons md-36' },
+                                ''
+                            )
+                        )
+                    ) : "",
+                    React.createElement(
+                        'div',
+                        { id: 'table' },
+                        React.createElement(
+                            BootstrapTable,
+                            { ref: 'table', data: data, pagination: true,
+                                search: true, striped: true, hover: true, options: options, keyField: 'id' },
+                            React.createElement(
+                                TableHeaderColumn,
+                                { dataField: 'name', dataSort: true, dataFormat: this.dashboardNameFormatter },
+                                'Name'
+                            )
+                        )
+                    )
+                );
+            }
+        }
+
+        return content;
     }
 });
 
 module.exports = ManageActiveDashboard;
 
-},{"react":370,"react-router":139}],42:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-bootstrap-table":93,"react-router":139}],42:[function(require,module,exports){
 'use strict';
 
 /*
@@ -8480,7 +8749,7 @@ var DashboardSuperAdmin = React.createClass({
           { className: 'material-icons-dashboard' },
           ''
         ),
-        'Impersonate other user'
+        'Impersonate other users'
       )
     );
 
@@ -9018,7 +9287,9 @@ var usersManagement = React.createClass({
         };
 
         var confirmDelete = function confirmDelete() {
-            if (row.role != "Owner") RequestUserActionCreator.deleteUser(row.email, row.id);else {
+            if (row.role != "Owner") {
+                RequestUserActionCreator.deleteUser(row.email, row.id);
+            } else {
                 RequestCompanyActionCreator.deleteCompany(row.companyId, row.email);
             }
         };
@@ -9196,6 +9467,10 @@ var usersManagement = React.createClass({
         this.setState({ type: "Guest" });
     },
 
+    deleteAllSelected: function deleteAllSelected() {
+        RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
+    },
+
     render: function render() {
 
         if (!this.state.isLogged || this.state.userType != "superAdmin") {
@@ -9265,6 +9540,11 @@ var usersManagement = React.createClass({
                 noDataText: "There are no users to display"
             };
 
+            var selectRowProp = {
+                mode: "checkbox",
+                bgColor: "rgba(144, 238, 144, 0.42)"
+            };
+
             var sidebarData = [all, owner, administrators, members, guests];
             if (this.state.users && this.state.users.length > 0) {
                 this.state.users.forEach(function (user, i) {
@@ -9298,6 +9578,24 @@ var usersManagement = React.createClass({
                             'p',
                             { id: 'filter-type' },
                             this.state.type
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'top-buttons' },
+                            React.createElement(
+                                'div',
+                                { className: 'tooltip tooltip-bottom', id: 'deleteAll-button' },
+                                React.createElement(
+                                    'i',
+                                    { onClick: this.deleteAllSelected, className: 'material-icons md-48' },
+                                    ''
+                                ),
+                                React.createElement(
+                                    'p',
+                                    { className: 'tooltip-text tooltip-text-long' },
+                                    'Delete all selected users'
+                                )
+                            )
                         )
                     ),
                     React.createElement(
@@ -9306,7 +9604,7 @@ var usersManagement = React.createClass({
                         React.createElement(
                             BootstrapTable,
                             { ref: 'table', data: data, pagination: true,
-                                search: true, striped: true, hover: true, options: options, keyField: 'id' },
+                                search: true, striped: true, hover: true, options: options, selectRow: selectRowProp, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
                                 { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
@@ -9395,6 +9693,8 @@ module.exports = {
     CHANGE_ROLE_RESPONSE: null,
     GET_ALL_USERS: null,
     CHANGE_USER_EMAIL: null,
+    CHANGE_ACTIVE_DASHBOARD: null,
+
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
@@ -9404,12 +9704,6 @@ module.exports = {
     GET_DSLDEFINITION_COUNT: null,
 
     // Super Admin
-
-    // Dashboard
-
-    // Collection
-
-    // Document
 
     // DSL
     SAVE_DSL_RESPONSE: null,
@@ -11151,6 +11445,15 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       UserStore.emitChange();
       break;
 
+    case ActionTypes.CHANGE_ACTIVE_DASHBOARD:
+      if (action.errors) {
+        _errors = action.errors;
+      } else {
+        _user.activeDashboard = action.dashboard;
+      }
+      UserStore.emitChange();
+      break;
+
     case ActionTypes.DELETE_COMPANY:
       if (action.errors) {
         _errors = action.errors;
@@ -11171,8 +11474,8 @@ UserStore.dispatchToken = Dispatcher.register(function (payload) {
       }
       UserStore.emitChange();
       break;
-    case ActionTypes.LEAVE_IMPERSONATE:
 
+    case ActionTypes.LEAVE_IMPERSONATE:
       _user.name = localStorage.removeItem('userName');
       _user.surname = localStorage.removeItem('userSurname');
       _user.dateOfBirth = localStorage.removeItem('userDateOfBirth');
@@ -12014,6 +12317,20 @@ module.exports = {
     });
   },
 
+  deleteAllSelectedUsers: function deleteAllSelectedUsers(arrayId) {
+    request.del(APIEndpoints.USERS + '/deleteAllSelectedUsers').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      arrayId: arrayId
+    }).end(function (error, res) {
+      res = JSON.parse(res.text);
+      console.log(res);
+      if (res.error) {
+        //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+      } else {
+          //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(null, arrayId);
+        }
+    });
+  },
+
   // get the user company
   getCompany: function getCompany(userId) {
     request.get(APIEndpoints.USERS + '/' + userId + '/company').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).end(function (error, res) {
@@ -12086,8 +12403,18 @@ module.exports = {
         if (res.error) ResponseUserActionCreator.responseChangeUserEmail(null, res.error.message);else ResponseUserActionCreator.responseChangeUserEmail(res.data, null);
       }
     });
-  }
+  },
 
+  changeActiveDashboard: function changeActiveDashboard(id, definitionId) {
+    request.put(APIEndpoints.USERS + '/' + id + '/changeActiveDashboard').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      definitionId: definitionId
+    }).end(function (error, res) {
+      if (res) {
+        res = JSON.parse(res.text);
+        if (res.error) ResponseUserActionCreator.responseChangeActiveDashboard(null, res.error.message);else ResponseUserActionCreator.responseChangeActiveDashboard(res.dashboard, null);
+      }
+    });
+  }
 };
 
 },{"../actions/Response/ResponseUserActionCreator.react.jsx":12,"../constants/Constants.js":51,"superagent":371}],66:[function(require,module,exports){

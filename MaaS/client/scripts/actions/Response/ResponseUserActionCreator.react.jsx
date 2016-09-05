@@ -88,6 +88,14 @@ var ResponseUserActionCreator = {
             json: json,
             errors: errors
         });
+    },
+    
+    responseChangeActiveDashboard: function(dashboard, errors) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.CHANGE_ACTIVE_DASHBOARD,
+            dashboard: dashboard,
+            errors: errors
+        });
     }
 };
 

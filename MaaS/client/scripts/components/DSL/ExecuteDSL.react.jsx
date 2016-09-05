@@ -195,6 +195,8 @@ var ExecuteDSL = React.createClass({
         {
             this.setState({popup: id});
             var container = document.getElementById("dashboard-container");
+            if(!container)
+                container = document.getElementById("execute-container");
             var entity = document.getElementById(id);
             var parent = entity.parentElement;
             
@@ -212,7 +214,7 @@ var ExecuteDSL = React.createClass({
             var popup = document.createElement("div");  // White box for dsl entity
             popup.setAttribute("class", "dashboard-popup dropdown-content dropdown-show");
             var close = document.createElement("p");    // Close button
-            close.setAttribute("class", "close-modal");
+            close.setAttribute("class", "close-modal dropdown-button");
             close.innerHTML = "<i class=\"material-icons md-36\">&#xE5CD</i>";
             
             popup.appendChild(close);
@@ -502,7 +504,7 @@ var ExecuteDSL = React.createClass({
         
         return (
             fromManageSource ?
-                <div className="execute-popup">
+                <div id="execute-container">
                     {title}
                     {content}
                     {action}

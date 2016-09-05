@@ -84,8 +84,6 @@ var UserStore = assign({}, EventEmitter.prototype, {
   removeAllUsersLoadListener: function(callback) {
       this.removeListener(USERS_LOAD_EVENT, callback);
   },
-  
-  
 
   getUser: function() {
     return _user;
@@ -349,6 +347,17 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         UserStore.emitChange();  
       break;
       
+      case ActionTypes.CHANGE_ACTIVE_DASHBOARD:
+        if(action.errors) {
+          _errors = action.errors;
+        }
+        else
+        {
+          _user.activeDashboard = action.dashboard;
+        }
+        UserStore.emitChange();
+        break;
+      
       case ActionTypes.DELETE_COMPANY:
         if(action.errors) {
           _errors = action.errors;
@@ -373,8 +382,8 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         }
         UserStore.emitChange(); 
       break;
+      
       case ActionTypes.LEAVE_IMPERSONATE:
-       
         _user.name = localStorage.removeItem('userName');
         _user.surname = localStorage.removeItem('userSurname');
         _user.dateOfBirth =localStorage.removeItem('userDateOfBirth');

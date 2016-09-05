@@ -1487,6 +1487,13 @@ input {
 }
 
 .execute-popup {
+    width: 82%;
+    height: 80%;
+    overflow: auto;
+    margin: auto;
+    position: fixed;
+    top: 15%; left: 0; bottom: 10%; right: 0;
+    z-index: 1;
     text-align: center;
 }
 
@@ -1646,7 +1653,7 @@ input {
     margin: auto;
     position: fixed;
     top: 15%; left: 0; bottom: 20%; right: 0;
-    z-index: 1;
+    z-index: 5;
 }
 
 .dashboard-popup th, .dashboard-popup td {
@@ -2041,6 +2048,8 @@ input {
 }
 
 .table-link {
+    display: inline-block;
+    width: 100%;
     cursor: pointer;
 }
 
@@ -2048,57 +2057,30 @@ input {
     color: #60D42E;
 }
 
-/*------------------------------------------------ SUPERADMIN ---------------------------------------------------------*/
+/*------------------------------------------------ ACTIVE DASHBOARD ---------------------------------------------------------*/
 
-.dashCont{
-    width: 100%;
-    text-align:center;
+#active-dashboard-description {
+    padding-bottom: 1em;
 }
 
-.dashElement {
+#current-dashboard {
+    font-size: 1.2em;
+}
+
+#current-dashboard span {
     display: inline-block;
-    vertical-align: middle;
-    width: 30%;
-    height: 15em;
-    margin: auto;
-    margin-left:1em;
-    -moz-border-radius: 5px;
-    border-radius: 10px;
-    border: 2px solid lightgrey;
-    font-family:'Helvetica Neue',Arial,sans-serif;
-    text-align: center;
-	font-size:16px;
-	font-weight:700;
-	text-shadow: black 1px 1px 2px;
-    text-decoration: none;
-	color: white;
-	background-color: #333;
-	-moz-box-shadow: rgba(0,0,0,0.2) 0 1px 0 1px;
-}
-.dashElement:hover{
-    border: 2px solid lightgreen;
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
-.material-icons-dashboard{
-      font-family: 'Material Icons';
-      clear:both;
-      width:100%;
-      font-weight: normal;
-      font-style: normal;
-      font-size: 10em;  /* Preferred icon size */
-      display: inline-block;
-      line-height: 1;
-      text-align:center;
-      text-transform: none;
-      letter-spacing: normal;
-      word-wrap: normal;
-      white-space: nowrap;
-      direction: ltr;
+#current-dashboard i {
+    vertical-align: middle;
+    cursor: pointer;
 }
-   
-.dashCont a:hover {
-    color: lightgreen;   
-  }
+
+#current-dashboard i:hover {
+    color: lightgrey;
+}
 
 /*------------------------------------------------ SUPERADMIN ---------------------------------------------------------*/
 

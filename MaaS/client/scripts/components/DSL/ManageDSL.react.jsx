@@ -59,7 +59,7 @@ var ManageDSL = React.createClass({
     },
     
     componentDidUpdate: function(prevProps) {
-        if(!this.props.children && prevProps.children)
+        if(!this.props.children && prevProps.children)  // from children to main page
         {
             RequestDSLActionCreator.loadDSLList(SessionStore.getUserId());
         }
@@ -439,7 +439,7 @@ var ManageDSL = React.createClass({
                             : "" }
                         </div>
                         : "" }
-                        <div id="table">
+                        <div id="table" className={this.props.mode == "include" ? "include-table" : ""}>
                             {this.props.mode != "include" ?
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} selectRow={selectRowProp} options={options} keyField="id">

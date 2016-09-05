@@ -160,6 +160,30 @@ module.exports = {
         }
       });
   },
+  
+  deleteAllSelectedUsers: function(arrayId) {
+    request
+      .del(APIEndpoints.USERS + '/deleteAllSelectedUsers')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send(
+        {
+          arrayId: arrayId
+        }
+      )
+      .end(function(error, res) {
+        res = JSON.parse(res.text);
+        console.log(res);
+        if (res.error)
+        {
+          //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+        }
+        else
+        {
+          //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(null, arrayId);
+        }
+      });
+  },
 
   // get the user company
   getCompany: function(userId) {
@@ -275,7 +299,25 @@ module.exports = {
             ResponseUserActionCreator.responseChangeUserEmail(res.data, null); 
         }
       });
+  },
+  
+  changeActiveDashboard: function(id, definitionId) {
+    request
+      .put(APIEndpoints.USERS + '/' + id + '/changeActiveDashboard')
+      .set('Accept','application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send({
+        definitionId: definitionId
+      })
+      .end(function(error, res) {
+        if (res)
+        {
+          res = JSON.parse(res.text);
+          if (res.error)
+            ResponseUserActionCreator.responseChangeActiveDashboard(null, res.error.message);
+          else
+            ResponseUserActionCreator.responseChangeActiveDashboard(res.dashboard, null); 
+        }
+      });
   }
-  
-  
 };

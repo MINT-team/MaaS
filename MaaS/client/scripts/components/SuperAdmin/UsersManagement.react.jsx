@@ -84,12 +84,14 @@ var usersManagement = React.createClass({
         };
         
         var confirmDelete = function() {
-           if(row.role != "Owner")
+            if(row.role != "Owner")
+            {
                 RequestUserActionCreator.deleteUser(row.email,row.id);
-           else{
-               RequestCompanyActionCreator.deleteCompany(row.companyId, row.email);
-           }
-                
+            }
+            else
+            {
+                RequestCompanyActionCreator.deleteCompany(row.companyId, row.email);
+            }
         };
         
         var alertBox;
@@ -189,7 +191,9 @@ var usersManagement = React.createClass({
         this.setState({type: "Guest"});
     },
     
-    
+    deleteAllSelected: function() {
+        RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
+    },
     
     render: function() {
   
@@ -246,6 +250,11 @@ var usersManagement = React.createClass({
                 noDataText: "There are no users to display"
             };
             
+            var selectRowProp = {
+                mode: "checkbox",
+                bgColor: "rgba(144, 238, 144, 0.42)"
+            };
+            
             var sidebarData = [all, owner, administrators, members, guests];
             if(this.state.users && this.state.users.length > 0)
             {
@@ -269,11 +278,16 @@ var usersManagement = React.createClass({
                         <p className="container-title">{title}</p>
                         <div id="table-top">
                             <p id="filter-type">{this.state.type}</p>
-                           
+                            <div className="top-buttons">
+                                <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                                  <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                                  <p className="tooltip-text tooltip-text-long">Delete all selected users</p>
+                                </div>
+                          </div>
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
-                            search={true} striped={true} hover={true} options={options} keyField="id">
+                            search={true} striped={true} hover={true} options={options} selectRow={selectRowProp} keyField="id">
                                 <TableHeaderColumn dataField="email" dataSort={true} columnClassName="emailColumn" >Email</TableHeaderColumn>
                                 <TableHeaderColumn dataField="role" dataSort={true} columnClassName="roleColumn">Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>
