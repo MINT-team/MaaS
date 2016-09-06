@@ -1470,9 +1470,30 @@ module.exports = function(DSL) {
                                                     transformation: row.transformation
                                                 };
                                                 AttributesReader.checkKeywordValue(keywords, function(rowKeywordValueError) {
-                                                    var rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                                    var rowError;
+                                                    
+                                                    if (row.type.type && row.type.type == "image")
+                                                    {
+                                                        AttributesReader.checkSupportedAttributes(row.type, ['height', 'width', 'type'], function(unsupportedImageAttributesError) {
+                                                            AttributesReader.checkKeywordValue({ height: row.type.height, width: row.type.width}, function(keywordImageValueError) {
+                                                                rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedImageAttributesError, keywordImageValueError);            
+                                                            });
+                                                        });
+                                                    }
+                                                    else if (row.type.type && row.type.type)
+                                                    {
+                                                        AttributesReader.checkSupportedAttributes(row.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
+                                                            AttributesReader.checkKeywordValue({ label: row.type.label, url: row.type.url}, function(keywordLinkValueError) {
+                                                                rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
+                                                            });
+                                                        });
+                                                    }
+                                                    else
+                                                    {
+                                                        rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                                    }
                                                     var error = Object.assign(unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError, 
-                                                                              identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError, rowError);
+                                                                            identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError, rowError);
                                                     if(Object.getOwnPropertyNames(rowError).length !== 0)
                                                     {
                                                         returned = true;
@@ -1542,7 +1563,27 @@ module.exports = function(DSL) {
                                                 transformation: row.transformation
                                             };
                                             AttributesReader.checkKeywordValue(keywords, function(rowKeywordValueError) {
-                                                var rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                                var rowError;  
+                                                if (row.type.type && row.type.type == "image")
+                                                {
+                                                    AttributesReader.checkSupportedAttributes(row.type, ['height', 'width', 'type'], function(unsupportedImageAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ height: row.type.height, width: row.type.width}, function(keywordImageValueError) {
+                                                            rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedImageAttributesError, keywordImageValueError);            
+                                                        });
+                                                    });
+                                                }
+                                                else if (row.type.type && row.type.type)
+                                                {
+                                                    AttributesReader.checkSupportedAttributes(row.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ label: row.type.label, url: row.type.url}, function(keywordLinkValueError) {
+                                                            rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
+                                                        });
+                                                    });
+                                                }
+                                                else
+                                                {
+                                                    rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError);
+                                                }
                                                 var error = Object.assign(unsupportedIdentityAttributesError, identityKeywordValueError, 
                                                 unsupportedActionAttributesError, actionKeywordValueError, rowError);
                                                 if(Object.getOwnPropertyNames(rowError).length !== 0)
@@ -1947,7 +1988,27 @@ Collection(
                                                 transformation: column.transformation
                                             };
                                             AttributesReader.checkKeywordValue(keywords, function(columnKeywordValueError) {
-                                                var columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
+                                                var columnError;
+                                                if (column.type.type && column.type.type == "image")
+                                                {
+                                                    AttributesReader.checkSupportedAttributes(column.type, ['height', 'width', 'type'], function(unsupportedImageAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ height: column.type.height, width: column.type.width}, function(keywordImageValueError) {
+                                                            columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError, unsupportedImageAttributesError, keywordImageValueError);
+                                                        });
+                                                    });
+                                                }
+                                                else if (column.type.type && column.type.type)
+                                                {
+                                                    AttributesReader.checkSupportedAttributes(column.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ label: column.type.label, url: column.type.url}, function(keywordLinkValueError) {
+                                                            columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
+                                                        });
+                                                    });
+                                                }
+                                                else
+                                                {
+                                                    columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError);
+                                                }
                                                 var error = Object.assign(columnError, unsupportedIdentityAttributesError, missingRequiredIdentityAttributesError,
                                                 identityKeywordValueError, unsupportedActionAttributesError, actionKeywordValueError);
                                                 if(Object.getOwnPropertyNames(columnError).length !== 0)
