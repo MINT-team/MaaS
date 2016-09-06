@@ -88,12 +88,14 @@ var ExecuteDSL = React.createClass({
         {
             cell = cell.toString();
         }
-        if(formatExtraData.type == "array")
+        else if (formatExtraData.type == "array")
         {
-            alert("asd");
+            cell = this.createTableArray(cell);
         }
-        
-        /*
+        else if (formatExtraData.type == "object")
+        {
+            cell = this.createTableObject(cell);
+        }
         else if(formatExtraData.type == "image")
         {
             
@@ -104,16 +106,13 @@ var ExecuteDSL = React.createClass({
         }
         else if (formatExtraData.type == "date")
         {
-            
+            var d = new Date(cell);
+            cell = d ? d.toDateString() : "Date error";
         }
         else if (formatExtraData.type == "number")
         {
-            
+            cell = Number(cell);
         }
-        ..
-        array
-        object
-        */
         
         if(formatExtraData.selectable)
         {
@@ -135,44 +134,12 @@ var ExecuteDSL = React.createClass({
         return cell;
     },
     
-    /*
-    
-    [
-        {
-            name: 'lol',
-            surname: 'asd'
-        },
-        {
-            name: 'lol2',
-            surname: 'asd2'
-        }
-    ]
-    
-    [
-        {
-            
-            value: 'cane'
-        },
-        {
-            value: 'gatto'
-        }
-    ]
-    
-    
-    [
-        'cane',
-        'gatto'
-    
-    ]
-    */
-    
-    createTableArray: function(string) {
-        var array = string ; //JSON.parse(string); // "['cane', 'gatto']" => ["cane", "gatto"]
-        var keys = Object.keys(array);  // array[4] => 0, 1, 2, 3
+    createTableArray: function(array) {
+        var keys = Object.keys(array);
         var values;
         if(typeof array[0] == "object")
         {
-            values = Object.keys(array[0]);     // name, surname
+            values = Object.keys(array[0]);
         }
         else if(typeof array[0] == "string")
         {
@@ -185,8 +152,6 @@ var ExecuteDSL = React.createClass({
             }
             values = ["value"];
         }
-        console.log(values);
-        console.log(array);
         return (
             <table className="inner-table table table-striped table-bordered table-hover">
                 <tbody>
@@ -201,8 +166,24 @@ var ExecuteDSL = React.createClass({
         );
     },
     
-    createTableObject: function(string) {
-        
+    createTableObject: function(obj) {
+        var keys = Object.keys(obj);
+        var instance = this;
+        return (
+            <table className="inner-table table table-striped table-bordered table-hover">
+                <tbody>
+                    {keys.map((k, i) =>
+                        <tr key={"row_"+i} className="short-column">
+                            <td>{k}</td><td>{Object.prototype.toString.call( obj[k] ) === '[object Array]' ?
+                                                instance.createTableArray(obj[k]) : 
+                                                typeof obj[k] == "object" ? instance.createTableObject(obj[k]) :
+                                                obj[k] }
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        );
     },
     
     horizontalTable: function(columns, data, types) {
@@ -219,7 +200,7 @@ var ExecuteDSL = React.createClass({
             }
             else if(types[i] == "object")
             {
-                
+                rows.push(<td className="react-bs-container-body">{instance.createTableObject(data[0][column])}</td>);
             }
         });
         Document = (
@@ -547,7 +528,7 @@ var ExecuteDSL = React.createClass({
                                         </div>
                                     </div>
                                 )}
-                            </div>  
+                            </div>
                         )}
                     </div>
                 );

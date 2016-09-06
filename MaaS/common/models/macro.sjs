@@ -16,6 +16,10 @@ syntax Cell = function (ctx) {
         {
             identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
         }
+        else if(item.val() == 'type')
+        {
+            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
+        }
         else
             identity = identity.concat(#`${item}: ${params.next().value}`);
         params.next(); // salta ','
@@ -38,6 +42,7 @@ syntax Cell = function (ctx) {
     tot = #`DSL.compileCell({${identity}}, {${body}}, callback)`;
     return tot;
 }
+
 syntax row = function (ctx) {
     let ctxItem = ctx.next().value;
     if (!ctxItem.isParens()) // check for parens
@@ -88,7 +93,15 @@ syntax row = function (ctx) {
             identity = identity.concat(#`${item}: ${expr.value}`);
             params.next(); // salta ','
             marker = params.mark();            
-        } 
+        }
+        else if(item.val() == 'type')
+        {
+            params.next();      // salta ':'
+            let expr = params.expand('expr');
+            identity = identity.concat(#`${item}: ${expr.value}`);
+            params.next(); // salta ','
+            marker = params.mark();
+        }
         else
         {
             params.next();      // salta ':'
@@ -96,22 +109,12 @@ syntax row = function (ctx) {
             identity = identity.concat(#`${item}: ${expr.value}`);
             params.next(); // salta ','
             marker = params.mark();            
-        }            
-        /*
-        params.next();      // salta ':'
-        if(item.val() == 'transformation')
-        {
-            identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
-        }
-        else
-            identity = identity.concat(#`${item}: ${params.next().value}`);
-        params.next(); // salta ','*/
+        }  
     }
     tot = #`{${identity}}`;
     if(dashboardRow != #``)
     {
         tot = #`[${dashboardRow}]`;
-        //throw dashboardRow;
     }
     return tot;
 }
@@ -333,6 +336,10 @@ syntax column = function (ctx) {
         {
             identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
         }
+        else if(item.val() == 'type')
+        {
+            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
+        }
         else
             identity = identity.concat(#`${item}: ${params.next().value}`);
         params.next(); // salta ','
@@ -389,4 +396,52 @@ syntax Dashboard = function (ctx) {
     }
     tot = #`DSL.compileDashboard({${identity}}, [${rows}], callback)`;
     return tot;
+}
+
+syntax image = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
+        throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+        
+    // read itentity
+    for(let item of params)
+    {      
+        params.next();      // salta ':'
+        identity = identity.concat(#`${item}: ${params.next().value}`);
+        params.next(); // salta ','
+    }
+    identity = identity.concat(#`type: "image"`);
+    tot = #`{${identity}}`;
+    return tot;
+}
+
+syntax link = function (ctx) {
+    let ctxItem = ctx.next().value;
+    if (!ctxItem.isParens()) // check for parens
+        throw new Error('Unexpected syntax: ' + #`${ctxItem}` + ' at: ' + #`${ctxItem.lineNumber()}`);
+    let params = ctxItem.inner();
+    
+    let tot = #``;
+    let identity = #``;
+        
+    // read itentity
+    for(let item of params)
+    {      
+        params.next();      // salta ':'
+        identity = identity.concat(#`${item}: ${params.next().value}`);
+        params.next(); // salta ','
+    }
+    identity = identity.concat(#`type: "link"`);
+    tot = #`{${identity}}`;
+    return tot;
+}
+Document(
+) {
+    row(
+        type: link(l: "asd", u: "zxc")
+    )
 }

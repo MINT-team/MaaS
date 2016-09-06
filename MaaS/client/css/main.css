@@ -1486,6 +1486,10 @@ input {
     margin: auto;
 }
 
+.inner-table th {
+    text-align: center;
+}
+
 .execute-popup {
     width: 82%;
     height: 80%;

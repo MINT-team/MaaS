@@ -2821,32 +2821,16 @@ var ExecuteDSL = React.createClass({
     dataFormatter: function dataFormatter(cell, row, formatExtraData) {
         if (formatExtraData.type == "string") {
             cell = cell.toString();
+        } else if (formatExtraData.type == "array") {
+            cell = this.createTableArray(cell);
+        } else if (formatExtraData.type == "object") {
+            cell = this.createTableObject(cell);
+        } else if (formatExtraData.type == "image") {} else if (formatExtraData.type == "link") {} else if (formatExtraData.type == "date") {
+            var d = new Date(cell);
+            cell = d ? d.toDateString() : "Date error";
+        } else if (formatExtraData.type == "number") {
+            cell = Number(cell);
         }
-        if (formatExtraData.type == "array") {
-            alert("asd");
-        }
-
-        /*
-        else if(formatExtraData.type == "image")
-        {
-            
-        }
-        else if (formatExtraData.type == "link")
-        {
-            
-        }
-        else if (formatExtraData.type == "date")
-        {
-            
-        }
-        else if (formatExtraData.type == "number")
-        {
-            
-        }
-        ..
-        array
-        object
-        */
 
         if (formatExtraData.selectable) {
             var instance = this;
@@ -2870,43 +2854,11 @@ var ExecuteDSL = React.createClass({
         return cell;
     },
 
-    /*
-    
-    [
-        {
-            name: 'lol',
-            surname: 'asd'
-        },
-        {
-            name: 'lol2',
-            surname: 'asd2'
-        }
-    ]
-    
-    [
-        {
-            
-            value: 'cane'
-        },
-        {
-            value: 'gatto'
-        }
-    ]
-    
-    
-    [
-        'cane',
-        'gatto'
-    
-    ]
-    */
-
-    createTableArray: function createTableArray(string) {
-        var array = string; //JSON.parse(string); // "['cane', 'gatto']" => ["cane", "gatto"]
-        var keys = Object.keys(array); // array[4] => 0, 1, 2, 3
+    createTableArray: function createTableArray(array) {
+        var keys = Object.keys(array);
         var values;
         if (_typeof(array[0]) == "object") {
-            values = Object.keys(array[0]); // name, surname
+            values = Object.keys(array[0]);
         } else if (typeof array[0] == "string") {
             for (var i = 0; i < array.length; ++i) {
                 if (array[i] !== undefined) {
@@ -2915,8 +2867,6 @@ var ExecuteDSL = React.createClass({
             }
             values = ["value"];
         }
-        console.log(values);
-        console.log(array);
         return React.createElement(
             'table',
             { className: 'inner-table table table-striped table-bordered table-hover' },
@@ -2961,7 +2911,34 @@ var ExecuteDSL = React.createClass({
         );
     },
 
-    createTableObject: function createTableObject(string) {},
+    createTableObject: function createTableObject(obj) {
+        var keys = Object.keys(obj);
+        var instance = this;
+        return React.createElement(
+            'table',
+            { className: 'inner-table table table-striped table-bordered table-hover' },
+            React.createElement(
+                'tbody',
+                null,
+                keys.map(function (k, i) {
+                    return React.createElement(
+                        'tr',
+                        { key: "row_" + i, className: 'short-column' },
+                        React.createElement(
+                            'td',
+                            null,
+                            k
+                        ),
+                        React.createElement(
+                            'td',
+                            null,
+                            Object.prototype.toString.call(obj[k]) === '[object Array]' ? instance.createTableArray(obj[k]) : _typeof(obj[k]) == "object" ? instance.createTableObject(obj[k]) : obj[k]
+                        )
+                    );
+                })
+            )
+        );
+    },
 
     horizontalTable: function horizontalTable(columns, data, types) {
         var Document,
@@ -2980,7 +2957,13 @@ var ExecuteDSL = React.createClass({
                     { className: 'react-bs-container-body' },
                     instance.createTableArray(data[0][column])
                 ));
-            } else if (types[i] == "object") {}
+            } else if (types[i] == "object") {
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    instance.createTableObject(data[0][column])
+                ));
+            }
         });
         Document = React.createElement(
             'table',
