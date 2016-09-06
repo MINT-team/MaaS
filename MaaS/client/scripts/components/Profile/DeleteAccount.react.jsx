@@ -10,7 +10,6 @@ var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
-//var CompanyStore = require('../../stores/CompanyStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var RequestSessionActionCreator = require('../../actions/Request/RequestSessionActionCreator.react.jsx');
 

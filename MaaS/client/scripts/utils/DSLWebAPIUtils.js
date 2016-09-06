@@ -163,7 +163,7 @@ module.exports = {
           res = JSON.parse(res.text);
           if (res.error)
           {
-            ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(res.error.message, null);
+            ResponseDSLActionCreator.responseDeleteAllSelectedDSLDefinitions(res.error, null);
           }
           else
           {

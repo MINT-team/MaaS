@@ -15,7 +15,6 @@ var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.js
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestExternalDatabaseActionCreator = require('../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var AddExternalDatabase = require('./AddExternalDatabase.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
@@ -201,12 +200,6 @@ var ExternalDatabases = React.createClass({
   },
   
   render: function() {
-    if(!this.state.isLogged)
-    {
-      return (
-        <AuthorizationRequired />
-      );
-    }
     if (this.props.params.mode != "select" && this.props.params.mode != "changeDefinitionDatabase")
     {
       var all = {

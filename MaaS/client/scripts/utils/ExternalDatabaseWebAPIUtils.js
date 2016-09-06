@@ -105,7 +105,7 @@ module.exports = {
         res = JSON.parse(res.text);
         if (res.error)
         {
-          ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+          ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error, null);
         }
         else
         {

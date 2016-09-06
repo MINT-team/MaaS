@@ -14,7 +14,6 @@ var UserStore = require('../../stores/UserStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -80,10 +79,6 @@ var ManageDSL = React.createClass({
     },
     
     _onUserChange: function() {
-        if(this.state.role != UserStore.getRole() && (this.state.role=="Administrator" || this.state.role=="Member" || this.state.role=="Guest") )
-        {
-            alert("Your role has been changed!");
-        }
         this.setState({
             role: UserStore.getRole(),
             userId: UserStore.getId(),
@@ -318,12 +313,6 @@ var ManageDSL = React.createClass({
 	},
 	
     render: function() {
-        if(!this.state.isLogged) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
         var title, content;
         if(this.props.children)
         {

@@ -20,6 +20,7 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
+    
     responseChangePassword: function(email, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_PASSWORD_RESPONSE,
@@ -27,6 +28,7 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
+    
     responseChangePersonalData: function(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_DATA_RESPONSE,
@@ -40,12 +42,14 @@ var ResponseUserActionCreator = {
             json: json
         });
     },
+    
     responseGetUser: function(json) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_USER,
             json: json
         });
     },
+    
     responseDeleteUser: function(errors, email){
         Dispatcher.handleServerAction({
             type: ActionTypes.DELETE_USER,
@@ -53,6 +57,15 @@ var ResponseUserActionCreator = {
             email: email
         });
     },
+    
+    responseDeleteAllSelectedUsers: function(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_USERS_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
+        });
+    },
+    
     responseGetCompany: function(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.GET_COMPANY,
@@ -60,6 +73,7 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
+    
     responseChangeEditorConfig: function(json, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE,
@@ -67,6 +81,7 @@ var ResponseUserActionCreator = {
             errors: errors
         });
     },
+    
     responseChangeRole: function(email, errors) {
         Dispatcher.handleServerAction({
             type: ActionTypes.CHANGE_ROLE_RESPONSE,

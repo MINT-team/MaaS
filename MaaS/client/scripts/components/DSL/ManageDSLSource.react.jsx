@@ -12,7 +12,6 @@ var Editor = require('../Editor.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var ExecuteDSL = require('./ExecuteDSL.react.jsx');
 
 function includeCollection(instance, editor, editorSession) {
@@ -418,12 +417,6 @@ var ManageDSLSource = React.createClass({
 	},
     
     render: function() {
-        if(!this.state.isLogged) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
         var content, log = [], errors, execute;
         if(this.props.children)
         {

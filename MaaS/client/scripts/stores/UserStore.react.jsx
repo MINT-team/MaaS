@@ -264,7 +264,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
           localStorage.setItem('activeDashboard',_user.activeDashboard);
         }
         UserStore.emitUserLoad();
-        //UserStore.emitChange();
+        // UserStore.emitChange();
         break;
         
       case ActionTypes.CHANGE_EDITOR_CONFIG_RESPONSE:
@@ -298,9 +298,12 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         break;
         
       case ActionTypes.DELETE_USER:
-        if(action.errors) {
+        if(action.errors)
+        {
             _errors = action.errors;
-        } else {
+        }
+        else
+        {
             _errors = [];
             //var email = action.email;
             
@@ -313,6 +316,30 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
               });
               _users.splice(index, 1);
             }
+        }
+        UserStore.emitDelete();
+        break;
+        
+      case ActionTypes.DELETE_ALL_SELECTED_USERS_RESPONSE:
+        if(action.errors)
+        {
+          _errors.push(action.errors);
+        }
+        else
+        {
+          _errors = [];
+          var count = 0;
+          for (var i = 0; count < action.arrayId.length && i <_users.length; i++)
+          {
+              for (var j = 0; j < action.arrayId.length; j++)
+              {
+                  if(_users[i].id == action.arrayId[j])
+                  {
+                      _users.splice(i,1);
+                      count++;
+                  }
+              }
+          }
         }
         UserStore.emitDelete();
         break;
@@ -354,6 +381,7 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
         else
         {
           _user.activeDashboard = action.dashboard;
+          localStorage.setItem('activeDashboard',_user.activeDashboard);
         }
         UserStore.emitChange();
         break;

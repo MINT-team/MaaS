@@ -428,7 +428,7 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
-                    if(err)
+                    if(err || !accessInstance)
                         return reject();
                     if(accessInstance.permission == "execute")
                         cb(null, true); // true = user has execute permission
@@ -463,7 +463,7 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
-                    if(err)
+                    if(err || !accessInstance)
                         return reject();
                     if(accessInstance.permission == "read")
                         cb(null, true); // true = user has read permission
@@ -498,7 +498,7 @@ module.exports = function(app) {
                 
                 var DSLAccess = app.models.DSLAccess;
                 DSLAccess.findOne({ where: { dslId: DSLInstance.id, userId: userId } }, function(err, accessInstance) {
-                    if(err)
+                    if(err || !accessInstance)
                         return reject();
                     if(accessInstance.permission == "write")
                         cb(null, true); // true = user has write permission

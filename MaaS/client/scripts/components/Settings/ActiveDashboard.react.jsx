@@ -61,7 +61,8 @@ var ManageActiveDashboard = React.createClass({
     },
     
     _onUserChange: function() {
-        this.setState({activeDashboard: UserStore.getActiveDashboard(), userErrors: UserStore.getErrors()});
+        var d = UserStore.getActiveDashboard();
+        this.setState({activeDashboard: d, currentActiveDashboard: d, userErrors: UserStore.getErrors()});
     },
     
     dashboardNameFormatter: function(cell, row) {
@@ -77,7 +78,7 @@ var ManageActiveDashboard = React.createClass({
     
     render: function() {
         var data = [];
-        var content, errors;
+        var content, name;
         var instance = this;
         if(this.state.DSL_LIST && this.state.DSL_LIST.length > 0)
         {
@@ -91,12 +92,12 @@ var ManageActiveDashboard = React.createClass({
                 }
                 if(DSL.dsl.id == instance.state.currentActiveDashboard)
                 {
-                    instance.setState({currentActiveDashboard: DSL.dsl.name});
+                    name = DSL.dsl.name;
                 }
             });
         }
-        // const { router } = this.context;
         
+        // const { router } = this.context;
         var options = {
             noDataText: "There are no Dashboards to display",
             onRowClick: function(row){
@@ -110,23 +111,37 @@ var ManageActiveDashboard = React.createClass({
         {
             if(this.state.activeDashboard)
             {
-                content = (
-                    <div id="active-dashboard" className="container">
-                        <p className="container-title">Active Dashboard</p>
-                        <div id="active-dashboard-description">
-                            <p>Main Dashboard changed!</p>
-                            <p>It will appear as your home page under the name of your company</p>
+                if(this.state.activeDashboard == "default")
+                {
+                    content = (
+                        <div id="active-dashboard" className="container">
+                            <p className="container-title">Active Dashboard removed!</p>
+                            <div id="successful-operation">
+                                <Link className="button" to="/manageDSL">Back to DSL management</Link>
+                            </div>
                         </div>
-                        <div id="successful-operation">
-                            <Link className="button" to={this.state.activeDashboard == "default" ? "/manageDSL" : "/manageDSL/executeDSL/"+this.state.activeDashboard}>Check it out</Link>
+                    );
+                }
+                else
+                {
+                    content = (
+                        <div id="active-dashboard" className="container">
+                            <p className="container-title">Active Dashboard changed!</p>
+                            <div id="active-dashboard-description">
+                                <p>It will appear as your home page under the name of your company</p>
+                            </div>
+                            <div id="successful-operation">
+                                <Link className="button" to={"/manageDSL/executeDSL/"+this.state.activeDashboard}>Check it out</Link>
+                            </div>
                         </div>
-                    </div>
-                );
+                    );
+                }
+                
             }
             else if(this.state.userErrors && this.state.userErrors.length > 0) {
                 content = (
                     <div id="active-dashboard" className="container">
-                        <p className="container-title">Active Dashboard</p>
+                        <p className="container-title">Change Active Dashboard</p>
                         <div id="active-dashboard-description">
                             <p>Error</p>
                         </div>
@@ -140,7 +155,7 @@ var ManageActiveDashboard = React.createClass({
             {
                 content = (
                     <div id="active-dashboard" className="container">
-                        <p className="container-title">Active Dashboard</p>
+                        <p className="container-title">Change Active Dashboard</p>
                         <div id="active-dashboard-description">
                         </div>
                         <div>
@@ -157,7 +172,7 @@ var ManageActiveDashboard = React.createClass({
             {
                 content = (
                     <div id="active-dashboard" className="container">
-                        <p className="container-title">Active Dashboard</p>
+                        <p className="container-title">Change Active Dashboard</p>
                         <div id="active-dashboard-description">
                             <p>Error</p>
                         </div>
@@ -171,17 +186,17 @@ var ManageActiveDashboard = React.createClass({
             {
                 content = (
                     <div id="active-dashboard" className="container">
-                        <p className="container-title">Active Dashboard</p>
+                        <p className="container-title">Change Active Dashboard</p>
                         <div id="active-dashboard-description">
-                            <p>Select your main Dashboard</p>
+                            <p>Select your main Dashboard.</p>
                             <p>It will appear as your home page under the name of your company</p>
                         </div>
                         {this.state.currentActiveDashboard ?
                         <div id="current-dashboard" className="container-description">
                             <p>
-                                Current Dashboard:
-                                <span>{this.state.currentActiveDashboard}</span>
-                                <i onClick={this.unsetDashboard} className="material-icons md-36">&#xE888;</i>
+                                Active Dashboard:
+                                <span>{name}</span>
+                                <i onClick={this.unsetDashboard} className="material-icons">&#xE5C9;</i>
                             </p>
                         </div>
                         : ""}

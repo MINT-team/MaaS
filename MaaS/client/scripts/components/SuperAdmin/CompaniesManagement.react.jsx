@@ -122,67 +122,76 @@ var CompaniesManagement = React.createClass({
                 {buttons}
             </div>
         );
-  },
+    },
+    deleteAllSelected: function() {
+        RequestCompanyActionCreator.deleteAllSelectedCompanies(this.refs.table.state.selectedRowKeys);
+    },
   
-  render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") 
-    {
-      return (
-        <AuthorizationRequired />
-      );
-    }
-    if(this.props.children)
+    render: function() {
+        if(!this.state.isLogged || this.state.errors.length > 0 || this.state.userType != "superAdmin") 
+        {
+          return (
+            <AuthorizationRequired />
+          );
+        }
+        if(this.props.children)
         {
             content = this.props.children;
         }
-    else{
-    var selectRowProp = {
-        mode: "checkbox",
-        clickToSelect: true,
-        bgColor: "rgba(144, 238, 144, 0.42)",
-    };
-    
-    var options = {
-      noDataText: "There are no companies to display"
-    };
-    
-    var data = [];
-    if(this.state.companies && this.state.companies.length > 0)
-    {
-      this.state.companies.forEach(function(company, i) {
-          data[i] = {
-              id: company.id,
-              name: company.name,
-              owner: company.owner.email
-          };
-      });
-    }
-    
-    var title, content;
-    title = "Manage companies";
-	  content = (
-	    <div id="manage-companies">
-        <p className="container-title">{title}</p>
-          <div id="table-top">
-          </div>
-          <div id="table">
-            <BootstrapTable ref="table" keyField="id" pagination={true} data={data}
-                search={true} striped={true} hover={true} options={options}>
-              <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
-              <TableHeaderColumn dataField="owner" dataSort={true}>Owner</TableHeaderColumn>
-              <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
-            </BootstrapTable>
-          </div>
-        </div>
+        else
+        {
+            var selectRowProp = {
+                mode: "checkbox",
+                clickToSelect: true,
+                bgColor: "rgba(144, 238, 144, 0.42)",
+            };
         
-    );
-  }
-    return (
-      <div className="container sidebar-container">
-        {content}
-      </div>
-    );
-  }
+            var options = {
+                noDataText: "There are no companies to display"
+            };
+            
+            var data = [];
+            if(this.state.companies && this.state.companies.length > 0)
+            {
+              this.state.companies.forEach(function(company, i) {
+                  data[i] = {
+                      id: company.id,
+                      name: company.name,
+                      owner: company.owner.email
+                  };
+              });
+            }
+            
+            var title, content;
+            title = "Manage companies";
+        	  content = (
+        	    <div id="manage-companies">
+                    <p className="container-title">{title}</p>
+                    <div id="table-top">
+                        <div className="top-buttons">
+                            <div className="tooltip tooltip-bottom" id="deleteAll-button">
+                                <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
+                                <p className="tooltip-text tooltip-text-long">Delete all selected companies</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="table">
+                        <BootstrapTable ref="table" keyField="id" pagination={true} data={data}
+                            search={true} striped={true} hover={true} options={options} selectRow={selectRowProp}>
+                          <TableHeaderColumn dataField="name" dataSort={true}>Name</TableHeaderColumn>
+                          <TableHeaderColumn dataField="owner" dataSort={true}>Owner</TableHeaderColumn>
+                          <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter}></TableHeaderColumn>
+                        </BootstrapTable>
+                    </div>
+                </div>
+            );
+        }
+        return (
+          <div className="container sidebar-container">
+            {content}
+          </div>
+        );
+    }
 });
 
 module.exports = CompaniesManagement;

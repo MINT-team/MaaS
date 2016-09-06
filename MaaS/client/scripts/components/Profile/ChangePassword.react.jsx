@@ -14,8 +14,6 @@ var RequestUserActionCreator = require('../../actions/Request/RequestUserActionC
 
 function getState() {
   return {
-    //accessToken: RecoverPwd.getState().accessToken,
-    //userId: RecoverPwd.getState().userId,
     email:  UserStore.getUser().email,
     errors: UserStore.getErrors()
   };

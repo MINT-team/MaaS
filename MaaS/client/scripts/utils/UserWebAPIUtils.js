@@ -73,7 +73,6 @@ module.exports = {
       .end(function(err, res){
         if(res) 
         {
-          //console.log(res);
           res = JSON.parse(res.text);
           if(res.error) 
           {
@@ -173,14 +172,13 @@ module.exports = {
       )
       .end(function(error, res) {
         res = JSON.parse(res.text);
-        console.log(res);
         if (res.error)
         {
-          //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(res.error.message, null);
+          ResponseUserActionCreator.responseDeleteAllSelectedUsers(res.error, null);
         }
         else
         {
-          //ResponseExternalDatabaseActionCreator.responseDeleteAllSelectedDatabases(null, arrayId);
+          ResponseUserActionCreator.responseDeleteAllSelectedUsers(null, arrayId);
         }
       });
   },

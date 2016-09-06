@@ -58,7 +58,7 @@ var Company = React.createClass({
   },
 
   render: function() {
-    if(!this.state.isLogged || this.state.errors.length > 0) {
+    if(this.state.errors.length > 0) {
         return (
             <div className="container">
               <p className="container-title">Authorization required</p>

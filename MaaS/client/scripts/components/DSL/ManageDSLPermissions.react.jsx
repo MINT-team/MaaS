@@ -13,7 +13,6 @@ var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
 var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 var Sidebar = require('../Sidebar.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -97,12 +96,6 @@ var ManageDSLPermissions = React.createClass({
     },
     
     render: function() {
-        if(!this.state.isLogged) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
         var title,content, errors = [];
         
         // SideBar initialization

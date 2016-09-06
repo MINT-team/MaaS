@@ -47,6 +47,7 @@ module.exports = {
     GET_EDITOR_CONFIG_RESPONSE: null,
     GET_USER: null,
     DELETE_USER: null,
+    DELETE_ALL_SELECTED_USERS_RESPONSE: null,
     GET_COMPANY: null,
     CHANGE_EDITOR_CONFIG_RESPONSE: null,
     CHANGE_ROLE_RESPONSE: null,
@@ -57,6 +58,7 @@ module.exports = {
     // Company
     GET_USERS: null,
     DELETE_COMPANY: null,
+    DELETE_ALL_SELECTED_COMPANIES_RESPONSE: null,
     GET_COMPANIES: null,
     CHANGE_COMPANY_NAME_RESPONSE: null,
     GET_DATABASES_COUNT: null,

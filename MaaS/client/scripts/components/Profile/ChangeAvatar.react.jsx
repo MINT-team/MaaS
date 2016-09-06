@@ -21,11 +21,6 @@ var ChangeAvatar = React.createClass({
       this.setState({
         image: file
       });
-      /*var req = request.post('/upload');
-      files.forEach((file)=> {
-          req.attach(file.name, file);
-      });
-      req.end(callback);*/
     },
 
     openDropzone: function () {

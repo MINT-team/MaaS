@@ -149,18 +149,45 @@ CompanyStore.dispatchToken = Dispatcher.register(function(payload) {
             {
                 _errors = [];
                 var i = 0;
-                //removal of the deleted company from the list of the companies
-                // console.log(action);
-                // console.log(_companies);
-                if(_companies)  // altrimenti la pagina di eliminazione azienda non va
+                var trovato = false;
+                if(_companies)
                 {
-                    while(_companies[i].id != action.id && i < _companies.length )
+                    while(!trovato && i < _companies.length)
+                    {
+                        if (_companies[i].id == action.id)
+                        {
+                            trovato = true;
+                            _companies.splice(i, 1);
+                        }
                         i++;
-                    _companies.splice(i, 1);
+                    }
                 }
             }
             CompanyStore.emitChange();
             CompanyStore.emitDelete();
+            break;
+        case ActionTypes.DELETE_ALL_SELECTED_COMPANIES_RESPONSE:
+            if(action.errors)
+            {
+              _errors.push(action.errors);
+            }
+            else
+            {
+                _errors = [];
+                var count = 0;
+                for (var i = 0; count < action.arrayId.length && i <_companies.length; i++)
+                {
+                    for (var j = 0; j < action.arrayId.length; j++)
+                    {
+                        if(_companies[i].id == action.arrayId[j])
+                        {
+                            _companies.splice(i,1);
+                            count++;
+                        }
+                    }
+                }
+            }
+            CompanyStore.emitChange();
             break;
             
         case ActionTypes.COMPANIES:     //get companies

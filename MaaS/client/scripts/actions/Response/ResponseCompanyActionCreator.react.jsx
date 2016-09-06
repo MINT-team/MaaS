@@ -28,6 +28,14 @@ var ResponseCompanyActionCreator = {
         });
     },
     
+    responseDeleteAllSelectedCompanies: function(errors, arrayId) {
+        Dispatcher.handleServerAction({
+            type: ActionTypes.DELETE_ALL_SELECTED_COMPANIES_RESPONSE,
+            errors: errors,
+            arrayId: arrayId
+        });
+    },
+    
     responseGetCompanies: function(json, errors) {
         Dispatcher.handleServerAction({
           type: ActionTypes.COMPANIES,

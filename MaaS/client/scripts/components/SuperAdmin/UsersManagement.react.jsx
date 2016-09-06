@@ -18,7 +18,6 @@ var SessionStore = require('../../stores/SessionStore.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -141,14 +140,13 @@ var usersManagement = React.createClass({
                 </div>
             </div>
         );
-        
        
-            buttons = (
+        buttons = (
             <div>
                 {deleteUser}
                 <Link to={"/dashboardSuperAdmin/databaseManagement/usersManagement/changeUserPersonalData/"+ row.id} ><i id="modify-button" className="material-icons md-24">&#xE254;</i></Link>
             </div>
-            );
+        );
         
         
         return (
@@ -196,13 +194,6 @@ var usersManagement = React.createClass({
     },
     
     render: function() {
-  
-        if(!this.state.isLogged || this.state.userType != "superAdmin") 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
         var title, content;
         if(this.props.children)
         {
@@ -250,11 +241,6 @@ var usersManagement = React.createClass({
                 noDataText: "There are no users to display"
             };
             
-            var selectRowProp = {
-                mode: "checkbox",
-                bgColor: "rgba(144, 238, 144, 0.42)"
-            };
-            
             var sidebarData = [all, owner, administrators, members, guests];
             if(this.state.users && this.state.users.length > 0)
             {
@@ -283,7 +269,7 @@ var usersManagement = React.createClass({
                                   <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                   <p className="tooltip-text tooltip-text-long">Delete all selected users</p>
                                 </div>
-                          </div>
+                            </div>
                         </div>
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 

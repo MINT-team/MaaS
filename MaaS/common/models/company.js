@@ -18,7 +18,8 @@ module.exports = function(Company) {
             user.findOne({where: {companyId: company.id, email: email}, limit: 1}, function(err, userInstance) {
                 if(err || !userInstance)
                     return cb(err);
-                if(userInstance.role != "Owner" && company.owner == userInstance) {
+                if(userInstance.role != "Owner" && company.owner == userInstance)
+                {
                     var error = {
                         message: 'You haven\'t the rights to delete this company'
                     };
@@ -49,7 +50,11 @@ module.exports = function(Company) {
                     if(err)
                         return cb(err);
                     Company.deleteById(company.id, function(err) {
-                        if(err) console.log("> error deleting company:", company.name);
+                        if(err)
+                        {
+                            console.log("> error deleting company:", company.name);
+                            return cb(err);
+                        }
                         console.log("> company deleted:", company.id);
                         return cb(null, null, company.id);
                     });
@@ -72,6 +77,71 @@ module.exports = function(Company) {
             ],
             isStatic: true,
             http: { verb: 'delete', path: '/deleteCompany/:id' }
+        }
+    );
+    
+    Company.deleteAllSelectedCompanies = function(arrayId, cb) {
+        arrayId.forEach(function(id, index) {
+            Company.findById(id, function(err, company) {
+                if(err || !company)
+                    return cb(err);
+                company.owner(function(err, userInstance) {
+                    if (err)
+                    {
+                        return cb(err);
+                    }
+                    // Remove all company DSLs
+                    userInstance.dsl.destroyAll( function(err) {
+                        if (err)
+                        {
+                            console.log("> error deleting dsl: ",err);
+                            return cb(err);
+                        }
+                    });
+               
+                   //Remove databases of the company
+                    company.externalDatabases.destroyAll(function(err) {
+                        if (err)
+                        {
+                            console.log("> error deleting databases: ",err);
+                            return cb(err);
+                        }
+                        console.log("> databases deleted");
+                    });
+              
+                    //Remove Users of the company
+                    company.users.destroyAll(function(err) {
+                        if(err)
+                            return cb(err);
+                        Company.deleteById(company.id, function(err) {
+                            if(err)
+                            {
+                                console.log("> error deleting company:", company.name);
+                                return cb(err);
+                            }
+                        });
+                    });
+                });
+            });
+            if (index == arrayId.length-1)
+            {
+                console.log('Selected companies deleted');
+                return cb(null, null);
+            }
+        });
+    };
+    
+    Company.remoteMethod(
+        'deleteAllSelectedCompanies',
+        {
+            description: 'Delete all selected companies',
+            accepts: [
+                { arg: 'arrayId', type: 'Array', required: true, description: 'Companies id'}
+            ],
+            returns: [
+                {arg: 'error', type: 'Object'}
+            ],
+            http: { verb: 'delete', path: '/deleteAllSelectedCompanies' }
         }
     );
     

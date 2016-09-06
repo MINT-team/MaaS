@@ -77,6 +77,29 @@ module.exports = {
       });
   },
   
+  deleteAllSelectedCompanies: function(arrayId) {
+    request
+      .del(APIEndpoints.COMPANIES + '/deleteAllSelectedCompanies')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send(
+        {
+          arrayId: arrayId
+        }
+      )
+      .end(function(error, res) {
+        res = JSON.parse(res.text);
+        if (res.error)
+        {
+          ResponseCompanyActionCreator.responseDeleteAllSelectedCompanies(res.error, null);
+        }
+        else
+        {
+          ResponseCompanyActionCreator.responseDeleteAllSelectedCompanies(null, arrayId);
+        }
+      });
+  },
+  
   getCompanies: function() {    //returns all companies in the db
     request
       .get(APIEndpoints.COMPANIES)

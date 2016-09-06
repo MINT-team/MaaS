@@ -12,7 +12,6 @@ var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
 var RequestDSLActionCreator = require('../../actions/Request/RequestDSLActionCreator.react.jsx');
-var AuthorizationRequired = require('../AuthorizationRequired.react.jsx');
 
 var ReactBSTable = require('react-bootstrap-table');
 var BootstrapTable = ReactBSTable.BootstrapTable;
@@ -398,12 +397,6 @@ var ExecuteDSL = React.createClass({
     },
     
     render: function() {
-        if(!this.state.isLogged) 
-        {
-            return (
-                <AuthorizationRequired />
-            );
-        }
         var content, errors, title, action;
         var data = [];
         var fromManageSource = this.props.definitionId ? true : false;

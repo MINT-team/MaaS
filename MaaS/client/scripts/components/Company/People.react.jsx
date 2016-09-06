@@ -84,7 +84,7 @@ var People = React.createClass({
   
   render: function() {
 
-    if(!this.state.isLogged || this.state.errors.length > 0 || !this.props.users) 
+    if(this.state.errors.length > 0 || !this.props.users) 
     {
         return (
             <AuthorizationRequired />
@@ -140,7 +140,7 @@ var People = React.createClass({
                     <span className="table-column-big">Email</span>
                 </div>
                 {this.props.users.map((u) =>
-                  <div key={u.email} className="table-row">
+                  <div key={u.email} className="table-row" id={this.state.email==u.email ? "user-profile" : ""}>
           					<span className="table-column-small">
           					  {u.avatar?
           					    (<img src={"../../../images/"+u.avatar} />) :

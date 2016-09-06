@@ -77,10 +77,8 @@ module.exports = {
         .end(function(err, res) {
             if(res)
             {
-                console.log(res);
                 if(res.body.error)
                 {
-                    alert(res.body.error);
                     var errors = _getErrors(res.body.error);
                     ResponseSessionActionCreator.responseSignup(null, errors);
                 }
@@ -133,7 +131,8 @@ module.exports = {
                         }
                         if(err) console.log("login error");
                     });
-                }else   //common User login
+                }
+                else   //common User login
                 {
                     request.post(APIEndpoints.USERS + '/login')
                     .send({
@@ -152,11 +151,13 @@ module.exports = {
                             var errors = _getErrors(UserRes.body.error);
                             ResponseSessionActionCreator.responseLogin(null, errors);   
                         }
-                        if(err) console.log("login error");
+                        // if(err)
+                        //     console.log("login error");
                     });    
                 }
             }
-            if(err) console.log(">error");
+            // if(err)
+            //     console.log(">error");
         });
     },
 
