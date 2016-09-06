@@ -65,6 +65,9 @@ module.exports = {
     	var selectable = keywords.selectable;
     	var sortable = keywords.sortable;
     	var populate = keywords.populate;
+    	var height = keywords.height;
+    	var width = keywords.width;
+    	var url = keywords.url;
     	
         var error = {};
         if(name && (typeof name !== 'string'))
@@ -92,9 +95,16 @@ module.exports = {
         	error.wrongColumnLabelErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
         }
         
-        if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date' && type != 'array' && type != 'object') )
+        if(type && (type != 'string' && type != 'number' && type != 'date' && type != 'array' && type != 'object' && type.type != 'link' && type.type != 'image') )
         {
-            error.wrongTypeErrorMessage = CompileErrors.wrongTypeError(type);
+            if (type == 'string' || type == 'number' || type == 'date' || type == 'array' || type == 'object')
+            {
+                error.wrongTypeErrorMessage = CompileErrors.wrongTypeError(type);
+            }
+            else if (type.type == 'image' || type.type == 'link')
+            {
+                error.wrongTypeErrorMessage = CompileErrors.wrongTypeError(type.type);
+            }
         }
         
         if(order && (order != 'asc' && order != 'desc'))
@@ -140,6 +150,21 @@ module.exports = {
         if (populate && (typeof populate !== 'string'))
         {
             error.wrongPopulateErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
+        }
+        
+        if (height && (typeof height !== 'number'))
+        {
+            error.wrongHeightAttributeErrorMessage = CompileErrors.wrongImageAttributeError(height);
+        }
+        
+        if (width && (typeof width !== 'number'))
+        {
+            error.wrongWidthAttributeErrorMessage = CompileErrors.wrongImageAttributeError(width);
+        }
+        
+        if(url && (typeof url !== 'string'))
+        {
+        	error.wrongLabelErrorMessage = CompileErrors.notStringErrorMessage(url);
         }
         
         if(value)

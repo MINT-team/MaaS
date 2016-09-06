@@ -14,17 +14,33 @@ syntax Cell = function (ctx) {
         params.next();      // salta ':'
         if(item.val() == 'transformation')
         {
-            identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
+            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
+            
         }
         else if(item.val() == 'type')
         {
-            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
+            let m = params.mark();
+            let expr;            
+            if(params.next().value.isStringLiteral())
+            {
+                params.reset(m);
+                expr = params.next();
+            }
+            else
+            {
+                params.reset(m);
+                expr = params.expand('expr');
+            }
+            identity = identity.concat(#`${item}: ${expr.value}`);
         }
         else
             identity = identity.concat(#`${item}: ${params.next().value}`);
         params.next(); // salta ','
+        
     }
     
+            
+           
     // read body
     ctxItem = ctx.next();
     if(ctxItem.done == false)
@@ -40,6 +56,8 @@ syntax Cell = function (ctx) {
         }
     }
     tot = #`DSL.compileCell({${identity}}, {${body}}, callback)`;
+    
+        
     return tot;
 }
 
@@ -89,7 +107,7 @@ syntax row = function (ctx) {
         else if(item.isIdentifier('transformation'))
         {
             params.next();      // salta ':'
-            let expr = params.expand('FunctionExpression');
+            let expr = params.expand('expr');
             identity = identity.concat(#`${item}: ${expr.value}`);
             params.next(); // salta ','
             marker = params.mark();            
@@ -97,7 +115,18 @@ syntax row = function (ctx) {
         else if(item.val() == 'type')
         {
             params.next();      // salta ':'
-            let expr = params.expand('expr');
+            let m = params.mark();
+            let expr;
+            if(typeof params.next().value == "string")
+            {
+                params.reset(m);
+                expr = params.next();
+            }
+            else
+            {
+                params.reset(m);
+                expr = params.expand('expr');
+            }
             identity = identity.concat(#`${item}: ${expr.value}`);
             params.next(); // salta ','
             marker = params.mark();
@@ -334,11 +363,23 @@ syntax column = function (ctx) {
         params.next();      // salta ':'
         if(item.val() == 'transformation')
         {
-            identity = identity.concat(#`${item}: ${params.expand('FunctionExpression').value}`);
+            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
         }
         else if(item.val() == 'type')
         {
-            identity = identity.concat(#`${item}: ${params.expand('expr').value}`);
+            let m = params.mark();
+            let expr;
+            if(typeof params.next().value == "string")
+            {
+                params.reset(m);
+                expr = params.next();
+            }
+            else
+            {
+                params.reset(m);
+                expr = params.expand('expr');
+            }
+            identity = identity.concat(#`${item}: ${expr.value}`);
         }
         else
             identity = identity.concat(#`${item}: ${params.next().value}`);
@@ -438,10 +479,4 @@ syntax link = function (ctx) {
     identity = identity.concat(#`type: "link"`);
     tot = #`{${identity}}`;
     return tot;
-}
-Document(
-) {
-    row(
-        type: link(l: "asd", u: "zxc")
-    )
 }

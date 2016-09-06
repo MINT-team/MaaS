@@ -69,5 +69,9 @@ module.exports = {
     
     wrongActionTypeError: function(type) {
         return "Action error: "+ type + "is unknown. It must be 'csv', 'json', 'true' or 'false'";
+    },
+    
+    wrongImageAttributeError: function(attribute) {
+        return "Image error: "+ attribute + " must express a size in number of pixels'";
     }
 };

@@ -1090,15 +1090,54 @@ module.exports = function(DSL) {
                 AttributesReader.readRequiredAttributes(body, ['value'], function(missingRequiredBodyAttributesError) {
                     AttributesReader.readRequiredAttributes(identity, ['type', 'columnLabel'], function(missingRequiredIdentityAttributesError) {
                         AttributesReader.checkKeywordValue({type: identity.type, transformation: identity.transformation, value: body.value}, function(keywordValueError) {
-                            var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
-                            if(Object.getOwnPropertyNames(error).length !== 0)
+                            if (identity.type.type && identity.type.type == "image")
                             {
-                                return cb(error, null, null);
+                                AttributesReader.checkSupportedAttributes(identity.type, ['height', 'width', 'type'], function(unsupportedImageAttributesError) {
+                                    AttributesReader.checkKeywordValue({ height: identity.type.height, width: identity.type.width}, function(keywordImageValueError) {
+                                        var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError,
+                                        keywordValueError, unsupportedImageAttributesError, keywordImageValueError);
+                                        if(Object.getOwnPropertyNames(error).length !== 0)
+                                        {
+                                            return cb(error, null, null);
+                                        }
+                                        else
+                                        {
+                                            body.definitionType = "Cell";
+                                            return cb(null, identity, body);
+                                        }
+                                    });
+                                });
+                            }
+                            else if (identity.type.type && identity.type.type)
+                            {
+                                AttributesReader.checkSupportedAttributes(identity.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
+                                    AttributesReader.checkKeywordValue({ label: identity.type.label, url: identity.type.url}, function(keywordLinkValueError) {
+                                        var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError,
+                                        keywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
+                                        if(Object.getOwnPropertyNames(error).length !== 0)
+                                        {
+                                            return cb(error, null, null);
+                                        }
+                                        else
+                                        {
+                                            body.definitionType = "Cell";
+                                            return cb(null, identity, body);
+                                        }
+                                    });
+                                });
                             }
                             else
                             {
-                                body.definitionType = "Cell";
-                                return cb(null, identity, body);
+                                var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
+                                if(Object.getOwnPropertyNames(error).length !== 0)
+                                {
+                                    return cb(error, null, null);
+                                }
+                                else
+                                {
+                                    body.definitionType = "Cell";
+                                    return cb(null, identity, body);
+                                }
                             }
                         });
                     });
@@ -1121,15 +1160,54 @@ module.exports = function(DSL) {
                         label: identity.label
                     };
                     AttributesReader.checkKeywordValue(keywordsValue, function(keywordValueError) {
-                        var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
-                        if(Object.getOwnPropertyNames(error).length !== 0)
+                        if (identity.type.type && identity.type.type == "image")
                         {
-                            return cb(error, null, null);
+                            AttributesReader.checkSupportedAttributes(identity.type, ['height', 'width', 'type'], function(unsupportedImageAttributesError) {
+                                AttributesReader.checkKeywordValue({ height: identity.type.height, width: identity.type.width}, function(keywordImageValueError) {
+                                    var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError,
+                                    keywordValueError, unsupportedImageAttributesError, keywordImageValueError);
+                                    if(Object.getOwnPropertyNames(error).length !== 0)
+                                    {
+                                        return cb(error, null, null);
+                                    }
+                                    else
+                                    {
+                                        body.definitionType = "Cell";
+                                        return cb(null, identity, body);
+                                    }
+                                });
+                            });
+                        }
+                        else if (identity.type.type && identity.type.type)
+                        {
+                            AttributesReader.checkSupportedAttributes(identity.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
+                                AttributesReader.checkKeywordValue({ label: identity.type.label, url: identity.type.url}, function(keywordLinkValueError) {
+                                    var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError,
+                                    keywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
+                                    if(Object.getOwnPropertyNames(error).length !== 0)
+                                    {
+                                        return cb(error, null, null);
+                                    }
+                                    else
+                                    {
+                                        body.definitionType = "Cell";
+                                        return cb(null, identity, body);
+                                    }
+                                });
+                            });
                         }
                         else
                         {
-                            body.definitionType = "Cell";
-                            return cb(null, identity, body);
+                            var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError, keywordValueError);
+                            if(Object.getOwnPropertyNames(error).length !== 0)
+                            {
+                                return cb(error, null, null);
+                            }
+                            else
+                            {
+                                body.definitionType = "Cell";
+                                return cb(null, identity, body);
+                            }
                         }
                     });
                 });
@@ -1578,7 +1656,6 @@ module.exports = function(DSL) {
             }
             mongoose_query.limit(1);    // take only one document
             mongoose_query.exec(function(err, result) {
-                console.log(result);
                 if (err)
                 {
                     return cb(err, null);
