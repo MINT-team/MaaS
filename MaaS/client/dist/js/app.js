@@ -2729,6 +2729,8 @@ module.exports = People;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"./ChangeRole.react.jsx":16,"./DeleteUser.react.jsx":19,"./Invite.react.jsx":21,"react":370,"react-router":139}],23:[function(require,module,exports){
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 // Name: {ExecuteDSL.react.jsx}
 // Module: {Front-end::Views}
 // Location: {/MaaS/client/script/components/Company/}
@@ -2750,6 +2752,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     var data = DSLStore.getDSLData();
+    console.log(data);
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -2819,6 +2822,9 @@ var ExecuteDSL = React.createClass({
         if (formatExtraData.type == "string") {
             cell = cell.toString();
         }
+        if (formatExtraData.type == "array") {
+            alert("asd");
+        }
 
         /*
         else if(formatExtraData.type == "image")
@@ -2864,8 +2870,119 @@ var ExecuteDSL = React.createClass({
         return cell;
     },
 
-    horizontalTable: function horizontalTable(columns, data) {
+    /*
+    
+    [
+        {
+            name: 'lol',
+            surname: 'asd'
+        },
+        {
+            name: 'lol2',
+            surname: 'asd2'
+        }
+    ]
+    
+    [
+        {
+            
+            value: 'cane'
+        },
+        {
+            value: 'gatto'
+        }
+    ]
+    
+    
+    [
+        'cane',
+        'gatto'
+    
+    ]
+    */
+
+    createTableArray: function createTableArray(string) {
+        var array = string; //JSON.parse(string); // "['cane', 'gatto']" => ["cane", "gatto"]
+        var keys = Object.keys(array); // array[4] => 0, 1, 2, 3
+        var values;
+        if (_typeof(array[0]) == "object") {
+            values = Object.keys(array[0]); // name, surname
+        } else if (typeof array[0] == "string") {
+            for (var i = 0; i < array.length; ++i) {
+                if (array[i] !== undefined) {
+                    array[i] = { value: array[i] };
+                }
+            }
+            values = ["value"];
+        }
+        console.log(values);
+        console.log(array);
         return React.createElement(
+            'table',
+            { className: 'inner-table table table-striped table-bordered table-hover' },
+            React.createElement(
+                'tbody',
+                null,
+                React.createElement(
+                    'tr',
+                    { className: 'short-column' },
+                    React.createElement(
+                        'th',
+                        null,
+                        '[keys]'
+                    ),
+                    values.map(function (value, i) {
+                        return React.createElement(
+                            'th',
+                            { key: "head_" + i },
+                            value
+                        );
+                    })
+                ),
+                keys.map(function (k, i) {
+                    return React.createElement(
+                        'tr',
+                        { key: "row_" + i, className: 'short-column' },
+                        React.createElement(
+                            'td',
+                            null,
+                            k
+                        ),
+                        values.map(function (value, j) {
+                            return React.createElement(
+                                'td',
+                                { key: "cell_" + j },
+                                array[i][value]
+                            );
+                        })
+                    );
+                })
+            )
+        );
+    },
+
+    createTableObject: function createTableObject(string) {},
+
+    horizontalTable: function horizontalTable(columns, data, types) {
+        var Document,
+            rows = [];
+        var instance = this;
+        columns.forEach(function (column, i) {
+            if (types[i] == "string") {
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    data[0][column]
+                ));
+            } else if (types[i] == "array") {
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    instance.createTableArray(data[0][column])
+                ));
+            } else if (types[i] == "object") {}
+        });
+        Document = React.createElement(
             'table',
             { className: 'table table-striped table-bordered table-hover' },
             React.createElement(
@@ -2880,15 +2997,12 @@ var ExecuteDSL = React.createClass({
                             { key: "col_" + i, className: '' },
                             column
                         ),
-                        React.createElement(
-                            'td',
-                            { className: 'react-bs-container-body' },
-                            data[0][column]
-                        )
+                        rows[i]
                     );
                 })
             )
         );
+        return Document;
     },
 
     verticalTable: function verticalTable(columns, data, perpage, definitionType) {
@@ -3189,7 +3303,7 @@ var ExecuteDSL = React.createClass({
                     content = React.createElement(
                         'div',
                         { id: 'dsl-data-table', className: 'document-table-view' },
-                        this.horizontalTable(columns, data)
+                        this.horizontalTable(columns, data, this.state.types)
                     );
                 }
             } else if (this.state.dashboardRows && this.state.definitionType == "Dashboard") {
@@ -3214,7 +3328,7 @@ var ExecuteDSL = React.createClass({
                                             { className: 'entity-label' },
                                             entity.data.label
                                         ) : React.createElement('p', { className: 'entity-label' }),
-                                        entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type),
+                                        entity.type == "Document" ? _this2.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.types) : _this2.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type),
                                         _this2.createAction(entity.data.action, entity.data.result, entity.data.label, entity.type)
                                     )
                                 );
@@ -8599,12 +8713,7 @@ var CompaniesManagement = React.createClass({
                         { id: 'successful-email' },
                         row.name
                     ),
-                    ' '
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    '?'
+                    ' ?'
                 ),
                 React.createElement(
                     'div',
@@ -9358,13 +9467,9 @@ var usersManagement = React.createClass({
                     React.createElement(
                         'span',
                         { id: 'successful-email' },
-                        row.email
+                        row.email,
+                        ' ?'
                     )
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    '?'
                 )
             );
         } else {
@@ -9382,13 +9487,9 @@ var usersManagement = React.createClass({
                     React.createElement(
                         'span',
                         { id: 'successful-email' },
-                        row.email
+                        row.email,
+                        ' ?'
                     )
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'dropdown-description' },
-                    '?'
                 ),
                 React.createElement(
                     'p',
@@ -11655,7 +11756,6 @@ module.exports = {
       }
     }).end(function (err, res) {
       if (res) {
-        console.log(res);
         if (res.error) {
           var errors = _getErrors(res.body.error);
           ResponseCompanyActionCreator.responseGetCompanies(null, errors);

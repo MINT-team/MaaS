@@ -113,7 +113,6 @@ module.exports = {
       .end(function(err, res){
         if(res)
         {
-          console.log(res);
           if(res.error)
           {
             var errors = _getErrors(res.body.error);

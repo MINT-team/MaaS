@@ -92,7 +92,7 @@ module.exports = {
         	error.wrongColumnLabelErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
         }
         
-        if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date') )
+        if(type && (type != 'string' && type != 'image' && type != 'number' && type != 'link' && type != 'date' && type != 'array' && type != 'object') )
         {
             error.wrongTypeErrorMessage = CompileErrors.wrongTypeError(type);
         }

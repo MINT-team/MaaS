@@ -1578,6 +1578,7 @@ module.exports = function(DSL) {
             }
             mongoose_query.limit(1);    // take only one document
             mongoose_query.exec(function(err, result) {
+                console.log(result);
                 if (err)
                 {
                     return cb(err, null);

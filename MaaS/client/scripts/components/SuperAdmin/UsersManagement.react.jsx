@@ -100,23 +100,22 @@ var usersManagement = React.createClass({
                 <div>
                     <p className="dropdown-description">Are you sure you want to delete</p>
                     <p className="dropdown-description"> 
-                        <span id="successful-email">{row.email}</span> 
+                        <span id="successful-email">{row.email} ?</span> 
                     </p>
-                    <p className="dropdown-description">?</p>
                 </div>
-                    );
+            );
         }
         else
         {
-            alertBox = ( <div>
-                            <p className="dropdown-description">Are you sure you want to delete </p>
-                            <p className="dropdown-description"> 
-                                <span id="successful-email">{row.email}</span> 
-                            </p>
-                            <p className="dropdown-description">?</p>
-                            <p className="dropdown-description"> <span id="successful-email"> This will delete the entire company!</span></p>
-                        </div>
-                        );
+            alertBox = (
+                <div>
+                    <p className="dropdown-description">Are you sure you want to delete </p>
+                    <p className="dropdown-description"> 
+                        <span id="successful-email">{row.email} ?</span> 
+                    </p>
+                    <p className="dropdown-description"> <span id="successful-email"> This will delete the entire company!</span></p>
+                </div>
+            );
         }
     
         

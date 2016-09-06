@@ -99,8 +99,7 @@ var CompaniesManagement = React.createClass({
                 <div className="dropdown-content dropdown-popup-SA" id={deleteId}>
                     <p className="dropdown-title">Delete company</p>
                     <p className="dropdown-description">Are you sure you want to delete </p> 
-                    <p className="dropdown-description"> <span id="successful-email">{row.name}</span> </p> 
-                    <p className="dropdown-description">?</p>
+                    <p className="dropdown-description"> <span id="successful-email">{row.name}</span> ?</p> 
                     <div className="dropdown-buttons">
                         <button className="inline-button">Cancel</button>
                         <button id="delete-button" className="inline-button" onClick={confirmDelete}>Delete</button>

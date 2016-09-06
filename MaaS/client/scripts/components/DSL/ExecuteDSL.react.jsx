@@ -19,6 +19,7 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     var data = DSLStore.getDSLData();
+    console.log(data);
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
@@ -87,6 +88,10 @@ var ExecuteDSL = React.createClass({
         {
             cell = cell.toString();
         }
+        if(formatExtraData.type == "array")
+        {
+            alert("asd");
+        }
         
         /*
         else if(formatExtraData.type == "image")
@@ -130,19 +135,106 @@ var ExecuteDSL = React.createClass({
         return cell;
     },
     
-    horizontalTable: function(columns, data) {
+    /*
+    
+    [
+        {
+            name: 'lol',
+            surname: 'asd'
+        },
+        {
+            name: 'lol2',
+            surname: 'asd2'
+        }
+    ]
+    
+    [
+        {
+            
+            value: 'cane'
+        },
+        {
+            value: 'gatto'
+        }
+    ]
+    
+    
+    [
+        'cane',
+        'gatto'
+    
+    ]
+    */
+    
+    createTableArray: function(string) {
+        var array = string ; //JSON.parse(string); // "['cane', 'gatto']" => ["cane", "gatto"]
+        var keys = Object.keys(array);  // array[4] => 0, 1, 2, 3
+        var values;
+        if(typeof array[0] == "object")
+        {
+            values = Object.keys(array[0]);     // name, surname
+        }
+        else if(typeof array[0] == "string")
+        {
+            for (var i = 0; i < array.length; ++i)
+            {
+                if (array[i] !== undefined)
+                {
+                    array[i] = { value: array[i]};
+                }
+            }
+            values = ["value"];
+        }
+        console.log(values);
+        console.log(array);
         return (
+            <table className="inner-table table table-striped table-bordered table-hover">
+                <tbody>
+                    <tr className="short-column"><th>[keys]</th>{values.map((value, i) => <th key={"head_"+i}>{value}</th>)}</tr>
+                    {keys.map((k, i) =>
+                        <tr key={"row_"+i} className="short-column">
+                            <td>{k}</td>{values.map((value, j) => <td key={"cell_"+ j}>{array[i][value]}</td>)}
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        );
+    },
+    
+    createTableObject: function(string) {
+        
+    },
+    
+    horizontalTable: function(columns, data, types) {
+        var Document, rows = [];
+        var instance = this;
+        columns.forEach(function(column, i) {
+            if(types[i] == "string")
+            {
+                rows.push(<td className="react-bs-container-body">{data[0][column]}</td>);
+            }
+            else if(types[i] == "array")
+            {
+                rows.push(<td className="react-bs-container-body">{instance.createTableArray(data[0][column])}</td>);
+            }
+            else if(types[i] == "object")
+            {
+                
+            }
+        });
+        Document = (
             <table className="table table-striped table-bordered table-hover">
                 <tbody>
                     {columns.map((column, i) => 
                         <tr key={"row_"+i} className="short-column">
                             <th key={"col_"+i} className="">{column}</th> 
-                            <td className="react-bs-container-body">{data[0][column]}</td>
+                            {rows[i]}
                         </tr>  
                     )}
                 </tbody>
             </table>
-        );  
+        );
+        return Document;  
     },
     
     verticalTable: function(columns, data, perpage, definitionType) {
@@ -430,7 +522,7 @@ var ExecuteDSL = React.createClass({
                 {
                     content = (
                         <div id="dsl-data-table" className="document-table-view">
-                            {this.horizontalTable(columns, data)}
+                            {this.horizontalTable(columns, data, this.state.types)}
                         </div>
                     );
                 }
@@ -448,7 +540,7 @@ var ExecuteDSL = React.createClass({
                                         <div key={"thumb_"+j} id={"entity_"+i+j} className={"dsl-thumbnail dropdown-button " + "dashboard-"+entity.type.toLowerCase()+"-view"}>
                                             {entity.data.label ? <p className="entity-label">{entity.data.label}</p> : <p className="entity-label"></p>}
                                             {entity.type == "Document" ? 
-                                                this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result)
+                                                this.horizontalTable(Object.keys(entity.data.result[0]), entity.data.result, entity.data.types)
                                                 :
                                                 this.verticalTable(Object.keys(entity.data.result[0]), entity.data, entity.data.perpage, entity.type)}
                                             {this.createAction(entity.data.action, entity.data.result, entity.data.label, entity.type)}
