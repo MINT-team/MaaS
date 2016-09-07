@@ -2825,7 +2825,18 @@ var ExecuteDSL = React.createClass({
             cell = this.createTableArray(cell);
         } else if (formatExtraData.type == "object") {
             cell = this.createTableObject(cell);
-        } else if (formatExtraData.type == "image") {} else if (formatExtraData.type == "link") {} else if (formatExtraData.type == "date") {
+        } else if (_typeof(formatExtraData.type) == "object" && formatExtraData.type.type == "image") {
+            var h = formatExtraData.type.height ? formatExtraData.type.height : 100;
+            var w = formatExtraData.type.width ? formatExtraData.type.width : 100;
+            cell = React.createElement('img', { width: w, height: h, src: cell, alt: "Image: " + cell });
+        } else if (_typeof(formatExtraData.type) == "object" && formatExtraData.type.type == "link") {
+            var label = formatExtraData.type.label ? formatExtraData.type.label : "Link";
+            cell = React.createElement(
+                'a',
+                { className: 'dsl-link', href: cell, target: '_blank' },
+                label
+            );
+        } else if (formatExtraData.type == "date") {
             var d = new Date(cell);
             cell = d ? d.toDateString() : "Date error";
         } else if (formatExtraData.type == "number") {
@@ -2962,6 +2973,39 @@ var ExecuteDSL = React.createClass({
                     'td',
                     { className: 'react-bs-container-body' },
                     instance.createTableObject(data[0][column])
+                ));
+            } else if (types[i] == "date") {
+                var date = new Date(data[0][column]);
+                date = date ? date.toDateString() : "Date error";
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    date
+                ));
+            } else if (types[i] == "number") {
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    Number(data[0][column])
+                ));
+            } else if (_typeof(types[i]) == "object" && types[i].type == "image") {
+                var h = types[i].height ? types[i].height : 100;
+                var w = types[i].width ? types[i].width : 100;
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    React.createElement('img', { width: w, height: h, src: data[0][column], alt: "Image: " + data[0][column] })
+                ));
+            } else if (_typeof(types[i]) == "object" && types[i].type == "link") {
+                var label = types[i].label ? types[i].label : "Link";
+                rows.push(React.createElement(
+                    'td',
+                    { className: 'react-bs-container-body' },
+                    React.createElement(
+                        'a',
+                        { className: 'dsl-link', href: data[0][column], target: '_blank' },
+                        label
+                    )
                 ));
             }
         });
@@ -6204,6 +6248,10 @@ var ChangeAvatar = React.createClass({
     this.refs.dropzone.open();
   },
 
+  onSubmit: function onSubmit() {
+    alert('si');
+  },
+
   render: function render() {
     var content;
     if (this.state.image) {
@@ -6260,7 +6308,7 @@ var ChangeAvatar = React.createClass({
         ),
         React.createElement(
           'button',
-          { type: 'submit', className: 'form-submit' },
+          { onSubmit: this.onSubmit, type: 'submit', className: 'form-submit' },
           'Change avatar'
         )
       )

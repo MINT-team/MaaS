@@ -67,7 +67,6 @@ module.exports = {
     	var populate = keywords.populate;
     	var height = keywords.height;
     	var width = keywords.width;
-    	var url = keywords.url;
     	
         var error = {};
         if(name && (typeof name !== 'string'))
@@ -160,11 +159,6 @@ module.exports = {
         if (width && (typeof width !== 'number'))
         {
             error.wrongWidthAttributeErrorMessage = CompileErrors.wrongImageAttributeError(width);
-        }
-        
-        if(url && (typeof url !== 'string'))
-        {
-        	error.wrongLabelErrorMessage = CompileErrors.notStringErrorMessage(url);
         }
         
         if(value)

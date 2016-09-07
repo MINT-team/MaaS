@@ -26,17 +26,24 @@ var ChangeAvatar = React.createClass({
     openDropzone: function () {
       this.refs.dropzone.open();
     },
+    
+    onSubmit: function() {
+      alert('si');
+    },
 
     render: function() {
       var content;
-      if(this.state.image) {
+      if(this.state.image)
+      {
         content = (
           <div id="preview">
             <img src={this.state.image[0].preview} />
             <p>{this.state.image[0].name}</p>
           </div>
         );
-      } else {
+      }
+      else
+      {
         content = (
           <Dropzone onDrop={this.onDrop} multiple="false" accept="image/*" id="dropzone" ref="dropzone">
             <div className="dropzone-description">Drag and drop the new image</div>
@@ -51,11 +58,10 @@ var ChangeAvatar = React.createClass({
               <div className="form-field" id="avatar-container">
                 <label htmlFor="newAvatar" id="avatar-label">New Avatar</label>
                 <div id="dropzone-container">
-
                   {content}
                 </div>
               </div>
-              <button type="submit" className="form-submit">Change avatar</button>
+              <button onSubmit={this.onSubmit} type="submit" className="form-submit">Change avatar</button>
             </form>
           </div>
         );

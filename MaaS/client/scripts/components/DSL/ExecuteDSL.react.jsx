@@ -96,13 +96,16 @@ var ExecuteDSL = React.createClass({
         {
             cell = this.createTableObject(cell);
         }
-        else if(formatExtraData.type == "image")
+        else if(typeof formatExtraData.type == "object" && formatExtraData.type.type == "image")
         {
-            
+            var h = formatExtraData.type.height ? formatExtraData.type.height : 100;
+            var w = formatExtraData.type.width ? formatExtraData.type.width : 100;
+            cell = <img width={w} height={h} src={cell} alt={"Image: "+cell}/>;
         }
-        else if (formatExtraData.type == "link")
+        else if (typeof formatExtraData.type == "object" && formatExtraData.type.type == "link")
         {
-            
+            var label = formatExtraData.type.label ? formatExtraData.type.label : "Link";
+            cell = <a className="dsl-link" href={cell} target="_blank">{label}</a>;
         }
         else if (formatExtraData.type == "date")
         {
@@ -201,6 +204,27 @@ var ExecuteDSL = React.createClass({
             else if(types[i] == "object")
             {
                 rows.push(<td className="react-bs-container-body">{instance.createTableObject(data[0][column])}</td>);
+            }
+            else if (types[i] == "date")
+            {
+                var date = new Date(data[0][column]);
+                date = date ? date.toDateString() : "Date error";
+                rows.push(<td className="react-bs-container-body">{date}</td>);
+            }
+            else if (types[i] == "number")
+            {
+                rows.push(<td className="react-bs-container-body">{Number(data[0][column])}</td>);
+            }
+            else if(typeof types[i] == "object" && types[i].type == "image")
+            {
+                var h = types[i].height ? types[i].height : 100;
+                var w = types[i].width ? types[i].width : 100;
+                rows.push(<td className="react-bs-container-body"><img width={w} height={h} src={data[0][column]} alt={"Image: "+data[0][column]}/></td>);
+            }
+            else if (typeof types[i] == "object" && types[i].type == "link")
+            {
+                var label = types[i].label ? types[i].label : "Link";
+                rows.push(<td className="react-bs-container-body"><a className="dsl-link" href={data[0][column]} target="_blank">{label}</a></td>);
             }
         });
         Document = (

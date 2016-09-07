@@ -1546,6 +1546,15 @@ input {
     color: darkgreen;
 }
 
+.dsl-link {
+    color: blue !important;
+    text-decoration: underline !important;
+}
+
+.dsl-link:hover {
+    color: darkgrey !important;
+}
+
 .dashboard-table-view {
     min-width: 90%;
     -moz-border-radius: 5px;

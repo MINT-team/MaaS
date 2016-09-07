@@ -1110,8 +1110,8 @@ module.exports = function(DSL) {
                             }
                             else if (identity.type.type && identity.type.type)
                             {
-                                AttributesReader.checkSupportedAttributes(identity.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
-                                    AttributesReader.checkKeywordValue({ label: identity.type.label, url: identity.type.url}, function(keywordLinkValueError) {
+                                AttributesReader.checkSupportedAttributes(identity.type, ['label', 'type'], function(unsupportedLinkAttributesError) {
+                                    AttributesReader.checkKeywordValue({ label: identity.type.label }, function(keywordLinkValueError) {
                                         var error = Object.assign(unsupportedAttributesError, missingRequiredBodyAttributesError, missingRequiredIdentityAttributesError,
                                         keywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
                                         if(Object.getOwnPropertyNames(error).length !== 0)
@@ -1180,8 +1180,8 @@ module.exports = function(DSL) {
                         }
                         else if (identity.type.type && identity.type.type)
                         {
-                            AttributesReader.checkSupportedAttributes(identity.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
-                                AttributesReader.checkKeywordValue({ label: identity.type.label, url: identity.type.url}, function(keywordLinkValueError) {
+                            AttributesReader.checkSupportedAttributes(identity.type, ['label', 'type'], function(unsupportedLinkAttributesError) {
+                                AttributesReader.checkKeywordValue({ label: identity.type.label }, function(keywordLinkValueError) {
                                     var error = Object.assign(unsupportedAttributesError, missingRequiredIdentityAttributesError,
                                     keywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
                                     if(Object.getOwnPropertyNames(error).length !== 0)
@@ -1482,8 +1482,8 @@ module.exports = function(DSL) {
                                                     }
                                                     else if (row.type.type && row.type.type)
                                                     {
-                                                        AttributesReader.checkSupportedAttributes(row.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
-                                                            AttributesReader.checkKeywordValue({ label: row.type.label, url: row.type.url}, function(keywordLinkValueError) {
+                                                        AttributesReader.checkSupportedAttributes(row.type, ['label', 'type'], function(unsupportedLinkAttributesError) {
+                                                            AttributesReader.checkKeywordValue({ label: row.type.label }, function(keywordLinkValueError) {
                                                                 rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
                                                             });
                                                         });
@@ -1574,8 +1574,8 @@ module.exports = function(DSL) {
                                                 }
                                                 else if (row.type.type && row.type.type)
                                                 {
-                                                    AttributesReader.checkSupportedAttributes(row.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
-                                                        AttributesReader.checkKeywordValue({ label: row.type.label, url: row.type.url}, function(keywordLinkValueError) {
+                                                    AttributesReader.checkSupportedAttributes(row.type, ['label', 'type'], function(unsupportedLinkAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ label: row.type.label }, function(keywordLinkValueError) {
                                                             rowError = Object.assign(unsupportedRowAttributesError, missingRequiredRowAttributesError, rowKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
                                                         });
                                                     });
@@ -1999,8 +1999,8 @@ Collection(
                                                 }
                                                 else if (column.type.type && column.type.type)
                                                 {
-                                                    AttributesReader.checkSupportedAttributes(column.type, ['label', 'url', 'type'], function(unsupportedLinkAttributesError) {
-                                                        AttributesReader.checkKeywordValue({ label: column.type.label, url: column.type.url}, function(keywordLinkValueError) {
+                                                    AttributesReader.checkSupportedAttributes(column.type, ['label', 'type'], function(unsupportedLinkAttributesError) {
+                                                        AttributesReader.checkKeywordValue({ label: column.type.label }, function(keywordLinkValueError) {
                                                             columnError = Object.assign(unsupportedColumnAttributesError, missingRequiredColumnAttributesError, columnKeywordValueError, unsupportedLinkAttributesError, keywordLinkValueError);
                                                         });
                                                     });
