@@ -57,5 +57,10 @@
     "url": ""
   },
   "license": "UNLICENSED",
-  "description": "MaaS"
+  "name": "MaaS",
+  "version": "1.0.0",
+  "description": "MaaS: MongoDB as an Admin Service",
+  "engines": {
+    "node": "4.4.0"
+  },
 }
