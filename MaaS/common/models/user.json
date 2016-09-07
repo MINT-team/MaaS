@@ -1,0 +1,145 @@
+{
+  "name": "user",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "avatar": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "surname": {
+      "type": "string"
+    },
+    "dateOfBirth": {
+      "type": "date"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "activeDashboard": {
+      "type": "string",
+      "default": "default",
+      "required": false
+    },
+    "editorConfig": {
+      "type": "object",
+      "default": {
+        "theme": "tomorrow_night",
+        "softTabs": "true",
+        "tabSize": "4",
+        "fontSize": "12"
+      }
+    }
+  },
+  "validations": [],
+  "relations": {
+    "company": {
+      "type": "belongsTo",
+      "model": "Company",
+      "foreignKey": "companyId"
+    },
+    "dsl": {
+      "type": "hasMany",
+      "model": "DSL",
+      "foreignKey": "userId",
+      "through": "DSLAccess",
+      "keyThrough": "dslId"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "SuperAdmin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "Owner",
+      "permission": "DENY",
+      "property": "*"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "signUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changePassword"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changePersonalData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changeActiveDashboard"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "deleteUser"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changeRole"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__company"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__dsl"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "getEditorConfig"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Owner",
+      "permission": "ALLOW",
+      "property": "invite"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "Administrator",
+      "permission": "ALLOW",
+      "property": "invite"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changeEditorConfig"
+    }
+  ],
+  "methods": {}
+}

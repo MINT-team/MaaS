@@ -14,7 +14,8 @@
     ]
   },
   "User": {
-    "dataSource": "db"
+    "dataSource": "db",
+    "public": false
   },
   "AccessToken": {
     "dataSource": "db",
@@ -31,5 +32,38 @@
   "Role": {
     "dataSource": "db",
     "public": false
+  },
+  "Email": {
+    "dataSource": "gmail"
+  },
+  "user": {
+    "dataSource": "maas",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": true
+    }
+  },
+  "SuperAdmin": {
+    "dataSource": "maas",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": false
+    }
+  },
+  "Company": {
+    "dataSource": "maas",
+    "public": true
+  },
+  "ExternalDatabase": {
+    "dataSource": "maas",
+    "public": true
+  },
+  "DSL": {
+    "dataSource": "maas",
+    "public": true
+  },
+  "DSLAccess": {
+    "dataSource": "maas",
+    "public": true
   }
 }

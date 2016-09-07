@@ -1,7 +1,14 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
+//var path = require('path');
+//var dotenv = require('dotenv').config();
+var localenv = require('localenvify/node_modules/localenv');
 
 var app = module.exports = loopback();
+
+// configure view handler
+app.set('view engine', 'ejs');
+//app.set('views', path.join(__dirname, 'views'));
 
 app.start = function() {
   // start the web server

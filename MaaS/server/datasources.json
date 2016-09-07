@@ -2,5 +2,31 @@
   "db": {
     "name": "db",
     "connector": "memory"
+  },
+  "maas": {
+    "host": "ds027338.mlab.com",
+    "port": 27338,
+    "url": "mongodb://mintswe:mint2016@ds027338.mlab.com:27338/maas",
+    "database": "maas",
+    "password": "mint2016",
+    "name": "maas",
+    "user": "mintswe",
+    "connector": "mongodb"
+  },
+  "gmail": {
+    "name": "gmail",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "SMTP",
+        "host": "smtp.gmail.com",
+        "secure": true,
+        "port": 465,
+        "auth": {
+          "user": "mint.swe.unipd@gmail.com",
+          "pass": "mint.swe"
+        }
+      }
+    ]
   }
 }
