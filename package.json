@@ -18,7 +18,7 @@
     "jquery.transition": "^0.1.0",
     "keymirror": "^0.1.1",
     "localenvify": "^1.0.1",
-    "loopback": "^3.0.0-alpha.1",
+    "loopback": "^2.32.0",
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^2.4.0",
     "loopback-connector-mongodb": "^1.15.2",
