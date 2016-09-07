@@ -1,5 +1,6 @@
 {
   "name": "MaaS",
+  "description": "MaaS: MongoDB as an Admin Service",
   "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
@@ -57,10 +58,7 @@
     "url": ""
   },
   "license": "UNLICENSED",
-  "name": "MaaS",
-  "version": "1.0.0",
-  "description": "MaaS: MongoDB as an Admin Service",
   "engines": {
     "node": "4.4.0"
-  },
+  }
 }
