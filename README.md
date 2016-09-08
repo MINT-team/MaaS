@@ -1,4 +1,4 @@
-MaaS - MongoDB as an Admin Service
+MaaS: MongoDB as an Admin Service
 ====
 
 MaaS is a System based on **Node.js** and **MongoDB**. It is intended for company Administrators, especially Businessmen,
@@ -17,7 +17,6 @@ npm install
 npm install --global gulp-cli
 gulp build
 node .
-
 ```
 after executing these commands, you can open the server root page to see the application running.
 
@@ -48,7 +47,6 @@ SMTP_PORT=465
 
 SUPERADMIN_EMAIL=superadmin@gmail.com
 SUPERADMIN_PASSWORD=******
-
 ```
 Demo
 ---
@@ -57,7 +55,7 @@ You can find a demo of this application at this [link](https://maas-swe.herokuap
 Super Admin credentials:
 
 * Email: superadmin@gmail.com
-* Password: 123456789
+* Password: ******
 
 User credentials:
 
