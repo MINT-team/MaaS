@@ -1238,6 +1238,7 @@ module.exports = function(DSL) {
         data.types = [];
         if(Object.getOwnPropertyNames(body).length === 0)   // cell without value
         {
+            DocumentSchema.set('collection', identity.table);
             var collection = conn.model(identity.table, DocumentSchema);
             var mongoose_query;
             if(identity.query)
@@ -1664,6 +1665,7 @@ module.exports = function(DSL) {
         {
             data.action = body.action;
         }
+        DocumentSchema.set('collection', identity.table);
         var collection = conn.model(identity.table, DocumentSchema);
         var mongoose_query;
         if(!body.rows || (body.rows && body.rows.length == 0) )   // Document without rows
@@ -2146,6 +2148,7 @@ Collection(
         {
             data.action = body.action;
         }
+        DocumentSchema.set('collection', identity.table);
         var collection = conn.model(identity.table, DocumentSchema);
         var mongoose_query;
         if(!body.columns || (body.columns && body.columns.length == 0) )   // Collection without columns

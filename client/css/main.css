@@ -1351,12 +1351,12 @@ input {
     padding-bottom: 0.2em;
 }
 
-#editor-errors p {
+#editor-errors .log_error {
     color: red;
 }
 
-#editor-errors span {
-    color: #333;
+#editor-errors span, #editor-errors .log_success {
+    color: #60D42E;
 }
 
 @media (max-width: 1400px) {

@@ -2740,7 +2740,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 // ==========================================
 
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');
@@ -3457,7 +3456,7 @@ var ExecuteDSL = React.createClass({
 
 module.exports = ExecuteDSL;
 
-},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"react":370,"react-bootstrap-table":93,"react-dom":108,"react-router":139}],24:[function(require,module,exports){
+},{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"react":370,"react-bootstrap-table":93,"react-router":139}],24:[function(require,module,exports){
 'use strict';
 
 // Name: {ManageDSL.react.jsx}
@@ -3857,6 +3856,13 @@ var ManageDSL = React.createClass({
         this.setState({ uploadErrors: [] });
     },
 
+    onIncludeBack: function onIncludeBack() {
+        var router = this.context.router;
+
+        RequestDSLActionCreator.handleIncludeDefinition("");
+        router.push('/manageDSL/manageDSLSource?databaseID=' + this.props.currentDefinitionDatabase);
+    },
+
     render: function render() {
         var _this = this;
 
@@ -3973,6 +3979,20 @@ var ManageDSL = React.createClass({
                 React.createElement(
                     'div',
                     { className: this.props.mode == "include" ? "container" : "container  sidebar-container" },
+                    this.props.mode == "include" ? React.createElement(
+                        'div',
+                        { className: 'tooltip tooltip-bottom', id: 'editor-back-button' },
+                        React.createElement(
+                            'i',
+                            { onClick: this.onIncludeBack, className: 'material-icons md-48' },
+                            ''
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'tooltip-text tooltip-text-short' },
+                            'Back'
+                        )
+                    ) : "",
                     React.createElement(
                         'p',
                         { className: 'container-title' },
@@ -4495,6 +4515,7 @@ var ManageDSLSource = React.createClass({
     getInitialState: function getInitialState() {
         return {
             errors: [],
+            logs: [],
             popUpErrors: [],
             includeErrors: [],
             isLogged: SessionStore.isLogged(),
@@ -4643,7 +4664,13 @@ var ManageDSLSource = React.createClass({
     },
 
     _onCompile: function _onCompile() {
-        this.setState({ errors: DSLStore.getErrors() });
+        var errors = DSLStore.getErrors();
+        if (errors && errors.length > 0) {
+            this.setState({ errors: errors, logs: [] });
+        } else {
+            this.setState({ errors: [], logs: ["DSL compilation processed successfully"] });
+        }
+
         if (this.state.building) {
             this.refs.build.classList.toggle("loader-small");
             this.setState({ building: false });
@@ -4652,7 +4679,12 @@ var ManageDSLSource = React.createClass({
     },
 
     _onExecute: function _onExecute() {
-        this.setState({ errors: DSLStore.getErrors() });
+        var errors = DSLStore.getErrors();
+        if (errors && errors.length > 0) {
+            this.setState({ errors: errors, logs: [] });
+        } else {
+            this.setState({ errors: [], logs: ["DSL execution processed successfully"] });
+        }
     },
 
     _onInclude: function _onInclude() {
@@ -4765,15 +4797,22 @@ var ManageDSLSource = React.createClass({
             });
             content = childrenWithProps;
         } else {
-            if (this.state.errors.length > 0) {
+            if (this.state.errors.length > 0 || this.state.logs.length > 0) {
                 log = React.createElement(
                     'div',
                     null,
                     this.state.errors.map(function (error, i) {
                         return React.createElement(
                             'p',
-                            { key: i },
+                            { key: "error_" + i, className: 'log_error' },
                             error
+                        );
+                    }),
+                    this.state.logs.map(function (log, i) {
+                        return React.createElement(
+                            'p',
+                            { key: "log_" + i, className: 'log_success' },
+                            log
                         );
                     })
                 );

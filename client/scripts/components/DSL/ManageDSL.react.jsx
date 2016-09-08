@@ -312,6 +312,12 @@ var ManageDSL = React.createClass({
 	    this.setState({ uploadErrors: [] });
 	},
 	
+	onIncludeBack: function() {
+	    const { router } = this.context;
+	    RequestDSLActionCreator.handleIncludeDefinition("");
+        router.push('/manageDSL/manageDSLSource?databaseID=' + this.props.currentDefinitionDatabase);
+	},
+	
     render: function() {
         var title, content;
         if(this.props.children)
@@ -408,6 +414,12 @@ var ManageDSL = React.createClass({
                         <Sidebar title="Filter DSL" data={sidebarData}/>
                         : "" }
                     <div className={this.props.mode == "include" ? "container" : "container  sidebar-container" }>
+                        { this.props.mode == "include" ?
+                        <div className="tooltip tooltip-bottom" id="editor-back-button">
+                            <i onClick={this.onIncludeBack} className="material-icons md-48">&#xE15E;</i>
+                            <p className="tooltip-text tooltip-text-short">Back</p>
+                        </div>
+                        : "" }
                         <p className="container-title">{title}</p>
                         {this.props.mode != "include" ?
                         <div id="table-top">

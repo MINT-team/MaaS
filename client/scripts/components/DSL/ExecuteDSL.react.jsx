@@ -7,7 +7,6 @@
 // ==========================================
 
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var DSLStore = require('../../stores/DSLStore.react.jsx');

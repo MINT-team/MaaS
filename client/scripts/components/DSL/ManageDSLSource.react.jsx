@@ -108,6 +108,7 @@ var ManageDSLSource = React.createClass({
     getInitialState: function() {
         return {
                 errors: [],
+                logs: [],
                 popUpErrors: [],
                 includeErrors: [],
                 isLogged: SessionStore.isLogged(),
@@ -289,7 +290,16 @@ var ManageDSLSource = React.createClass({
     },
     
     _onCompile: function() {
-        this.setState({errors: DSLStore.getErrors()});
+        var errors = DSLStore.getErrors();
+        if(errors && errors.length > 0)
+        {
+            this.setState({errors: errors, logs: []});
+        }
+        else
+        {
+            this.setState({errors: [], logs: ["DSL compilation processed successfully"]});
+        }
+        
         if(this.state.building)
         {
             this.refs.build.classList.toggle("loader-small");
@@ -299,7 +309,15 @@ var ManageDSLSource = React.createClass({
     },
     
     _onExecute: function() {
-        this.setState({errors: DSLStore.getErrors()});
+        var errors = DSLStore.getErrors();
+        if(errors && errors.length > 0)
+        {
+            this.setState({errors: errors, logs: []});
+        }
+        else
+        {
+            this.setState({errors: [], logs: ["DSL execution processed successfully"]});
+        }
     },
     
     _onInclude: function() {
@@ -433,9 +451,14 @@ var ManageDSLSource = React.createClass({
         }
         else
         {
-            if(this.state.errors.length > 0)
+            if(this.state.errors.length > 0 || this.state.logs.length > 0)
             {
-                log = ( <div>{this.state.errors.map((error, i) => <p key={i}>{error}</p>)}</div> );
+                log = (
+                        <div>
+                            {this.state.errors.map((error, i) => <p key={"error_"+i} className="log_error">{error}</p>)}
+                            {this.state.logs.map((log, i) => <p key={"log_"+i} className="log_success">{log}</p>)}
+                        </div>
+                    );
             }
             if(this.state.popUpErrors.length > 0)
             {

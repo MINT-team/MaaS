@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node .",
     "pretest": "eslint .",
-    "posttest": "nsp check"
+    "posttest": "nsp check",
+    "postinstall": "gulp build"
   },
   "dependencies": {
     "async": "^2.0.0",
