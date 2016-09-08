@@ -66,4 +66,4 @@ User credentials:
 DSL Guide
 ---
 
-You can check the guide to our [*Domain Specific Language*](https://github.com/steakholders/maap/wiki/DSL-File-Configuration)
+You can check the guide to our [*Domain Specific Language*](https://github.com/MINT-team/MaaS/wiki)
