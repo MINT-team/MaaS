@@ -49,6 +49,7 @@
     "gulp-preprocess": "^2.0.0",
     "gulp-uglify": "^2.0.0",
     "nsp": "^2.1.0",
+    "supertest": "^2.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"

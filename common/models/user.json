@@ -32,7 +32,7 @@
     "editorConfig": {
       "type": "object",
       "default": {
-        "theme": "tomorrow_night",
+        "theme": "vibrant_ink",
         "softTabs": "true",
         "tabSize": "4",
         "fontSize": "12"

@@ -157,13 +157,16 @@ var EditorConfig = React.createClass({
                             <div className="form-right-block">
                                 <select id="theme" className="select" ref="theme">
                                     <option value="chaos">Chaos</option>
+                                    <option value="merbivore">Merbivore</option>
                                     <option value="dawn">Dawn</option>
                                     <option value="twilight">Twilight</option>
                                     <option value="ambiance">Ambiance</option>
+                                    <option value="vibrant_ink">Vibrant Ink</option>
                                     <option value="cobalt">Cobalt</option>
                                     <option value="tomorrow">Tomorrow</option>
                                     <option value="tomorrow_night">Tomorrow night</option>
                                     <option value="tomorrow_night_blue">Tomorrow night blue</option>
+                                    <option value="tomorrow_night_bright">Tomorrow night bright</option>
                                 </select>
                             </div>
                         </div>

@@ -31,6 +31,7 @@ var Editor = React.createClass({
         UserStore.addChangeListener(this._onChange);
         var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         editor.setTheme("ace/theme/"+ this.state.theme);
+        editor.getSession().setMode("ace/mode/dsl");
         editor.session.setUseSoftTabs(this.state.softTabs == "true");
         editor.setFontSize(parseInt(this.state.fontSize,10));
         editor.session.setTabSize(parseInt(this.state.tabSize,10));

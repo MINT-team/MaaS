@@ -4,6 +4,7 @@ var path = require('path');
 var sweet = require('sweet.js');
 var fs = require('fs');
 var mongoose = require('mongoose');
+mongoose.set('debug', true);
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
 var AttributesReader = require('./attributesReader.js');
