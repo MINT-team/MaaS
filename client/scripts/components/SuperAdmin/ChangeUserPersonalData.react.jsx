@@ -1,15 +1,3 @@
-// Name: {ChangeCompanyName.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');

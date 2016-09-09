@@ -1,12 +1,3 @@
-// Name: {Editor.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-
 var React = require('react');
 var UserStore = require('../stores/UserStore.react.jsx');
 

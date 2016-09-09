@@ -1,11 +1,3 @@
-// Name: {ChangeAvatar.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Dropzone = require('react-dropzone');
 // var UserStore = require('../../stores/UserStore.react.jsx');

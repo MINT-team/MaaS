@@ -1,11 +1,3 @@
-// Name: {app.jsx}
-// Module: {Front-end}
-// Location: {/MaaS/client/scripts}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var ReactDOM = require('react-dom');
 

@@ -1359,7 +1359,30 @@ input {
     color: #60D42E;
 }
 
+#dsl-help {
+    position: absolute;
+    width: 3.4em;
+    text-align: right;
+    margin-top: -1em;
+    right: 15%;
+    display: block;
+}
+
+#dsl-help i {
+    color: #333;
+    cursor: pointer;
+}
+
+#dsl-help i:hover {
+    color: lightgrey;
+}
+
 @media (max-width: 1400px) {
+    
+    #dsl-help {
+        right: 10%;
+    }
+
     #editor-container {
         width: 80%;
         min-height: 5em;

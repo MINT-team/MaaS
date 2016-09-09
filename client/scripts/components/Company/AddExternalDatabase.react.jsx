@@ -1,12 +1,3 @@
-// Name: {AddExternalDatabase.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
-// ==========================================
-
 var React = require('react');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');

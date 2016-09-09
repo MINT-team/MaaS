@@ -1,11 +1,3 @@
-// Name: {UserWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseUserActionCreator = require('../actions/Response/ResponseUserActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');

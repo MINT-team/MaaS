@@ -1,11 +1,3 @@
-// Name: {Footer.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
@@ -127,12 +119,12 @@ var Footer = React.createClass({
     	}
     	footerLeft = (
     		<div className="footer-left">
-				<a target="_blank" href="http://redbabel.com"><img src="../../images/RedBabelLogo.png" alt="RedBabel Logo"/></a>
+				<a target="_blank" href="http://redbabel.com"><img src="../../dist/images/RedBabelLogo.png" alt="RedBabel Logo"/></a>
 			</div>
     	);
     	footerRight = (
 			<div className="footer-right">
-				<a target="_blank" href="https://github.com/MINT-team/"><img src="../../images/mint_logo.png" alt="MINT Logo"/></a>
+				<a target="_blank" href="https://github.com/MINT-team/"><img src="../../dist/images/mint_logo.png" alt="MINT Logo"/></a>
 			</div>
     	);
         return (

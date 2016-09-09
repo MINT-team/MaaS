@@ -1,11 +1,3 @@
-// Name: {ExternalDatabasesWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseExternalDatabaseActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');

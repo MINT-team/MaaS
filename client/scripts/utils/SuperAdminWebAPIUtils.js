@@ -1,11 +1,3 @@
-// Name: {SuperAdminWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseSuperAdminActionCreator = require('../actions/Response/ResponseSuperAdminActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');

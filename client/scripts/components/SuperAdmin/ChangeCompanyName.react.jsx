@@ -1,16 +1,3 @@
-// Name: {ChangeCompanyName.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');

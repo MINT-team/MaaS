@@ -1,35 +1,3 @@
-/*
-* Name: {Error404.react.jsx}
-* Module: {Front-end::Views}
-* Location: {/MaaS/client/script/components/}
-* 
-* History:
-* Version         Date            Programmer
-* ==========================================
-* 1.0.0         30/07/2016          Navid Taha
-* ------------------------------------------
-* Approved stability.
-* ==========================================
-* 0.1.0        30/07/2016          Fabiano Tavallini
-* ------------------------------------------
-* Verify of the component.
-* ==========================================
-* 0.0.4        29/07/2016          Navid Taha
-* ------------------------------------------
-* Defined connection with UserStore.
-* ==========================================
-* 0.0.3        28/07/2016          Thomas Fuser
-* ------------------------------------------
-* Defined connection with RequestUserActionCreator.
-* ==========================================
-* 0.0.2        28/07/2016          Navid Taha
-* ------------------------------------------
-* Defined HTML structure of the component.
-* ==========================================
-* 0.0.1        27/07/2016          Navid Taha
-* ------------------------------------------
-* First structure of the file.
-*/
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');

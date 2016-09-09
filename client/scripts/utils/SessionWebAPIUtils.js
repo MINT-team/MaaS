@@ -1,11 +1,3 @@
-// Name: {SessionWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseSessionActionCreator = require('../actions/Response/ResponseSessionActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');

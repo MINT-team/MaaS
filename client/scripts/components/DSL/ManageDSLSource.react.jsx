@@ -1,11 +1,3 @@
-// Name: {ManageDSLSource.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var Editor = require('../Editor.react.jsx');
@@ -496,6 +488,10 @@ var ManageDSLSource = React.createClass({
                         <Link to="manageDSL"><i className="material-icons md-48">&#xE15E;</i></Link>
                         <p className="tooltip-text tooltip-text-short">Back</p>
                     </div>
+                    <div className="tooltip tooltip-bottom"  id="dsl-help">
+                        <a target="_blank" href="https://github.com/MINT-team/MaaS/wiki"><i className="material-icons md-36">&#xE887;</i></a>
+                        <p className="tooltip-text tooltip-text-short">DSL guide</p>
+                    </div>
                     <div id="editor-controls">
                         <form id="definition-name">
                             <label htmlFor="definitionName">Definition name</label>
@@ -540,6 +536,7 @@ var ManageDSLSource = React.createClass({
                             </select>
                         </form>
                     </div>
+                    
                     <div id="editor-viewer">
                         <Editor />
                     </div>

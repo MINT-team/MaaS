@@ -1,14 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-// Name: {RequestCompanyActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/CompanyWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
@@ -49,20 +41,6 @@ module.exports = RequestCompanyActionCreator;
 
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/CompanyWebAPIUtils.js":60}],2:[function(require,module,exports){
 "use strict";
-
-/*
-* Name: {RequestDSLActionCreator.react.jsx}
-* Module: {ActionCreators}
-* Location: {/MaaS/client/scripts/actions/Request}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
@@ -158,14 +136,6 @@ module.exports = RequestDSLActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/DSLWebAPIUtils.js":61}],3:[function(require,module,exports){
 "use strict";
 
-// Name: {RequestExternalDatabaseActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/ExternalDatabaseWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
@@ -198,14 +168,6 @@ module.exports = RequestExternalDatabaseActionCreator;
 
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/ExternalDatabaseWebAPIUtils.js":62}],4:[function(require,module,exports){
 'use strict';
-
-// Name: {RequestSessionActionCreator.react.jsx}
-// Module: {ActionsCreators}
-// Location: {/MaaS/clientscripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var Dispatcher = require('../../dispatcher/Dispatcher.js');
 var Constants = require('../../constants/Constants.js');
@@ -252,15 +214,6 @@ module.exports = RequestSessionActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/SessionWebAPIUtils.js":63}],5:[function(require,module,exports){
 "use strict";
 
-// Name: {RequestSuperAdminActionCreator.react.jsx}
-// Module: {ActionsCreators}
-// Location: {/MaaS/clientscripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/SuperAdminWebAPIUtils.js");
 var Constants = require("../../constants/Constants.js");
@@ -273,14 +226,6 @@ module.exports = RequestSuperAdminActionCreator;
 
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/SuperAdminWebAPIUtils.js":64}],6:[function(require,module,exports){
 "use strict";
-
-// Name: {RequestUserActionCreator.react.jsx}
-// Module: {ActionsCreators}
-// Location: {/MaaS/clientscripts/actions/Request/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var WebAPIUtils = require("../../utils/UserWebAPIUtils.js");
@@ -351,14 +296,6 @@ module.exports = RequestUserActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52,"../../utils/UserWebAPIUtils.js":65}],7:[function(require,module,exports){
 "use strict";
 
-// Name: {ResponseCompanyActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
 
@@ -426,20 +363,6 @@ module.exports = ResponseCompanyActionCreator;
 
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],8:[function(require,module,exports){
 "use strict";
-
-/*
-* Name: {ResponseDSLActionCreator.react.jsx}
-* Module: {ActionCreators}
-* Location: {/MaaS/client/scripts/actions/Response}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
@@ -562,14 +485,6 @@ module.exports = ResponseDSLActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],9:[function(require,module,exports){
 "use strict";
 
-// Name: {ResponseExternalDatabaseActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
 
@@ -622,14 +537,6 @@ module.exports = ResponseExternalDatabaseActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],10:[function(require,module,exports){
 "use strict";
 
-// Name: {ResponseSessionActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
 
@@ -672,14 +579,6 @@ module.exports = ResponseSessionActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],11:[function(require,module,exports){
 "use strict";
 
-// Name: {ResponseSuperAdminCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
 
@@ -691,14 +590,6 @@ module.exports = ResponseSuperAdminActionCreator;
 
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],12:[function(require,module,exports){
 "use strict";
-
-// Name: {ResponseUserActionCreator.react.jsx}
-// Module: {ActionCreators}
-// Location: {/MaaS/client/scripts/actions/Response/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var Dispatcher = require("../../dispatcher/Dispatcher.js");
 var Constants = require("../../constants/Constants.js");
@@ -813,14 +704,6 @@ module.exports = ResponseUserActionCreator;
 },{"../../constants/Constants.js":51,"../../dispatcher/Dispatcher.js":52}],13:[function(require,module,exports){
 'use strict';
 
-// Name: {app.jsx}
-// Module: {Front-end}
-// Location: {/MaaS/client/scripts}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -904,15 +787,6 @@ module.exports = AuthorizationRequired;
 
 },{"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],15:[function(require,module,exports){
 'use strict';
-
-// Name: {AddExternalDatabase.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
-// ==========================================
 
 var React = require('react');
 var ExternalDatabaseStore = require('../../stores/ExternalDatabaseStore.react.jsx');
@@ -1039,15 +913,6 @@ module.exports = AddExternalDatabase;
 
 },{"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/ExternalDatabaseStore.react.jsx":56,"react":370}],16:[function(require,module,exports){
 'use strict';
-
-// Name: {Delete.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
-// ==========================================
 
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -1215,14 +1080,6 @@ module.exports = ChangeRole;
 
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370}],17:[function(require,module,exports){
 'use strict';
-
-// Name: {Company.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -1437,14 +1294,6 @@ module.exports = Company;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370,"react-router":139}],18:[function(require,module,exports){
 'use strict';
 
-// Name: {DeleteAccount.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
@@ -1625,15 +1474,6 @@ module.exports = DeleteCompany;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],19:[function(require,module,exports){
 'use strict';
 
-// Name: {Delete.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
-// ==========================================
-
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
@@ -1778,14 +1618,6 @@ module.exports = DeleteUser;
 
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370}],20:[function(require,module,exports){
 'use strict';
-
-// Name: {ExternalDatabase.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
@@ -2236,14 +2068,6 @@ module.exports = ExternalDatabases;
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestExternalDatabaseActionCreator.react.jsx":3,"../../stores/CompanyStore.react.jsx":54,"../../stores/DSLStore.react.jsx":55,"../../stores/ExternalDatabaseStore.react.jsx":56,"../../stores/SessionStore.react.jsx":57,"../Sidebar.react.jsx":43,"./AddExternalDatabase.react.jsx":15,"react":370,"react-bootstrap-table":93,"react-router":139}],21:[function(require,module,exports){
 'use strict';
 
-// Name: {Invite.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var UserStore = require('../../stores/UserStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
@@ -2422,14 +2246,6 @@ module.exports = Invite;
 
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370}],22:[function(require,module,exports){
 'use strict';
-
-// Name: {People.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -2734,14 +2550,6 @@ module.exports = People;
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-// Name: {ExecuteDSL.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -3461,14 +3269,6 @@ module.exports = ExecuteDSL;
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"react":370,"react-bootstrap-table":93,"react-router":139}],24:[function(require,module,exports){
 'use strict';
 
-// Name: {ManageDSL.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var Sidebar = require('../Sidebar.react.jsx');
@@ -4146,14 +3946,6 @@ module.exports = ManageDSL;
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],25:[function(require,module,exports){
 'use strict';
 
-// Name: {ManageDSLPermission.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -4423,14 +4215,6 @@ Permesso = 'esecuzione', 'scrittura', 'lettura'
 
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/CompanyStore.react.jsx":54,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],26:[function(require,module,exports){
 'use strict';
-
-// Name: {ManageDSLSource.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Company/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -4892,6 +4676,24 @@ var ManageDSLSource = React.createClass({
                 ),
                 React.createElement(
                     'div',
+                    { className: 'tooltip tooltip-bottom', id: 'dsl-help' },
+                    React.createElement(
+                        'a',
+                        { target: '_blank', href: 'https://github.com/MINT-team/MaaS/wiki' },
+                        React.createElement(
+                            'i',
+                            { className: 'material-icons md-36' },
+                            ''
+                        )
+                    ),
+                    React.createElement(
+                        'p',
+                        { className: 'tooltip-text tooltip-text-short' },
+                        'DSL guide'
+                    )
+                ),
+                React.createElement(
+                    'div',
                     { id: 'editor-controls' },
                     React.createElement(
                         'form',
@@ -5066,15 +4868,6 @@ module.exports = ManageDSLSource;
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../Editor.react.jsx":27,"./ExecuteDSL.react.jsx":23,"react":370,"react-router":139}],27:[function(require,module,exports){
 'use strict';
 
-// Name: {Editor.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-
 var React = require('react');
 var UserStore = require('../stores/UserStore.react.jsx');
 
@@ -5137,15 +4930,6 @@ module.exports = Editor;
 },{"../stores/UserStore.react.jsx":59,"react":370}],28:[function(require,module,exports){
 'use strict';
 
-// Name: {Error404.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -5191,14 +4975,6 @@ module.exports = Error404;
 
 },{"react":370,"react-router":139}],29:[function(require,module,exports){
 'use strict';
-
-// Name: {Footer.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -5426,7 +5202,7 @@ var Footer = React.createClass({
 			React.createElement(
 				'a',
 				{ target: '_blank', href: 'http://redbabel.com' },
-				React.createElement('img', { src: '../../images/RedBabelLogo.png', alt: 'RedBabel Logo' })
+				React.createElement('img', { src: '../../dist/images/RedBabelLogo.png', alt: 'RedBabel Logo' })
 			)
 		);
 		footerRight = React.createElement(
@@ -5435,7 +5211,7 @@ var Footer = React.createClass({
 			React.createElement(
 				'a',
 				{ target: '_blank', href: 'https://github.com/MINT-team/' },
-				React.createElement('img', { src: '../../images/mint_logo.png', alt: 'MINT Logo' })
+				React.createElement('img', { src: '../../dist/images/mint_logo.png', alt: 'MINT Logo' })
 			)
 		);
 		return React.createElement(
@@ -5452,14 +5228,6 @@ module.exports = Footer;
 
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"react":370,"react-router":139}],30:[function(require,module,exports){
 'use strict';
-
-// Name: {Header.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -5923,14 +5691,6 @@ module.exports = Header;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],31:[function(require,module,exports){
 'use strict';
 
-// Name: {Home.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Slider = require('react-slick');
 
@@ -5989,17 +5749,17 @@ var Home = React.createClass({
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/dsl.png', alt: '' })
+												React.createElement('img', { src: '../dist/images/dsl.png', alt: '' })
 										),
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/editor.png', alt: '' })
+												React.createElement('img', { src: '../dist/images/editor.png', alt: '' })
 										),
 										React.createElement(
 												'div',
 												null,
-												React.createElement('img', { src: '../images/database.png', alt: '' })
+												React.createElement('img', { src: '../dist/images/database.png', alt: '' })
 										)
 								)
 						)
@@ -6011,14 +5771,6 @@ module.exports = Home;
 
 },{"react":370,"react-slick":176}],32:[function(require,module,exports){
 'use strict';
-
-// Name: {Login.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -6189,14 +5941,6 @@ module.exports = Login;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/SuperAdminStore.react.jsx":58,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],33:[function(require,module,exports){
 'use strict';
 
-// Name: {MaaSApp.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var SessionStore = require('../stores/SessionStore.react.jsx');
 var CompanyStore = require('../stores/CompanyStore.react.jsx');
@@ -6293,14 +6037,6 @@ module.exports = MaaSApp;
 
 },{"../stores/CompanyStore.react.jsx":54,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"./AuthorizationRequired.react.jsx":14,"./Footer.react.jsx":29,"./Header.react.jsx":30,"react":370}],34:[function(require,module,exports){
 'use strict';
-
-// Name: {ChangeAvatar.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Dropzone = require('react-dropzone');
@@ -6403,14 +6139,6 @@ module.exports = ChangeAvatar;
 
 },{"react":370,"react-dropzone":109}],35:[function(require,module,exports){
 'use strict';
-
-// Name: {}
-// Module: {}
-// Location: {}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -6555,14 +6283,6 @@ module.exports = ChangePassword;
 
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],36:[function(require,module,exports){
 'use strict';
-
-// Name: {DeleteAccount.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -6735,14 +6455,6 @@ module.exports = DeleteAccount;
 
 },{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],37:[function(require,module,exports){
 'use strict';
-
-// Name: {PersonalData.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -6958,14 +6670,6 @@ module.exports = PersonalData;
 
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],38:[function(require,module,exports){
 'use strict';
-
-// Name: {Profile.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/Profile/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
@@ -7338,14 +7042,6 @@ module.exports = Profile;
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370}],39:[function(require,module,exports){
 'use strict';
 
-// Name: {Register.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../stores/SessionStore.react.jsx');
@@ -7586,14 +7282,6 @@ module.exports = Register;
 },{"../actions/Request/RequestSessionActionCreator.react.jsx":4,"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],40:[function(require,module,exports){
 'use strict';
 
-// Name: {ResetPwd.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../stores/UserStore.react.jsx');
@@ -7731,14 +7419,6 @@ module.exports = ResetPwd;
 
 },{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/UserStore.react.jsx":59,"react":370,"react-router":139}],41:[function(require,module,exports){
 'use strict';
-
-// Name: {ManageDashboard.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -8029,38 +7709,6 @@ module.exports = ManageActiveDashboard;
 },{"../../actions/Request/RequestDSLActionCreator.react.jsx":2,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/DSLStore.react.jsx":55,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"react":370,"react-bootstrap-table":93,"react-router":139}],42:[function(require,module,exports){
 'use strict';
 
-/*
-* Name: {Error404.react.jsx}
-* Module: {Front-end::Views}
-* Location: {/MaaS/client/script/components/}
-* 
-* History:
-* Version         Date            Programmer
-* ==========================================
-* 1.0.0         30/07/2016          Navid Taha
-* ------------------------------------------
-* Approved stability.
-* ==========================================
-* 0.1.0        30/07/2016          Fabiano Tavallini
-* ------------------------------------------
-* Verify of the component.
-* ==========================================
-* 0.0.4        29/07/2016          Navid Taha
-* ------------------------------------------
-* Defined connection with UserStore.
-* ==========================================
-* 0.0.3        28/07/2016          Thomas Fuser
-* ------------------------------------------
-* Defined connection with RequestUserActionCreator.
-* ==========================================
-* 0.0.2        28/07/2016          Navid Taha
-* ------------------------------------------
-* Defined HTML structure of the component.
-* ==========================================
-* 0.0.1        27/07/2016          Navid Taha
-* ------------------------------------------
-* First structure of the file.
-*/
 var React = require('react');
 var Link = require('react-router').Link;
 var UserStore = require('../../stores/UserStore.react.jsx');
@@ -8363,14 +8011,6 @@ module.exports = EditorConfig;
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Editor.react.jsx":27,"react":370,"react-router":139}],43:[function(require,module,exports){
 'use strict';
 
-// Name: {Sidebar.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 
@@ -8441,19 +8081,6 @@ module.exports = Sidebar;
 },{"react":370,"react-router":139}],44:[function(require,module,exports){
 'use strict';
 
-// Name: {ChangeCompanyName.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var RequestSuperAdminActionCreator = require('../../actions/Request/RequestSuperAdminActionCreator.react.jsx');
 var RequestCompanyActionCreator = require('../../actions/Request/RequestCompanyActionCreator.react.jsx');
@@ -8587,20 +8214,8 @@ var ChangeCompanyName = React.createClass({
 
 module.exports = ChangeCompanyName;
 
-},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/SuperAdminStore.react.jsx":58,"../AuthorizationRequired.react.jsx":14,"react":370,"react-router":139}],45:[function(require,module,exports){
+},{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/SuperAdminStore.react.jsx":58,"../AuthorizationRequired.react.jsx":14,"react-router":139}],45:[function(require,module,exports){
 'use strict';
-
-// Name: {ChangeCompanyName.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -8773,19 +8388,6 @@ module.exports = ChangeUserPersonalData;
 
 },{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"react":370,"react-router":139}],46:[function(require,module,exports){
 'use strict';
-
-// Name: {CompaniesManagement.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -9054,18 +8656,6 @@ module.exports = CompaniesManagement;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../../stores/SuperAdminStore.react.jsx":58,"../AuthorizationRequired.react.jsx":14,"react":370,"react-bootstrap-table":93,"react-router":139}],47:[function(require,module,exports){
 'use strict';
 
-// Name: {DashboardSuperAdmin.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var Link = require('react-router').Link;
 var SessionStore = require('../../stores/SessionStore.react.jsx');
@@ -9256,18 +8846,6 @@ module.exports = DatabaseManagement;
 
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestSuperAdminActionCreator.react.jsx":5,"../../stores/CompanyStore.react.jsx":54,"../../stores/SessionStore.react.jsx":57,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-router":139}],49:[function(require,module,exports){
 'use strict';
-
-// Name: {ImpersonateUser.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -9558,19 +9136,6 @@ module.exports = ImpersonateUser;
 
 },{"../../actions/Request/RequestSessionActionCreator.react.jsx":4,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../AuthorizationRequired.react.jsx":14,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],50:[function(require,module,exports){
 'use strict';
-
-// Name: {UsersManagement.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/SuperAdmin/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 
 var React = require('react');
 var Link = require('react-router').Link;
@@ -9997,14 +9562,6 @@ module.exports = usersManagement;
 },{"../../actions/Request/RequestCompanyActionCreator.react.jsx":1,"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/SessionStore.react.jsx":57,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370,"react-bootstrap-table":93,"react-router":139}],51:[function(require,module,exports){
 "use strict";
 
-// Name: {Constants.js}
-// Module: {Front-end}
-// Location: {/MaaS/client/scripts/constants/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var keyMirror = require('keymirror');
 
 //var APIRoot = "https://maas-navid94.c9users.io/api";
@@ -10098,33 +9655,6 @@ module.exports = {
 },{"keymirror":71}],52:[function(require,module,exports){
 'use strict';
 
-/*
-* Name: {Dispatcher.js}
-* Module: {Front-end}
-* Location: {/MaaS/client/scripts/dispatcher/}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 1.0.0        2016/07/11         Navid Taha
-* ---------------------------------------------------
-* Approved stability.
-* ===================================================
-* 0.1.0        2016/07/09      Fabiano Tavallini
-* ---------------------------------------------------
-* Verify and definition of handleViewAction and
-* handleServerAction.
-* ===================================================
-* 0.0.2        2016/07/08         Thomas Fuser
-* ---------------------------------------------------
-* Definition of a payload to dispatch.
-* ===================================================
-* 0.0.1        2016/07/04      Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
-
 var Constants = require('../constants/Constants.js');
 var FluxDispatcher = require('flux').Dispatcher;
 var assign = require('object-assign');
@@ -10153,14 +9683,6 @@ module.exports = Dispatcher;
 
 },{"../constants/Constants.js":51,"flux":68,"object-assign":72}],53:[function(require,module,exports){
 'use strict';
-
-// Name: {routes.jsx}
-// Module: {Front-end}
-// Location: {MaaS/client/scripts/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var React = require('react');
 var ReactRouter = require('react-router');
@@ -10280,15 +9802,6 @@ module.exports = Routes;
 
 },{"./components/Company/Company.react.jsx":17,"./components/Company/DeleteCompany.react.jsx":18,"./components/Company/ExternalDatabases.react.jsx":20,"./components/Company/People.react.jsx":22,"./components/DSL/ExecuteDSL.react.jsx":23,"./components/DSL/ManageDSL.react.jsx":24,"./components/DSL/ManageDSLPermissions.react.jsx":25,"./components/DSL/ManageDSLSource.react.jsx":26,"./components/Editor.react.jsx":27,"./components/Error404.react.jsx":28,"./components/Home.react.jsx":31,"./components/Login.react.jsx":32,"./components/MaaSApp.react.jsx":33,"./components/Profile/ChangeAvatar.react.jsx":34,"./components/Profile/ChangePassword.react.jsx":35,"./components/Profile/DeleteAccount.react.jsx":36,"./components/Profile/PersonalData.react.jsx":37,"./components/Profile/Profile.react.jsx":38,"./components/Register.react.jsx":39,"./components/ResetPwd.react.jsx":40,"./components/Settings/ActiveDashboard.react.jsx":41,"./components/Settings/EditorConfig.react.jsx":42,"./components/SuperAdmin/ChangeCompanyName.react.jsx":44,"./components/SuperAdmin/ChangeUserPersonalData.react.jsx":45,"./components/SuperAdmin/CompaniesManagement.react.jsx":46,"./components/SuperAdmin/DashboardSuperAdmin.react.jsx":47,"./components/SuperAdmin/DatabaseManagement.react.jsx":48,"./components/SuperAdmin/ImpersonateUser.react.jsx":49,"./components/SuperAdmin/UsersManagement.react.jsx":50,"react":370,"react-router":139}],54:[function(require,module,exports){
 'use strict';
-
-// Name: {CompanyStore.react.jsx}
-// Module: {Front-end::Stores}
-// Location: {/MaaS/client/scripts/stores/}
-
-// History:
-// Version         Date            Programmer
-// 1.0.0        27/07/2016      Fabiano Tavallini
-// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -10516,20 +10029,6 @@ module.exports = CompanyStore;
 
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"events":66,"object-assign":72}],55:[function(require,module,exports){
 'use strict';
-
-/*
-* Name: {DSLStore.react.jsx}
-* Module: {Front-end}
-* Location: {/MaaS/client/scripts/stores/}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -11061,14 +10560,6 @@ module.exports = DSLStore;
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"events":66,"object-assign":72}],56:[function(require,module,exports){
 'use strict';
 
-// Name: {ExternalDatabaseStore.react.jsx}
-// Module: {Front-end::Stores}
-// Location: {/MaaS/client/scripts/stores/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
@@ -11195,14 +10686,6 @@ module.exports = ExternalDatabaseStore;
 
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"events":66,"object-assign":72}],57:[function(require,module,exports){
 'use strict';
-
-// Name: {SessionStore.react.jsx}
-// Module: {Front-end::Stores}
-// Location: {/MaaS/client/scripts/stores/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -11399,14 +10882,6 @@ module.exports = SessionStore;
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"events":66,"object-assign":72}],58:[function(require,module,exports){
 'use strict';
 
-// Name: {SuperAdminStore.react.jsx}
-// Module: {Front-end::Stores}
-// Location: {/MaaS/client/scripts/stores/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
 var EventEmitter = require('events').EventEmitter;
@@ -11493,14 +10968,6 @@ module.exports = SuperAdminStore;
 
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"./SessionStore.react.jsx":57,"events":66,"object-assign":72}],59:[function(require,module,exports){
 'use strict';
-
-// Name: {UserStore.react.jsx}
-// Module: {Front-end::Stores}
-// Location: {/MaaS/client/scripts/stores/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var Dispatcher = require('../dispatcher/Dispatcher.js');
 var Constants = require('../constants/Constants.js');
@@ -11895,14 +11362,6 @@ module.exports = UserStore;
 },{"../constants/Constants.js":51,"../dispatcher/Dispatcher.js":52,"./SessionStore.react.jsx":57,"events":66,"object-assign":72}],60:[function(require,module,exports){
 'use strict';
 
-// Name: {CompanyWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseCompanyActionCreator = require('../actions/Response/ResponseCompanyActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
@@ -12031,20 +11490,6 @@ module.exports = {
 
 },{"../actions/Response/ResponseCompanyActionCreator.react.jsx":7,"../constants/Constants.js":51,"superagent":371}],61:[function(require,module,exports){
 'use strict';
-
-/*
-* Name: {DSLWebAPIUtils.js}
-* Module: {Front-end}
-* Location: {/MaaS/client/scripts/utils/}
-* 
-* History:
-* Version         Date            Programmer
-* ===================================================
-* 0.0.1        2016/08/02   Navid Taha, Fabiano Tavallini
-* ---------------------------------------------------
-* First structure of the file.
-* ===================================================
-*/
 
 var ResponseDSLActionCreator = require('../actions/Response/ResponseDSLActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
@@ -12293,14 +11738,6 @@ module.exports = {
 },{"../actions/Response/ResponseDSLActionCreator.react.jsx":8,"../constants/Constants.js":51,"superagent":371}],62:[function(require,module,exports){
 'use strict';
 
-// Name: {ExternalDatabasesWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseExternalDatabaseActionCreator = require('../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
@@ -12394,14 +11831,6 @@ module.exports = {
 
 },{"../actions/Response/ResponseExternalDatabaseActionCreator.react.jsx":9,"../constants/Constants.js":51,"superagent":371}],63:[function(require,module,exports){
 'use strict';
-
-// Name: {SessionWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var ResponseSessionActionCreator = require('../actions/Response/ResponseSessionActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
@@ -12574,14 +12003,6 @@ module.exports = {
 },{"../actions/Response/ResponseSessionActionCreator.react.jsx":10,"../constants/Constants.js":51,"superagent":371}],64:[function(require,module,exports){
 'use strict';
 
-// Name: {SuperAdminWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var ResponseSuperAdminActionCreator = require('../actions/Response/ResponseSuperAdminActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');
 var request = require('superagent');
@@ -12604,14 +12025,6 @@ module.exports = {};
 
 },{"../actions/Response/ResponseSuperAdminActionCreator.react.jsx":11,"../constants/Constants.js":51,"superagent":371}],65:[function(require,module,exports){
 'use strict';
-
-// Name: {UserWebAPIUtils.js}
-// Module: {Front-end::WebAPIUtils}
-// Location: {/MaaS/client/scripts/utils/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
 
 var ResponseUserActionCreator = require('../actions/Response/ResponseUserActionCreator.react.jsx');
 var Constants = require('../constants/Constants.js');

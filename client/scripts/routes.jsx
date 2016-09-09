@@ -1,11 +1,3 @@
-// Name: {routes.jsx}
-// Module: {Front-end}
-// Location: {MaaS/client/scripts/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var ReactRouter = require('react-router');
 var Route = ReactRouter.Route;

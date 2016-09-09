@@ -1,11 +1,3 @@
-// Name: {ExternalDatabase.react.jsx}
-// Module: {Front-end::Views}
-// Location: {/MaaS/client/script/components/}
-
-// History:
-// Version         Date            Programmer
-// ==========================================
-
 var React = require('react');
 var SessionStore = require('../../stores/SessionStore.react.jsx');
 var CompanyStore = require('../../stores/CompanyStore.react.jsx');
