@@ -182,7 +182,10 @@ var ExternalDatabases = React.createClass({
   },
   
   deleteAllSelected: function() {
-    RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
+    if (this.refs.table.state.selectedRowKeys > 0)
+    {
+      RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
+    }
   },
   
   nameFormatter: function(cell, row) {

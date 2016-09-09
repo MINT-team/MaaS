@@ -17,6 +17,7 @@
     "helmet": "^1.3.0",
     "jquery.transition": "^0.1.0",
     "keymirror": "^0.1.1",
+    "localenv": "^0.2.2",
     "localenvify": "^1.0.1",
     "loopback": "^2.32.0",
     "loopback-boot": "^2.6.5",

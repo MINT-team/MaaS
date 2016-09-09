@@ -98,7 +98,8 @@ var Header = React.createClass({
 
     render: function() {
         var title, headerMenu, headerPanel;
-        if (this.props.isLogged) {
+        if (this.props.isLogged)
+        {
             if(this.props.type == "commonUser")
             {
                 title = (
@@ -220,7 +221,9 @@ var Header = React.createClass({
                     );
                 }
             }
-        } else {        //user not logged
+        }
+        else
+        {        //user not logged
             title = (
                 <Link to="/" id="header-title">MaaS</Link>
             );

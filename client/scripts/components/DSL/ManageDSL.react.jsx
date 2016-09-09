@@ -14,8 +14,13 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 function getState() {
     var userId;
     if(SessionStore.getImpersonate() == "true")
-         userId = SessionStore.getUserId();  
-    else userId = UserStore.getId();
+    {
+         userId = SessionStore.getUserId();
+    }
+    else
+    {
+        userId = UserStore.getId();
+    }
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
@@ -249,7 +254,10 @@ var ManageDSL = React.createClass({
     },
     
     deleteAllSelected: function() {
-        RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
+        if (this.refs.table.state.selectedRowKeys > 0)
+        {
+            RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
+        }
     },
 
     onUploadSource: function() {
@@ -294,6 +302,45 @@ var ManageDSL = React.createClass({
         tempLink.setAttribute('type', 'file');
         tempLink.addEventListener('change', onFileSelect);
         tempLink.click();
+    },
+    
+    onDownloadAllSelectedSource: function() {
+        if (this.refs.table.state.selectedRowKeys.length > 0)
+        {
+            for (var i = 0; i < this.state.DSL_LIST.length; i++)
+            {
+                var trovato = false;
+                for (var j = 0; !trovato &&  j < this.refs.table.state.selectedRowKeys.length; j++)
+                {
+                    if (this.state.DSL_LIST[i].dslId == this.refs.table.state.selectedRowKeys[j])
+                    {
+                        trovato = true;
+                        var data = {
+                            name: this.state.DSL_LIST[i].dsl.name,
+                            dsl: this.state.DSL_LIST[i].dsl.source,
+                            type: this.state.DSL_LIST[i].dsl.type,
+                            database: this.state.DSL_LIST[i].dsl.externalDatabaseId
+                        };
+                        data = JSON.stringify(data);
+                        var filename = this.state.DSL_LIST[i].dsl.name + ".dsl";
+                        var blob = new Blob([data], {type: 'application/json'});
+                        if (typeof window.navigator.msSaveBlob !== 'undefined')
+                        {
+                                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                                window.navigator.msSaveBlob(blob, filename);
+                        }
+                        else
+                        {
+                            var url = window.URL.createObjectURL(blob);
+                            var tempLink = document.createElement('a');
+                            tempLink.href = url;
+                            tempLink.setAttribute('download', filename);
+                            tempLink.click();
+                        }
+                    }
+                }
+            }
+        }
     },
     
     toggleErrorPopUp: function() {
@@ -422,11 +469,11 @@ var ManageDSL = React.createClass({
                                         <Link to="/manageDSL/externalDatabases/select"><i className="material-icons md-48">&#xE147;</i></Link>
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
-                                    <div className="tooltip tooltip-bottom" id="add-button">
-                                        <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
+                                    <div className="tooltip tooltip-bottom" id="downloadAllSelectedSource-button">
+                                        <i onClick={this.onDownloadAllSelectedSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
                                         <p className="tooltip-text tooltip-text-long">Download all selected DSL definitions</p>
                                     </div>
-                                    <div className="tooltip tooltip-bottom" id="add-button">
+                                    <div className="tooltip tooltip-bottom" id="uploadSource-button">
                                         <i onClick={this.onUploadSource} className="material-icons md-48 dropdown-button">&#xE864;</i>
                                         <p className="tooltip-text tooltip-text-long">Upload a DSL definition</p>
                                     </div>

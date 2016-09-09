@@ -1884,7 +1884,9 @@ var ExternalDatabases = React.createClass({
   },
 
   deleteAllSelected: function deleteAllSelected() {
-    RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
+    if (this.refs.table.state.selectedRowKeys > 0) {
+      RequestExternalDatabaseActionCreator.deleteAllSelectedDatabases(CompanyStore.getId(), this.refs.table.state.selectedRowKeys);
+    }
   },
 
   nameFormatter: function nameFormatter(cell, row) {
@@ -3284,7 +3286,11 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     var userId;
-    if (SessionStore.getImpersonate() == "true") userId = SessionStore.getUserId();else userId = UserStore.getId();
+    if (SessionStore.getImpersonate() == "true") {
+        userId = SessionStore.getUserId();
+    } else {
+        userId = UserStore.getId();
+    }
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -3611,7 +3617,9 @@ var ManageDSL = React.createClass({
     },
 
     deleteAllSelected: function deleteAllSelected() {
-        RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
+        if (this.refs.table.state.selectedRowKeys > 0) {
+            RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
+        }
     },
 
     onUploadSource: function onUploadSource() {
@@ -3648,6 +3656,38 @@ var ManageDSL = React.createClass({
         tempLink.setAttribute('type', 'file');
         tempLink.addEventListener('change', onFileSelect);
         tempLink.click();
+    },
+
+    onDownloadAllSelectedSource: function onDownloadAllSelectedSource() {
+        if (this.refs.table.state.selectedRowKeys.length > 0) {
+            for (var i = 0; i < this.state.DSL_LIST.length; i++) {
+                var trovato = false;
+                for (var j = 0; !trovato && j < this.refs.table.state.selectedRowKeys.length; j++) {
+                    if (this.state.DSL_LIST[i].dslId == this.refs.table.state.selectedRowKeys[j]) {
+                        trovato = true;
+                        var data = {
+                            name: this.state.DSL_LIST[i].dsl.name,
+                            dsl: this.state.DSL_LIST[i].dsl.source,
+                            type: this.state.DSL_LIST[i].dsl.type,
+                            database: this.state.DSL_LIST[i].dsl.externalDatabaseId
+                        };
+                        data = JSON.stringify(data);
+                        var filename = this.state.DSL_LIST[i].dsl.name + ".dsl";
+                        var blob = new Blob([data], { type: 'application/json' });
+                        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                            // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                            window.navigator.msSaveBlob(blob, filename);
+                        } else {
+                            var url = window.URL.createObjectURL(blob);
+                            var tempLink = document.createElement('a');
+                            tempLink.href = url;
+                            tempLink.setAttribute('download', filename);
+                            tempLink.click();
+                        }
+                    }
+                }
+            }
+        }
     },
 
     toggleErrorPopUp: function toggleErrorPopUp() {
@@ -3831,10 +3871,10 @@ var ManageDSL = React.createClass({
                             ),
                             React.createElement(
                                 'div',
-                                { className: 'tooltip tooltip-bottom', id: 'add-button' },
+                                { className: 'tooltip tooltip-bottom', id: 'downloadAllSelectedSource-button' },
                                 React.createElement(
                                     'i',
-                                    { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
+                                    { onClick: this.onDownloadAllSelectedSource, className: 'material-icons md-48 dropdown-button' },
                                     ''
                                 ),
                                 React.createElement(
@@ -3845,7 +3885,7 @@ var ManageDSL = React.createClass({
                             ),
                             React.createElement(
                                 'div',
-                                { className: 'tooltip tooltip-bottom', id: 'add-button' },
+                                { className: 'tooltip tooltip-bottom', id: 'uploadSource-button' },
                                 React.createElement(
                                     'i',
                                     { onClick: this.onUploadSource, className: 'material-icons md-48 dropdown-button' },
@@ -4871,6 +4911,15 @@ module.exports = ManageDSLSource;
 var React = require('react');
 var UserStore = require('../stores/UserStore.react.jsx');
 
+/*
+
+Essential information:
+
+Snippets configuration file: dist/ace-editor/snippets/dsl.js
+Syntax highlight configuration file: dist/ace-editor/mode-dsl.js
+
+*/
+
 function getState() {
     return {
         theme: UserStore.getEditorTheme(),
@@ -5792,7 +5841,7 @@ var Login = React.createClass({
   displayName: 'Login',
 
 
-  contextTypes: { // serve per utilizzare il router
+  contextTypes: {
     router: React.PropTypes.object.isRequired
   },
 
@@ -5817,8 +5866,9 @@ var Login = React.createClass({
 
   handleRedirect: function handleRedirect() {
     if (this.state.isLogged) {
+      var router = this.context.router;
+
       if (this.state.userType == "commonUser") {
-        var router = this.context.router;
 
         if (this.state.activeDashboard == "default") {
           router.push('/manageDSL'); // redirect to DSL page
@@ -5827,9 +5877,7 @@ var Login = React.createClass({
         }
       } else //redirect for Super Admin
         {
-          var _router = this.context.router;
-
-          _router.push('/dashboardSuperAdmin'); // redirect to Super Admin Dashboard page
+          router.push('/dashboardSuperAdmin'); // redirect to Super Admin Dashboard page
         }
     }
   },
@@ -5955,7 +6003,7 @@ function getState() {
         return {
             isLogged: SessionStore.isLogged(),
             company: CompanyStore.getName(),
-
+            activeDashboard: UserStore.getActiveDashboard(),
             user: {
                 name: UserStore.getName(),
                 surname: UserStore.getSurname(),
@@ -5980,8 +6028,34 @@ var MaaSApp = React.createClass({
     displayName: 'MaaSApp',
 
 
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
+
     getInitialState: function getInitialState() {
         return getState();
+    },
+
+    handleRedirect: function handleRedirect() {
+        var router = this.context.router;
+
+        if (this.state.isLogged) {
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/") {
+                if (this.state.user.type == "commonUser") {
+                    if (this.state.activeDashboard == "default") {
+                        router.push('/manageDSL'); // redirect to DSL page
+                    } else if (this.state.activeDashboard) {
+                        router.push('/manageDSL/executeDSL/' + this.state.activeDashboard); // redirect to Dashboard page
+                    }
+                } else {
+                    router.push('/dashboardSuperAdmin');
+                }
+            }
+        }
+    },
+
+    componentWillMount: function componentWillMount() {
+        this.handleRedirect();
     },
 
     componentDidMount: function componentDidMount() {
@@ -5998,6 +6072,11 @@ var MaaSApp = React.createClass({
         CompanyStore.removeChangeListener(this._onChange);
     },
 
+    componentDidUpdate: function componentDidUpdate() {
+        alert('update');
+        this.handleRedirect();
+    },
+
     _onChange: function _onChange() {
         this.setState(getState());
     },
@@ -6010,26 +6089,71 @@ var MaaSApp = React.createClass({
     },
 
     render: function render() {
-        var authorized = false;
-        if (this.state.isLogged || this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/") authorized = true;
-        if (this.state.user.type == "commonUser") {
-            return React.createElement(
-                'div',
-                { id: 'content' },
-                React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
-                authorized ? this.props.children : React.createElement(AuthorizationRequired, null),
-                React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company })
-            );
+        var content;
+        if (this.state.isLogged) {
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/") {
+                if (this.state.user.type == "commonUser") {
+                    content = React.createElement(
+                        'div',
+                        null,
+                        React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
+                        this.props.children,
+                        React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company })
+                    );
+                } else //redirect for Super Admin
+                    {
+                        content = React.createElement(
+                            'div',
+                            null,
+                            React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS', userName: 'Super Admin' }),
+                            this.props.children,
+                            React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS' })
+                        );
+                    }
+            } else {
+                if (this.state.user.type == "commonUser") {
+                    content = React.createElement(
+                        'div',
+                        null,
+                        React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company, userName: this.state.user.name + " " + this.state.user.surname }),
+                        this.props.children,
+                        React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: this.state.company })
+                    );
+                } else {
+                    // render of SuperAdmin or userImpersonate
+                    content = React.createElement(
+                        'div',
+                        null,
+                        React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS', userName: 'Super Admin' }),
+                        this.props.children,
+                        React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS' })
+                    );
+                }
+            }
         } else {
-            // render of SuperAfmin or userImpersonate
-            return React.createElement(
-                'div',
-                { id: 'content' },
-                React.createElement(Header, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS', userName: 'Super Admin' }),
-                authorized ? this.props.children : React.createElement(AuthorizationRequired, null),
-                React.createElement(Footer, { isLogged: this.state.isLogged, type: this.state.user.type, companyName: 'MaaS' })
-            );
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/") {
+                content = React.createElement(
+                    'div',
+                    null,
+                    React.createElement(Header, { isLogged: false }),
+                    this.props.children,
+                    React.createElement(Footer, { isLogged: false })
+                );
+            } else {
+                content = React.createElement(
+                    'div',
+                    null,
+                    React.createElement(Header, { isLogged: false }),
+                    React.createElement(AuthorizationRequired, null),
+                    React.createElement(Footer, { isLogged: false })
+                );
+            }
         }
+        return React.createElement(
+            'div',
+            { id: 'content' },
+            content
+        );
     }
 });
 
@@ -8558,7 +8682,9 @@ var CompaniesManagement = React.createClass({
         );
     },
     deleteAllSelected: function deleteAllSelected() {
-        RequestCompanyActionCreator.deleteAllSelectedCompanies(this.refs.table.state.selectedRowKeys);
+        if (this.refs.table.state.selectedRowKeys > 0) {
+            RequestCompanyActionCreator.deleteAllSelectedCompanies(this.refs.table.state.selectedRowKeys);
+        }
     },
 
     render: function render() {
@@ -9387,7 +9513,9 @@ var usersManagement = React.createClass({
     },
 
     deleteAllSelected: function deleteAllSelected() {
-        RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
+        if (this.refs.table.state.selectedRowKeys > 0) {
+            RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
+        }
     },
 
     showProfile: function showProfile(id) {

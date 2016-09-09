@@ -13,7 +13,7 @@ function getState() {
         return {
             isLogged: SessionStore.isLogged(),
             company: CompanyStore.getName(),
-            
+            activeDashboard: UserStore.getActiveDashboard(),
             user: {
             	name:	        UserStore.getName(),
             	surname:	    UserStore.getSurname(),
@@ -34,15 +34,47 @@ function getState() {
                 }
         };
     }
-    
 }
 
 var MaaSApp = React.createClass({
     
+    contextTypes: {
+      router: React.PropTypes.object.isRequired
+    },
+    
     getInitialState: function() {
       return getState();
     },
-
+    
+    handleRedirect: function() {
+        const { router } = this.context;
+        if(this.state.isLogged)
+        {
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            {
+                if(this.state.user.type == "commonUser")
+                {
+                    if (this.state.activeDashboard == "default")
+                    {
+                        router.push('/manageDSL');   // redirect to DSL page
+                    }
+                    else if (this.state.activeDashboard)
+                    {
+                        router.push('/manageDSL/executeDSL/'+ this.state.activeDashboard);      // redirect to Dashboard page
+                    }
+                }
+                else
+                {
+                    router.push('/dashboardSuperAdmin');
+                }
+            }
+        }
+    },
+    
+    componentWillMount: function() {
+        this.handleRedirect();
+    },
+    
     componentDidMount: function() {
 		SessionStore.addChangeListener(this._onChange);
 		UserStore.addChangeListener(this._onChange);
@@ -56,6 +88,11 @@ var MaaSApp = React.createClass({
     	UserStore.removeUserLoadListener(this._onUserLoad);
 		CompanyStore.removeChangeListener(this._onChange);
     },
+    
+    componentDidUpdate: function() {
+        alert('update');
+        this.handleRedirect();
+    },
 
     _onChange: function() {
     	this.setState(getState());
@@ -68,30 +105,86 @@ var MaaSApp = React.createClass({
             alert("Your role has been changed!");
         }
     },
-
+    
     render: function() {
-        var authorized = false;
-        if(this.state.isLogged || this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
-            authorized = true;
-        if(this.state.user.type == "commonUser")
+        var content;
+        if(this.state.isLogged)
         {
-            return (
-                <div id="content">
-                    <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
-                    {authorized ? this.props.children : <AuthorizationRequired />}
-                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company}/>
-                </div>
-    	    );    
-        }else{  // render of SuperAfmin or userImpersonate
-            return (
-                <div id="content">
-                    <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
-                        {authorized ? this.props.children : <AuthorizationRequired />}
-                    <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
-                </div>
-    	    );    
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            {
+                if(this.state.user.type == "commonUser")
+                {
+                    content = (
+                        <div>
+                            <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+                                {this.props.children}
+                            <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company}/>
+                        </div>
+                    );
+                }
+                else //redirect for Super Admin
+                {
+                    content = (
+                        <div>
+                            <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
+                                { this.props.children }
+                            <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
+                        </div>
+                    );
+                }
+            }
+            else
+            {
+                if(this.state.user.type == "commonUser")
+                {
+                    content = (
+                        <div>
+                            <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company} userName={this.state.user.name + " " + this.state.user.surname} />
+                                {this.props.children}
+                            <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName={this.state.company}/>
+                        </div>
+                    );
+                }
+                else
+                {  // render of SuperAdmin or userImpersonate
+                    content = (
+                        <div>
+                            <Header isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" userName="Super Admin" />
+                                { this.props.children }
+                            <Footer isLogged={this.state.isLogged} type={this.state.user.type} companyName="MaaS" />
+                        </div>
+                    );
+                }
+            }
         }
-        
+        else
+        {
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            {
+                content = (
+                    <div>
+                        <Header isLogged={false} />
+                            {this.props.children}
+                        <Footer isLogged={false} />
+                    </div>
+                );
+            }
+            else
+            {
+                content = (
+                    <div>
+                        <Header isLogged={false} />
+                            <AuthorizationRequired />
+                        <Footer isLogged={false} />
+                    </div>
+                );
+            }
+        }
+        return (
+            <div id="content">
+                {content}
+            </div>
+        );
     }
 });
 

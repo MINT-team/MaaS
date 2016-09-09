@@ -16,7 +16,7 @@ function getState() {
 
 var Login = React.createClass({
 
-    contextTypes: {   // serve per utilizzare il router
+    contextTypes: {
       router: React.PropTypes.object.isRequired
     },
 
@@ -43,23 +43,24 @@ var Login = React.createClass({
     handleRedirect: function() {
       if(this.state.isLogged)
       {
+        const { router } = this.context;
         if(this.state.userType == "commonUser")
         {
-          const { router } = this.context;
+          
           if (this.state.activeDashboard == "default")
           {
             router.push('/manageDSL');   // redirect to DSL page
           }
           else if (this.state.activeDashboard)
           {
-            router.push('/manageDSL/executeDSL/'+this.state.activeDashboard);      // redirect to Dashboard page
+            router.push('/manageDSL/executeDSL/'+ this.state.activeDashboard);      // redirect to Dashboard page
           }
-        }else //redirect for Super Admin
+        }
+        else //redirect for Super Admin
         {
-          const { router } = this.context;
           router.push('/dashboardSuperAdmin');   // redirect to Super Admin Dashboard page
         }
-    }
+      }
     },
 
     _onChange: function() {

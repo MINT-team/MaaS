@@ -1,6 +1,15 @@
 var React = require('react');
 var UserStore = require('../stores/UserStore.react.jsx');
 
+/*
+
+Essential information:
+
+Snippets configuration file: dist/ace-editor/snippets/dsl.js
+Syntax highlight configuration file: dist/ace-editor/mode-dsl.js
+
+*/
+
 function getState() {
     return {
         theme: UserStore.getEditorTheme(),
