@@ -301,6 +301,10 @@ var RequestUserActionCreator = {
         WebAPIUtils.changePersonalData(id, name, surname, dateOfBirth, gender);
     },
 
+    changeAvatar: function changeAvatar(id, file) {
+        WebAPIUtils.changeAvatar(id, file);
+    },
+
     getUser: function getUser(id) {
         WebAPIUtils.getUser(id);
     },
@@ -2549,7 +2553,7 @@ var People = React.createClass({
               React.createElement(
                 'span',
                 { className: 'table-column-small' },
-                u.avatar ? React.createElement('img', { className: 'table-row-icon', src: "../../../images/" + u.avatar }) : React.createElement(
+                u.avatar ? React.createElement('img', { onClick: _this.showProfile.bind(_this, u.id), className: 'table-row-icon', src: u.avatar.preview }) : React.createElement(
                   'i',
                   { onClick: _this.showProfile.bind(_this, u.id), className: 'material-icons md-36 table-row-icon' },
                   ''
@@ -2751,7 +2755,6 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     var data = DSLStore.getDSLData();
-    console.log(data);
     return {
         errors: DSLStore.getErrors(),
         isLogged: SessionStore.isLogged(),
@@ -3193,7 +3196,6 @@ var ExecuteDSL = React.createClass({
                         var url = window.URL.createObjectURL(blob);
                         var tempLink = document.createElement('a');
                         tempLink.href = url;
-                        console.log(url);
                         tempLink.setAttribute('download', filename);
                         tempLink.click();
                     }
@@ -4028,14 +4030,32 @@ var ManageDSL = React.createClass({
                                 )
                             ),
                             React.createElement(
-                                'i',
-                                { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
-                                ''
+                                'div',
+                                { className: 'tooltip tooltip-bottom', id: 'add-button' },
+                                React.createElement(
+                                    'i',
+                                    { onClick: this.onDownloadSource, className: 'material-icons md-48 dropdown-button' },
+                                    ''
+                                ),
+                                React.createElement(
+                                    'p',
+                                    { className: 'tooltip-text tooltip-text-long' },
+                                    'Download all selected DSL definitions'
+                                )
                             ),
                             React.createElement(
-                                'i',
-                                { onClick: this.onUploadSource, className: 'material-icons md-48 dropdown-button' },
-                                ''
+                                'div',
+                                { className: 'tooltip tooltip-bottom', id: 'add-button' },
+                                React.createElement(
+                                    'i',
+                                    { onClick: this.onUploadSource, className: 'material-icons md-48 dropdown-button' },
+                                    ''
+                                ),
+                                React.createElement(
+                                    'p',
+                                    { className: 'tooltip-text tooltip-text-long' },
+                                    'Upload a DSL definition'
+                                )
                             ),
                             React.createElement(
                                 'div',
@@ -4279,7 +4299,6 @@ var ManageDSLPermissions = React.createClass({
 
         var data = [];
         var selectRowProp = {
-            mode: "checkbox",
             bgColor: "rgba(144, 238, 144, 0.42)"
         };
 
@@ -4295,11 +4314,8 @@ var ManageDSLPermissions = React.createClass({
                 };
             });
         }
-        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
+
         var options = {
-            onRowClick: function onRowClick(row) {
-                //Show user profile
-            },
             noDataText: "There are no users to display"
         };
         title = "Manage DSL definition permissions";
@@ -4340,15 +4356,6 @@ var ManageDSLPermissions = React.createClass({
                         'p',
                         { id: 'filter-type' },
                         this.state.roleFilter
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'top-buttons' },
-                        React.createElement(
-                            'i',
-                            { onClick: this.changeAllSelected, className: 'material-icons md-48' },
-                            ''
-                        )
                     )
                 ),
                 React.createElement(
@@ -4451,7 +4458,7 @@ function includeCollection(instance, editor, editorSession) {
     } else {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
         tot = instance.state.currentDefinitionSource.slice(0, index - 1) + instance.state.includeSource + '\n' + instance.state.currentDefinitionSource.slice(index);
-        editor.setValue(tot);
+        editor.setValue(tot, -1);
     }
     if (errors.length > 0) {
         instance.setState({ popUpErrors: errors });
@@ -4477,7 +4484,7 @@ function includeDashboard(instance, editor, editorSession) {
     } else {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length - 1);
         tot = instance.state.currentDefinitionSource.slice(0, index - 1) + "\t\trow(\n\t\t\t" + instance.state.includeSource + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
-        editor.setValue(tot);
+        editor.setValue(tot, -1);
     }
     if (errors.length > 0) {
         instance.setState({ popUpErrors: errors });
@@ -4583,7 +4590,7 @@ var ManageDSLSource = React.createClass({
             editor.$blockScrolling = Infinity;
             editorSession.on("change", this.onEdit);
             if (this.state.currentDefinitionSource) {
-                editor.setValue(this.state.currentDefinitionSource);
+                editor.setValue(this.state.currentDefinitionSource, -1);
             }
 
             if (this.state.includeSource != "") {
@@ -4622,7 +4629,7 @@ var ManageDSLSource = React.createClass({
             }
             var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
             if (this.state.definitionSource) {
-                editor.setValue(this.state.definitionSource);
+                editor.setValue(this.state.definitionSource, -1);
             }
             if (this.props.params.mode == "view") {
                 this.refs.definitionName.disabled = true;
@@ -5069,8 +5076,6 @@ module.exports = ManageDSLSource;
 
 
 var React = require('react');
-var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
 
 function getState() {
@@ -5087,17 +5092,31 @@ var Editor = React.createClass({
 
 
     getInitialState: function getInitialState() {
-        return getState();
+        var state = getState();
+        state.theme = this.props.theme || UserStore.getEditorTheme();
+        return state;
     },
 
     componentDidMount: function componentDidMount() {
         UserStore.addChangeListener(this._onChange);
+        ace.require("ace/ext/language_tools");
         var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         editor.setTheme("ace/theme/" + this.state.theme);
+        //editor.getSession().setMode("ace/mode/dsl");
         editor.getSession().setMode("ace/mode/dsl");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
         editor.session.setUseSoftTabs(this.state.softTabs == "true");
         editor.setFontSize(parseInt(this.state.fontSize, 10));
         editor.session.setTabSize(parseInt(this.state.tabSize, 10));
+    },
+
+    componentDidUpdate: function componentDidUpdate() {
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+        editor.setTheme("ace/theme/" + (this.props.theme ? this.props.theme : this.state.theme));
     },
 
     componentWillUnmount: function componentWillUnmount() {
@@ -5115,7 +5134,7 @@ var Editor = React.createClass({
 
 module.exports = Editor;
 
-},{"../actions/Request/RequestUserActionCreator.react.jsx":6,"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370}],28:[function(require,module,exports){
+},{"../stores/UserStore.react.jsx":59,"react":370}],28:[function(require,module,exports){
 'use strict';
 
 // Name: {Error404.react.jsx}
@@ -5269,6 +5288,15 @@ var Footer = React.createClass({
 					),
 					React.createElement(
 						'p',
+						null,
+						React.createElement(
+							'a',
+							{ href: 'mailto:mint.swe.unipd@gmail.com' },
+							'Any problems? Contact the Super Admin'
+						)
+					),
+					React.createElement(
+						'p',
 						{ className: 'text-footer' },
 						'MaaS is offered by RedBabel and developed with ❤ by MINT. '
 					)
@@ -5374,6 +5402,15 @@ var Footer = React.createClass({
 						Link,
 						{ to: '/register', id: 'register' },
 						' Sign Up '
+					)
+				),
+				React.createElement(
+					'p',
+					null,
+					React.createElement(
+						'a',
+						{ href: 'mailto:mint.swe.unipd@gmail.com' },
+						'Any problems? Contact the Super Admin'
 					)
 				),
 				React.createElement(
@@ -6267,6 +6304,9 @@ module.exports = MaaSApp;
 
 var React = require('react');
 var Dropzone = require('react-dropzone');
+// var UserStore = require('../../stores/UserStore.react.jsx');
+// var SessionStore = require('../../stores/SessionStore.react.jsx');
+// var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 var ChangeAvatar = React.createClass({
   displayName: 'ChangeAvatar',
@@ -6275,6 +6315,7 @@ var ChangeAvatar = React.createClass({
   getInitialState: function getInitialState() {
     return {
       image: null
+      // userId: SessionStore.getUserId()
     };
   },
 
@@ -6288,8 +6329,10 @@ var ChangeAvatar = React.createClass({
     this.refs.dropzone.open();
   },
 
-  onSubmit: function onSubmit() {
-    alert('si');
+  _onSubmit: function _onSubmit(e) {
+    e.preventDefault();
+    // RequestUserActionCreator.changeAvatar(this.state.userId, this.state.image);
+    //console.log(this.state.image);
   },
 
   render: function render() {
@@ -6308,7 +6351,7 @@ var ChangeAvatar = React.createClass({
     } else {
       content = React.createElement(
         Dropzone,
-        { onDrop: this.onDrop, multiple: 'false', accept: 'image/*', id: 'dropzone', ref: 'dropzone' },
+        { onDrop: this.onDrop, multiple: false, accept: 'image/*', id: 'dropzone', ref: 'dropzone' },
         React.createElement(
           'div',
           { className: 'dropzone-description' },
@@ -6331,7 +6374,7 @@ var ChangeAvatar = React.createClass({
       ),
       React.createElement(
         'form',
-        { className: 'form-container' },
+        { onSubmit: this._onSubmit, className: 'form-container' },
         React.createElement(
           'div',
           { className: 'form-field', id: 'avatar-container' },
@@ -6348,15 +6391,13 @@ var ChangeAvatar = React.createClass({
         ),
         React.createElement(
           'button',
-          { onSubmit: this.onSubmit, type: 'submit', className: 'form-submit' },
+          { type: 'submit', className: 'form-submit' },
           'Change avatar'
         )
       )
     );
   }
 });
-
-//<input type="file" id="newAvatar" ref="newAvatar" />
 
 module.exports = ChangeAvatar;
 
@@ -6929,6 +6970,7 @@ module.exports = PersonalData;
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -6946,19 +6988,33 @@ var Profile = React.createClass({
   displayName: 'Profile',
 
   getInitialState: function getInitialState() {
-    return getState();
+    var state = getState();
+    state.user = null;
+    return state;
+  },
+
+  componentWillMount: function componentWillMount() {
+    if (this.props.params.userId && !this.props.users) {
+      RequestUserActionCreator.getUser(this.props.params.userId);
+    }
   },
 
   componentDidMount: function componentDidMount() {
     UserStore.addChangeListener(this._onChange);
+    UserStore.addUserLoadListener(this._onUserLoad);
   },
 
   componentWillUnmount: function componentWillUnmount() {
     UserStore.removeChangeListener(this._onChange);
+    UserStore.removeUserLoadListener(this._onUserLoad);
   },
 
   _onChange: function _onChange() {
     this.setState(getState());
+  },
+
+  _onUserLoad: function _onUserLoad() {
+    this.setState({ user: UserStore.getUser() });
   },
 
   render: function render() {
@@ -6967,11 +7023,14 @@ var Profile = React.createClass({
       // render user settings once sidebar is clicked
       content = this.props.children;
     } else {
-
       if (this.props.params.userId) {
         var user = null;
-        for (var i = 0; !user && i < this.props.users.length; i++) {
-          if (this.props.users[i].id == this.props.params.userId) user = this.props.users[i];
+        if (this.props.users) {
+          for (var i = 0; !user && i < this.props.users.length; i++) {
+            if (this.props.users[i].id == this.props.params.userId) user = this.props.users[i];
+          }
+        } else {
+          user = this.state.user;
         }
         if (user) {
           var name,
@@ -6981,8 +7040,17 @@ var Profile = React.createClass({
           if (!user.name && !user.surname) {
             name = user.email;
           } else {
-            name = user.name + ' ' + user.surname;
+            if (user.name && user.surname) {
+              name = user.name + ' ' + user.surname;
+            } else {
+              if (user.name) {
+                name = user.name;
+              } else if (user.surname) {
+                name = user.surname;
+              }
+            }
           }
+
           user.dateOfBirth = new Date(user.dateOfBirth);
           if (!user.dateOfBirth || user.dateOfBirth.toDateString().match(/Invalid/)) {
             dateOfBirth = "Not set";
@@ -7005,7 +7073,18 @@ var Profile = React.createClass({
               ''
             );
           } else {
-            avatar = React.createElement('img', { id: 'avatar', src: "../../../images/" + user.avatar }); // da cambiare col servizio esterno
+            console.log(user.avatar);
+            console.log(user.avatar.preview);
+
+            /*
+            
+            [Object]0: Object
+              preview: "blob:http://maas-navid94.c9users.io:8080/2be79dd3-f975-4804-8087-323513dbd6db"
+              __proto__: Object
+              length: 1__proto__: Array[0]
+            app.js:7056 undefined
+            */
+            avatar = React.createElement('img', { id: 'avatar', src: user.avatar.preview }); // da cambiare col servizio esterno
           }
           content = React.createElement(
             'div',
@@ -7256,7 +7335,7 @@ var Profile = React.createClass({
 
 module.exports = Profile;
 
-},{"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370}],39:[function(require,module,exports){
+},{"../../actions/Request/RequestUserActionCreator.react.jsx":6,"../../stores/UserStore.react.jsx":59,"../Sidebar.react.jsx":43,"react":370}],39:[function(require,module,exports){
 'use strict';
 
 // Name: {Register.react.jsx}
@@ -8006,6 +8085,7 @@ var EditorConfig = React.createClass({
         return {
             submit: false,
             theme: UserStore.getEditorTheme(),
+            currentTheme: UserStore.getEditorTheme(),
             softTabs: UserStore.getEditorSoftTabs(),
             tabSize: UserStore.getEditorTabSize(),
             fontSize: UserStore.getEditorFontSize(),
@@ -8028,12 +8108,16 @@ var EditorConfig = React.createClass({
 
     initForm: function initForm() {
         if (!this.state.submit) {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            editor.$blockScrolling = Infinity;
+            var example = "Collection(\n\ttable: \"users\",\n\tlabel: \"Users\",\n\tperpage: 2,\n\tsortby: \"surname\",\n\torder: \"asc\",\n\tquery: {level: {$lt: \"5\"}}\n) {\n\tcolumn(\n\t\tname: \"email\",\n\t\ttype: \"string\",\n\t\tlabel: \"Email\",\n\t\tselectable: true\n\t)\n\taction(\n\t\tExport: \"true\",\n\t\tSendEmail: \"true\"\n\t)\n}";
+            editor.setValue(example, -1);
             if (this.state.softTabs == "true") {
                 document.getElementById('softTabs').checked = true;
             } else {
                 document.getElementById('softTabs').checked = false;
             }
-            document.getElementById('theme').value = this.state.theme;
+            document.getElementById('theme').value = this.state.currentTheme ? this.state.currentTheme : this.state.theme;
             document.getElementById('tabSize').value = this.state.tabSize;
             document.getElementById('fontSize').value = this.state.fontSize;
         }
@@ -8064,6 +8148,10 @@ var EditorConfig = React.createClass({
     backToConfig: function backToConfig(event) {
         event.preventDefault();
         this.setState({ submit: false });
+    },
+
+    _onSelectChange: function _onSelectChange(event) {
+        this.setState({ currentTheme: event.target.value });
     },
 
     render: function render() {
@@ -8139,61 +8227,89 @@ var EditorConfig = React.createClass({
                             { className: 'form-right-block' },
                             React.createElement(
                                 'select',
-                                { id: 'theme', className: 'select', ref: 'theme' },
+                                { id: 'theme', className: 'select', onChange: this._onSelectChange, ref: 'theme' },
                                 React.createElement(
-                                    'option',
-                                    { value: 'chaos' },
-                                    'Chaos'
+                                    'optgroup',
+                                    { label: 'Bright' },
+                                    React.createElement(
+                                        'option',
+                                        { value: 'dawn' },
+                                        'Dawn'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'iplastic' },
+                                        'IPlastic'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'tomorrow' },
+                                        'Tomorrow'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'xcode' },
+                                        'XCode'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'chrome' },
+                                        'Chrome'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'textmate' },
+                                        'TextMate'
+                                    )
                                 ),
                                 React.createElement(
-                                    'option',
-                                    { value: 'merbivore' },
-                                    'Merbivore'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'dawn' },
-                                    'Dawn'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'twilight' },
-                                    'Twilight'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'ambiance' },
-                                    'Ambiance'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'vibrant_ink' },
-                                    'Vibrant Ink'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'cobalt' },
-                                    'Cobalt'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow' },
-                                    'Tomorrow'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow_night' },
-                                    'Tomorrow night'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow_night_blue' },
-                                    'Tomorrow night blue'
-                                ),
-                                React.createElement(
-                                    'option',
-                                    { value: 'tomorrow_night_bright' },
-                                    'Tomorrow night bright'
+                                    'optgroup',
+                                    { label: 'Dark' },
+                                    React.createElement(
+                                        'option',
+                                        { value: 'chaos' },
+                                        'Chaos'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'merbivore' },
+                                        'Merbivore'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'ambiance' },
+                                        'Ambiance'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'vibrant_ink' },
+                                        'Vibrant Ink'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'cobalt' },
+                                        'Cobalt'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'twilight' },
+                                        'Twilight'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'tomorrow_night' },
+                                        'Tomorrow night'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'tomorrow_night_blue' },
+                                        'Tomorrow night blue'
+                                    ),
+                                    React.createElement(
+                                        'option',
+                                        { value: 'tomorrow_night_bright' },
+                                        'Tomorrow night bright'
+                                    )
                                 )
                             )
                         )
@@ -8208,7 +8324,7 @@ var EditorConfig = React.createClass({
                 React.createElement(
                     'div',
                     { id: 'editorContainerPreview' },
-                    React.createElement(Editor, null)
+                    React.createElement(Editor, { theme: this.state.currentTheme })
                 )
             );
         } else {
@@ -9217,12 +9333,11 @@ var ImpersonateUser = React.createClass({
         // router.push('/manageDSL'); 
         var router = this.context.router;
 
-        console.log("cosa è attivo? ", this.state.activeDashboard);
         if (this.state.activeDashboard == "default") {
             router.push('/manageDSL'); // redirect to Dashboard page
         } else {
-                //Redirect to active dashboard
-            }
+            router.push('/manageDSL/executeDSL/' + this.state.activeDashboard);
+        }
     },
 
     _onUserLoad: function _onUserLoad() {
@@ -9484,6 +9599,10 @@ var usersManagement = React.createClass({
     displayName: 'usersManagement',
 
 
+    contextTypes: { // serve per utilizzare il router
+        router: React.PropTypes.object.isRequired
+    },
+
     getInitialState: function getInitialState() {
         return getState();
     },
@@ -9706,6 +9825,20 @@ var usersManagement = React.createClass({
         RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
     },
 
+    showProfile: function showProfile(id) {
+        var router = this.context.router;
+
+        router.push("dashboardSuperAdmin/databaseManagement/usersManagement/" + id + "/profile");
+    },
+
+    emailFormatter: function emailFormatter(cell, row) {
+        return React.createElement(
+            'span',
+            { onClick: this.showProfile.bind(this, row.id), className: 'table-link' },
+            row.email
+        );
+    },
+
     render: function render() {
         var title, content;
         if (this.props.children) {
@@ -9763,7 +9896,6 @@ var usersManagement = React.createClass({
             var data = [];
             var selectRowProp = {
                 mode: "checkbox",
-                clickToSelect: true,
                 bgColor: "rgba(144, 238, 144, 0.42)"
             };
 
@@ -9833,7 +9965,7 @@ var usersManagement = React.createClass({
                                 search: true, striped: true, hover: true, options: options, selectRow: selectRowProp, keyField: 'id' },
                             React.createElement(
                                 TableHeaderColumn,
-                                { dataField: 'email', dataSort: true, columnClassName: 'emailColumn' },
+                                { dataField: 'email', dataSort: true, dataFormat: this.emailFormatter, columnClassName: 'emailColumn' },
                                 'Email'
                             ),
                             React.createElement(
@@ -10131,6 +10263,7 @@ var Routes = React.createClass({
             React.createElement(
               Route,
               { path: 'usersManagement', component: UsersManagement },
+              React.createElement(Route, { path: ':userId/profile', component: Profile }),
               React.createElement(Route, { path: 'changeUserPersonalData/:userId', component: ChangeUserPersonalData })
             )
           ),
@@ -12539,6 +12672,18 @@ module.exports = {
         } else {
           ResponseUserActionCreator.responseChangePassword(res.email, null);
         }
+      }
+    });
+  },
+
+  changeAvatar: function changeAvatar(id, file) {
+    request.put(APIEndpoints.USERS + '/' + id + '/changeAvatar').set('Accept', 'application/json').set('Authorization', localStorage.getItem('accessToken')).send({
+      id: id,
+      avatar: file
+    }).end(function (error, res) {
+      if (res) {
+        alert('ritorno web api');
+        console.log(res);
       }
     });
   },

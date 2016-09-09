@@ -72,14 +72,13 @@ var ImpersonateUser = React.createClass({
         // const { router } = this.context;
         // router.push('/manageDSL'); 
         const { router } = this.context;
-        console.log("cosa è attivo? ",this.state.activeDashboard);
           if (this.state.activeDashboard == "default")
           {
             router.push('/manageDSL');   // redirect to Dashboard page
           }
           else
           {
-            //Redirect to active dashboard
+           router.push('/manageDSL/executeDSL/'+this.state.activeDashboard);
           }
     },
 

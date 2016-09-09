@@ -38,7 +38,7 @@ function includeCollection(instance, editor, editorSession) {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length-1);
         tot = instance.state.currentDefinitionSource.slice(0, index-1) + instance.state.includeSource 
         + '\n' + instance.state.currentDefinitionSource.slice(index);
-        editor.setValue(tot);
+        editor.setValue(tot, -1);
     }
     if(errors.length > 0)
     {
@@ -71,7 +71,7 @@ function includeDashboard(instance, editor, editorSession) {
         var index = instance.state.currentDefinitionSource.indexOf("}", instance.state.currentDefinitionSource.length-1);
         tot = instance.state.currentDefinitionSource.slice(0, index-1) + "\t\trow(\n\t\t\t" + instance.state.includeSource 
         + '\n\t\t)\n' + instance.state.currentDefinitionSource.slice(index);
-        editor.setValue(tot);
+        editor.setValue(tot, -1);
     }
     if(errors.length > 0)
     {
@@ -187,7 +187,7 @@ var ManageDSLSource = React.createClass({
             editorSession.on("change", this.onEdit);
             if(this.state.currentDefinitionSource)
             {
-                editor.setValue(this.state.currentDefinitionSource);
+                editor.setValue(this.state.currentDefinitionSource, -1);
             }
             
             if (this.state.includeSource != "")
@@ -240,7 +240,7 @@ var ManageDSLSource = React.createClass({
             var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
             if(this.state.definitionSource)
             {
-                editor.setValue(this.state.definitionSource);
+                editor.setValue(this.state.definitionSource, -1);
             }
             if (this.props.params.mode == "view")
             {

@@ -36,6 +36,10 @@ function getState() {
 
 var usersManagement = React.createClass({
     
+    contextTypes: {   // serve per utilizzare il router
+      router: React.PropTypes.object.isRequired
+    },
+  
     getInitialState: function() {
         return getState();
     },
@@ -192,6 +196,17 @@ var usersManagement = React.createClass({
         RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
     },
     
+    showProfile: function(id) {
+        const { router } = this.context;
+        router.push("dashboardSuperAdmin/databaseManagement/usersManagement/" + id + "/profile");
+     },
+     
+    emailFormatter: function(cell, row) {
+        return (
+            <span onClick={this.showProfile.bind(this, row.id)} className="table-link">{row.email}</span>
+        );
+    },
+    
     render: function() {
         var title, content;
         if(this.props.children)
@@ -232,7 +247,6 @@ var usersManagement = React.createClass({
             var data = [];
             var selectRowProp = {
                 mode: "checkbox",
-                clickToSelect: true,
                 bgColor: "rgba(144, 238, 144, 0.42)"
             };
             
@@ -273,7 +287,7 @@ var usersManagement = React.createClass({
                         <div id="table">
                             <BootstrapTable ref="table" data={data} pagination={true} 
                             search={true} striped={true} hover={true} options={options} selectRow={selectRowProp} keyField="id">
-                                <TableHeaderColumn dataField="email" dataSort={true} columnClassName="emailColumn" >Email</TableHeaderColumn>
+                                <TableHeaderColumn dataField="email" dataSort={true} dataFormat={this.emailFormatter} columnClassName="emailColumn" >Email</TableHeaderColumn>
                                 <TableHeaderColumn dataField="role" dataSort={true} columnClassName="roleColumn">Role</TableHeaderColumn>
                                 <TableHeaderColumn dataField="companyName" dataSort={true}>Company</TableHeaderColumn>
                                 <TableHeaderColumn dataField="buttons" dataFormat={this.buttonFormatter} columnClassName="buttonColumn"></TableHeaderColumn>

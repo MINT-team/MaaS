@@ -8,12 +8,16 @@
 
 var React = require('react');
 var Dropzone = require('react-dropzone');
+// var UserStore = require('../../stores/UserStore.react.jsx');
+// var SessionStore = require('../../stores/SessionStore.react.jsx');
+// var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 var ChangeAvatar = React.createClass({
 
     getInitialState: function() {
       return {
         image: null
+        // userId: SessionStore.getUserId()
       };
     },
 
@@ -27,8 +31,10 @@ var ChangeAvatar = React.createClass({
       this.refs.dropzone.open();
     },
     
-    onSubmit: function() {
-      alert('si');
+    _onSubmit: function(e) {
+      e.preventDefault();
+      // RequestUserActionCreator.changeAvatar(this.state.userId, this.state.image);
+      //console.log(this.state.image);
     },
 
     render: function() {
@@ -45,7 +51,7 @@ var ChangeAvatar = React.createClass({
       else
       {
         content = (
-          <Dropzone onDrop={this.onDrop} multiple="false" accept="image/*" id="dropzone" ref="dropzone">
+          <Dropzone onDrop={this.onDrop} multiple={false} accept="image/*" id="dropzone" ref="dropzone">
             <div className="dropzone-description">Drag and drop the new image</div>
             <div className="dropzone-description">Or click here to choose it</div>
           </Dropzone>
@@ -54,20 +60,18 @@ var ChangeAvatar = React.createClass({
         return (
           <div className="container sidebar-container">
             <p className="container-title">Avatar</p>
-            <form className="form-container">
+            <form onSubmit={this._onSubmit} className="form-container">
               <div className="form-field" id="avatar-container">
                 <label htmlFor="newAvatar" id="avatar-label">New Avatar</label>
                 <div id="dropzone-container">
                   {content}
                 </div>
               </div>
-              <button onSubmit={this.onSubmit} type="submit" className="form-submit">Change avatar</button>
+              <button type="submit" className="form-submit">Change avatar</button>
             </form>
           </div>
         );
     }
 });
-
-//<input type="file" id="newAvatar" ref="newAvatar" />
 
 module.exports = ChangeAvatar;

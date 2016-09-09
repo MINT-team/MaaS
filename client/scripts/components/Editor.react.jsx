@@ -8,8 +8,6 @@
 
 
 var React = require('react');
-var RequestUserActionCreator = require('../actions/Request/RequestUserActionCreator.react.jsx');
-var SessionStore = require('../stores/SessionStore.react.jsx');
 var UserStore = require('../stores/UserStore.react.jsx');
 
 function getState() {
@@ -24,17 +22,32 @@ function getState() {
 var Editor = React.createClass({
 
     getInitialState: function() {
-        return getState();
+        var state = getState();
+        state.theme = this.props.theme || UserStore.getEditorTheme();
+        return state;
     },
 
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
+        ace.require("ace/ext/language_tools");
         var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
         editor.setTheme("ace/theme/"+ this.state.theme);
+        //editor.getSession().setMode("ace/mode/dsl");
         editor.getSession().setMode("ace/mode/dsl");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
         editor.session.setUseSoftTabs(this.state.softTabs == "true");
         editor.setFontSize(parseInt(this.state.fontSize,10));
         editor.session.setTabSize(parseInt(this.state.tabSize,10));
+    },
+    
+    componentDidUpdate: function() {
+        var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+        editor.setTheme("ace/theme/"+ (this.props.theme ? this.props.theme : this.state.theme));
+        
     },
 
     componentWillUnmount: function() {

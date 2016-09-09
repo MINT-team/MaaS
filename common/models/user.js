@@ -280,6 +280,45 @@ module.exports = function(user) {
             http: { verb: 'get', path: '/:id/editorConfig' }
         }
     );
+    
+    // Cambio avatar
+    user.changeAvatar = function(id, avatar, cb) {
+        console.log(avatar);
+        /*
+        user.findById(id, function(err, userInstance) {
+            if(err || !userInstance)
+            {
+                return cb(err);
+            }   
+            
+            userInstance.updateAttribute('avatar', avatar, function(err, newUserInstance) {
+                if(err)
+                {
+                    console.log('> Failed changing avatar for: ', userInstance.email);
+                    return cb(err);
+                }
+                console.log('> Avatar changed successfully for: ', userInstance.email);
+                return cb(null, null, newUserInstance.avatar);
+            });
+        });
+        */
+    };
+    
+    user.remoteMethod(
+        'changeAvatar',
+        {
+            description: 'Change the avatar of an user',
+            accepts: [
+                { arg: 'id', type: 'string', required: true, description: 'User id'},
+                { arg: 'avatar', type: 'Object', required: true, description: 'New avatar'}
+            ],
+            returns: [
+                { arg: 'error', type: 'Object' },
+                { arg: 'avatar', type: 'Object' }
+            ],
+            http: { verb: 'put', path: '/:id/changeAvatar' }
+        }
+    );
 
     // Cambio password dopo l'email di verifica - vedesi relativo ACL
     user.changePassword = function(id, password, confirmation, cb) {

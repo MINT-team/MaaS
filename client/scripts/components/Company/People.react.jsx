@@ -113,7 +113,7 @@ var People = React.createClass({
                   <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
           					<span className="table-column-small">
           					  {u.avatar?
-          					    <img className="table-row-icon" src={"../../../images/"+u.avatar} /> :
+          					    <img onClick={this.showProfile.bind(this, u.id)} className="table-row-icon" src={u.avatar.preview} /> :
           					    <i onClick={this.showProfile.bind(this, u.id)} className="material-icons md-36 table-row-icon">&#xE851;</i>}
           					</span>
           					<span className="table-column-normal">{u.name}</span>

@@ -69,6 +69,9 @@ var Footer = React.createClass({
 							<Link to="/manageDSL">DSL</Link>
 							<Link onClick={this.logout} to="">Logout</Link>
 						</p>
+						<p>
+							<a href="mailto:mint.swe.unipd@gmail.com">Any problems? Contact the Super Admin</a>
+						</p>
 						<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 					</div>
 	    		);
@@ -113,6 +116,9 @@ var Footer = React.createClass({
 					<p className="footer-links">
 						<Link to="/login" id="login"> Login </Link>
 						<Link to="/register" id="register"> Sign Up </Link>
+					</p>
+					<p>
+						<a href="mailto:mint.swe.unipd@gmail.com">Any problems? Contact the Super Admin</a>
 					</p>
 					<p className="text-footer">MaaS is offered by RedBabel and developed with ❤ by MINT. </p>
 				</div>

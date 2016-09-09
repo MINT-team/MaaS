@@ -7,7 +7,7 @@
   },
   "properties": {
     "avatar": {
-      "type": "string"
+      "type": "object"
     },
     "name": {
       "type": "string"
@@ -32,7 +32,7 @@
     "editorConfig": {
       "type": "object",
       "default": {
-        "theme": "vibrant_ink",
+        "theme": "merbivore",
         "softTabs": "true",
         "tabSize": "4",
         "fontSize": "12"
@@ -73,6 +73,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "signUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "changeAvatar"
     },
     {
       "principalType": "ROLE",

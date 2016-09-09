@@ -24,6 +24,10 @@ var RequestUserActionCreator = {
     changePersonalData: function(id, name, surname, dateOfBirth, gender) {
         WebAPIUtils.changePersonalData(id, name, surname, dateOfBirth, gender);
     },
+    
+    changeAvatar: function(id, file) {
+        WebAPIUtils.changeAvatar(id, file);
+    },
 
     getUser: function(id) {
         WebAPIUtils.getUser(id);

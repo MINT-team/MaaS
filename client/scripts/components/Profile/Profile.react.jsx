@@ -9,6 +9,7 @@
 var React = require('react');
 var Sidebar = require('../Sidebar.react.jsx');
 var UserStore = require('../../stores/UserStore.react.jsx');
+var RequestUserActionCreator = require('../../actions/Request/RequestUserActionCreator.react.jsx');
 
 function getState() {
   return {
@@ -24,19 +25,34 @@ function getState() {
 
 var Profile = React.createClass({
   getInitialState: function() {
-      return getState();
+      var state = getState();
+      state.user = null;
+      return state;
+  },
+  
+  componentWillMount: function() {
+    if (this.props.params.userId && !this.props.users)
+    {
+      RequestUserActionCreator.getUser(this.props.params.userId);
+    }
   },
 
   componentDidMount: function() {
       UserStore.addChangeListener(this._onChange);
+      UserStore.addUserLoadListener(this._onUserLoad);
   },
 
   componentWillUnmount: function() {
       UserStore.removeChangeListener(this._onChange);
+      UserStore.removeUserLoadListener(this._onUserLoad);
   },
 
   _onChange: function() {
       this.setState(getState());
+  },
+  
+  _onUserLoad: function() {
+    this.setState({user: UserStore.getUser()});
   },
 
   render: function() {
@@ -48,14 +64,20 @@ var Profile = React.createClass({
     }
     else
     {
-      
       if(this.props.params.userId)
       {
         var user = null;
-        for(var i = 0; !user && i<this.props.users.length; i++  )
+        if(this.props.users)
         {
-          if(this.props.users[i].id == this.props.params.userId)
-            user = this.props.users[i];
+          for(var i = 0; !user && i<this.props.users.length; i++  )
+          {
+            if(this.props.users[i].id == this.props.params.userId)
+              user = this.props.users[i];
+          }
+        }
+        else
+        {
+          user = this.state.user;
         }
         if(user)
         {
@@ -64,10 +86,25 @@ var Profile = React.createClass({
           {
             name = user.email;
           }
-          else
+          else 
           {
-            name = user.name + ' ' + user.surname;
+            if(user.name && user.surname)
+            {
+              name = user.name + ' ' + user.surname;
+            }
+            else
+            {
+              if(user.name)
+              {
+                name = user.name;
+              }
+              else if(user.surname)
+              {
+                name = user.surname;
+              }
+            }
           }
+          
           user.dateOfBirth = new Date(user.dateOfBirth);
           if(!user.dateOfBirth || user.dateOfBirth.toDateString().match(/Invalid/))
           {
@@ -88,7 +125,7 @@ var Profile = React.createClass({
           else if(user.gender == "female")
           {
             gender = "Female";
-          } 
+          }
           else
           {
             gender = user.gender;
@@ -99,7 +136,18 @@ var Profile = React.createClass({
           }
           else
           {
-            avatar = (<img id="avatar" src={"../../../images/"+user.avatar} />);  // da cambiare col servizio esterno
+            console.log(user.avatar);
+            console.log(user.avatar.preview);
+            
+            /*
+            
+            [Object]0: Object
+              preview: "blob:http://maas-navid94.c9users.io:8080/2be79dd3-f975-4804-8087-323513dbd6db"
+              __proto__: Object
+              length: 1__proto__: Array[0]
+            app.js:7056 undefined
+            */
+            avatar = (<img id="avatar" src={user.avatar.preview} />);  // da cambiare col servizio esterno
           }
           content = (
             <div className="container sidebar-container">

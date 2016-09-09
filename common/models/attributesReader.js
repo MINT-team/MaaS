@@ -1,20 +1,6 @@
 var CompileErrors = require('./compileErrors.js');
 
 module.exports = {
-    // readOptionalAttributes: function(source, optional, cb) {
-    //     var result = {};
-    //     for (var i=0; i<optional.length; i++)
-    //     {
-    // 		var attr = optional[i];
-    
-    // 		if (source[attr] !== undefined)
-    // 		{
-    // 			result[attr] = source[attr];
-    // 			continue;
-    // 		}
-	   // }
-	   // return cb(result);
-    // },
     
     readRequiredAttributes: function(source, required, cb) {
         var missingAttributes = [];
@@ -71,27 +57,27 @@ module.exports = {
         var error = {};
         if(name && (typeof name !== 'string'))
         {
-        	error.wrongNameErrorMessage = CompileErrors.notStringErrorMessage(name);
+        	error.wrongNameErrorMessage = CompileErrors.notStringError(name);
         }
         
         if(label && (typeof label !== 'string'))
         {
-        	error.wrongLabelErrorMessage = CompileErrors.notStringErrorMessage(label);
+        	error.wrongLabelErrorMessage = CompileErrors.notStringError(label);
         }
         
         if(sortby && (typeof sortby !== 'string'))
         {
-        	error.wrongSortbyErrorMessage = CompileErrors.notStringErrorMessage(sortby);
+        	error.wrongSortbyErrorMessage = CompileErrors.notStringError(sortby);
         }
         
         if(table && (typeof table !== 'string'))
         {
-        	error.wrongTableErrorMessage = CompileErrors.notStringErrorMessage(table);
+        	error.wrongTableErrorMessage = CompileErrors.notStringError(table);
         }
         
         if(columnLabel && (typeof columnLabel !== 'string'))
         {
-        	error.wrongColumnLabelErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
+        	error.wrongColumnLabelErrorMessage = CompileErrors.notStringError(columnLabel);
         }
         
         if(type && (type != 'string' && type != 'number' && type != 'date' && type != 'array' && type != 'object' && type.type != 'link' && type.type != 'image') )
@@ -146,11 +132,22 @@ module.exports = {
             error.wrongSendEmailTypeErrorMessage = CompileErrors.wrongActionTypeError(SendEmail);
         }
         
-        if (populate && (typeof populate !== 'string'))
+        if (populate && (typeof populate !== 'string') && (Object.prototype.toString.call( populate ) != '[object Array]'))
         {
-            error.wrongPopulateErrorMessage = CompileErrors.notStringErrorMessage(columnLabel);
+            error.wrongPopulateErrorMessage = CompileErrors.notStringError(populate);
         }
-        
+        else if(Object.prototype.toString.call( populate ) === '[object Array]' && populate[0])
+        {
+            var stop = false;
+            for (var i = 0; !stop && i < populate.length; i++)
+            {
+               if(typeof populate[i] != "string")
+               {
+                   stop = true;
+                   error.wrongPopulateErrorMessage = CompileErrors.notStringError(populate[i]);
+               }
+            }
+        }
         if (height && (typeof height !== 'number'))
         {
             error.wrongHeightAttributeErrorMessage = CompileErrors.wrongImageAttributeError(height);

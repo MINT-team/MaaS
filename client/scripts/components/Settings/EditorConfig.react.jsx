@@ -52,6 +52,7 @@ var EditorConfig = React.createClass({
         return {
             submit: false,
             theme: UserStore.getEditorTheme(),
+            currentTheme: UserStore.getEditorTheme(),
             softTabs: UserStore.getEditorSoftTabs(),
             tabSize: UserStore.getEditorTabSize(),
             fontSize: UserStore.getEditorFontSize(),
@@ -75,6 +76,10 @@ var EditorConfig = React.createClass({
     initForm: function() {
         if(!this.state.submit)
         {
+            var editor = ace.edit("editor"); // ace variable will be defined when index.html execute ace.js
+            editor.$blockScrolling = Infinity;
+            var example = "Collection(\n\ttable: \"users\",\n\tlabel: \"Users\",\n\tperpage: 2,\n\tsortby: \"surname\",\n\torder: \"asc\",\n\tquery: {level: {$lt: \"5\"}}\n) {\n\tcolumn(\n\t\tname: \"email\",\n\t\ttype: \"string\",\n\t\tlabel: \"Email\",\n\t\tselectable: true\n\t)\n\taction(\n\t\tExport: \"true\",\n\t\tSendEmail: \"true\"\n\t)\n}";
+            editor.setValue(example, -1);
             if (this.state.softTabs == "true")
             {
                 document.getElementById('softTabs').checked = true;
@@ -83,7 +88,7 @@ var EditorConfig = React.createClass({
             {
                 document.getElementById('softTabs').checked = false;
             }
-            document.getElementById('theme').value = this.state.theme;
+            document.getElementById('theme').value = this.state.currentTheme ? this.state.currentTheme : this.state.theme;
             document.getElementById('tabSize').value = this.state.tabSize;
             document.getElementById('fontSize').value = this.state.fontSize;
         }
@@ -117,6 +122,10 @@ var EditorConfig = React.createClass({
     backToConfig: function(event) {
         event.preventDefault();
         this.setState({submit: false});
+    },
+    
+    _onSelectChange: function(event) {
+        this.setState({currentTheme: event.target.value});
     },
     
     render: function() {
@@ -155,18 +164,26 @@ var EditorConfig = React.createClass({
                         <div className="form-field">
                             <label htmlFor="theme">Theme</label>
                             <div className="form-right-block">
-                                <select id="theme" className="select" ref="theme">
-                                    <option value="chaos">Chaos</option>
-                                    <option value="merbivore">Merbivore</option>
-                                    <option value="dawn">Dawn</option>
-                                    <option value="twilight">Twilight</option>
-                                    <option value="ambiance">Ambiance</option>
-                                    <option value="vibrant_ink">Vibrant Ink</option>
-                                    <option value="cobalt">Cobalt</option>
-                                    <option value="tomorrow">Tomorrow</option>
-                                    <option value="tomorrow_night">Tomorrow night</option>
-                                    <option value="tomorrow_night_blue">Tomorrow night blue</option>
-                                    <option value="tomorrow_night_bright">Tomorrow night bright</option>
+                                <select id="theme" className="select" onChange={this._onSelectChange} ref="theme">
+                                    <optgroup label="Bright">
+                                        <option value="dawn">Dawn</option>
+                                        <option value="iplastic">IPlastic</option>
+                                        <option value="tomorrow">Tomorrow</option>
+                                        <option value="xcode">XCode</option>
+                                        <option value="chrome">Chrome</option>
+                                        <option value="textmate">TextMate</option>
+                                    </optgroup>
+                                    <optgroup label="Dark">
+                                        <option value="chaos">Chaos</option>
+                                        <option value="merbivore">Merbivore</option>
+                                        <option value="ambiance">Ambiance</option>
+                                        <option value="vibrant_ink">Vibrant Ink</option>
+                                        <option value="cobalt">Cobalt</option>
+                                        <option value="twilight">Twilight</option>
+                                        <option value="tomorrow_night">Tomorrow night</option>
+                                        <option value="tomorrow_night_blue">Tomorrow night blue</option>
+                                        <option value="tomorrow_night_bright">Tomorrow night bright</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -174,7 +191,7 @@ var EditorConfig = React.createClass({
                         <button type="submit" className="form-submit">Save changes</button>
                     </form>
                     <div id="editorContainerPreview">
-                        <Editor />
+                        <Editor theme={this.state.currentTheme}/>
                     </div>
                 </div>
             );

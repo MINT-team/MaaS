@@ -18,7 +18,6 @@ var TableHeaderColumn = ReactBSTable.TableHeaderColumn;
 
 function getState() {
     var data = DSLStore.getDSLData();
-    console.log(data);
     return {
             errors: DSLStore.getErrors(),
             isLogged: SessionStore.isLogged(),
@@ -400,14 +399,16 @@ var ExecuteDSL = React.createClass({
                 }
                 
                 var downloadBlob = function(blob, filename) {
-                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    if (typeof window.navigator.msSaveBlob !== 'undefined')
+                    {
                         // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
                         window.navigator.msSaveBlob(blob, filename);
-                    } else {
+                    }
+                    else
+                    {
                         var url = window.URL.createObjectURL(blob);
                         var tempLink = document.createElement('a');
                         tempLink.href = url;
-                        console.log(url);
                         tempLink.setAttribute('download', filename);
                         tempLink.click();
                     }    
@@ -562,7 +563,7 @@ var ExecuteDSL = React.createClass({
         {
             if(this.state.queried)
             {
-                if(this.state.errors.length > 0) 
+                if(this.state.errors.length > 0)
                 {
                     errors = (
                                 <div>

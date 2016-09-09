@@ -117,7 +117,6 @@ var ManageDSLPermissions = React.createClass({
         
         var data = [];
         var selectRowProp = {
-            mode: "checkbox",
             bgColor: "rgba(144, 238, 144, 0.42)"
         };
         
@@ -134,11 +133,8 @@ var ManageDSLPermissions = React.createClass({
                 };
             });
         }
-        // Top button: scudo che se cliccato mostra pop up con select box per dare i permessi a tutti gli utenti selezionati
+        
         var options = {
-            onRowClick: function(row){
-                //Show user profile
-            },
             noDataText: "There are no users to display"
         };
         title = "Manage DSL definition permissions";
@@ -153,9 +149,6 @@ var ManageDSLPermissions = React.createClass({
                     <p className="container-title">{title}</p>
                     <div id="table-top">
                         <p id="filter-type">{this.state.roleFilter}</p>
-                        <div className="top-buttons">
-                            <i onClick={this.changeAllSelected} className="material-icons md-48">&#xE32A;</i>
-                        </div>
                     </div>
                     <div id="table">
                         <BootstrapTable ref="table" data={data} pagination={true} 

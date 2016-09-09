@@ -86,6 +86,28 @@ module.exports = {
         }
       });
   },
+  
+  changeAvatar: function(id, file) {
+    request
+      .put(APIEndpoints.USERS + '/' + id + '/changeAvatar')
+      .set('Accept', 'application/json')
+      .set('Authorization', localStorage.getItem('accessToken'))
+      .send(
+        {
+          id: id,
+          avatar: file
+        }
+      )
+      .end(function(error, res) {
+        if (res)
+        {
+          alert('ritorno web api');
+          console.log(res);
+        }
+          
+      });
+      
+  },
 
   changePersonalData: function(id, name, surname, dateOfBirth, gender) {
     request

@@ -430,8 +430,14 @@ var ManageDSL = React.createClass({
                                         <Link to="/manageDSL/externalDatabases/select"><i className="material-icons md-48">&#xE147;</i></Link>
                                         <p className="tooltip-text tooltip-text-long">Create new DSL definition</p>
                                     </div>
-                                    <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
-                                    <i onClick={this.onUploadSource} className="material-icons md-48 dropdown-button">&#xE864;</i>
+                                    <div className="tooltip tooltip-bottom" id="add-button">
+                                        <i onClick={this.onDownloadSource} className="material-icons md-48 dropdown-button">&#xE884;</i>
+                                        <p className="tooltip-text tooltip-text-long">Download all selected DSL definitions</p>
+                                    </div>
+                                    <div className="tooltip tooltip-bottom" id="add-button">
+                                        <i onClick={this.onUploadSource} className="material-icons md-48 dropdown-button">&#xE864;</i>
+                                        <p className="tooltip-text tooltip-text-long">Upload a DSL definition</p>
+                                    </div>
                                     <div className="tooltip tooltip-bottom" id="deleteAll-button">
                                         <i onClick={this.deleteAllSelected} className="material-icons md-48">&#xE92B;</i>
                                         <p className="tooltip-text tooltip-text-long">Delete all selected DSL definitions</p>

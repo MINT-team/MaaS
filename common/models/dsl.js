@@ -4,7 +4,6 @@ var path = require('path');
 var sweet = require('sweet.js');
 var fs = require('fs');
 var mongoose = require('mongoose');
-mongoose.set('debug', true);
 var Schema = mongoose.Schema;
 var DocumentSchema = new Schema({}, {strict: false});
 var AttributesReader = require('./attributesReader.js');
@@ -747,10 +746,6 @@ module.exports = function(DSL) {
         data.types = [];
         data.result = [{}];
         data.definitionType = "Document";
-        if(identity.populate)
-        {
-            //.....
-        }
         
         if(Object.getOwnPropertyNames(body.action).length !== 0)
         {
@@ -1444,14 +1439,15 @@ module.exports = function(DSL) {
         body.definitionType = "Document";
         if(!nested)
         {
-            AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order'], function(unsupportedIdentityAttributesError) {
+            AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'query', 'order', 'populate'], function(unsupportedIdentityAttributesError) {
                 AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
                     var keywords = {
                         table: identity.table,
                         label: identity.label,
                         sortby: identity.sortby,
                         order: identity.order,
-                        query: identity.query
+                        query: identity.query,
+                        populate: identity.populate
                     };
                     AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
                         AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
@@ -1698,6 +1694,19 @@ module.exports = function(DSL) {
                     mongoose_query.sort({[identity.sortby]: 1});
                 }
             }
+            if(identity.populate)
+            {
+                if(Object.prototype.toString.call(identity.populate) === '[object Array]')
+                {
+                    identity.populate.forEach(function(item, i) {
+                        mongoose_query.populate(item);
+                    });
+                }
+                else
+                {
+                    mongoose_query.populate(identity.populate);
+                }
+            }
             mongoose_query.limit(1);    // take only one document
             mongoose_query.exec(function(err, result) {
                 if (err)
@@ -1747,6 +1756,19 @@ module.exports = function(DSL) {
                 if(identity.sortby)
                 {
                     mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            if(identity.populate)
+            {
+                if(Object.prototype.toString.call(identity.populate) === '[object Array]')
+                {
+                    identity.populate.forEach(function(item, i) {
+                        mongoose_query.populate(item);
+                    });
+                }
+                else
+                {
+                    mongoose_query.populate(identity.populate);
                 }
             }
             mongoose_query.limit(1);    // take only one document
@@ -1962,7 +1984,7 @@ Collection(
     DSL.compileCollection = function(identity, columns, document, action, cb) {
         var body = {};
         body.definitionType = "Collection";
-        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'order', 'query', 'perpage'], function(unsupportedIdentityAttributesError) {
+        AttributesReader.checkSupportedAttributes(identity, ['table', 'label', 'sortby', 'order', 'query', 'perpage', 'populate'], function(unsupportedIdentityAttributesError) {
             AttributesReader.readRequiredAttributes(identity, ['table'], function(missingRequiredIdentityAttributesError) {
                 var keywords = {
                     table: identity.table,
@@ -1970,7 +1992,8 @@ Collection(
                     sortby: identity.sortby,
                     order: identity.order,
                     query: identity.query,
-                    perpage: identity.perpage
+                    perpage: identity.perpage,
+                    populate: identity.populate
                 };
                 AttributesReader.checkKeywordValue(keywords, function(identityKeywordValueError) {
                     AttributesReader.checkSupportedAttributes(action, ['Export', 'SendEmail'], function(unsupportedActionAttributesError) {
@@ -2181,6 +2204,19 @@ Collection(
                     mongoose_query.sort({[identity.sortby]: 1});
                 }
             }
+            if(identity.populate)
+            {
+                if(Object.prototype.toString.call(identity.populate) === '[object Array]')
+                {
+                    identity.populate.forEach(function(item, i) {
+                        mongoose_query.populate(item);
+                    });
+                }
+                else
+                {
+                    mongoose_query.populate(identity.populate);
+                }
+            }
             mongoose_query.exec(function(err, results) {
                 if (err)
                 {
@@ -2281,6 +2317,19 @@ Collection(
                 if(identity.sortby)
                 {
                     mongoose_query.sort({[identity.sortby]: 1});
+                }
+            }
+            if(identity.populate)
+            {
+                if(Object.prototype.toString.call(identity.populate) === '[object Array]')
+                {
+                    identity.populate.forEach(function(item, i) {
+                        mongoose_query.populate(item);
+                    });
+                }
+                else
+                {
+                    mongoose_query.populate(identity.populate);
                 }
             }
             mongoose_query.exec(function(err, results) {
