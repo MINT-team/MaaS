@@ -110,7 +110,7 @@ var CompaniesManagement = React.createClass({
         );
     },
     deleteAllSelected: function() {
-        if (this.refs.table.state.selectedRowKeys > 0)
+        if (this.refs.table.state.selectedRowKeys.length > 0)
         {
             RequestCompanyActionCreator.deleteAllSelectedCompanies(this.refs.table.state.selectedRowKeys);
         }

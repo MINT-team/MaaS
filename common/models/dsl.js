@@ -639,14 +639,14 @@ module.exports = function(DSL) {
     );
   
     DSL.compileDefinition = function(id, cb) {
-        var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
             {
                 console.log(err);
                 return cb(err);
             }
-            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
+            
+            DSLInstance.externalDatabase(function(err, database) {
                 if(err)
                 {
                    console.log("> Error finding database of dsl");
@@ -857,16 +857,14 @@ module.exports = function(DSL) {
     
     
     DSL.executeDefinition = function(id, cb) {
-        var ExternalDatabase = app.models.ExternalDatabase;
         DSL.findById(id, function(err, DSLInstance) {
             if(err)
             {
                 console.log(err);
                 return cb(err);
             }
-            
-            ExternalDatabase.findById(DSLInstance.externalDatabase, function(err, database) {
-                if(err)
+            DSLInstance.externalDatabase(function(err, database) {
+                if(err || !database)
                 {
                    console.log("> Error finding database of dsl");
                    return cb(err);

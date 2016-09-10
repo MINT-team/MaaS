@@ -85,7 +85,6 @@ function getState() {
             currentDefinitionName: DSLStore.getCurrentDefinitionName(),
             currentDefinitionType: DSLStore.getCurrentDefinitionType(),
             currentDefinitionSource: DSLStore.getCurrentDefinitionSource(),
-            currentDefinitionDatabase: DSLStore.getCurrentDefinitionDatabase(),
             includeSource: DSLStore.getIncludeSource(),
             isImpersonate: SessionStore.getImpersonate()
     };
@@ -114,7 +113,6 @@ var ManageDSLSource = React.createClass({
                 currentDefinitionName: null,
                 currentDefinitionType: null,
                 currentDefinitionSource: null,
-                currentDefinitionDatabase: this.props.location.query.databaseID,
                 includeSource: null,
                 include: false,
                 isImpersonate: SessionStore.getImpersonate()
@@ -409,7 +407,7 @@ var ManageDSLSource = React.createClass({
         var definitionName = this.refs.definitionName.value;
         var definitionType = this.refs.definitionType.options[this.refs.definitionType.selectedIndex].value;
         RequestDSLActionCreator.saveCurrentDefinitionData(definitionName, definitionType,
-        definitionSource, this.state.currentDefinitionDatabase);
+        definitionSource);
         router.push('/manageDSL/manageDSLSource/include');
     },
     
@@ -436,7 +434,6 @@ var ManageDSLSource = React.createClass({
                     currentDefinitionName: this.state.currentDefinitionName,
                     currentDefinitionType: this.state.currentDefinitionType,
                     currentDefinitionSource: this.state.currentDefinitionSource,
-                    currentDefinitionDatabase: this.state.currentDefinitionDatabase
                 })
             );
             content = childrenWithProps;

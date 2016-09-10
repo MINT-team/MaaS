@@ -25,7 +25,7 @@ function getState() {
 
 var People = React.createClass({
 
-  contextTypes: {   // serve per utilizzare il router
+  contextTypes: {
       router: React.PropTypes.object.isRequired
   },
     
@@ -102,7 +102,7 @@ var People = React.createClass({
                     <span className="table-spacing"></span>
                 </div>
                 {this.props.users.map((u) =>
-                  <div className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
+                  <div key={u.email} className="table-row" id={this.state.email==u.email ? "user-profile" : ""}> 
           					<span className="table-column-small">
           					  {u.avatar?
           					    <img onClick={this.showProfile.bind(this, u.id)} className="table-row-icon" src={u.avatar.preview} /> :

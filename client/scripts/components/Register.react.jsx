@@ -24,7 +24,7 @@ var Register = React.createClass({
       isLogged: SessionStore.isLogged(),
       userType:SessionStore.whoIam(),
       activeDashboard: UserStore.getActiveDashboard(),
-      isRegistered: SessionStore.isRegistered()|| UserStore.getEmail()? true : false,
+      isRegistered: false, //SessionStore.isRegistered()|| UserStore.getEmail()? true : false,
       userId: this.props.location.query.uid,
       accessToken: this.props.location.query.access_token,
       errors: [],
@@ -74,9 +74,12 @@ var Register = React.createClass({
     var email = this.refs.email.value;
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
-    if(company != "" || email != "" || password != "" || confirmation != "") {
+    if(company != "" || email != "" || password != "" || confirmation != "")
+    {
       RequestSessionActionCreator.signup(company, email, password, confirmation);
-    } else {
+    }
+    else
+    {
       this._setError("Fill out all fields");
     }
   },
@@ -87,10 +90,13 @@ var Register = React.createClass({
     var accessToken = this.state.accessToken;
     var password = this.refs.password.value;
     var confirmation = this.refs.confermaPassword.value;
-    if(password != "" || confirmation != "") {
+    if(password != "" || confirmation != "")
+    {
       // register by invite, the user already exists, we only have to change his password
       RequestUserActionCreator.changePassword(id, password, confirmation, accessToken);
-    } else {
+    }
+    else
+    {
       this._setError("Fill out all fields");
     }
   },
@@ -105,9 +111,11 @@ var Register = React.createClass({
 
   render: function() {
     var title, content, errors;
-    if(!this.state.isRegistered) {
+    if(!this.state.isRegistered)
+    {
       title = "Sign Up to MaaS";
-      if(this.state.userId && this.state.userId!="undefined") {
+      if(this.state.userId && this.state.userId!="undefined")
+      {
         if(this.state.inviteErrors.length > 0) {
           errors = (<p id="errors">{this.state.inviteErrors}</p>);
         }
@@ -125,8 +133,11 @@ var Register = React.createClass({
             <button type="submit" className="form-submit">Join your company</button>
           </form>
         );
-      } else {
-        if(this.state.errors.length > 0) {
+      }
+      else
+      {
+        if(this.state.errors.length > 0)
+        {
           errors = (<p id="errors">{this.state.errors}</p>);
         }
         content = (
@@ -152,16 +163,21 @@ var Register = React.createClass({
           </form>
         );
       }
-    } else {
+    }
+    else
+    {
       title = "Thanks for your registration!";
-      if(this.state.userId && this.state.userId!="undefined") {
+      if(this.state.userId && this.state.userId!="undefined")
+      {
         content = (
           <div id="successful-operation">
             <p>Now you that have confirmed your account you can log into MaaS.</p>
             <Link id="successful-button" className="button" to="/login">Go to Login</Link>
           </div>
         );
-      } else {
+      }
+      else
+      {
         content = (
           <div id="successful-operation">
             <p>Now please confirm your account.</p>

@@ -26,8 +26,7 @@ var _DSL = {
 var current_DSL = {
     currentDefinitionName: localStorage.getItem('currentDefinitionName'),
     currentDefinitionType: localStorage.getItem('currentDefinitionType'),
-    currentDefinitionSource: localStorage.getItem('currentDefinitionSource'),
-    currentDefinitionDatabase: localStorage.getItem('currentDefinitionDatabase')
+    currentDefinitionSource: localStorage.getItem('currentDefinitionSource')
 };
 
 var includeSource = localStorage.getItem('includeSource');
@@ -186,10 +185,6 @@ var DSLStore = assign({}, EventEmitter.prototype, {
     
     getCurrentDefinitionSource: function() {
         return current_DSL.currentDefinitionSource;
-    },
-    
-    getCurrentDefinitionDatabase: function() {
-        return current_DSL.currentDefinitionDatabase;
     },
     
     getIncludeSource: function() {
@@ -551,12 +546,10 @@ DSLStore.dispatchToken = Dispatcher.register(function(payload) {
                 current_DSL.currentDefinitionName = action.data.currentDefinitionName;
                 current_DSL.currentDefinitionType = action.data.currentDefinitionType;
                 current_DSL.currentDefinitionSource = action.data.currentDefinitionSource;
-                current_DSL.currentDefinitionDatabase = action.data.currentDefinitionDatabase;
                 
                 localStorage.setItem('currentDefinitionName', current_DSL.currentDefinitionName);
                 localStorage.setItem('currentDefinitionType', current_DSL.currentDefinitionType);
                 localStorage.setItem('currentDefinitionSource', current_DSL.currentDefinitionSource);
-                localStorage.setItem('currentDefinitionDatabase', current_DSL.currentDefinitionDatabase);
             }
             break;
         case ActionTypes.HANDLE_INCLUDE_DEFINITION:

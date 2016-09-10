@@ -61,14 +61,13 @@ var RequestDSLActionCreator = {
         WebAPIUtils.changeDefinitionDatabase(id, databaseId);
     },
     
-    saveCurrentDefinitionData: function(currentDefinitionName, currentDefinitionType, currentDefinitionSource, currentDefinitionDatabase) {
+    saveCurrentDefinitionData: function(currentDefinitionName, currentDefinitionType, currentDefinitionSource) {
         Dispatcher.handleViewAction({
             type: ActionTypes.SAVE_CURRENT_DEFINITION_DATA,
             data: { 
                 currentDefinitionName,
                 currentDefinitionType,
-                currentDefinitionSource,
-                currentDefinitionDatabase
+                currentDefinitionSource
             }
         });
     },

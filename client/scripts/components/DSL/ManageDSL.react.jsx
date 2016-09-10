@@ -254,7 +254,7 @@ var ManageDSL = React.createClass({
     },
     
     deleteAllSelected: function() {
-        if (this.refs.table.state.selectedRowKeys > 0)
+        if (this.refs.table.state.selectedRowKeys.length > 0)
         {
             RequestDSLActionCreator.deleteAllSelectedDSLDefinitions(this.refs.table.state.selectedRowKeys);
         }
@@ -354,7 +354,7 @@ var ManageDSL = React.createClass({
 	onIncludeBack: function() {
 	    const { router } = this.context;
 	    RequestDSLActionCreator.handleIncludeDefinition("");
-        router.push('/manageDSL/manageDSLSource?databaseID=' + this.props.currentDefinitionDatabase);
+        router.push('/manageDSL/manageDSLSource');
 	},
 	
     render: function() {
@@ -441,7 +441,7 @@ var ManageDSL = React.createClass({
                 options = {
                     onRowClick: function(row){
                         RequestDSLActionCreator.handleIncludeDefinition(row.source);
-                        router.push('/manageDSL/manageDSLSource?databaseID=' + instance.props.currentDefinitionDatabase);
+                        router.push('/manageDSL/manageDSLSource');
                     },
                     noDataText: "There are no DSL definitions to display"
                 };

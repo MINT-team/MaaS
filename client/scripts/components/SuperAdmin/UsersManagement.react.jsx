@@ -180,7 +180,7 @@ var usersManagement = React.createClass({
     },
     
     deleteAllSelected: function() {
-        if (this.refs.table.state.selectedRowKeys > 0)
+        if (this.refs.table.state.selectedRowKeys.length > 0)
         {
             RequestUserActionCreator.deleteAllSelectedUsers(this.refs.table.state.selectedRowKeys);
         }
