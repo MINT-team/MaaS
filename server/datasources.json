@@ -4,27 +4,27 @@
     "connector": "memory"
   },
   "maas": {
-    "host": "ds027338.mlab.com",
-    "port": 27338,
-    "url": "mongodb://mintswe:mint2016@ds027338.mlab.com:27338/maas",
-    "database": "maas",
-    "password": "mint2016",
+    "host": "${DB_HOST}",
+    "port": "${DB_PORT}",
+    "url": "${DB_URL}",
+    "database": "${DB_NAME}",
+    "password": "${DB_PASS}",
     "name": "maas",
-    "user": "mintswe",
+    "user": "${DB_USER}",
     "connector": "mongodb"
   },
   "gmail": {
-    "name": "gmail",
+    "name": "${SMTP_NAME}",
     "connector": "mail",
     "transports": [
       {
         "type": "SMTP",
-        "host": "smtp.gmail.com",
+        "host": "${SMTP_HOST}",
         "secure": true,
-        "port": 465,
+        "port": "${SMTP_PORT}",
         "auth": {
-          "user": "mint.swe.unipd@gmail.com",
-          "pass": "mint.swe"
+          "user": "${SMTP_USER}",
+          "pass": "${SMTP_PASSWORD}"
         }
       }
     ]

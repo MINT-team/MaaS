@@ -50,7 +50,9 @@ var MaaSApp = React.createClass({
         const { router } = this.context;
         if(this.state.isLogged)
         {
-            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" 
+            || this.props.location.pathname == "/" || this.props.location.pathname == "/resetpwd" 
+            || this.props.location.pathname == "/recoverpwd" || this.props.location.pathname == "/404")
             {
                 if(this.state.user.type == "commonUser")
                 {
@@ -109,7 +111,9 @@ var MaaSApp = React.createClass({
         var content;
         if(this.state.isLogged)
         {
-            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" 
+            || this.props.location.pathname == "/" || this.props.location.pathname == "/resetpwd" 
+            || this.props.location.pathname == "/recoverpwd" || this.props.location.pathname == "/404")
             {
                 if(this.state.user.type == "commonUser")
                 {
@@ -158,7 +162,9 @@ var MaaSApp = React.createClass({
         }
         else
         {
-            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" || this.props.location.pathname == "/")
+            if (this.props.location.pathname == "/login" || this.props.location.pathname == "/register" 
+            || this.props.location.pathname == "/" || this.props.location.pathname == "/resetpwd" 
+            || this.props.location.pathname == "/recoverpwd" || this.props.location.pathname == "/404")
             {
                 content = (
                     <div>
