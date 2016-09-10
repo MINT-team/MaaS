@@ -10,7 +10,8 @@ function getState() {
   return {
     isLogged: SessionStore.isLogged(),
     userType:SessionStore.whoIam(),
-    errors: SessionStore.getErrors()
+    errors: SessionStore.getErrors(),
+    activeDashboard: UserStore.getActiveDashboard(),
   };
 }
 
@@ -23,15 +24,20 @@ var Login = React.createClass({
     getInitialState: function() {
       return {
         isLogged: SessionStore.isLogged(),
+        userType:SessionStore.whoIam(),
+        activeDashboard: UserStore.getActiveDashboard(),
         errors: []
       };
+    },
+    
+    componentWillMount: function() {
+      this.handleRedirect();
     },
 
     componentDidMount: function() {
       SessionStore.addChangeListener(this._onChange);
       UserStore.addUserLoadListener(this._onUserLoad);
       SuperAdminStore.addLoginSAListener(this._onUserLoad);
-
     },
 
     componentWillUnmount: function() {
@@ -46,7 +52,6 @@ var Login = React.createClass({
         const { router } = this.context;
         if(this.state.userType == "commonUser")
         {
-          
           if (this.state.activeDashboard == "default")
           {
             router.push('/manageDSL');   // redirect to DSL page

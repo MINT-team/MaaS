@@ -88,12 +88,11 @@ var MaaSApp = React.createClass({
     	UserStore.removeUserLoadListener(this._onUserLoad);
 		CompanyStore.removeChangeListener(this._onChange);
     },
-    
+    /*
     componentDidUpdate: function() {
-        alert('update');
-        this.handleRedirect();
+        //this.handleRedirect();
     },
-
+*/
     _onChange: function() {
     	this.setState(getState());
     },

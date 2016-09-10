@@ -14,8 +14,16 @@ function getState() {
 }
 
 var Register = React.createClass({
+  
+  contextTypes: {
+    router: React.PropTypes.object.isRequired
+  },
+  
   getInitialState: function() {
     return {
+      isLogged: SessionStore.isLogged(),
+      userType:SessionStore.whoIam(),
+      activeDashboard: UserStore.getActiveDashboard(),
       isRegistered: SessionStore.isRegistered()|| UserStore.getEmail()? true : false,
       userId: this.props.location.query.uid,
       accessToken: this.props.location.query.access_token,
@@ -23,6 +31,28 @@ var Register = React.createClass({
       inviteErrors: []
     };
   },
+  
+  componentWillMount: function() {
+		if(this.state.isLogged)
+    	{
+        	const { router } = this.context;
+        	if(this.state.userType == "commonUser")
+        	{
+        		if (this.state.activeDashboard == "default")
+        		{
+            		router.push('/manageDSL');   // redirect to DSL page
+        		}
+        		else if (this.state.activeDashboard)
+        		{
+            		router.push('/manageDSL/executeDSL/'+ this.state.activeDashboard);      // redirect to Dashboard page
+        		}
+        	}
+        	else //redirect for Super Admin
+        	{
+        		router.push('/dashboardSuperAdmin');   // redirect to Super Admin Dashboard page
+        	}
+    	}
+	},
 
   componentDidMount: function() {
     SessionStore.addChangeListener(this._onChange);

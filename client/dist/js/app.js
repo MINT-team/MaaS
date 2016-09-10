@@ -5743,82 +5743,116 @@ module.exports = Header;
 var React = require('react');
 var Slider = require('react-slick');
 
-var Home = React.createClass({
-		displayName: 'Home',
-		render: function render() {
-				var settings = {
-						accessibility: true,
-						dots: true,
-						slidesToShow: 1,
-						autoplay: true,
-						autoplaySpeed: 5000,
-						cssEase: 'ease',
-						speed: 1000,
-						centerMode: true,
-						adaptiveHeight: false,
-						prevArrow: React.createElement(
-								'div',
-								null,
-								React.createElement(
-										'i',
-										{ className: 'material-icons md-36' },
-										''
-								)
-						),
-						nextArrow: React.createElement(
-								'div',
-								null,
-								React.createElement(
-										'i',
-										{ className: 'material-icons md-36' },
-										''
-								)
-						)
-				};
+var SessionStore = require('../stores/SessionStore.react.jsx');
+var UserStore = require('../stores/UserStore.react.jsx');
 
-				return React.createElement(
-						'div',
-						{ id: 'home' },
-						React.createElement(
-								'h1',
-								{ id: 'home-title' },
-								'MongoDB as an Admin Service'
-						),
-						React.createElement(
-								'p',
-								{ id: 'home-description' },
-								'MaaS is the Software as a Service you need'
-						),
-						React.createElement(
-								'div',
-								{ id: 'home-container' },
-								React.createElement(
-										Slider,
-										settings,
-										React.createElement(
-												'div',
-												null,
-												React.createElement('img', { src: '../dist/images/dsl.png', alt: '' })
-										),
-										React.createElement(
-												'div',
-												null,
-												React.createElement('img', { src: '../dist/images/editor.png', alt: '' })
-										),
-										React.createElement(
-												'div',
-												null,
-												React.createElement('img', { src: '../dist/images/database.png', alt: '' })
-										)
-								)
-						)
-				);
+var Home = React.createClass({
+	displayName: 'Home',
+
+
+	contextTypes: {
+		router: React.PropTypes.object.isRequired
+	},
+
+	getInitialState: function getInitialState() {
+		return {
+			isLogged: SessionStore.isLogged(),
+			userType: SessionStore.whoIam(),
+			activeDashboard: UserStore.getActiveDashboard()
+		};
+	},
+
+	componentWillMount: function componentWillMount() {
+		if (this.state.isLogged) {
+			var router = this.context.router;
+
+			if (this.state.userType == "commonUser") {
+				if (this.state.activeDashboard == "default") {
+					router.push('/manageDSL'); // redirect to DSL page
+				} else if (this.state.activeDashboard) {
+					router.push('/manageDSL/executeDSL/' + this.state.activeDashboard); // redirect to Dashboard page
+				}
+			} else //redirect for Super Admin
+				{
+					router.push('/dashboardSuperAdmin'); // redirect to Super Admin Dashboard page
+				}
 		}
+	},
+
+	render: function render() {
+		var settings = {
+			accessibility: true,
+			dots: true,
+			slidesToShow: 1,
+			autoplay: true,
+			autoplaySpeed: 5000,
+			cssEase: 'ease',
+			speed: 1000,
+			centerMode: true,
+			adaptiveHeight: false,
+			prevArrow: React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'i',
+					{ className: 'material-icons md-36' },
+					''
+				)
+			),
+			nextArrow: React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'i',
+					{ className: 'material-icons md-36' },
+					''
+				)
+			)
+		};
+
+		return React.createElement(
+			'div',
+			{ id: 'home' },
+			React.createElement(
+				'h1',
+				{ id: 'home-title' },
+				'MongoDB as an Admin Service'
+			),
+			React.createElement(
+				'p',
+				{ id: 'home-description' },
+				'MaaS is the Software as a Service you need'
+			),
+			React.createElement(
+				'div',
+				{ id: 'home-container' },
+				React.createElement(
+					Slider,
+					settings,
+					React.createElement(
+						'div',
+						null,
+						React.createElement('img', { src: '../dist/images/dsl.png', alt: '' })
+					),
+					React.createElement(
+						'div',
+						null,
+						React.createElement('img', { src: '../dist/images/editor.png', alt: '' })
+					),
+					React.createElement(
+						'div',
+						null,
+						React.createElement('img', { src: '../dist/images/database.png', alt: '' })
+					)
+				)
+			)
+		);
+	}
 });
 
 module.exports = Home;
 
-},{"react":370,"react-slick":176}],32:[function(require,module,exports){
+},{"../stores/SessionStore.react.jsx":57,"../stores/UserStore.react.jsx":59,"react":370,"react-slick":176}],32:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -5833,7 +5867,8 @@ function getState() {
   return {
     isLogged: SessionStore.isLogged(),
     userType: SessionStore.whoIam(),
-    errors: SessionStore.getErrors()
+    errors: SessionStore.getErrors(),
+    activeDashboard: UserStore.getActiveDashboard()
   };
 }
 
@@ -5848,8 +5883,14 @@ var Login = React.createClass({
   getInitialState: function getInitialState() {
     return {
       isLogged: SessionStore.isLogged(),
+      userType: SessionStore.whoIam(),
+      activeDashboard: UserStore.getActiveDashboard(),
       errors: []
     };
+  },
+
+  componentWillMount: function componentWillMount() {
+    this.handleRedirect();
   },
 
   componentDidMount: function componentDidMount() {
@@ -5869,7 +5910,6 @@ var Login = React.createClass({
       var router = this.context.router;
 
       if (this.state.userType == "commonUser") {
-
         if (this.state.activeDashboard == "default") {
           router.push('/manageDSL'); // redirect to DSL page
         } else if (this.state.activeDashboard) {
@@ -6071,12 +6111,11 @@ var MaaSApp = React.createClass({
         UserStore.removeUserLoadListener(this._onUserLoad);
         CompanyStore.removeChangeListener(this._onChange);
     },
-
-    componentDidUpdate: function componentDidUpdate() {
-        alert('update');
-        this.handleRedirect();
+    /*
+    componentDidUpdate: function() {
+        //this.handleRedirect();
     },
-
+    */
     _onChange: function _onChange() {
         this.setState(getState());
     },
@@ -7184,14 +7223,39 @@ function getState() {
 var Register = React.createClass({
   displayName: 'Register',
 
+
+  contextTypes: {
+    router: React.PropTypes.object.isRequired
+  },
+
   getInitialState: function getInitialState() {
     return {
+      isLogged: SessionStore.isLogged(),
+      userType: SessionStore.whoIam(),
+      activeDashboard: UserStore.getActiveDashboard(),
       isRegistered: SessionStore.isRegistered() || UserStore.getEmail() ? true : false,
       userId: this.props.location.query.uid,
       accessToken: this.props.location.query.access_token,
       errors: [],
       inviteErrors: []
     };
+  },
+
+  componentWillMount: function componentWillMount() {
+    if (this.state.isLogged) {
+      var router = this.context.router;
+
+      if (this.state.userType == "commonUser") {
+        if (this.state.activeDashboard == "default") {
+          router.push('/manageDSL'); // redirect to DSL page
+        } else if (this.state.activeDashboard) {
+          router.push('/manageDSL/executeDSL/' + this.state.activeDashboard); // redirect to Dashboard page
+        }
+      } else //redirect for Super Admin
+        {
+          router.push('/dashboardSuperAdmin'); // redirect to Super Admin Dashboard page
+        }
+    }
   },
 
   componentDidMount: function componentDidMount() {
