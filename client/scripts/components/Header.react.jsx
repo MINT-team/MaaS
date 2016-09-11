@@ -184,7 +184,7 @@ var Header = React.createClass({
                         </div>
                         <div id="header-dropdown" className="dropdown-content" ref="dropdownMenu">
                             <ul>
-                                <Link to="/manageDashboard"><li>Active Dashboard</li></Link>
+                                <Link to="/activeDashboard"><li>Active Dashboard</li></Link>
                                 <Link to="/editorConfig"><li>Text editor</li></Link>
                                 <Link onClick={this.leaveImpersonate} to="dashboardSuperAdmin/impersonateUser"><li><i className="material-icons md-24">&#xE572;</i>Leave</li></Link>
                             </ul>
