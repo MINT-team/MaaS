@@ -52,11 +52,6 @@ Demo
 ---
 You can find a demo of this application at this [link](https://maas-swe.herokuapp.com/#/).  
 
-Super Admin credentials:
-
-* Email: superadmin@gmail.com
-* Password: ******
-
 User credentials:
 
 * You can sign up from the proper page.
